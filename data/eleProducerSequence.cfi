@@ -1,0 +1,32 @@
+# sequence producing electron colletion
+# first version: 29/Apr/2007
+
+include "Configuration/StandardSequences/data/FakeConditions.cff"
+include "Configuration/StandardSequences/data/Reconstruction.cff"
+
+# ecal clustering sequence
+include "RecoEcal/EgammaClusterProducers/data/ecalClusteringSequence.cff"
+
+# sequence to make pixel-based Gsf electrons
+include "RecoEgamma/EgammaElectronProducers/data/pixelMatchGsfElectronSequence.cff"
+
+module eleMaker = HtoWWEleProducer {
+    string ElectronProducer = "pixelMatchGsfElectrons"
+    string ElectronLabel    = ""
+    InputTag barrelClusterShapeAssociation = hybridSuperClusters:hybridShapeAssoc
+    InputTag endcapClusterShapeAssociation = islandBasicClusters:islandEndcapShapeAssoc
+    string TrackProducer    = "ctfWithMaterialTracks"
+    string TrackLabel       = ""
+    InputTag HcalRhLabel = hbhereco
+    string McInfoProducer                = "VtxSmeared"
+    string HWWgsfEleCollection           = "HtoWWRecoEleCollection"
+    string HWWgsfEleCandCollection       = "HtoWWRecoEleCandidates"
+    untracked string outputFile          = "HtoWWEleMonitor.root"
+}
+
+sequence eleSequence = {
+    localreco, 
+    ecalClusteringSequence, 
+    pixelMatchGsfElectronSequence,
+    eleMaker
+}

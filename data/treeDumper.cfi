@@ -1,0 +1,37 @@
+# module producing the analysis ntuple with high level informations
+# Emanuele Di Marco    29/Apr/2007
+
+module treeDumper = HWWTreeDumper {
+    InputTag TriggerResultsTag = TriggerResults
+    InputTag electronCollection = clonedElectrons:HtoWWRecoEleCandidates
+    InputTag jetCollection = caloJetCollectionClone:
+    InputTag genJetCollection = genJetCollectionClone:
+    InputTag jetVertexAlphaCollection = jetvertexalpha:Var
+    InputTag jetVertexBetaCollection = jetvertexbeta:Var
+    InputTag metCollection = metMaker:HtoWWRecoMetCandidates
+    InputTag genMetCollection = metMaker:HtoWWGenMetCandidates
+    untracked string nameFile = "analysisTree.root"
+    untracked string nameTree = "ntp1"
+    # switch ON/OFF the candidate collections to dump
+    untracked bool dumpElectrons = true
+    untracked bool dumpJets = true
+    untracked bool dumpMet = true
+    # switch ON/OFF the additional informations to dump
+    untracked bool saveEcal = true
+    untracked bool saveFatEcal = true
+    untracked bool saveTrk = true
+    untracked bool saveFatTrk = true
+    untracked bool saveEleID = true
+    untracked bool saveJetAlpha = true
+    # MC truth
+    InputTag mcTruthCollection = genParticleCandidates
+    InputTag electronMatchMap  = electronMatchMap
+    untracked bool dumpGenMet = true
+    untracked bool dumpGenJets = true
+    untracked bool dumpMCTruth = true
+    untracked bool doMCmatch = false
+    # effectively dump the data into the tree
+    untracked bool dumpTree = true
+}
+
+sequence dumpSequence = { treeDumper }

@@ -1,0 +1,10 @@
+# module for the MC truth match for reco electrons
+# Emanuele Di Marco    29/Apr/2007
+
+# this creates the 1to1 map between reco candidates and gen particles
+module electronMatchMap = MCTruthDeltaRMatcher {    
+    InputTag src = eleMaker:HtoWWRecoEleCandidates
+    InputTag matched = genParticleCandidates
+    double distMin = 0.1
+    vint32 matchPDGId = { 11 }  
+}

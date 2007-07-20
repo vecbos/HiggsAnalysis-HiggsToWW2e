@@ -1,0 +1,69 @@
+# this is temporary. Take standard jets from the event and pass to tree dumper
+# PG
+
+
+
+#   include "FWCore/MessageService/data/MessageLogger.cfi"
+#   replace MessageLogger.cout.threshold = "DEBUG"
+#   replace MessageLogger.cerr.default.limit = 10
+#include "RecoJets/JetProducers/data/CaloJets.cfi"
+#include "RecoJets/JetProducers/data/GenJets.cfi"
+
+#reconstruction of jets
+include "RecoJets/Configuration/data/RecoJets.cff"
+
+# this is to get a CandidateCollection from a JetCollection
+module caloJetCollectionClone = CaloJetShallowCloneProducer{
+    InputTag src = iterativeCone5CaloJets
+}
+
+#PG recover the generated jets
+module genJetCollectionClone = GenJetShallowCloneProducer{
+    InputTag src = iterativeCone5GenJets
+}
+
+# Selection of jets
+module caloJetSele = PtMinCandSelector{
+    InputTag src = caloJetCollectionClone
+    double ptMin        = 20.0
+}
+
+# selection of generated jets
+module genJetSele = PtMinCandSelector{
+    InputTag src = genJetCollectionClone
+    double ptMin        = 20.0
+}
+
+# jet vertex associations
+# JV_type_Algo 1=alpha, 2=beta (CMS NOTE 2006/91)
+
+module jetvertexalpha = JetVertexAssociation {
+    double JV_deltaZ = 0.4
+    double JV_alpha_threshold = 0.2
+    double JV_cone_size = 0.5
+    int32 JV_type_Algo = 1
+    int32 JET_ALGO = 1 // "1" - IterativeConeAlgorithm
+    // "2" - KtAlgorithm
+    // "3" - MidPointAlgorithm
+} 
+
+# module jetvertexbeta = JetVertexAssociation {
+#     double JV_deltaZ = 0.1
+#     double JV_alpha_threshold = 0.2
+#     double JV_cone_size = 0.5
+#     int32 JV_type_Algo = 2
+#     int32 JET_ALGO = 1 // "1" - IterativeConeAlgorithm
+#     // "2" - KtAlgorithm
+#     // "3" - MidPointAlgorithm
+# } 
+
+
+sequence jetSequence = {
+    recoJets,
+    caloJetCollectionClone, 
+    genJetCollectionClone,
+    jetvertexalpha
+    #jetvertexbeta
+    #caloJetSele, 
+    #genJetSele, 
+}
