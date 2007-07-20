@@ -5,6 +5,8 @@
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWEleId.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTkIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWHadIsolation.h"
+#include "HiggsAnalysis/HiggsToWW2e/plugins/HWWMetProducer.h"
+#include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 //PG temp obj sel for 131
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWObjectSelector.h"
 
@@ -26,3 +28,5 @@ DEFINE_ANOTHER_FWK_MODULE (AmbResolver) ;
 DEFINE_ANOTHER_FWK_MODULE (EleIdentifier) ;
 DEFINE_ANOTHER_FWK_MODULE (TkIso) ;
 DEFINE_ANOTHER_FWK_MODULE (HadIso);  
+DEFINE_ANOTHER_FWK_MODULE (HWWMetProducer);  
+DEFINE_ANOTHER_FWK_MODULE (HWWTreeDumper);  

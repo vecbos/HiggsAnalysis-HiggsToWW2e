@@ -8,13 +8,22 @@
 <use name=DataFormats/TrackerRecHit2D>
 <use name=DataFormats/TrackingRecHit>
 <use name=DataFormats/PixelMatchTrackReco>
+<use name=DataFormats/METReco>
+<use name=DataFormats/HcalRecHit>
+<use name=DataFormats/Candidate>
+<use name=DataFormats/HepMCCandidate>
+<use name=DataFormats/TrackCandidate>
+<use name=DataFormats/EgammaCandidates>
+<use name=DataFormats/Common>
+<use name=PhysicsTools/CandUtils>
+<use name=PhysicsTools/HepMCCandAlgos>
 <use name=Geometry/CommonDetUnit>
 <use name=Geometry/TrackerGeometryBuilder>
 <use name=SimDataFormats/HepMCProduct>
-<use name=DataFormats/EgammaCandidates>
 <use name=RecoEgamma/EgammaElectronAlgos>
 <use name=RecoTracker/CkfPattern>
 <use name=RecoTracker/TrackProducer>
+
 <flags SEAL_PLUGIN_NAME="HiggsAnalysisHiggsToWW2e">
 <export>
    <lib name=HiggsAnalysisHiggsToWW2e>	
@@ -22,10 +31,21 @@
 #   <use name=FWCore/PluginManager>
    <use name=FWCore/ParameterSet>
    <use name=FWCore/Utilities>
+   <use name=root>
+   <use name=rootcore>
    <use name=DataFormats/DetId>
    <use name=DataFormats/TrackerRecHit2D>
    <use name=DataFormats/TrackingRecHit>
    <use name=DataFormats/PixelMatchTrackReco>
+   <use name=DataFormats/METReco>
+   <use name=DataFormats/HcalRecHit>
+   <use name=DataFormats/Candidate>
+   <use name=DataFormats/HepMCCandidate>
+   <use name=DataFormats/TrackCandidate>
+   <use name=DataFormats/EgammaCandidates>
+   <use name=DataFormats/Common>
+   <use name=PhysicsTools/CandUtils>
+   <use name=PhysicsTools/HepMCCandAlgos>
    <use name=Geometry/CommonDetUnit>
    <use name=Geometry/TrackerGeometryBuilder>
    <use name=SimDataFormats/HepMCProduct>
@@ -33,6 +53,4 @@
    <use name=RecoEgamma/EgammaElectronAlgos>
    <use name=RecoTracker/CkfPattern>
    <use name=RecoTracker/TrackProducer>
-   <use name=root>
-   <use name=rootcore>
 </export>
