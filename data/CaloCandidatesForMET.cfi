@@ -1,5 +1,5 @@
 # sequence producing calo towers for MET.
-# this is a copy of RecoMET/METProducers/test/CaloCandidatesFromDigis.cfi
+# this is a copy of RecoMET/METProducers/data/CaloCandidatesFromDigis.cfi
 # where the caloReco is removed because it is done by the HL trigger
 #
 # Emanuele Di Marco   03/Apr/2007

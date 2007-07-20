@@ -3,7 +3,7 @@
 
 include "RecoMET/METProducers/data/GenMET.cfi"
 include "RecoMET/METProducers/data/CaloMET.cfi"
-include "HiggsAnalysis/HiggsToWW2e/test/CaloCandidatesForMET.cfi"
+include "HiggsAnalysis/HiggsToWW2e/data/CaloCandidatesForMET.cfi"
 
 module metMaker = HWWMetProducer {
     InputTag genMetsTag = genMet:
@@ -18,7 +18,7 @@ module metMaker = HWWMetProducer {
 }
 
 # MET corrections
-include "HiggsAnalysis/HiggsToWW2e/test/metCorrSequence.cfi"
+include "HiggsAnalysis/HiggsToWW2e/data/metCorrSequence.cfi"
 
 sequence metSequence = {
     genParticleCandidates, genCandidatesForMET, genMet,
