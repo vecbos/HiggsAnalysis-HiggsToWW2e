@@ -1,0 +1,29 @@
+ include "HLTrigger/Configuration/data/common/HLTSetup.cff"
+
+ include "HLTrigger/Egamma/data/EgammaHLTLocal_1e32.cff"
+
+ include "HLTrigger/Egamma/data/SingleElectronL1Isolated_1e32.cff"
+ include "HLTrigger/Egamma/data/SingleElectronL1NonIsolated_1e32.cff"
+ include "HLTrigger/Egamma/data/DoubleElectronL1Isolated_1e32.cff"
+ include "HLTrigger/Egamma/data/DoubleElectronL1NonIsolated_1e32.cff"
+ include "HLTrigger/Egamma/data/SinglePhotonL1Isolated_1e32.cff"
+ include "HLTrigger/Egamma/data/SinglePhotonL1NonIsolated_1e32.cff"
+ include "HLTrigger/Egamma/data/DoublePhotonL1Isolated_1e32.cff"
+ include "HLTrigger/Egamma/data/DoublePhotonL1NonIsolated_1e32.cff"
+ include "HLTrigger/Egamma/data/SingleEMHighEtL1NonIsolated_1e32.cff"
+ include "HLTrigger/Egamma/data/SingleEMVeryHighEtL1NonIsolated_1e32.cff" 
+
+ path SingleElectron = {singleElectronL1Isolated}
+ path RelaxedSingleElectron = {singleElectronL1NonIsolated}
+ path DoubleElectron = {doubleElectronL1Isolated}
+ path RelaxedDoubleElectron = {doubleElectronL1NonIsolated}
+ path SinglePhoton = {singlePhotonL1Isolated}
+ path RelaxedSinglePhoton = {singlePhotonL1NonIsolated}
+ path DoublePhoton = {doublePhotonL1Isolated}
+ path RelaxedDoublePhoton = {doublePhotonL1NonIsolated}
+
+ path SingleEMHighEt = {singleEMHighEtL1NonIsolated}
+ path SingleEMVeryHighEt = {singleEMVHEL1NonIsolated}
+
+
+
