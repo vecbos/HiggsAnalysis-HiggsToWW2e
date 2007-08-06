@@ -9,10 +9,6 @@
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
 
-// temporary version of tracker isolation
-// we'd like to compare parameters at vertex, but no way.... take them at innermost state
-// also missing: cut on longitudinal impact parameter
-
 //CLHEP
 #include <CLHEP/Vector/LorentzVector.h>
 
@@ -41,16 +37,16 @@ float hwwEleTrackerIsolation::getPtTracks () const
 
   Hep3Vector elePAtVtx(_myGsfEle->px(), _myGsfEle->py(), _myGsfEle->pz()); 
   float ele_pt  = _myGsfEle->pt();
-  // float ele_lip = _myGsfEle->lip();    // to be fixed
+  float ele_lip = _myGsfEle->vz();   
 
   for(TrackCollection::const_iterator this_track = _tracks.begin(); this_track != _tracks.end(); this_track++ ){ 
     
-    Hep3Vector trackPAtVtx(this_track->innerMomentum().x(),this_track->innerMomentum().y(),this_track->innerMomentum().z());
-    float this_pt  = this_track->innerMomentum().rho();
+    Hep3Vector trackPAtVtx(this_track->px(),this_track->py(),this_track->pz());
+    float this_pt  = trackPAtVtx.perp();
 
     // only tracks from the same vertex as the electron
-    // float this_lip = TrackLip[iso];    
-    // if ( fabs(this_lip - my_ele_lip) > 0.2 ){ continue; }
+    float this_lip = this_track->vz();
+    if ( fabs(this_lip - ele_lip) > 0.2 ){ continue; }
 
     double dr = elePAtVtx.deltaR(trackPAtVtx);
     if ( fabs(dr) < _extRadius && fabs(dr) > _intRadius ){ dummyPt += this_pt; } 
@@ -69,17 +65,17 @@ float hwwEleTrackerIsolation::minDeltaR(float minPt) const
   float minDR = 100000. ;
 
   Hep3Vector elePAtVtx(_myGsfEle->px(), _myGsfEle->py(), _myGsfEle->pz()); 
-  // float ele_lip = _myGsfEle->lip();    // to be fixed
+  float ele_lip = _myGsfEle->vz();   
 
   for(TrackCollection::const_iterator this_track = _tracks.begin(); this_track != _tracks.end(); this_track++ ){ 
-    
-    Hep3Vector trackPAtVtx(this_track->innerMomentum().x(),this_track->innerMomentum().y(),this_track->innerMomentum().z());
-    float this_pt  = this_track->innerMomentum().rho();
+    Hep3Vector trackPAtVtx(this_track->px(),this_track->py(),this_track->pz());
+    float this_pt  = trackPAtVtx.perp();
+
     if (this_pt < minPt){ continue;} 
 
     // only tracks from the same vertex as the electron
-    // float this_lip = TrackLip[iso];      // to be fixed  
-    // if ( fabs(this_lip - my_ele_lip) > 0.2 ){ continue; }
+    float this_lip = this_track->vz();
+    if ( fabs(this_lip - ele_lip) > 0.2 ){ continue; }
     
     double dr = elePAtVtx.deltaR(trackPAtVtx);
     if ( fabs(dr) < minDR ){ minDR = dr; }
@@ -95,17 +91,17 @@ float hwwEleTrackerIsolation::minDeltaR_withVeto(float minPt) const
   float minDR = 100000. ;
 
   Hep3Vector elePAtVtx(_myGsfEle->px(), _myGsfEle->py(), _myGsfEle->pz()); 
-  // float ele_lip = _myGsfEle->lip();    // to be fixed
+  float ele_lip = _myGsfEle->vz();   
 
   for(TrackCollection::const_iterator this_track = _tracks.begin(); this_track != _tracks.end(); this_track++ ){ 
     
-    Hep3Vector trackPAtVtx(this_track->innerMomentum().x(),this_track->innerMomentum().y(),this_track->innerMomentum().z());
-    float this_pt  = this_track->innerMomentum().rho();
+    Hep3Vector trackPAtVtx(this_track->px(),this_track->py(),this_track->pz());
+    float this_pt  = trackPAtVtx.perp();
     if (this_pt < minPt){ continue;} 
 
     // only tracks from the same vertex as the electron
-    // float this_lip = TrackLip[iso];      // to be fixed  
-    // if ( fabs(this_lip - my_ele_lip) > 0.2 ){ continue; }
+    float this_lip = this_track->vz();
+    if ( fabs(this_lip - ele_lip) > 0.2 ){ continue; }
     
     double dr = elePAtVtx.deltaR(trackPAtVtx);
     if ( (fabs(dr) < minDR) && (fabs(dr)>_intRadius) ){ minDR = dr; }
