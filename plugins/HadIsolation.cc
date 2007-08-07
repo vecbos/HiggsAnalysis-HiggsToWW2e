@@ -89,7 +89,7 @@ double HadIsolation::getEtHadClusters () const
 	 double hcalHit_eta = caloGeom->getPosition(i->detid()).eta();
 	 double hcalHit_Et = i->energy()*sin(2*atan(exp(-hcalHit_eta)));
 	 if ( hcalHit_Et > etLow_)
-	      hcalEt += i->energy();
+	      hcalEt += hcalHit_Et;
        }
     } 
   return hcalEt ;
