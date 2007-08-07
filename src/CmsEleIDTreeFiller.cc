@@ -223,8 +223,8 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   // tracker isolation
   const TrackCollection tracksC = *(tracks.product());
   hwwEleTrackerIsolation trackIsolation(electron, tracksC);
-  trackIsolation.setExtRadius(0.4);    
-  trackIsolation.setIntRadius(0.02);    
+  trackIsolation.setExtRadius(0.2);    
+  trackIsolation.setIntRadius(0.015);    
   float minDR_tracker     = trackIsolation.minDeltaR(0.15);  
   float minDRveto_tracker = trackIsolation.minDeltaR_withVeto(0.15);  
   float sumPt_tracker     = trackIsolation.getPtTracks();  
@@ -235,7 +235,8 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   // calo isolation
   const HBHERecHitCollection hcalRecHits = *(hcalrhits.product());
   hwwEleCaloIsolation caloIsolation(electron, hcalRecHits, caloGeo);
-  float minDR_calo = caloIsolation.minDeltaR(0.15);  
+  //float minDR_calo = caloIsolation.minDeltaR(0.15);  
+  float minDR_calo = -1000.
   caloIsolation.setExtRadius(0.2);    
   float sumEt_calo = caloIsolation.getEtHcal();  
   privateData_->eleCaloIso_minDR->push_back(minDR_calo);

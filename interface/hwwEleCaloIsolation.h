@@ -43,7 +43,6 @@ class hwwEleCaloIsolation{
   void setExtRadius (float extRadius);
   
   float getEtHcal () const;
-  float minDeltaR (float minEt) const;
   bool isIsolated (float etCut = 0.05) const;
 
   //destructor 
