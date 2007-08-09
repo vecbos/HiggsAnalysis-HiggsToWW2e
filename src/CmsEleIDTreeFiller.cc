@@ -17,9 +17,8 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 
-// #include "HtoWWElectrons/HtoWWLHRecord/interface/PidLHElectronRecord.h"
-// #include "HtoWWElectrons/HtoWWLHAlgo/interface/PidLHElectronAlgo.h"
-// #include "HtoWWElectrons/HtoWWLHESSource/interface/PidLHElectronESSource.h"
+#include "EgammaAnalysis/ElectronIDAlgos/interface/ElectronLikelihood.h"
+#include "EgammaAnalysis/ElectronIDESSources/interface/ElectronLikelihoodESSource.h"
 
 struct CmsEleIDTreeFillerData {
   CmsTree *cmstree;
@@ -210,15 +209,9 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   privateData_->eleTip           ->push_back(myTip);
 
   // electron likelihood
-//   GsfLHSelector eleIDlikelihood;
-//   eleIDlikelihood.setup("HtoWWElectrons/HtoWWEleProducer/data/EBpdfs.root","HtoWWElectrons/HtoWWEleProducer/data/EEpdfs.root");
-//   eleIDlikelihood.getInputVar(electron,iEvent,iSetup);
-//   privateData_->eleLik->push_back(eleIDlikelihood.getLHRatio());
-
-//   edm::ESHandle<PidLHElectronAlgo> likelihood;
-//   iSetup.getData( likelihood );
-//   privateData_->eleLik->push_back(likelihood->getLHRatio (electron,iEvent,iSetup) );
-  privateData_->eleLik->push_back( -1. );
+  edm::ESHandle<ElectronLikelihood> likelihood;
+  iSetup.getData( likelihood );
+  privateData_->eleLik->push_back( likelihood->result(electron,iEvent) );
 
   // tracker isolation
   const TrackCollection tracksC = *(tracks.product());
@@ -236,7 +229,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   const HBHERecHitCollection hcalRecHits = *(hcalrhits.product());
   hwwEleCaloIsolation caloIsolation(electron, hcalRecHits, caloGeo);
   //float minDR_calo = caloIsolation.minDeltaR(0.15);  
-  float minDR_calo = -1000.
+  float minDR_calo = -1000.;
   caloIsolation.setExtRadius(0.2);    
   float sumEt_calo = caloIsolation.getEtHcal();  
   privateData_->eleCaloIso_minDR->push_back(minDR_calo);
