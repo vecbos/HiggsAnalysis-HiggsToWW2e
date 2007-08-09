@@ -23,6 +23,8 @@
 <use name=RecoEgamma/EgammaElectronAlgos>
 <use name=RecoTracker/CkfPattern>
 <use name=RecoTracker/TrackProducer>
+<use name=EgammaAnalysis/ElectronIDAlgos>
+<use name=EgammaAnalysis/ElectronIDESSources>
 
 <flags SEAL_PLUGIN_NAME="HiggsAnalysisHiggsToWW2e">
 <export>
@@ -53,4 +55,6 @@
    <use name=RecoEgamma/EgammaElectronAlgos>
    <use name=RecoTracker/CkfPattern>
    <use name=RecoTracker/TrackProducer>
+   <use name=EgammaAnalysis/ElectronIDAlgos>
+   <use name=EgammaAnalysis/ElectronIDESSources>
 </export>
