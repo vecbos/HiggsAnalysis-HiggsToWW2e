@@ -162,7 +162,6 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     treeFill.saveCSC(false);
     treeFill.saveRPC(false);
     treeFill.saveEleID(true);
-    treeFill.saveJetAlpha(false);
 
     Handle<CandidateCollection> electronCollectionHandle;
     try { iEvent.getByLabel(electronCollection_, electronCollectionHandle); }
@@ -187,7 +186,6 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     treeFill.saveDT(false);
     treeFill.saveCSC(false);
     treeFill.saveRPC(false);
-    treeFill.saveJetAlpha(false);
 
     Handle<CandidateCollection> metCollectionHandle;
     try { iEvent.getByLabel(metCollection_, metCollectionHandle); }
@@ -219,7 +217,6 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     treeFill.saveDT(false);
     treeFill.saveCSC(false);
     treeFill.saveRPC(false);
-    treeFill.saveJetAlpha(saveJetAlpha_);
 
     Handle<CandidateCollection> jetCollectionHandle;
     try { iEvent.getByLabel(jetCollection_, jetCollectionHandle); }
