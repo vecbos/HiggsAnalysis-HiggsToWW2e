@@ -75,7 +75,6 @@ struct CmsTreeFillerData {
   bool saveFatRPC;
 
   bool saveEleID;
-  bool saveJetAlpha;
 
   bool saveCand;
   bool doMcMatch;
@@ -110,11 +109,8 @@ struct CmsTreeFillerData {
   vector<float> *eMax, *e2nd;
   vector<float> *s1s9, *s9s25;
   vector<float> *covEtaEta, *covEtaPhi, *covPhiPhi;
-  vector<float> *lat, *a00, *a11, *a20, *a22, *a42;
+  vector<float> *lat, *phiLat, *etaLat, *a20, *a42;
   
-  vector<float> *jetAlpha; 
-  vector<float> *jetEmFrac, *jetHadFrac;
-
   int *ncand;
 
 };
@@ -237,15 +233,11 @@ CmsTreeFiller::~CmsTreeFiller() {
   delete privateData_->covEtaPhi;
   delete privateData_->covPhiPhi;
   delete privateData_->lat;
-  delete privateData_->a00;
-  delete privateData_->a11;
+  delete privateData_->phiLat;
+  delete privateData_->etaLat;
   delete privateData_->a20;
-  delete privateData_->a22;
   delete privateData_->a42;
 
-  delete privateData_->jetAlpha;
-  delete privateData_->jetEmFrac;
-  delete privateData_->jetHadFrac;
 }
 
 
@@ -282,8 +274,6 @@ void CmsTreeFiller::saveFatRPC(bool what) { privateData_->saveFatRPC=what;}
 void CmsTreeFiller::saveCand(bool what) { privateData_->saveCand=what;}
 
 void CmsTreeFiller::saveEleID(bool what) { privateData_->saveEleID=what;}
-
-void CmsTreeFiller::saveJetAlpha(bool what) { privateData_->saveJetAlpha=what;}
 
 void CmsTreeFiller::doMcMatch(bool what) { privateData_->doMcMatch=what;}
 
@@ -322,8 +312,6 @@ void CmsTreeFiller::writeCollectionToTree(const CandidateCollection *collection,
     // fill (GSF) Track Adapter
     GsfTrackRef trkRef = cand->get<GsfTrackRef>();
     if(privateData_->saveTrk) writeTrkInfo(&(*cand),iEvent,iSetup,trkRef);
-    // alpha param infos for jets
-    if(privateData_->saveJetAlpha) writeJetAlphaInfo(&(*cand),iEvent,iSetup);
   }
   
   // The class member vectors containing the relevant quantities 
@@ -341,7 +329,6 @@ void CmsTreeFiller::writeCollectionToTree(const CandidateCollection *collection,
     eIDFiller.setStandalone(false);
     eIDFiller.writeCollectionToTree(collection,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
-  if(privateData_->saveJetAlpha) treeJetAlphaInfo(columnPrefix,columnSuffix);
 
   if(dumpData) privateData_->cmstree->dumpData();
 
@@ -465,8 +452,9 @@ void CmsTreeFiller::writeEcalInfo(const Candidate *cand, const edm::Event& iEven
       privateData_->e3x3->push_back(sClShape->e3x3());
       privateData_->e5x5->push_back(sClShape->e5x5());
       privateData_->eMax->push_back(sClShape->eMax());
-      //      privateData_->lat->push_back(sClShape->lat());
-      privateData_->lat->push_back(-1.);
+      privateData_->lat->push_back(sClShape->lat());
+      privateData_->phiLat->push_back(sClShape->phiLat());
+      privateData_->etaLat->push_back(sClShape->etaLat());
       if(privateData_->saveFatEcal) {
 	privateData_->e2x2->push_back(sClShape->e2x2());
 	privateData_->e2nd->push_back(sClShape->e2nd());
@@ -475,18 +463,8 @@ void CmsTreeFiller::writeEcalInfo(const Candidate *cand, const edm::Event& iEven
 	privateData_->covEtaEta->push_back(sClShape->covEtaEta());
 	privateData_->covEtaPhi->push_back(sClShape->covEtaPhi());
 	privateData_->covPhiPhi->push_back(sClShape->covPhiPhi());
-// 	privateData_->a00->push_back(sClShape->zernike00());
-// 	privateData_->a11->push_back(sClShape->zernike11());
-// 	privateData_->a20->push_back(sClShape->zernike20());
-// 	privateData_->a22->push_back(sClShape->zernike22());
-// 	privateData_->a42->push_back(sClShape->zernike42());
-        // temporary until we do not have the code in the official CVS
- 	privateData_->a00->push_back(-1.);
- 	privateData_->a11->push_back(-1.);
- 	privateData_->a20->push_back(-1.);
- 	privateData_->a22->push_back(-1.);
- 	privateData_->a42->push_back(-1.);
-
+ 	privateData_->a20->push_back(sClShape->zernike20());
+ 	privateData_->a42->push_back(sClShape->zernike42());
       }
     }
     else { LogWarning("CmsTreeFiller") << "Cannot find hits in ECAL barrel or ECAL encap. Why are you requesting filling ECAL infos?";}
@@ -499,6 +477,8 @@ void CmsTreeFiller::writeEcalInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->e5x5->push_back(-1.);
     privateData_->eMax->push_back(-1.);
     privateData_->lat->push_back(-1.);
+    privateData_->phiLat->push_back(-1.);
+    privateData_->etaLat->push_back(-1.);
     if(privateData_->saveFatEcal) {
       privateData_->eraw->push_back(-1.);
       privateData_->caloEta->push_back(-1.);
@@ -510,10 +490,7 @@ void CmsTreeFiller::writeEcalInfo(const Candidate *cand, const edm::Event& iEven
       privateData_->covEtaEta->push_back(-1.);
       privateData_->covEtaPhi->push_back(-1.);
       privateData_->covPhiPhi->push_back(-1.);
-      privateData_->a00->push_back(-1.);
-      privateData_->a11->push_back(-1.);
       privateData_->a20->push_back(-1.);
-      privateData_->a22->push_back(-1.);
       privateData_->a42->push_back(-1.);
     }
   }
@@ -530,6 +507,8 @@ void CmsTreeFiller::treeEcalInfo(const std::string &colPrefix, const std::string
   privateData_->cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
   privateData_->cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
   privateData_->cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
+  privateData_->cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
+  privateData_->cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
   
   if(privateData_->saveFatEcal) {
     privateData_->cmstree->column((colPrefix+"eraw"+colSuffix).c_str(), *privateData_->eraw, nCandString.c_str(), 0, "Reco");
@@ -542,83 +521,9 @@ void CmsTreeFiller::treeEcalInfo(const std::string &colPrefix, const std::string
     privateData_->cmstree->column((colPrefix+"covEtaEta"+colSuffix).c_str(), *privateData_->covEtaEta, nCandString.c_str(), 0, "Reco");
     privateData_->cmstree->column((colPrefix+"covEtaPhi"+colSuffix).c_str(), *privateData_->covEtaPhi, nCandString.c_str(), 0, "Reco");
     privateData_->cmstree->column((colPrefix+"covPhiPhi"+colSuffix).c_str(), *privateData_->covPhiPhi, nCandString.c_str(), 0, "Reco");
-    privateData_->cmstree->column((colPrefix+"a00"+colSuffix).c_str(), *privateData_->a00, nCandString.c_str(), 0, "Reco");
-    privateData_->cmstree->column((colPrefix+"a11"+colSuffix).c_str(), *privateData_->a11, nCandString.c_str(), 0, "Reco");
     privateData_->cmstree->column((colPrefix+"a20"+colSuffix).c_str(), *privateData_->a20, nCandString.c_str(), 0, "Reco");
-    privateData_->cmstree->column((colPrefix+"a22"+colSuffix).c_str(), *privateData_->a22, nCandString.c_str(), 0, "Reco");
     privateData_->cmstree->column((colPrefix+"a42"+colSuffix).c_str(), *privateData_->a42, nCandString.c_str(), 0, "Reco");
   }
-}
-
-void CmsTreeFiller::writeJetAlphaInfo(const Candidate *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-  
-  // tdr: only tracks coming from the event vertex
-  // this requires the info on the selected e+e-
-  // we have not it here... skip this requirement for the moment and put it at analysis level
-
-  // get reconstructed tracks
-  /*
-  edm::Handle<TrackCollection> tracks;
-  try { iEvent.getByLabel("ctfWithMaterialTracks","",tracks); }
-  catch ( cms::Exception& ex ) { cout << "Can't get collection: " << "ctfWithMaterialTracks" << endl; }
-
-  float alpha = 0.;
-  for(TrackCollection::const_iterator myTrack=tracks->begin(); myTrack!=tracks->end(); myTrack++) {
-
-    if (myTrack->momentum().rho()<2.){continue;}
-    if (myTrack->found() < 5 ){ continue; }
-
-    // track within the cone around the jet?
-    double my_pi = 3.1415927;
-    double my_2pi = 2.*my_pi;
-    float thisTrackDeta = myTrack->momentum().eta() - cand->eta(); 
-    float thisTrackDphi = myTrack->momentum().phi() - cand->phi();
-    if ( thisTrackDphi > my_pi ) { thisTrackDphi = my_2pi - thisTrackDphi; }
-    if ( thisTrackDphi < -my_pi ){ thisTrackDphi = my_2pi + thisTrackDphi; }
-    float thisTrackDr   = sqrt(thisTrackDphi*thisTrackDphi + thisTrackDeta*thisTrackDeta);
-    if ( fabs(thisTrackDr)> 0.5 ){ continue; }
-
-    alpha = alpha + myTrack->momentum().rho();
-  } // loop over tracks
-
-  alpha = alpha/cand->et();
-
-  privateData_->jetAlpha->push_back(alpha);
-  */
-  // em and hadronic jet fraction
-
-  /*
-  if (thisRecoJet){
-    std::cout << "debug: recoJet" << std::endl;
-    std::cout << "debug: em = "   << thisRecoJet->emEnergyFraction()       << std::endl;
-    std::cout << "debug: had = "  << thisRecoJet->energyFractionHadronic() << std::endl;    
-    privateData_->jetEmFrac ->push_back(thisRecoJet->emEnergyFraction());
-    privateData_->jetHadFrac->push_back(thisRecoJet->energyFractionHadronic());
-  }
-
-  if (thisGenJet){
-    std::cout << "debug: genJet"  << std::endl;
-    std::cout << "debug: em = "   << thisGenJet->emEnergy()       << std::endl;
-    std::cout << "debug: had = "  << thisGenJet->hadEnergy()      << std::endl;    
-    privateData_->jetEmFrac ->push_back(thisGenJet->emEnergy());					
-    privateData_->jetHadFrac->push_back(thisGenJet->hadEnergy());
-  }
-  */
-
-  privateData_->jetEmFrac ->push_back(1000.);
-  privateData_->jetHadFrac->push_back(1000.);
-
-}
-
-void CmsTreeFiller::treeJetAlphaInfo(const std::string &colPrefix, const std::string &colSuffix) {
-
-  std::string nCandString = colPrefix+(*privateData_->trkIndexName)+colSuffix;
-  //  privateData_->cmstree->column((colPrefix+"alphaJet"+colSuffix).c_str(),   *privateData_->jetAlpha, nCandString.c_str(), 0, "Reco");
-//   privateData_->cmstree->column((colPrefix+"emFracJet"+colSuffix).c_str(),  *privateData_->jetEmFrac, nCandString.c_str(), 0, "Reco");
-//   privateData_->cmstree->column((colPrefix+"hadFracJet"+colSuffix).c_str(), *privateData_->jetHadFrac, nCandString.c_str(), 0, "Reco");
-
-
-
 }
 
 void CmsTreeFiller::writeHcalInfo(const Candidate *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup) {
@@ -676,12 +581,13 @@ void CmsTreeFiller::treeCandInfo(const std::string colPrefix, const std::string 
 }
 
 void CmsTreeFiller::writeMcMatchInfo(const CandidateCollection *recoCollection, const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					 const CandidateCollection *genCollection) {
+				     const CandidateCollection *genCollection) {
   
   edm::Handle<reco::CandMatchMap> mcMatchMap;
   try { iEvent.getByLabel( matchMap_, mcMatchMap ); }
   catch( cms::Exception& ex ) { edm::LogWarning("CmsMcTruthTreeFiller") << "Can't get MC match map " << matchMap_; }
   MCCandMatcher match(*mcMatchMap);
+  //  MCCandMatcher<reco::CandidateCollection> match(*mcMatchMap); // this for releases > 15X, in <=14X defined with no template argument 
   
   CandidateCollection::const_iterator recoCand;
   for(recoCand=recoCollection->begin(); recoCand!=recoCollection->end(); recoCand++) {
@@ -764,15 +670,10 @@ void CmsTreeFiller::initialise() {
   privateData_->covEtaPhi = new vector<float>;
   privateData_->covPhiPhi = new vector<float>;
   privateData_->lat = new vector<float>;
-  privateData_->a00 = new vector<float>;
-  privateData_->a11 = new vector<float>;
+  privateData_->phiLat = new vector<float>;
+  privateData_->etaLat = new vector<float>;
   privateData_->a20 = new vector<float>;
-  privateData_->a22 = new vector<float>;
   privateData_->a42 = new vector<float>;
-
-  privateData_->jetAlpha = new vector<float>;
-  privateData_->jetEmFrac = new vector<float>;
-  privateData_->jetHadFrac = new vector<float>;
 
   privateData_->saveTrk=true;
   privateData_->saveEcal=true;
@@ -780,7 +681,6 @@ void CmsTreeFiller::initialise() {
   privateData_->saveDT=true;
   privateData_->saveCSC=true;
   privateData_->saveRPC=true;
-  privateData_->saveJetAlpha=false;
   
   privateData_->saveCand=true;
 
@@ -814,6 +714,8 @@ void CmsTreeFiller::clearTrkVectors() {
     privateData_->e5x5->clear();
     privateData_->eMax->clear();
     privateData_->lat->clear();
+    privateData_->phiLat->clear();
+    privateData_->etaLat->clear();
     if(privateData_->saveFatEcal) {
       privateData_->eraw->clear();
       privateData_->caloEta->clear();
@@ -825,20 +727,11 @@ void CmsTreeFiller::clearTrkVectors() {
       privateData_->covEtaEta->clear();
       privateData_->covEtaPhi->clear();
       privateData_->covPhiPhi->clear();
-      privateData_->a00->clear();
-      privateData_->a11->clear();
       privateData_->a20->clear();
-      privateData_->a22->clear();
       privateData_->a42->clear();
     }
   }
   
-  if(privateData_->saveJetAlpha) {
-    privateData_->jetAlpha->clear();
-    privateData_->jetEmFrac->clear();
-    privateData_->jetHadFrac->clear();
-  }
-
   privateData_->mcIndex->clear();
   if(privateData_->saveCand) {
     privateData_->charge->clear();
