@@ -160,7 +160,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   //--------------------------------------
 
 
-  SuperClusterRef sclusRef = electron->get<SuperClusterRef>();
+  SuperClusterRef sclusRef = electron->superCluster();
   
   // ele corr - notcorr energy
   float myEleTrackerP   = electron->trackMomentumAtVtx().r();
@@ -209,9 +209,40 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   privateData_->eleTip           ->push_back(myTip);
 
   // electron likelihood
-  edm::ESHandle<ElectronLikelihood> likelihood;
-  iSetup.getData( likelihood );
-  privateData_->eleLik->push_back( likelihood->result(electron,iEvent) );
+  // FIX: reorganize this, cluster shape collections have to be passed
+  // in the cfg file as parameters
+  bool hasBarrel=true;
+  bool hasEndcap=true;
+
+  Handle<BasicClusterShapeAssociationCollection> barrelClShpHandle;
+  try { iEvent.getByLabel("hybridSuperClusters","hybridShapeAssoc", barrelClShpHandle); }
+  catch ( cms::Exception& ex ) { LogWarning("CmsTreeFiller") << "Can't get ECAL barrel Cluster Shape Collection"; }
+  const reco::BasicClusterShapeAssociationCollection& barrelClShpMap = *barrelClShpHandle;
+  
+  Handle<BasicClusterShapeAssociationCollection> endcapClShpHandle;
+  try { iEvent.getByLabel("islandBasicClusters","islandEndcapShapeAssoc", endcapClShpHandle); }
+  catch ( cms::Exception& ex ) { LogWarning("CmsTreeFiller") << "Can't get ECAL endcap Cluster Shape Collection"; }
+  const reco::BasicClusterShapeAssociationCollection& endcapClShpMap = *endcapClShpHandle;
+  
+  reco::BasicClusterShapeAssociationCollection::const_iterator seedShpItr;
+  seedShpItr = barrelClShpMap.find(sclusRef->seed());
+  if(seedShpItr==barrelClShpMap.end()) {
+    hasBarrel=false;
+    seedShpItr=endcapClShpMap.find(sclusRef->seed());
+    if(seedShpItr==endcapClShpMap.end()) hasEndcap=false;
+  }
+  if(hasBarrel || hasEndcap) {
+    const ClusterShapeRef& sClShape = seedShpItr->val;  
+    
+    edm::ESHandle<ElectronLikelihood> likelihood;
+    iSetup.getData( likelihood );
+    privateData_->eleLik->push_back( likelihood->result(*electron,*sClShape) );
+  }
+  else {
+    edm::LogWarning("CmsEleIDTreeFiller") << "cannot find cluster shapes in ECAL barrel or endcap "
+					  << " setting likelihood value to -1";
+    privateData_->eleLik->push_back( -1.);
+  }
 
   // tracker isolation
   const TrackCollection tracksC = *(tracks.product());
