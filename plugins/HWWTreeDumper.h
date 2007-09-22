@@ -25,9 +25,6 @@ class HWWTreeDumper : public edm::EDAnalyzer {
   virtual void beginJob(const edm::EventSetup&) ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
-  void writeJetAlpha(const reco::CandidateCollection *jetCollection, 
-		     const edm::Event& iEvent, const edm::EventSetup& iSetup,
-		     const std::string prefix, const std::string suffix);
 
 private:
   // ----------member data ---------------------------

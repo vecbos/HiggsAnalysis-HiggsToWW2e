@@ -40,7 +40,8 @@
 #include "DataFormats/JetReco/interface/GenJet.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/CmsTreeFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
@@ -147,20 +148,15 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   // fill Electrons block
   if(dumpElectrons_) {
-    CmsTreeFiller treeFill(tree_, true);
+    CmsElectronFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("Ele");
     treeFill.saveCand(saveCand_);
     treeFill.saveTrk(saveTrk_);
     treeFill.saveEcal(saveEcal_);
-    treeFill.saveHcal(saveHcal_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.saveFatEcal(saveFatEcal_);
-    treeFill.saveFatHcal(saveFatHcal_);
     treeFill.setMatchMap(electronMatchMap_);
-    treeFill.saveDT(false);
-    treeFill.saveCSC(false);
-    treeFill.saveRPC(false);
     treeFill.saveEleID(true);
 
     Handle<CandidateCollection> electronCollectionHandle;
@@ -176,16 +172,10 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   
   // fill MET block
   if(dumpMet_) {
-    CmsTreeFiller treeFill(tree_, true);
+    CmsCandidateFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("Met");
     treeFill.saveCand(saveCand_);
-    treeFill.saveTrk(false);
-    treeFill.saveEcal(false);
-    treeFill.saveHcal(false);
-    treeFill.saveDT(false);
-    treeFill.saveCSC(false);
-    treeFill.saveRPC(false);
 
     Handle<CandidateCollection> metCollectionHandle;
     try { iEvent.getByLabel(metCollection_, metCollectionHandle); }
@@ -207,16 +197,11 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   // fill JET block (this is temporary... to be replaced with the collection from Vale producer )
   if(dumpJets_) {
-    CmsTreeFiller treeFill(tree_, true);
+    CmsJetFiller treeFill(tree_, jetVertexAlphaCollection_, jetVertexBetaCollection_, true);
     std::string prefix("");
     std::string suffix("Jet");
     treeFill.saveCand(saveCand_);
-    treeFill.saveTrk(false);
-    treeFill.saveEcal(false);
-    treeFill.saveHcal(false);
-    treeFill.saveDT(false);
-    treeFill.saveCSC(false);
-    treeFill.saveRPC(false);
+    treeFill.saveJetExtras(saveJetAlpha_);
 
     Handle<CandidateCollection> jetCollectionHandle;
     try { iEvent.getByLabel(jetCollection_, jetCollectionHandle); }
@@ -224,7 +209,6 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     const CandidateCollection *jetCollection = jetCollectionHandle.product();
     LogDebug("HWWTreeDumper") << "Jet collection size = " << jetCollection->size();
     treeFill.writeCollectionToTree(jetCollection, iEvent, iSetup, prefix, suffix, false);
-    if(saveJetAlpha_) writeJetAlpha(jetCollection, iEvent, iSetup, prefix, suffix);
 
     // dump generated JETs
     if(dumpGenJets_) {
@@ -260,49 +244,4 @@ HWWTreeDumper::endJob() {
   fileOut_->Close();
 }
 
-void 
-HWWTreeDumper::writeJetAlpha(const CandidateCollection *jetCollection, 
-			       const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-			       const std::string prefix, const std::string suffix) {
-  
-  std::string nCandString = prefix+"n"+suffix;
-  std::vector<float> alphas;
-  //  std::vector<double> betas;
 
-  std::vector<float> emFrac, hadFrac;
-
-  typedef std::vector<double> jetVtxQualCollection;
-  Handle<jetVtxQualCollection> JV_alpha;
-  iEvent.getByLabel(jetVertexAlphaCollection_,JV_alpha);
-
-  //   Handle<jetVtxQualCollection> JV_beta;
-  //   iEvent.getByLabel(jetVertexBetaCollection_,JV_beta);
-
-  jetVtxQualCollection::const_iterator jetVtxAlphaItr = JV_alpha->begin();
-  //  jetVtxQualCollection::const_iterator jetVtxBetaItr = JV_beta->begin();
-  CandidateCollection::const_iterator cand;
-  for(cand=jetCollection->begin(); cand!=jetCollection->end(); cand++) {
-    // alpha and beta
-    alphas.push_back(*jetVtxAlphaItr);
-    //    betas.push_back(*jetVtxBetaItr);
-    jetVtxAlphaItr++;
-    //    jetVtxBetaItr++;
-
-    // em, had fractions
-    CaloJetRef thisRecoJet = cand->masterClone().castTo<CaloJetRef>();
-
-    if( thisRecoJet.isNonnull() ) { 
-      emFrac.push_back( thisRecoJet->emEnergyFraction() );
-      hadFrac.push_back( thisRecoJet->energyFractionHadronic() );
-    }
-    else {
-      emFrac.push_back( -1. );
-      hadFrac.push_back( -1. );
-    }
-  }
-
-  tree_->column((prefix+"alpha"+suffix).c_str(), alphas, nCandString.c_str(), 0, "Reco");
-  //  tree_->column((prefix+"beta"+suffix).c_str(), betas, nCandString.c_str(), 0, "Reco");
-  tree_->column((prefix+"emFrac"+suffix).c_str(), emFrac, nCandString.c_str(), 0, "Reco"); 
-  tree_->column((prefix+"hadFrac"+suffix).c_str(), hadFrac, nCandString.c_str(), 0, "Reco"); 
-}
