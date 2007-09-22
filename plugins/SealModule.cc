@@ -11,11 +11,11 @@
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWObjectSelector.h"
 
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-// #include "PhysicsTools/UtilAlgos/interface/ObjectSelector.h"
+//#include "PhysicsTools/UtilAlgos/interface/ObjectSelector.h"
 #include "PhysicsTools/UtilAlgos/interface/SortCollectionSelector.h"
 #include "PhysicsTools/Utilities/interface/PtComparator.h"
 #include "PhysicsTools/UtilAlgos/interface/PtMinSelector.h"
-#include "PhysicsTools/UtilAlgos/interface/SingleElementCollectionSelector.h"
+//#include "PhysicsTools/UtilAlgos/interface/SingleElementCollectionSelector.h"
 #include "PhysicsTools/UtilAlgos/interface/ObjectCountFilter.h"
 
 typedef HWWObjectSelector<HWWEleAmbiguityResolve> AmbResolver ;
