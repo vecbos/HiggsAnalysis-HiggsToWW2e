@@ -64,7 +64,7 @@ class CmsJetFiller : public CmsCandidateFiller {
   // Dump  everything if fatTree is true and less informations otherwise
   CmsJetFiller(CmsTree *, 
 	       edm::InputTag jetVertexAlphaCollection,
-               edm::InputTag jetVertexBetaCollection,
+	       edm::InputTag jetVertexBetaCollection,
 	       bool fatTree, 
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
