@@ -1,28 +1,22 @@
 # sequence producing reconstructed and generated MET collections
 # Emanuele Di Marco    29/Apr/2007
 
-include "RecoMET/METProducers/data/GenMET.cfi"
+include "RecoMET/METProducers/data/genMet.cfi"
 include "RecoMET/METProducers/data/CaloMET.cfi"
 include "HiggsAnalysis/HiggsToWW2e/data/CaloCandidatesForMET.cfi"
 
-module metMaker = HWWMetProducer {
-    InputTag genMetsTag = genMet:
-    InputTag recoMetsTag = met:
-    string genMetsOut = "HtoWWGenMets"
-    string recoMetsOut = "HtoWWRecoMets"
-    string genMetCandsOut = "HtoWWGenMetCandidates"
-    string recoMetCandsOut = "HtoWWRecoMetCandidates"
-    untracked double MinPt = 0.0
-    untracked bool produceGenMET = true
-    untracked string outputFile = "HtoWWMetMonitor.root"
+module caloMetCollectionClone = CaloMETShallowCloneProducer {
+    InputTag src = met
+}
+
+module genMetCollectionClone = GenMETShallowCloneProducer {
+    InputTag src = genMet
 }
 
 # MET corrections
 include "HiggsAnalysis/HiggsToWW2e/data/metCorrSequence.cfi"
 
 sequence metSequence = {
-    genParticleCandidates, genCandidatesForMET, genMet,
-    caloCandidatesForMET, met,
-    metCorrSequence,
-    metMaker
+    caloMetCollectionClone,
+    genMetCollectionClone
 }
