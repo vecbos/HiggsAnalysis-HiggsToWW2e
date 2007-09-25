@@ -20,28 +20,6 @@
 #include "EgammaAnalysis/ElectronIDAlgos/interface/ElectronLikelihood.h"
 #include "EgammaAnalysis/ElectronIDESSources/interface/ElectronLikelihoodESSource.h"
 
-struct CmsEleIDTreeFillerData {
-  CmsTree *cmstree;
-  std::string *trkIndexName;
-  bool standalone;
-  int maxTracks;
-
-  vector<int>   *eleClass;
-  vector<float> *eleHoE;
-  vector<float> *eleNotCorrEoP,    *eleCorrEoP;
-  vector<float> *eleNotCorrEoPout, *eleCorrEoPout;
-  vector<float> *eleDeltaEtaAtVtx, *eleDeltaEtaAtCalo;
-  vector<float> *eleDeltaPhiAtVtx, *eleDeltaPhiAtCalo;
-  vector<float> *eleTrackerP;
-  vector<float> *eleTrackerIso_minDR, *eleTrackerIso_sumPt;
-  vector<float> *eleTrackerIso_minDR_veto;
-  vector<float> *eleCaloIso_minDR,    *eleCaloIso_sumPt;
-  vector<float> *eleFullCorrE,     *eleCaloCorrE;
-  vector<float> *eleNxtalCorrE,    *eleRawE;
-  vector<float> *eleLik;
-  vector<float> *eleTip;
-
-};
 
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
@@ -51,16 +29,17 @@ struct CmsEleIDTreeFillerData {
 // Constructors --
 //----------------
 
-CmsEleIDTreeFiller::CmsEleIDTreeFiller(CmsTree *cmstree, int maxTracks, bool noOutputIfLimitsReached ):
+CmsEleIDTreeFiller::CmsEleIDTreeFiller(CmsTree *cmsTree, int maxTracks, bool noOutputIfLimitsReached ):
+  CmsCandidateFiller(cmsTree,maxTracks,500,noOutputIfLimitsReached),
   privateData_(new CmsEleIDTreeFillerData)
 {
-  privateData_->cmstree=cmstree;
-  privateData_->maxTracks=maxTracks;
-  privateData_->trkIndexName = new std::string("n");
+  cmstree=cmsTree;
+  maxTracks_=maxTracks;
+  trkIndexName_ = new std::string("n");
   
-  privateData_->standalone = true;
+  standalone_ = true;
 
-  initialise();
+  privateData_->initialise();
 }
 
 //--------------
@@ -92,53 +71,67 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->eleTip;
 }
 
+
 //-------------
 // Methods   --
 //-------------
-void CmsEleIDTreeFiller::setStandalone(bool what) { privateData_->standalone=what; }
+void CmsEleIDTreeFiller::setStandalone(bool what) { standalone_=what; }
+
 
 void CmsEleIDTreeFiller::writeCollectionToTree(const CandidateCollection *collection,
 					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
-  this->clearTrkVectors();
+  privateData_->clearTrkVectors();
   CandidateCollection::const_iterator cand;
   for(cand=collection->begin(); cand!=collection->end(); cand++) {
-    const PixelMatchGsfElectron *electron = dynamic_cast<const PixelMatchGsfElectron*>(&(*cand));
-    writeEleInfo(electron,iEvent,iSetup);
+    if ( cand->hasMasterClone() ) {   
+      CandidateBaseRef master = cand->masterClone();
+      PixelMatchGsfElectronRef electronRef = cand->masterClone().castTo<PixelMatchGsfElectronRef>();
+      const PixelMatchGsfElectron &electron = *electronRef;
+      writeEleInfo(&electron,iEvent,iSetup);
+    }
   }
 
   // if used standalone, it is necessary to initialize the size of the block event by event
-  if(privateData_->standalone) {
-    std::string nCandString = columnPrefix+(*privateData_->trkIndexName)+columnSuffix; 
-    privateData_->cmstree->column(nCandString.c_str(),collection->size(),0,"Reco");
+  if(standalone_) {
+    std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
+    cmstree->column(nCandString.c_str(),collection->size(),0,"Reco");
   }
 
   treeEleInfo(columnPrefix,columnSuffix);
-  if(dumpData) privateData_->cmstree->dumpData();
+  if(dumpData) cmstree->dumpData();
 }
+
+
+
+
 
 void CmsEleIDTreeFiller::writeCollectionToTree(const PixelMatchGsfElectronCollection *collection,
 					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
-  this->clearTrkVectors();
+  privateData_->clearTrkVectors();
   PixelMatchGsfElectronCollection::const_iterator electron;
   for(electron=collection->begin(); electron!=collection->end(); electron++) {
     writeEleInfo(&(*electron),iEvent,iSetup);
   }
 
   // if used standalone, it is necessary to initialize the size of the block event by event
-  if(privateData_->standalone) {
-    std::string nCandString = columnPrefix+(*privateData_->trkIndexName)+columnSuffix; 
-    privateData_->cmstree->column(nCandString.c_str(),collection->size(),0,"Reco");
+  if(standalone_) {
+    std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
+    cmstree->column(nCandString.c_str(),collection->size(),0,"Reco");
   }
 
   treeEleInfo(columnPrefix,columnSuffix);
-  if(dumpData) privateData_->cmstree->dumpData();
+  if(dumpData) cmstree->dumpData();
 }
 
-void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, const edm::Event& iEvent, const edm::EventSetup& iSetup) { 
+
+
+
+void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, 
+				      const edm::Event& iEvent, const edm::EventSetup& iSetup) { 
 
   // --------------------------------------
   // collections needed for isolation
@@ -159,9 +152,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   caloGeo = pG.product();
   //--------------------------------------
 
-
   SuperClusterRef sclusRef = electron->superCluster();
-  
   // ele corr - notcorr energy
   float myEleTrackerP   = electron->trackMomentumAtVtx().r();
   float myEleFullCorrE  = electron->energy();
@@ -218,12 +209,12 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   try { iEvent.getByLabel("hybridSuperClusters","hybridShapeAssoc", barrelClShpHandle); }
   catch ( cms::Exception& ex ) { LogWarning("CmsTreeFiller") << "Can't get ECAL barrel Cluster Shape Collection"; }
   const reco::BasicClusterShapeAssociationCollection& barrelClShpMap = *barrelClShpHandle;
-  
+
   Handle<BasicClusterShapeAssociationCollection> endcapClShpHandle;
   try { iEvent.getByLabel("islandBasicClusters","islandEndcapShapeAssoc", endcapClShpHandle); }
   catch ( cms::Exception& ex ) { LogWarning("CmsTreeFiller") << "Can't get ECAL endcap Cluster Shape Collection"; }
   const reco::BasicClusterShapeAssociationCollection& endcapClShpMap = *endcapClShpHandle;
-  
+
   reco::BasicClusterShapeAssociationCollection::const_iterator seedShpItr;
   seedShpItr = barrelClShpMap.find(sclusRef->seed());
   if(seedShpItr==barrelClShpMap.end()) {
@@ -233,10 +224,10 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   }
   if(hasBarrel || hasEndcap) {
     const ClusterShapeRef& sClShape = seedShpItr->val;  
-    
     edm::ESHandle<ElectronLikelihood> likelihood;
     iSetup.getData( likelihood );
     privateData_->eleLik->push_back( likelihood->result(*electron,*sClShape) );
+
   }
   else {
     edm::LogWarning("CmsEleIDTreeFiller") << "cannot find cluster shapes in ECAL barrel or endcap "
@@ -265,80 +256,93 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, con
   float sumEt_calo = caloIsolation.getEtHcal();  
   privateData_->eleCaloIso_minDR->push_back(minDR_calo);
   privateData_->eleCaloIso_sumPt->push_back(sumEt_calo);
+
 }
+
+
+
 
 void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::string &colSuffix) {
-  std::string nCandString = colPrefix+(*privateData_->trkIndexName)+colSuffix;
-  privateData_->cmstree->column((colPrefix+"eleFullCorrE"+colSuffix).c_str(), *privateData_->eleFullCorrE, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleCaloCorrE"+colSuffix).c_str(), *privateData_->eleCaloCorrE, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleNxtalCorrE"+colSuffix).c_str(), *privateData_->eleNxtalCorrE, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleRawE"+colSuffix).c_str(), *privateData_->eleRawE, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleTrackerP"+colSuffix).c_str(), *privateData_->eleTrackerP, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleClass"+colSuffix).c_str(), *privateData_->eleClass, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleHoE"+colSuffix).c_str(), *privateData_->eleHoE, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleCorrEoP"+colSuffix).c_str(), *privateData_->eleCorrEoP, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleNotCorrEoP"+colSuffix).c_str(), *privateData_->eleNotCorrEoP, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleCorrEoPout"+colSuffix).c_str(), *privateData_->eleCorrEoPout, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleNotCorrEoPout"+colSuffix).c_str(), *privateData_->eleNotCorrEoPout, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleDeltaEtaAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtVtx, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleDeltaPhiAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtVtx, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleDeltaEtaAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleDeltaPhiAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleTrackerIso_minDR"+colSuffix).c_str(), *privateData_->eleTrackerIso_minDR, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleTrackerIso_minDR_veto"+colSuffix).c_str(), *privateData_->eleTrackerIso_minDR_veto, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleTrackerIso_sumPt"+colSuffix).c_str(), *privateData_->eleTrackerIso_sumPt, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleCaloIso_minDR"+colSuffix).c_str(), *privateData_->eleCaloIso_minDR, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleCaloIso_sumPt"+colSuffix).c_str(), *privateData_->eleCaloIso_sumPt, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
-  privateData_->cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
+  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
+  cmstree->column((colPrefix+"eleFullCorrE"+colSuffix).c_str(), *privateData_->eleFullCorrE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleCaloCorrE"+colSuffix).c_str(), *privateData_->eleCaloCorrE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleNxtalCorrE"+colSuffix).c_str(), *privateData_->eleNxtalCorrE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleRawE"+colSuffix).c_str(), *privateData_->eleRawE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleTrackerP"+colSuffix).c_str(), *privateData_->eleTrackerP, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleClass"+colSuffix).c_str(), *privateData_->eleClass, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleHoE"+colSuffix).c_str(), *privateData_->eleHoE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleCorrEoP"+colSuffix).c_str(), *privateData_->eleCorrEoP, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleNotCorrEoP"+colSuffix).c_str(), *privateData_->eleNotCorrEoP, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleCorrEoPout"+colSuffix).c_str(), *privateData_->eleCorrEoPout, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleNotCorrEoPout"+colSuffix).c_str(), *privateData_->eleNotCorrEoPout, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleDeltaEtaAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtVtx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleDeltaPhiAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtVtx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleDeltaEtaAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleDeltaPhiAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleTrackerIso_minDR"+colSuffix).c_str(), *privateData_->eleTrackerIso_minDR, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleTrackerIso_minDR_veto"+colSuffix).c_str(), *privateData_->eleTrackerIso_minDR_veto, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleTrackerIso_sumPt"+colSuffix).c_str(), *privateData_->eleTrackerIso_sumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleCaloIso_minDR"+colSuffix).c_str(), *privateData_->eleCaloIso_minDR, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleCaloIso_sumPt"+colSuffix).c_str(), *privateData_->eleCaloIso_sumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
 }
 
-void CmsEleIDTreeFiller::initialise() {
-  privateData_->eleClass                 = new vector<int>;
-  privateData_->eleHoE                   = new vector<float>;
-  privateData_->eleNotCorrEoP            = new vector<float>;
-  privateData_->eleCorrEoP               = new vector<float>;
-  privateData_->eleNotCorrEoPout         = new vector<float>;
-  privateData_->eleCorrEoPout            = new vector<float>;
-  privateData_->eleDeltaEtaAtVtx         = new vector<float>;
-  privateData_->eleDeltaEtaAtCalo        = new vector<float>;
-  privateData_->eleDeltaPhiAtVtx         = new vector<float>;
-  privateData_->eleDeltaPhiAtCalo        = new vector<float>;
-  privateData_->eleFullCorrE             = new vector<float>;
-  privateData_->eleCaloCorrE             = new vector<float>;
-  privateData_->eleNxtalCorrE            = new vector<float>;
-  privateData_->eleRawE                  = new vector<float>;
-  privateData_->eleTrackerP              = new vector<float>;
-  privateData_->eleTrackerIso_minDR      = new vector<float>;
-  privateData_->eleTrackerIso_minDR_veto = new vector<float>;
-  privateData_->eleTrackerIso_sumPt      = new vector<float>;
-  privateData_->eleCaloIso_minDR         = new vector<float>;
-  privateData_->eleCaloIso_sumPt         = new vector<float>;
-  privateData_->eleLik                   = new vector<float>;
-  privateData_->eleTip                   = new vector<float>;
+
+
+
+void CmsEleIDTreeFillerData::initialise() {
+  initialiseCandidate();
+  eleClass                 = new vector<int>;
+  eleHoE                   = new vector<float>;
+  eleNotCorrEoP            = new vector<float>;
+  eleCorrEoP               = new vector<float>;
+  eleNotCorrEoPout         = new vector<float>;
+  eleCorrEoPout            = new vector<float>;
+  eleDeltaEtaAtVtx         = new vector<float>;
+  eleDeltaEtaAtCalo        = new vector<float>;
+  eleDeltaPhiAtVtx         = new vector<float>;
+  eleDeltaPhiAtCalo        = new vector<float>;
+  eleFullCorrE             = new vector<float>;
+  eleCaloCorrE             = new vector<float>;
+  eleNxtalCorrE            = new vector<float>;
+  eleRawE                  = new vector<float>;
+  eleTrackerP              = new vector<float>;
+  eleTrackerIso_minDR      = new vector<float>;
+  eleTrackerIso_minDR_veto = new vector<float>;
+  eleTrackerIso_sumPt      = new vector<float>;
+  eleCaloIso_minDR         = new vector<float>;
+  eleCaloIso_sumPt         = new vector<float>;
+  eleLik                   = new vector<float>;
+  eleTip                   = new vector<float>;
 }
-void CmsEleIDTreeFiller::clearTrkVectors() {
-  privateData_->eleClass            ->clear();
-  privateData_->eleHoE              ->clear();
-  privateData_->eleNotCorrEoP       ->clear();
-  privateData_->eleCorrEoP          ->clear();
-  privateData_->eleNotCorrEoPout    ->clear();
-  privateData_->eleCorrEoPout       ->clear();
-  privateData_->eleDeltaEtaAtVtx    ->clear();
-  privateData_->eleDeltaEtaAtCalo   ->clear();
-  privateData_->eleDeltaPhiAtVtx    ->clear();
-  privateData_->eleDeltaPhiAtCalo   ->clear();
-  privateData_->eleFullCorrE        ->clear();
-  privateData_->eleCaloCorrE        ->clear();
-  privateData_->eleNxtalCorrE       ->clear();
-  privateData_->eleRawE             ->clear();
-  privateData_->eleTrackerP         ->clear();
-  privateData_->eleTrackerIso_minDR ->clear();
-  privateData_->eleTrackerIso_minDR_veto ->clear();
-  privateData_->eleTrackerIso_sumPt ->clear();
-  privateData_->eleCaloIso_minDR    ->clear();
-  privateData_->eleCaloIso_sumPt    ->clear();
-  privateData_->eleLik              ->clear();
-  privateData_->eleTip              ->clear();
+
+
+
+
+void CmsEleIDTreeFillerData::clearTrkVectors() {
+  clearTrkVectorsCandidate();
+  eleClass            ->clear();
+  eleHoE              ->clear();
+  eleNotCorrEoP       ->clear();
+  eleCorrEoP          ->clear();
+  eleNotCorrEoPout    ->clear();
+  eleCorrEoPout       ->clear();
+  eleDeltaEtaAtVtx    ->clear();
+  eleDeltaEtaAtCalo   ->clear();
+  eleDeltaPhiAtVtx    ->clear();
+  eleDeltaPhiAtCalo   ->clear();
+  eleFullCorrE        ->clear();
+  eleCaloCorrE        ->clear();
+  eleNxtalCorrE       ->clear();
+  eleRawE             ->clear();
+  eleTrackerP         ->clear();
+  eleTrackerIso_minDR ->clear();
+  eleTrackerIso_minDR_veto ->clear();
+  eleTrackerIso_sumPt ->clear();
+  eleCaloIso_minDR    ->clear();
+  eleCaloIso_sumPt    ->clear();
+  eleLik              ->clear();
+  eleTip              ->clear();
 }
 

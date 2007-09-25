@@ -55,8 +55,6 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<float> *covEtaEta, *covEtaPhi, *covPhiPhi;
   vector<float> *lat, *phiLat, *etaLat, *a20, *a42;
   
-  int *ncand;
-
 public:
   void initialise();
   void clearTrkVectors();

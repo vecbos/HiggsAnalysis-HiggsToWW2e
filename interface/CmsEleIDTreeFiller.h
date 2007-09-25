@@ -30,16 +30,40 @@
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 
-class CmsEleIDTreeFillerData;
+struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
 
-class CmsEleIDTreeFiller {
+  vector<int>   *eleClass;
+  vector<float> *eleHoE;
+  vector<float> *eleNotCorrEoP,    *eleCorrEoP;
+  vector<float> *eleNotCorrEoPout, *eleCorrEoPout;
+  vector<float> *eleDeltaEtaAtVtx, *eleDeltaEtaAtCalo;
+  vector<float> *eleDeltaPhiAtVtx, *eleDeltaPhiAtCalo;
+  vector<float> *eleTrackerP;
+  vector<float> *eleTrackerIso_minDR, *eleTrackerIso_sumPt;
+  vector<float> *eleTrackerIso_minDR_veto;
+  vector<float> *eleCaloIso_minDR,    *eleCaloIso_sumPt;
+  vector<float> *eleFullCorrE,     *eleCaloCorrE;
+  vector<float> *eleNxtalCorrE,    *eleRawE;
+  vector<float> *eleLik;
+  vector<float> *eleTip;
+
+public:
+  void initialise();
+  void clearTrkVectors();
+
+};
+
+
+class CmsEleIDTreeFiller : public CmsCandidateFiller {
 
  public:
   // Constructors
-  CmsEleIDTreeFiller(CmsTree *, int maxTracks=500, bool noOutputIfLimitsReached=false );
+  CmsEleIDTreeFiller(CmsTree *, int maxTracks=500, 
+		     bool noOutputIfLimitsReached=false );
 
   // Destructor
   virtual ~CmsEleIDTreeFiller();
@@ -64,11 +88,14 @@ class CmsEleIDTreeFiller {
 
   void writeEleInfo(const PixelMatchGsfElectron *, const edm::Event&, const edm::EventSetup&);
   void treeEleInfo(const std::string &colPrefix, const std::string &colSuffix);
-  void initialise();
-  void clearTrkVectors();
 
+  int maxTracks_;
+  std::string *trkIndexName_;
+  bool standalone_;
+
+  CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
-  
+
   const CaloGeometry* caloGeo;
 };
 

@@ -156,6 +156,8 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->a20;
   delete privateData_->a42;
 
+  delete privateData_->ncand;
+
 }
 
 
@@ -175,66 +177,80 @@ void CmsElectronFiller::saveFatEcal(bool what) { saveFatEcal_=what;}
 
 void CmsElectronFiller::saveEleID(bool what) { saveEleID_=what;}
 
+
+
 void CmsElectronFiller::writeCollectionToTree(const CandidateCollection *collection,
 					      const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					      const std::string &columnPrefix, const std::string &columnSuffix,
 					      bool dumpData) {
-  
-  if(hitLimitsMeansNoOutput_ && 
-     (int)collection->size() > maxTracks_){
-    LogError("CmsElectronFiller") << "Track length " << collection->size() 
-				  << " is too long for declared max length for tree "
-				  << maxTracks_ << " and no output flag is set."
-				  << " No tracks written to tuple for this event ";
-    return;
-  }
-  
-  if((int)collection->size() > maxTracks_){
-    LogError("CmsElectronFiller") << "Track length " << collection->size() 
-				  << " is too long for declared max length for tree "
-				  << maxTracks_ 
-				  << ". Collection will be truncated ";
-  }
-  
-  *(privateData_->ncand) = collection->size();
 
-  LogDebug("CmsElectronFiller") << "Filling candidate vectors";
   privateData_->clearTrkVectors();
-  CandidateCollection::const_iterator cand;
-  for(cand=collection->begin(); cand!=collection->end(); cand++) {
-    // fill basic kinematics
-    if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
-    // fill Cluster Adapter
-    SuperClusterRef sclusRef = cand->get<SuperClusterRef>();
-    if(saveEcal_) writeEcalInfo(&(*cand),iEvent,iSetup,sclusRef);
-    // fill (GSF) Track Adapter
-    GsfTrackRef trkRef = cand->get<GsfTrackRef>();
-    if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,trkRef);
+
+  if(collection) {
+    if(hitLimitsMeansNoOutput_ && 
+       (int)collection->size() > maxTracks_){
+      LogInfo("CmsElectronFiller") << "Track length " << collection->size() 
+				   << " is too long for declared max length for tree "
+				   << maxTracks_ << " and no output flag is set."
+				   << " No tracks written to tuple for this event ";
+      return;
+    }
+  
+    if((int)collection->size() > maxTracks_){
+      LogInfo("CmsElectronFiller") << "Track length " << collection->size() 
+				   << " is too long for declared max length for tree "
+				   << maxTracks_ 
+				   << ". Collection will be truncated ";
+    }
+
+    *(privateData_->ncand) = collection->size();
+
+    CandidateCollection::const_iterator cand;
+    for(cand=collection->begin(); cand!=collection->end(); cand++) {
+      // fill basic kinematics
+      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
+      // fill Cluster Adapter
+      SuperClusterRef sclusRef = cand->get<SuperClusterRef>();
+      if(saveEcal_) writeEcalInfo(&(*cand),iEvent,iSetup,sclusRef);
+      // fill (GSF) Track Adapter
+      GsfTrackRef trkRef = cand->get<GsfTrackRef>();
+      if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,trkRef);
+    }
+  }
+  else {
+    *(privateData_->ncand) = 0;
   }
   
   // The class member vectors containing the relevant quantities 
   // have all been filled. Now transfer those we want into the 
   // tree 
-  
+  int blockSize = (collection) ? collection->size() : 0;
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
-  cmstree->column(nCandString.c_str(),collection->size(),0,"Reco");
+  cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
-  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
-  if(saveEcal_) treeEcalInfo(columnPrefix,columnSuffix);
-  if(saveTrk_) treeTrkInfo(columnPrefix,columnSuffix);
-  if(saveEleID_) {
-    CmsEleIDTreeFiller eIDFiller(cmstree);
-    eIDFiller.setStandalone(false);
-    eIDFiller.writeCollectionToTree(collection,iEvent,iSetup,columnPrefix,columnSuffix,false);
+  if(collection) {
+    if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
+    if(saveEcal_) treeEcalInfo(columnPrefix,columnSuffix);
+    if(saveTrk_) treeTrkInfo(columnPrefix,columnSuffix);
+    if(saveEleID_) {
+      CmsEleIDTreeFiller eIDFiller(cmstree);
+      eIDFiller.setStandalone(false);
+      eIDFiller.writeCollectionToTree(collection,iEvent,iSetup,columnPrefix,columnSuffix,false);
+    }
   }
-  
+
   if(dumpData) cmstree->dumpData();
 
 }
 
-void CmsElectronFiller::writeTrkInfo(const Candidate *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup, GsfTrackRef trkRef) {
-  if(&trkRef) {
 
+
+
+void CmsElectronFiller::writeTrkInfo(const Candidate *cand, 
+				     const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+				     GsfTrackRef trkRef) {
+  if(&trkRef) {
+    
     privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
     privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
     privateData_->pzAtInner->push_back(trkRef->innerMomentum().z());
@@ -272,6 +288,9 @@ void CmsElectronFiller::writeTrkInfo(const Candidate *cand, const edm::Event& iE
   }
 }
 
+
+
+
 void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
 
@@ -292,7 +311,13 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
   }
 }
 
-void CmsElectronFiller::writeEcalInfo(const Candidate *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup, SuperClusterRef sclusRef) {
+
+
+
+
+void CmsElectronFiller::writeEcalInfo(const Candidate *cand, 
+				      const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+				      SuperClusterRef sclusRef) {
   bool hasBarrel=true;
   bool hasEndcap=true;
   if(&sclusRef) {
@@ -381,8 +406,11 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand, const edm::Event& i
       privateData_->a42->push_back(-1.);
     }
   }
-
 }
+
+
+
+
 
 void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
@@ -413,8 +441,12 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
   }
 }
 
-void CmsElectronFillerData::initialise() {
 
+
+
+void CmsElectronFillerData::initialise() {
+  
+  initialiseCandidate();
   pxAtInner = new vector<float>;
   pyAtInner = new vector<float>;
   pzAtInner = new vector<float>;
@@ -453,6 +485,8 @@ void CmsElectronFillerData::initialise() {
 }
 
 void CmsElectronFillerData::clearTrkVectors() {
+
+  clearTrkVectorsCandidate();
 
   pxAtOuter->clear();
   pyAtOuter->clear();
