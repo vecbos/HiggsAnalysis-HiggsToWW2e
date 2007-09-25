@@ -85,12 +85,12 @@ CmsCandidateFiller::CmsCandidateFiller(CmsTree *cmsTree, int maxTracks,
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
 
-  privateData_->initialise();
+  privateData_->initialiseCandidate();
 }
 
 CmsCandidateFiller::CmsCandidateFiller(CmsTree *cmsTree, bool fatTree, int maxTracks,
-					   int maxMCTracks,
-					   bool noOutputIfLimitsReached):
+				       int maxMCTracks,
+				       bool noOutputIfLimitsReached):
   privateData_(new CmsCandidateFillerData)
 {
   cmstree=cmsTree;
@@ -101,7 +101,7 @@ CmsCandidateFiller::CmsCandidateFiller(CmsTree *cmsTree, bool fatTree, int maxTr
   maxTracks=maxTracks;
   maxMCTracks=maxMCTracks;
 
-  privateData_->initialise();
+  privateData_->initialiseCandidate();
 }
 
 
@@ -130,6 +130,7 @@ CmsCandidateFiller::~CmsCandidateFiller() {
   delete privateData_->pdgId;
 
   delete privateData_->mcIndex;
+  delete privateData_->ncand;
 }
 
 
@@ -145,63 +146,87 @@ void CmsCandidateFiller::saveCand(bool what) { saveCand_=what;}
 
 void CmsCandidateFiller::doMcMatch(bool what) { doMcMatch_=what;}
 
+
+
+
 void CmsCandidateFiller::writeCollectionToTree(const CandidateCollection *collection,
-			   const edm::Event& iEvent, const edm::EventSetup& iSetup,
-			   const std::string &columnPrefix, const std::string &columnSuffix,
-			   bool dumpData) {
+					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
+					       const std::string &columnPrefix, const std::string &columnSuffix,
+					       bool dumpData) {
+
+  privateData_->clearTrkVectorsCandidate();
   
-  if(hitLimitsMeansNoOutput_ && 
-     (int)collection->size() > maxTracks_){
-    LogError("CmsCandidateFiller") << "Track length " << collection->size() 
-				   << " is too long for declared max length for tree "
-				   << maxTracks_ << " and no output flag is set."
-				   << " No tracks written to tuple for this event ";
-    return;
+  if(collection) {
+    if(hitLimitsMeansNoOutput_ && 
+       (int)collection->size() > maxTracks_){
+      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
+				     << " is too long for declared max length for tree "
+				     << maxTracks_ << " and no output flag is set."
+				     << " No tracks written to tuple for this event ";
+      return;
+    }
+
+    if((int)collection->size() > maxTracks_){
+      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
+				     << " is too long for declared max length for tree "
+				     << maxTracks_ 
+				     << ". Collection will be truncated ";
+    }
+  
+    *(privateData_->ncand) = collection->size();
+
+    CandidateCollection::const_iterator cand;
+    for(cand=collection->begin(); cand!=collection->end(); cand++) {
+      // fill basic kinematics
+      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
+    }
+  }
+  else {
+    *(privateData_->ncand) = 0;
   }
 
-  if((int)collection->size() > maxTracks_){
-    LogError("CmsCandidateFiller") << "Track length " << collection->size() 
-				  << " is too long for declared max length for tree "
-				  << maxTracks_ 
-				  << ". Collection will be truncated ";
-  }
-  
-  *(privateData_->ncand) = collection->size();
-
-  LogDebug("CmsCandidateFiller") << "Filling candidate vectors";
-  privateData_->clearTrkVectors();
-  CandidateCollection::const_iterator cand;
-  for(cand=collection->begin(); cand!=collection->end(); cand++) {
-    // fill basic kinematics
-    if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
-  }
-  
   // The class member vectors containing the relevant quantities 
   // have all been filled. Now transfer those we want into the 
   // tree 
+
+  int blockSize = (collection) ? collection->size() : 0;
   
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
-  cmstree->column(nCandString.c_str(),collection->size(),0,"Reco");
+  cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
-  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
+  if(collection) {
+    if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
+  }
+
   if(dumpData) cmstree->dumpData();
 
 }
 
+
+
+
+
+
 void CmsCandidateFiller::writeMcIndicesToTree(const CandidateCollection *recoCollection,
-					     const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					     const CandidateCollection *genCollection,
-					     const std::string &columnPrefix, const std::string &columnSuffix,
-					     bool dumpData) {
-  LogDebug("CmsCandidateFiller") << "Filling the tree with references to the MC truth particles";
+					      const edm::Event& iEvent, const edm::EventSetup& iSetup,
+					      const CandidateCollection *genCollection,
+					      const std::string &columnPrefix, const std::string &columnSuffix,
+					      bool dumpData) {
+
   writeMcMatchInfo(recoCollection, iEvent, iSetup, genCollection);
   treeMcMatchInfo(columnPrefix, columnSuffix);
 
 }
 
+
+
+
+
+
 void CmsCandidateFiller::writeCandInfo(const Candidate *cand, 
 				       const edm::Event& iEvent, 
 				       const edm::EventSetup& iSetup) {
+
   privateData_->charge->push_back((int)cand->charge());
   privateData_->energy->push_back(cand->energy());
   privateData_->et->push_back(cand->et());
@@ -218,8 +243,13 @@ void CmsCandidateFiller::writeCandInfo(const Candidate *cand,
   privateData_->mass->push_back(cand->mass());
   privateData_->mt->push_back(cand->mt());
   privateData_->pdgId->push_back(cand->pdgId());
-
 }
+
+
+
+
+
+
 
 void CmsCandidateFiller::treeCandInfo(const std::string colPrefix, const std::string colSuffix) {
 
@@ -243,46 +273,57 @@ void CmsCandidateFiller::treeCandInfo(const std::string colPrefix, const std::st
 
 }
 
-void CmsCandidateFiller::writeMcMatchInfo(const CandidateCollection *recoCollection, const edm::Event& iEvent, const edm::EventSetup& iSetup,
-				     const CandidateCollection *genCollection) {
+
+
+void CmsCandidateFiller::writeMcMatchInfo(const CandidateCollection *recoCollection, 
+					  const edm::Event& iEvent, const edm::EventSetup& iSetup,
+					  const CandidateCollection *genCollection) {
   
   edm::Handle<reco::CandMatchMap> mcMatchMap;
   try { iEvent.getByLabel( matchMap_, mcMatchMap ); }
   catch( cms::Exception& ex ) { edm::LogWarning("CmsMcTruthTreeFiller") << "Can't get MC match map " << matchMap_; }
   //  MCCandMatcher match(*mcMatchMap);
   MCCandMatcher<reco::CandidateCollection> match(*mcMatchMap); // this for releases > 15X, in <=14X defined with no template argument 
-  
-  CandidateCollection::const_iterator recoCand;
-  for(recoCand=recoCollection->begin(); recoCand!=recoCollection->end(); recoCand++) {
-    CandidateRef mcRef = match(*recoCand);
-    
-    // find the index in the MC collection
-    int indMatched=-1;
-    bool matched=false;
-    int idx=0;
-    reco::CandidateCollection::const_iterator genCandIter;
-    for(genCandIter=genCollection->begin(); genCandIter!=genCollection->end(); genCandIter++) {
-      const Candidate *iCand=&(*genCandIter);
-      if(&(*mcRef)==&(*iCand)) {
-	indMatched=idx;
-	matched=true;
-	break;
-      }
-      idx++;
-    }
 
-//    if(mcRef) privateData_->mcIndex->push_back(mcRef.key());
-    if(matched) privateData_->mcIndex->push_back(indMatched);
-    else privateData_->mcIndex->push_back(-1);
+  if(recoCollection) {
+    CandidateCollection::const_iterator recoCand;
+    for(recoCand=recoCollection->begin(); recoCand!=recoCollection->end(); recoCand++) {
+      CandidateRef mcRef = match(*recoCand);
+    
+      // find the index in the MC collection
+      int indMatched=-1;
+      bool matched=false;
+      int idx=0;
+      reco::CandidateCollection::const_iterator genCandIter;
+      for(genCandIter=genCollection->begin(); genCandIter!=genCollection->end(); genCandIter++) {
+	const Candidate *iCand=&(*genCandIter);
+	if(&(*mcRef)==&(*iCand)) {
+	  indMatched=idx;
+	  matched=true;
+	  break;
+	}
+	idx++;
+      }
+
+      //    if(mcRef) privateData_->mcIndex->push_back(mcRef.key());
+      if(matched) privateData_->mcIndex->push_back(indMatched);
+      else privateData_->mcIndex->push_back(-1);
+    }
   }
 }
+
+
+
 
 void CmsCandidateFiller::treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix) {
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"index"+colSuffix).c_str(), *privateData_->mcIndex, nCandString.c_str(), 0, "Reco");
 }
 
-void CmsCandidateFillerData::initialise() {
+
+
+
+void CmsCandidateFillerData::initialiseCandidate() {
 
   charge = new vector<int>;
   energy = new vector<float>;
@@ -306,7 +347,7 @@ void CmsCandidateFillerData::initialise() {
 
 }
 
-void CmsCandidateFillerData::clearTrkVectors() {
+void CmsCandidateFillerData::clearTrkVectorsCandidate() {
 
   mcIndex->clear();
   charge->clear();

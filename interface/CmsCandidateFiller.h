@@ -52,8 +52,8 @@ struct CmsCandidateFillerData {
   int *ncand;
 
 public:
-  void initialise();
-  void clearTrkVectors();
+  void initialiseCandidate();
+  void clearTrkVectorsCandidate();
 };
 
 
