@@ -3,13 +3,13 @@
 
 module treeDumper = HWWTreeDumper {
     InputTag TriggerResultsTag = TriggerResults
-    InputTag electronCollection = clonedElectrons:HtoWWRecoEleCandidates
+    InputTag electronCollection = electronCollectionClone:
     InputTag jetCollection = caloJetCollectionClone:
     InputTag genJetCollection = genJetCollectionClone:
-    InputTag jetVertexAlphaCollection = jetvertexalpha:Var
-    InputTag jetVertexBetaCollection = jetvertexbeta:Var
-    InputTag metCollection = metMaker:HtoWWRecoMetCandidates
-    InputTag genMetCollection = metMaker:HtoWWGenMetCandidates
+    InputTag jetVertexAlphaCollection = jetVertexAlpha:Var
+    InputTag jetVertexBetaCollection = jetVertexBeta:Var
+    InputTag metCollection = caloMetCollectionClone:
+    InputTag genMetCollection = genMetCollectionClone:
     untracked string nameFile = "analysisTree.root"
     untracked string nameTree = "ntp1"
     # switch ON/OFF the candidate collections to dump
@@ -30,6 +30,8 @@ module treeDumper = HWWTreeDumper {
     untracked bool dumpGenJets = true
     untracked bool dumpMCTruth = true
     untracked bool doMCmatch = false
+    # trigger results
+    untracked bool dumpTriggerResults = false
     # effectively dump the data into the tree
     untracked bool dumpTree = true
 }
