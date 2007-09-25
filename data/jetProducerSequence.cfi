@@ -1,14 +1,3 @@
-# this is temporary. Take standard jets from the event and pass to tree dumper
-# PG
-
-
-
-#   include "FWCore/MessageService/data/MessageLogger.cfi"
-#   replace MessageLogger.cout.threshold = "DEBUG"
-#   replace MessageLogger.cerr.default.limit = 10
-#include "RecoJets/JetProducers/data/CaloJets.cfi"
-#include "RecoJets/JetProducers/data/GenJets.cfi"
-
 #reconstruction of jets
 include "RecoJets/Configuration/data/RecoJets.cff"
 
@@ -37,33 +26,44 @@ module genJetSele = PtMinCandSelector{
 # jet vertex associations
 # JV_type_Algo 1=alpha, 2=beta (CMS NOTE 2006/91)
 
-module jetvertexalpha = JetVertexAssociation {
+module jetVertexAlpha = JetVertexAssociation {
     double JV_deltaZ = 0.4
+    double JV_sigmaZ = 9.5 // distance from signal vertex in terms of sigma Z
     double JV_alpha_threshold = 0.2
     double JV_cone_size = 0.5
     int32 JV_type_Algo = 1
-    int32 JET_ALGO = 1 // "1" - IterativeConeAlgorithm
-    // "2" - KtAlgorithm
-    // "3" - MidPointAlgorithm
+    string JET_ALGO = "iterativeCone5CaloJets"
+    // other algo:  KtAlgorithm
+    // other algo:  MidPointAlgorithm
+    string TRACK_ALGO = "ctfWithMaterialTracks"
+    string VERTEX_ALGO = "offlinePrimaryVerticesFromCTFTracks"    
+    string JV_cutType = "sig" 
+    // "delta" - cut based on deltaZ
+    // "sig" - cut based on significance deltaZ
 } 
 
-# module jetvertexbeta = JetVertexAssociation {
-#     double JV_deltaZ = 0.1
-#     double JV_alpha_threshold = 0.2
-#     double JV_cone_size = 0.5
-#     int32 JV_type_Algo = 2
-#     int32 JET_ALGO = 1 // "1" - IterativeConeAlgorithm
-#     // "2" - KtAlgorithm
-#     // "3" - MidPointAlgorithm
-# } 
-
+module jetVertexBeta = JetVertexAssociation {
+    double JV_deltaZ = 0.4
+    double JV_sigmaZ = 9.5 // distance from signal vertex in terms of sigma Z
+    double JV_alpha_threshold = 0.2
+    double JV_cone_size = 0.5
+    int32 JV_type_Algo = 2
+    string JET_ALGO = "iterativeCone5CaloJets"
+    // other algo:  KtAlgorithm
+    // other algo:  MidPointAlgorithm
+    string TRACK_ALGO = "ctfWithMaterialTracks"
+    string VERTEX_ALGO = "offlinePrimaryVerticesFromCTFTracks"    
+    string JV_cutType = "sig" 
+    // "delta" - cut based on deltaZ
+    // "sig" - cut based on significance deltaZ
+} 
 
 sequence jetSequence = {
     recoJets,
     caloJetCollectionClone, 
     genJetCollectionClone,
-    jetvertexalpha
-    #jetvertexbeta
+    jetVertexAlpha,
+    jetVertexBeta
     #caloJetSele, 
     #genJetSele, 
 }
