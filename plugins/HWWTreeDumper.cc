@@ -89,7 +89,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   
   // jet vertex collections
   jetVertexAlphaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection");
-  jetVertexBetaCollection_  = iConfig.getParameter<edm::InputTag>("jetVertexBetaCollection");
+  jetVertexBetaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexBetaCollection");
 
   electronCollection_ = iConfig.getParameter<edm::InputTag>("electronCollection");
   //   muonCollection_     = iConfig.getParameter<edm::InputTag>("muonCollection");
@@ -102,7 +102,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   //  muonMatchMap_       = iConfig.getParameter<edm::InputTag>("muonMatchMap");
 
   // trigger Collections
-  triggerInputTag_  = iConfig.getParameter<edm::InputTag>("TriggerResultsTag") ;
+  triggerInputTag_     = iConfig.getParameter<edm::InputTag>("TriggerResultsTag") ;
+  dumpTriggerResults_  = iConfig.getUntrackedParameter<bool>("dumpTriggerResults");
 }
 
 
@@ -136,15 +137,17 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
   }
 
   // fill the trigger paths info
-  edm::Handle<edm::TriggerResults> trh;
-  try {iEvent.getByLabel(triggerInputTag_,trh);} 
-  catch( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Trigger results: " << triggerInputTag_ << " not found"; }
-  if (!trh.isValid())
-    throw cms::Exception("ProductNotValid") << "TriggerResults product not valid";
-  CmsTriggerTreeFiller triggerTreeFill (tree_) ;
-  std::string prefix ("") ;
-  std::string suffix ("Trg") ;
-  triggerTreeFill.writeTriggerToTree (trh,prefix,suffix) ;
+  if(dumpTriggerResults_) {
+    edm::Handle<edm::TriggerResults> trh;
+    try {iEvent.getByLabel(triggerInputTag_,trh);} 
+    catch( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Trigger results: " << triggerInputTag_ << " not found"; }
+    if (!trh.isValid())
+      throw cms::Exception("ProductNotValid") << "TriggerResults product not valid";
+    CmsTriggerTreeFiller triggerTreeFill (tree_) ;
+    std::string prefix ("") ;
+    std::string suffix ("Trg") ;
+    triggerTreeFill.writeTriggerToTree (trh,prefix,suffix) ;
+  }
 
   // fill Electrons block
   if(dumpElectrons_) {
@@ -168,7 +171,6 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       treeFill.writeMcIndicesToTree(electronCollection, iEvent, iSetup, genParticleCollection, prefix, suffix, false);
     }
   }
-
   
   // fill MET block
   if(dumpMet_) {
@@ -195,7 +197,7 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
   }
 
-  // fill JET block (this is temporary... to be replaced with the collection from Vale producer )
+  // fill JET block
   if(dumpJets_) {
     CmsJetFiller treeFill(tree_, jetVertexAlphaCollection_, jetVertexBetaCollection_, true);
     std::string prefix("");
@@ -213,6 +215,7 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     // dump generated JETs
     if(dumpGenJets_) {
       std::string suffix("GenJet");
+      treeFill.saveJetExtras(false);
       Handle<CandidateCollection> genJetCollectionHandle;
       try { iEvent.getByLabel(genJetCollection_, genJetCollectionHandle); }
       catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " <<genJetCollection_; }

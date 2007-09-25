@@ -37,6 +37,7 @@ private:
   bool saveCand_;
   bool dumpElectrons_, dumpMuons_;
   bool dumpJets_, dumpGenJets_, dumpMet_, dumpGenMet_;
+  bool dumpTriggerResults_;
 
   edm::InputTag electronCollection_, muonCollection_;
   edm::InputTag jetCollection_, genJetCollection_, metCollection_, genMetCollection_;
