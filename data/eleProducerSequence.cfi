@@ -1,32 +1,36 @@
 # sequence producing electron colletion
-# first version: 29/Apr/2007
 
-include "Configuration/StandardSequences/data/FakeConditions.cff"
-include "Configuration/StandardSequences/data/Reconstruction.cff"
-
-# ecal clustering sequence
-include "RecoEcal/EgammaClusterProducers/data/ecalClusteringSequence.cff"
-
-# sequence to make pixel-based Gsf electrons
-include "RecoEgamma/EgammaElectronProducers/data/pixelMatchGsfElectronSequence.cff"
-
-module eleMaker = HtoWWEleProducer {
-    string ElectronProducer = "pixelMatchGsfElectrons"
-    string ElectronLabel    = ""
-    InputTag barrelClusterShapeAssociation = hybridSuperClusters:hybridShapeAssoc
-    InputTag endcapClusterShapeAssociation = islandBasicClusters:islandEndcapShapeAssoc
-    string TrackProducer    = "ctfWithMaterialTracks"
-    string TrackLabel       = ""
-    InputTag HcalRhLabel = hbhereco
-    string McInfoProducer                = "VtxSmeared"
-    string HWWgsfEleCollection           = "HtoWWRecoEleCollection"
-    string HWWgsfEleCandCollection       = "HtoWWRecoEleCandidates"
-    untracked string outputFile          = "HtoWWEleMonitor.root"
+# --- ambiguity solving ---
+module ambSolving = AmbResolver {
+    InputTag src = pixelMatchGsfElectrons
+    bool filter = true
 }
 
+# --- electron identifying ---
+module eleIdentifying = EleIdentifier {
+    InputTag src = ambSolving
+    InputTag barrelClusterShapeAssociation = hybridSuperClusters:hybridShapeAssoc
+    InputTag endcapClusterShapeAssociation = islandBasicClusters:islandEndcapShapeAssoc
+    bool filter = true
+}
+
+# --- ESSource for Electron ID likelihood ---
+include "EgammaAnalysis/ElectronIDESSources/data/likelihoodPdfsDB.cfi"
+include "EgammaAnalysis/ElectronIDESSources/data/likelihoodESetup.cfi"
+
+
+sequence ourKfSequence = {	
+    ckftracks	
+}
+
+# --- ele cloning ------------------------------
+module electronCollectionClone = PixelMatchGsfElectronShallowCloneProducer
+{
+    InputTag src = ambSolving
+}	
+
 sequence eleSequence = {
-    localreco, 
-    ecalClusteringSequence, 
-    pixelMatchGsfElectronSequence,
-    eleMaker
+    ambSolving ,
+    #	eleIdentifying ,
+    electronCollectionClone
 }
