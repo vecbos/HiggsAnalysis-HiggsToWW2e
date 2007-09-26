@@ -98,8 +98,8 @@ CmsCandidateFiller::CmsCandidateFiller(CmsTree *cmsTree, bool fatTree, int maxTr
   trkIndexName_ = new std::string("n");
 
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
-  maxTracks=maxTracks;
-  maxMCTracks=maxMCTracks;
+  maxTracks_ = maxTracks;
+  maxMCTracks_ = maxMCTracks;
 
   privateData_->initialiseCandidate();
 }
