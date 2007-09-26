@@ -1,5 +1,4 @@
 <use name=FWCore/Framework>
-#<use name=FWCore/PluginManager>
 <use name=FWCore/ParameterSet>
 <use name=FWCore/Utilities>
 <use name=root>
@@ -27,11 +26,9 @@
 <use name=EgammaAnalysis/ElectronIDAlgos>
 <use name=EgammaAnalysis/ElectronIDESSources>
 
-<flags SEAL_PLUGIN_NAME="HiggsAnalysisHiggsToWW2e">
 <export>
    <lib name=HiggsAnalysisHiggsToWW2e>	
    <use name=FWCore/Framework>
-#   <use name=FWCore/PluginManager>
    <use name=FWCore/ParameterSet>
    <use name=FWCore/Utilities>
    <use name=root>
