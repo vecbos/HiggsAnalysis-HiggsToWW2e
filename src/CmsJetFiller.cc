@@ -72,7 +72,6 @@ using namespace reco;
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
 			   edm::InputTag jetVertexAlphaCollection,
-			   edm::InputTag jetVertexBetaCollection,
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
   CmsCandidateFiller(cmsTree,maxTracks,maxMCTracks,noOutputIfLimitsReached),
@@ -80,7 +79,6 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 {
   cmstree=cmsTree;
   jetVertexAlphaCollection_=jetVertexAlphaCollection;
-  jetVertexBetaCollection_=jetVertexBetaCollection;
 
   saveJetExtras_=true;
 
@@ -95,7 +93,6 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
 			   edm::InputTag jetVertexAlphaCollection,
-			   edm::InputTag jetVertexBetaCollection,
 			   bool fatTree, 
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
@@ -104,7 +101,6 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 {
   cmstree=cmsTree;
   jetVertexAlphaCollection_=jetVertexAlphaCollection;
-  jetVertexBetaCollection_=jetVertexBetaCollection;
 
   trkIndexName_ = new std::string("n");
 
@@ -126,7 +122,6 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->emFrac;
   delete privateData_->hadFrac;
   delete privateData_->alpha;
-  delete privateData_->beta;
 
 }
 
@@ -166,33 +161,26 @@ void CmsJetFiller::writeCollectionToTree(const CandidateCollection *collection,
     *(privateData_->ncand) = collection->size();
 
     typedef std::vector<double> jetVtxQualCollection;
-    Handle<jetVtxQualCollection> JV_alpha, JV_beta;
-    jetVtxQualCollection::const_iterator jetVtxAlphaItr, jetVtxBetaItr;
+    Handle<jetVtxQualCollection> JV_alpha;
+    jetVtxQualCollection::const_iterator jetVtxAlphaItr;
     if(saveJetExtras_) {
       try { iEvent.getByLabel(jetVertexAlphaCollection_,JV_alpha); }
-      catch ( cms::Exception& ex ) { LogWarning("CmsJetFiller") << "Can't get jet vertex alpha collection "                                                                                                                            
-								<< jetVertexAlphaCollection_;   }     
+      catch ( cms::Exception& ex ) { 
+	LogWarning("CmsJetFiller") << "Can't get jet vertex alpha collection " 
+				   << jetVertexAlphaCollection_;   
+      }     
       jetVtxAlphaItr = JV_alpha->begin();
-      try { iEvent.getByLabel(jetVertexBetaCollection_,JV_beta); }
-      catch ( cms::Exception& ex ) { LogWarning("CmsJetFiller") << "Can't get jet vertex alpha collection "                                                                                                                            
-								<< jetVertexBetaCollection_;   }     
-      jetVtxBetaItr = JV_beta->begin();
-
     }
-
 
     CandidateCollection::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       // fill basic kinematics
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
       // fill jet extra informations
-
-      if(saveJetExtras_) {
+      if(saveJetExtras_) { 
 	privateData_->alpha->push_back(*jetVtxAlphaItr);
-	privateData_->beta->push_back(*jetVtxBetaItr);
 	jetVtxAlphaItr++;
-	jetVtxBetaItr++;
-
+	
 	// em, had fractions
 	CaloJetRef thisRecoJet= cand->masterClone().castTo<CaloJetRef>();
 	if( thisRecoJet.isNonnull() ) { 
@@ -206,30 +194,29 @@ void CmsJetFiller::writeCollectionToTree(const CandidateCollection *collection,
       }
       else {
 	privateData_->alpha->push_back( -1. );
-	privateData_->beta->push_back( -1. );
 	privateData_->emFrac->push_back( -1. );
 	privateData_->hadFrac->push_back( -1. );
       }
     }
   }
   else {
-    *(privateData_->ncand) = 0;
+  *(privateData_->ncand) = 0;
   }
-
+  
   // The class member vectors containing the relevant quantities 
   // have all been filled. Now transfer those we want into the 
   // tree 
   int blockSize = (collection) ? collection->size() : 0;
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
-
+  
   if(collection) {
     if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
     if(saveJetExtras_) treeJetInfo(columnPrefix,columnSuffix);
   }
 
   if(dumpData) cmstree->dumpData();
-
+	
 }
 
 
@@ -244,7 +231,6 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
 
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"alpha"+colSuffix).c_str(), *privateData_->alpha, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"beta"+colSuffix).c_str(), *privateData_->beta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
 
@@ -260,7 +246,6 @@ void CmsJetFillerData::initialise() {
 
   initialiseCandidate();
   alpha = new vector<float>;
-  beta = new vector<float>;
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
 
@@ -270,7 +255,6 @@ void CmsJetFillerData::clearTrkVectors() {
 
   clearTrkVectorsCandidate();
   alpha->clear();
-  beta->clear();
   emFrac->clear();
   hadFrac->clear();
 

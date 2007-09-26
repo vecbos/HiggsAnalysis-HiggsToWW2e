@@ -40,7 +40,7 @@ using namespace reco;
 struct CmsJetFillerData : public CmsCandidateFillerData {
 
   std::vector<float> *emFrac, *hadFrac;
-  std::vector<float> *alpha, *beta;
+  std::vector<float> *alpha;
 
 public:
   void initialise();
@@ -57,14 +57,12 @@ class CmsJetFiller : public CmsCandidateFiller {
   // Dump everything
   CmsJetFiller(CmsTree *, 
 	       edm::InputTag jetVertexAlphaCollection,
-	       edm::InputTag jetVertexBetaCollection,
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
 
   // Dump  everything if fatTree is true and less informations otherwise
   CmsJetFiller(CmsTree *, 
 	       edm::InputTag jetVertexAlphaCollection,
-	       edm::InputTag jetVertexBetaCollection,
 	       bool fatTree, 
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
@@ -100,7 +98,6 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   CmsJetFillerData *privateData_;
   edm::InputTag jetVertexAlphaCollection_;
-  edm::InputTag jetVertexBetaCollection_;
 
   CmsTree *cmstree;
 
