@@ -89,7 +89,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   
   // jet vertex collections
   jetVertexAlphaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection");
-  jetVertexBetaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexBetaCollection");
 
   electronCollection_ = iConfig.getParameter<edm::InputTag>("electronCollection");
   //   muonCollection_     = iConfig.getParameter<edm::InputTag>("muonCollection");
@@ -199,7 +198,7 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 
   // fill JET block
   if(dumpJets_) {
-    CmsJetFiller treeFill(tree_, jetVertexAlphaCollection_, jetVertexBetaCollection_, true);
+    CmsJetFiller treeFill(tree_, jetVertexAlphaCollection_, true);
     std::string prefix("");
     std::string suffix("Jet");
     treeFill.saveCand(saveCand_);

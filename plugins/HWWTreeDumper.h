@@ -43,7 +43,7 @@ private:
   edm::InputTag jetCollection_, genJetCollection_, metCollection_, genMetCollection_;
   edm::InputTag mcTruthCollection_, electronMatchMap_, muonMatchMap_;
 
-  edm::InputTag jetVertexAlphaCollection_, jetVertexBetaCollection_;
+  edm::InputTag jetVertexAlphaCollection_;
 
   edm::InputTag triggerInputTag_ ;
 
