@@ -36,4 +36,4 @@ module treeDumper = HWWTreeDumper {
     untracked bool dumpTree = true
 }
 
-sequence dumpSequence = { treeDumper }
+
