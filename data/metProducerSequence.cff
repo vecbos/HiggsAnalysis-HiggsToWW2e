@@ -1,0 +1,19 @@
+# sequence producing reconstructed and generated MET collections
+# Emanuele Di Marco    29/Apr/2007
+
+module caloMetCollectionClone = CaloMETShallowCloneProducer {
+    InputTag src = met
+}
+
+module genMetCollectionClone = GenMETShallowCloneProducer {
+    InputTag src = genMet
+}
+
+# MET corrections
+include "HiggsAnalysis/HiggsToWW2e/data/metCorrSequence.cff"
+
+sequence metSequence = {
+    caloMetCollectionClone,
+    genMetCollectionClone,
+    metCorrSequence
+}
