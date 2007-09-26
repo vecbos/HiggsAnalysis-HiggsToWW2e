@@ -1,6 +1,3 @@
-#<use name=HtoWWElectrons/HtoWWEleProducer>
-#<use name=HtoWWElectrons/HtoWWLHAlgo>
-#<use name=HtoWWElectrons/HtoWWLHESSource>
 <use name=HiggsAnalysis/HiggsToWW2e>
 <library file="*.cc" name=HiggsAnalysisHiggsToWW2ePlugins>
 <flags EDM_PLUGIN=1>
