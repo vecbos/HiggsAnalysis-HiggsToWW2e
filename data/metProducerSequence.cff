@@ -1,6 +1,8 @@
 # sequence producing reconstructed and generated MET collections
 # Emanuele Di Marco    29/Apr/2007
 
+include "RecoMET/METProducers/data/genMet.cfi"
+
 module caloMetCollectionClone = CaloMETShallowCloneProducer {
     InputTag src = met
 }
@@ -13,6 +15,7 @@ module genMetCollectionClone = GenMETShallowCloneProducer {
 include "HiggsAnalysis/HiggsToWW2e/data/metCorrSequence.cff"
 
 sequence metSequence = {
+    genCandidatesForMET, genMet,
     caloMetCollectionClone,
     genMetCollectionClone,
     metCorrSequence
