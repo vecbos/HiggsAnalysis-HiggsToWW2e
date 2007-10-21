@@ -228,17 +228,16 @@ void CmsElectronFiller::writeCollectionToTree(const CandidateCollection *collect
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
-  if(collection) {
-    if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
-    if(saveEcal_) treeEcalInfo(columnPrefix,columnSuffix);
-    if(saveTrk_) treeTrkInfo(columnPrefix,columnSuffix);
-    if(saveEleID_) {
-      CmsEleIDTreeFiller eIDFiller(cmstree);
-      eIDFiller.setStandalone(false);
+  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
+  if(saveEcal_) treeEcalInfo(columnPrefix,columnSuffix);
+  if(saveTrk_) treeTrkInfo(columnPrefix,columnSuffix);
+  if(saveEleID_) {
+    CmsEleIDTreeFiller eIDFiller(cmstree);
+    eIDFiller.setStandalone(false);
       eIDFiller.writeCollectionToTree(collection,iEvent,iSetup,columnPrefix,columnSuffix,false);
-    }
   }
-
+  
+  
   if(dumpData) cmstree->dumpData();
 
 }

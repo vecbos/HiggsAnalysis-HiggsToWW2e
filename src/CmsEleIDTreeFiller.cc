@@ -83,13 +83,16 @@ void CmsEleIDTreeFiller::writeCollectionToTree(const CandidateCollection *collec
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
   privateData_->clearTrkVectors();
-  CandidateCollection::const_iterator cand;
-  for(cand=collection->begin(); cand!=collection->end(); cand++) {
-    if ( cand->hasMasterClone() ) {   
-      CandidateBaseRef master = cand->masterClone();
-      PixelMatchGsfElectronRef electronRef = cand->masterClone().castTo<PixelMatchGsfElectronRef>();
-      const PixelMatchGsfElectron &electron = *electronRef;
-      writeEleInfo(&electron,iEvent,iSetup);
+  
+  if(collection) {
+    CandidateCollection::const_iterator cand;
+    for(cand=collection->begin(); cand!=collection->end(); cand++) {
+      if ( cand->hasMasterClone() ) {   
+	CandidateBaseRef master = cand->masterClone();
+	PixelMatchGsfElectronRef electronRef = cand->masterClone().castTo<PixelMatchGsfElectronRef>();
+	const PixelMatchGsfElectron &electron = *electronRef;
+	writeEleInfo(&electron,iEvent,iSetup);
+      }
     }
   }
 
@@ -112,9 +115,12 @@ void CmsEleIDTreeFiller::writeCollectionToTree(const PixelMatchGsfElectronCollec
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
   privateData_->clearTrkVectors();
-  PixelMatchGsfElectronCollection::const_iterator electron;
-  for(electron=collection->begin(); electron!=collection->end(); electron++) {
-    writeEleInfo(&(*electron),iEvent,iSetup);
+
+  if(collection) {
+    PixelMatchGsfElectronCollection::const_iterator electron;
+    for(electron=collection->begin(); electron!=collection->end(); electron++) {
+      writeEleInfo(&(*electron),iEvent,iSetup);
+    }
   }
 
   // if used standalone, it is necessary to initialize the size of the block event by event

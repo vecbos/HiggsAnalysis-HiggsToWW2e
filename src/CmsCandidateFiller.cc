@@ -194,9 +194,7 @@ void CmsCandidateFiller::writeCollectionToTree(const CandidateCollection *collec
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
-  if(collection) {
-    if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
-  }
+  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
 
   if(dumpData) cmstree->dumpData();
 
