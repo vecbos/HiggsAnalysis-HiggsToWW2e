@@ -41,6 +41,7 @@
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
+#include "DataFormats/Candidate/interface/OverlapChecker.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
@@ -131,6 +132,9 @@ CmsCandidateFiller::~CmsCandidateFiller() {
 
   delete privateData_->mcIndex;
   delete privateData_->ncand;
+  delete privateData_->nDau;
+  delete privateData_->d1Index;
+  delete privateData_->d2Index;
 }
 
 
@@ -241,6 +245,34 @@ void CmsCandidateFiller::writeCandInfo(const Candidate *cand,
   privateData_->mass->push_back(cand->mass());
   privateData_->mt->push_back(cand->mt());
   privateData_->pdgId->push_back(cand->pdgId());
+  privateData_->nDau->push_back(cand->numberOfDaughters());
+  // only 2-body decays for now
+  if(cand->numberOfDaughters()==2 && daugCollectionList_.size()!=0) {
+    const Candidate *d1 = cand->daughter(0);
+    const Candidate *d2 = cand->daughter(1);
+
+    std::vector<const CandidateCollection*>::const_iterator daugCollection;
+    for(daugCollection=daugCollectionList_.begin(); daugCollection!=daugCollectionList_.end(); ++daugCollection) {
+      CandidateCollection::const_iterator candOrig;
+      int index=0;
+      for(candOrig=(*daugCollection)->begin(); candOrig!=(*daugCollection)->end(); ++candOrig) {
+	//	reco::OverlapChecker overlap;
+	//	if( overlap(&(*d2), &(*candOrig)) ) {
+	if( candOverlap(d1,&(*candOrig)) ) {
+	  privateData_->d1Index->push_back(index);
+	}
+	//	if( overlap(&(*d2), &(*candOrig)) ) {
+	if( candOverlap(d2,&(*candOrig)) ) {
+	  privateData_->d2Index->push_back(index);
+	}
+	++index;
+      }
+    }
+  } 
+  else {
+    privateData_->d1Index->push_back(-1);
+    privateData_->d2Index->push_back(-1);
+  }
 }
 
 
@@ -268,6 +300,9 @@ void CmsCandidateFiller::treeCandInfo(const std::string colPrefix, const std::st
   cmstree->column((colPrefix+"mass"+colSuffix).c_str(), *privateData_->mass, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"mt"+colSuffix).c_str(), *privateData_->mt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pdgId"+colSuffix).c_str(), *privateData_->pdgId, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nDau"+colSuffix).c_str(), *privateData_->nDau, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"d1Index"+colSuffix).c_str(), *privateData_->d1Index, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"d2Index"+colSuffix).c_str(), *privateData_->d2Index, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -310,7 +345,9 @@ void CmsCandidateFiller::writeMcMatchInfo(const CandidateCollection *recoCollect
   }
 }
 
-
+bool CmsCandidateFiller::candOverlap(const Candidate *cand1, const Candidate *cand2) {
+  return cand1->p4() == cand2->p4() && cand1->vertex() == cand2->vertex() && cand1->charge() == cand2->charge();
+}
 
 
 void CmsCandidateFiller::treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix) {
@@ -319,7 +356,9 @@ void CmsCandidateFiller::treeMcMatchInfo(const std::string colPrefix, const std:
 }
 
 
-
+void CmsCandidateFiller::addDaughterList(const CandidateCollection *daugCollectionList) {
+  daugCollectionList_.push_back(daugCollectionList);
+}
 
 void CmsCandidateFillerData::initialiseCandidate() {
 
@@ -340,6 +379,9 @@ void CmsCandidateFillerData::initialiseCandidate() {
   mt = new vector<float>;
   pdgId = new vector<int>;
   ncand = new int;
+  nDau = new vector<int>;
+  d1Index = new vector<int>;
+  d2Index = new vector<int>;
 
   mcIndex = new vector<int>;
 
@@ -364,5 +406,8 @@ void CmsCandidateFillerData::clearTrkVectorsCandidate() {
   mass->clear();
   mt->clear();
   pdgId->clear();
+  nDau->clear();
+  d1Index->clear();
+  d2Index->clear();
 
 }

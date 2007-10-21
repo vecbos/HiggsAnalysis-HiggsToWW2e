@@ -47,6 +47,9 @@ struct CmsCandidateFillerData {
   vector<float> *x, *y, *z;
   vector<float> *mass, *mt;
   vector<int> *pdgId;
+  vector<int> *nDau;
+  vector<int> *d1Index;
+  vector<int> *d2Index;
 
   vector<int> *mcIndex;
   int *ncand;
@@ -70,7 +73,6 @@ class CmsCandidateFiller {
   // Dump  everything if fatTree is true and less informations otherwise
   CmsCandidateFiller(CmsTree *, bool fatTree, int maxTracks=500, 
 		     int maxMCTracks=2000, bool noOutputIfLimitsReached=false );
-
 
   // Destructor
   virtual ~CmsCandidateFiller();
@@ -97,6 +99,10 @@ class CmsCandidateFiller {
 			    const std::string &columnPrefix, const std::string &columnSuffix,
 			    bool dumpData=false);
 
+
+  // Add daughter list
+  virtual void addDaughterList(const CandidateCollection *);
+
  protected:
   
 
@@ -109,11 +115,13 @@ class CmsCandidateFiller {
 			const CandidateCollection *);
   virtual void treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix);
 
+  virtual bool candOverlap(const Candidate *cand1, const Candidate *cand2);
 
   // Friends
 
   CmsCandidateFillerData *privateData_;
   edm::InputTag matchMap_;
+  std::vector<const CandidateCollection*> daugCollectionList_;
 
   CmsTree *cmstree;
 
