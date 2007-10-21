@@ -86,6 +86,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpGenJets_    = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
   dumpMet_        = iConfig.getUntrackedParameter<bool>("dumpMet", false);
   dumpGenMet_     = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
+  dumpZ0_         = iConfig.getUntrackedParameter<bool>("dumpZ0", false);
   
   // jet vertex collections
   jetVertexAlphaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection");
@@ -96,6 +97,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   genJetCollection_   = iConfig.getParameter<edm::InputTag>("genJetCollection");
   metCollection_      = iConfig.getParameter<edm::InputTag>("metCollection");
   genMetCollection_   = iConfig.getParameter<edm::InputTag>("genMetCollection");
+  Z0Collection_       = iConfig.getParameter<edm::InputTag>("Z0Collection");
   mcTruthCollection_  = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
   electronMatchMap_   = iConfig.getParameter<edm::InputTag>("electronMatchMap");
   //  muonMatchMap_       = iConfig.getParameter<edm::InputTag>("muonMatchMap");
@@ -148,6 +150,11 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     triggerTreeFill.writeTriggerToTree (trh,prefix,suffix) ;
   }
 
+  Handle<CandidateCollection> electronCollectionHandle;
+  try { iEvent.getByLabel(electronCollection_, electronCollectionHandle); }
+  catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " << electronCollection_; }
+  const CandidateCollection *electronCollection = electronCollectionHandle.product();
+
   // fill Electrons block
   if(dumpElectrons_) {
     CmsElectronFiller treeFill(tree_, true);
@@ -161,15 +168,28 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
 
-    Handle<CandidateCollection> electronCollectionHandle;
-    try { iEvent.getByLabel(electronCollection_, electronCollectionHandle); }
-    catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " << electronCollection_; }
-    const CandidateCollection *electronCollection = electronCollectionHandle.product();
     treeFill.writeCollectionToTree(electronCollection, iEvent, iSetup, prefix, suffix, false);
     if(doMCmatch_) {
       treeFill.writeMcIndicesToTree(electronCollection, iEvent, iSetup, genParticleCollection, prefix, suffix, false);
     }
   }
+
+  // fill Z block
+  if(dumpZ0_) {
+    CmsCandidateFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("Z0");
+    treeFill.saveCand(saveCand_);
+    treeFill.addDaughterList(electronCollection);
+
+    Handle<CandidateCollection> Z0CollectionHandle;
+    try { iEvent.getByLabel(Z0Collection_, Z0CollectionHandle); }
+    catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " << Z0Collection_; }
+    const CandidateCollection *Z0Collection = Z0CollectionHandle.product();
+    LogDebug("HWWTreeDumper") << "Z0 collection size = " << Z0Collection->size();
+    treeFill.writeCollectionToTree(Z0Collection, iEvent, iSetup, prefix, suffix, false);
+  }
+
   
   // fill MET block
   if(dumpMet_) {

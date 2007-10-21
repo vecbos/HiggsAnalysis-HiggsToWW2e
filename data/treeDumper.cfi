@@ -10,12 +10,14 @@ module treeDumper = HWWTreeDumper {
     InputTag jetVertexBetaCollection = jetVertexBeta:Var
     InputTag metCollection = caloMetCollectionClone:
     InputTag genMetCollection = genMetCollectionClone:
+    InputTag Z0Collection = dummy:dummy
     untracked string nameFile = "analysisTree.root"
     untracked string nameTree = "ntp1"
     # switch ON/OFF the candidate collections to dump
     untracked bool dumpElectrons = true
     untracked bool dumpJets = true
     untracked bool dumpMet = true
+    untracked bool dumpZ0 = false
     # switch ON/OFF the additional informations to dump
     untracked bool saveEcal = true
     untracked bool saveFatEcal = true
