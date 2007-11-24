@@ -18,7 +18,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 
 #include "EgammaAnalysis/ElectronIDAlgos/interface/ElectronLikelihood.h"
-#include "EgammaAnalysis/ElectronIDESSources/interface/ElectronLikelihoodESSource.h"
 
 
 //		----------------------------------------
