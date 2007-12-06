@@ -24,6 +24,9 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/Candidate/interface/CompositeCandidate.h"
+
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/METReco/interface/GenMET.h"
@@ -93,6 +96,12 @@ class CmsCandidateFiller {
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
+
+  virtual void writeCollectionToTree(const CompositeCandidateCollection *,
+			     const edm::Event&, const edm::EventSetup&,
+			     const std::string &columnPrefix, const std::string &columnSuffix,
+			     bool dumpData=false);
+
   virtual void writeMcIndicesToTree(const CandidateCollection *,
 			    const edm::Event&, const edm::EventSetup&,
 			    const CandidateCollection *,
