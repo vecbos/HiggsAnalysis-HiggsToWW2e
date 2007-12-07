@@ -260,6 +260,58 @@ void CmsCandidateFiller::writeCollectionToTree(const CompositeCandidateCollectio
 
 
 
+void CmsCandidateFiller::writeCollectionToTree(const VertexCompositeCandidateCollection *collection,
+					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
+					       const std::string &columnPrefix, const std::string &columnSuffix,
+					       bool dumpData) {
+
+  privateData_->clearTrkVectorsCandidate();
+  
+  if(collection) {
+    if(hitLimitsMeansNoOutput_ && 
+       (int)collection->size() > maxTracks_){
+      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
+				     << " is too long for declared max length for tree "
+				     << maxTracks_ << " and no output flag is set."
+				     << " No tracks written to tuple for this event ";
+      return;
+    }
+
+    if((int)collection->size() > maxTracks_){
+      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
+				     << " is too long for declared max length for tree "
+				     << maxTracks_ 
+				     << ". Collection will be truncated ";
+    }
+  
+    *(privateData_->ncand) = collection->size();
+
+    reco::VertexCompositeCandidateCollection::const_iterator cand;
+    for(cand=collection->begin(); cand!=collection->end(); cand++) {
+      // fill basic kinematics
+      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
+    }
+  }
+  else {
+    *(privateData_->ncand) = 0;
+  }
+
+  // The class member vectors containing the relevant quantities 
+  // have all been filled. Now transfer those we want into the 
+  // tree 
+
+  int blockSize = (collection) ? collection->size() : 0;
+  
+  std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
+  cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
+  
+  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
+
+  if(dumpData) cmstree->dumpData();
+
+}
+
+
 
 
 void CmsCandidateFiller::writeMcIndicesToTree(const CandidateCollection *recoCollection,
