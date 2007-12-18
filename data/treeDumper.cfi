@@ -2,8 +2,10 @@
 # Emanuele Di Marco    29/Apr/2007
 
 module treeDumper = HWWTreeDumper {
-    InputTag TriggerResultsTag = TriggerResults
+    InputTag TriggerResultsTag = TriggerResults::HLT
     InputTag electronCollection = electronCollectionClone:
+    InputTag hybridSCCollection = correctedHybridSuperClusters:
+    InputTag islandSCCollection = correctedEndcapSuperClustersWithPreshower:
     InputTag jetCollection = caloJetCollectionClone:
     InputTag genJetCollection = genJetCollectionClone:
     InputTag jetVertexAlphaCollection = jetVertexAlpha:Var
@@ -11,10 +13,14 @@ module treeDumper = HWWTreeDumper {
     InputTag metCollection = caloMetCollectionClone:
     InputTag genMetCollection = genMetCollectionClone:
     InputTag Z0Collection = dummy:dummy
+    InputTag hepMcCollection = source
+    InputTag genInfoCollection = source
+    InputTag genWeightCollection = weight:
     untracked string nameFile = "analysisTree.root"
     untracked string nameTree = "ntp1"
     # switch ON/OFF the candidate collections to dump
     untracked bool dumpElectrons = true
+    untracked bool dumpSCs = true
     untracked bool dumpJets = true
     untracked bool dumpMet = true
     untracked bool dumpZ0 = false
@@ -31,6 +37,7 @@ module treeDumper = HWWTreeDumper {
     untracked bool dumpGenMet = true
     untracked bool dumpGenJets = true
     untracked bool dumpMCTruth = true
+    untracked bool dumpGenInfo = true
     untracked bool doMCmatch = false
     # trigger results
     untracked bool dumpTriggerResults = false
