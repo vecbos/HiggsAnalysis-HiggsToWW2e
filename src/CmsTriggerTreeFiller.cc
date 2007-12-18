@@ -42,12 +42,14 @@
 #include "PhysicsTools/HepMCCandAlgos/interface/MCCandMatcher.h"
 #include "CLHEP/HepMC/GenParticle.h"
 
+#include "FWCore/Framework/interface/TriggerNames.h"
+
 #include <TTree.h>
 #include <string>
 
 using namespace edm;
-using namespace reco;
-
+using namespace reco
+;
 struct CmsTriggerTreeFillerData {
   CmsTree *cmstree;
 };
@@ -67,54 +69,36 @@ CmsTriggerTreeFiller::CmsTriggerTreeFiller(CmsTree *cmstree):
 {
   privateData_->cmstree=cmstree;
 
-  m_TrigNames.push_back ("SingleElectron"       ) ;
-  m_TrigNames.push_back ("RelaxedSingleElectron") ;
-  m_TrigNames.push_back ("DoubleElectron"       ) ;
-  m_TrigNames.push_back ("RelaxedDoubleElectron") ;
-  m_TrigNames.push_back ("SinglePhoton"         ) ;
-  m_TrigNames.push_back ("RelaxedSinglePhoton"  ) ;
-  m_TrigNames.push_back ("DoublePhoton"         ) ;
-  m_TrigNames.push_back ("RelaxedDoublePhoton"  ) ;
-  m_TrigNames.push_back ("SingleEMHighEt"       ) ;
-  m_TrigNames.push_back ("SingleEMVeryHighEt"   ) ;
-
 }
 
-
-// ---------------------------------------------------------------
 
 
 CmsTriggerTreeFiller::~CmsTriggerTreeFiller() {
 }
 
 
-// ---------------------------------------------------------------
-
 
 void
 CmsTriggerTreeFiller::writeTriggerToTree (edm::Handle<edm::TriggerResults> & trh,
 					  const std::string & columnPrefix, const std::string & columnSuffix) 
 {
-  int TrSize = trh->size();
-  bool Trfired [10] ;
-  // loop over trigger paths
-  for (int tr=0 ; tr < 10 ; ++tr) {
-    int ind = trh->find (m_TrigNames[tr]) ; // sistema di default per dire che nn ha trovato nulla:
-    Trfired[tr] = false;                  // ritorna la size
-    if ((ind < TrSize) && (trh->accept (ind)))
-      Trfired[tr] = true ;
-  } // loop over triggers
- 
-  privateData_->cmstree->column ((columnPrefix+"singleElePassed"+columnSuffix).c_str(),      Trfired[0], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"singleEleRelaxPassed"+columnSuffix).c_str(), Trfired[1], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"doubleElePassed"+columnSuffix).c_str(),      Trfired[2], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"doubleEleRelaxPassed"+columnSuffix).c_str(), Trfired[3], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"singlePhoPassed"+columnSuffix).c_str(),      Trfired[4], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"singlePhoRelaxPassed"+columnSuffix).c_str(), Trfired[5], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"doublePhoPassed"+columnSuffix).c_str(),      Trfired[6], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"doublePhoRelaxPassed"+columnSuffix).c_str(), Trfired[7], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"highEMPassed"+columnSuffix).c_str(),         Trfired[8], "Reco");
-  privateData_->cmstree->column ((columnPrefix+"veryHighEMPassed"+columnSuffix).c_str(),     Trfired[9], "Reco");
+
+  vector<bool> Trfired;
+  edm::TriggerNames hltNam;
+  hltNam.init(*trh);
+  std::vector<std::string> hltNames;
+  hltNames = hltNam.triggerNames();
+  int TrSize = hltNames.size();
+  Trfired.resize(TrSize);
   
+  for ( int tr=0; tr<TrSize; ++tr) {
+    Trfired[tr] = false;
+    if ( trh->accept(tr) ) Trfired[tr] = true ;
+  }
+  
+  std::string nTrgString = columnPrefix+"n"+columnSuffix;
+  privateData_->cmstree->column(nTrgString.c_str(), TrSize, 0, "Reco" );
+  privateData_->cmstree->column((columnPrefix+"fired"+columnSuffix).c_str(), Trfired, nTrgString.c_str(), 0, "Reco");
+
   return ;
 }
