@@ -29,23 +29,22 @@ class HWWTreeDumper : public edm::EDAnalyzer {
 private:
   // ----------member data ---------------------------
   std::string nameTree_, nameFile_;
-  bool dumpTree_, dumpMCTruth_, dumpMCmatch_, doMCmatch_;
+  bool dumpTree_, dumpMCTruth_, dumpMCmatch_, doMCmatch_, dumpGenInfo_;
   bool saveTrk_, saveEcal_, saveHcal_, saveDT_, saveCSC_, saveRPC_;
   bool saveFatTrk_, saveFatEcal_, saveFatHcal_, saveFatDT_, saveFatCSC_, saveFatRPC_;
   bool saveEleID_;
   bool saveJetAlpha_;
   bool saveCand_;
-  bool dumpElectrons_, dumpMuons_;
+  bool dumpElectrons_, dumpMuons_, dumpSCs_;
   bool dumpJets_, dumpGenJets_, dumpMet_, dumpGenMet_;
   bool dumpZ0_;
   bool dumpTriggerResults_;
 
-  edm::InputTag electronCollection_, muonCollection_;
+  edm::InputTag electronCollection_, muonCollection_, hybridSCCollection_, islandSCCollection_;
   edm::InputTag jetCollection_, genJetCollection_, metCollection_, genMetCollection_;
-  edm::InputTag Z0Collection_;
-  edm::InputTag mcTruthCollection_, electronMatchMap_, muonMatchMap_;
+  edm::InputTag mcTruthCollection_, electronMatchMap_, muonMatchMap_, hepMcCollection_, genInfoCollection_, genWeightCollection_;
 
-  edm::InputTag jetVertexAlphaCollection_;
+  edm::InputTag jetVertexAlphaCollection_,Z0Collection_;
 
   edm::InputTag triggerInputTag_ ;
 
