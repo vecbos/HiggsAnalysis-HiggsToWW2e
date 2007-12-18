@@ -50,13 +50,13 @@ CmsMcTruthTreeFiller::~CmsMcTruthTreeFiller() {
 //-------------
 // Methods   --
 //-------------
-void CmsMcTruthTreeFiller::writeCollectionToTree(const reco::CandidateCollection *collection, int range) {
+void CmsMcTruthTreeFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection, int range) {
 
   vector<float> pMC,massMC,thetaMC,etaMC,phiMC,energyMC;
   vector<float> xMC,yMC,zMC;
   vector<int> idMC,mothMC,nDauMC;
 
-  reco::CandidateCollection::const_iterator cand;
+  edm::View<reco::Candidate>::const_iterator cand;
   for(cand=collection->begin(); cand!=collection->end(); cand++) {
     if((int)pMC.size()>range) break;
     pMC.push_back(cand->p());
@@ -70,7 +70,7 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(const reco::CandidateCollection
     
     int indMom=-1;
     int idx=0;
-    reco::CandidateCollection::const_iterator candIter;
+    edm::View<reco::Candidate>::const_iterator candIter;
     for(candIter=collection->begin(); candIter!=collection->end(); candIter++) {
       if(&(*candIter)==cand->mother()) {
 	indMom=idx;

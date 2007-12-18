@@ -47,8 +47,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 
-#include "PhysicsTools/HepMCCandAlgos/interface/MCCandMatcher.h"
-#include "CLHEP/HepMC/GenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
 
 
 #include <TTree.h>
@@ -153,7 +152,7 @@ void CmsCandidateFiller::doMcMatch(bool what) { doMcMatch_=what;}
 
 
 
-void CmsCandidateFiller::writeCollectionToTree(const CandidateCollection *collection,
+void CmsCandidateFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
 					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
@@ -179,7 +178,7 @@ void CmsCandidateFiller::writeCollectionToTree(const CandidateCollection *collec
   
     *(privateData_->ncand) = collection->size();
 
-    CandidateCollection::const_iterator cand;
+    edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       // fill basic kinematics
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
@@ -207,116 +206,9 @@ void CmsCandidateFiller::writeCollectionToTree(const CandidateCollection *collec
 
 
 
-void CmsCandidateFiller::writeCollectionToTree(const CompositeCandidateCollection *collection,
-					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					       const std::string &columnPrefix, const std::string &columnSuffix,
-					       bool dumpData) {
-
-  privateData_->clearTrkVectorsCandidate();
-  
-  if(collection) {
-    if(hitLimitsMeansNoOutput_ && 
-       (int)collection->size() > maxTracks_){
-      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
-				     << " is too long for declared max length for tree "
-				     << maxTracks_ << " and no output flag is set."
-				     << " No tracks written to tuple for this event ";
-      return;
-    }
-
-    if((int)collection->size() > maxTracks_){
-      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
-				     << " is too long for declared max length for tree "
-				     << maxTracks_ 
-				     << ". Collection will be truncated ";
-    }
-  
-    *(privateData_->ncand) = collection->size();
-
-    reco::CompositeCandidateCollection::const_iterator cand;
-    for(cand=collection->begin(); cand!=collection->end(); cand++) {
-      // fill basic kinematics
-      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
-    }
-  }
-  else {
-    *(privateData_->ncand) = 0;
-  }
-
-  // The class member vectors containing the relevant quantities 
-  // have all been filled. Now transfer those we want into the 
-  // tree 
-
-  int blockSize = (collection) ? collection->size() : 0;
-  
-  std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
-  cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
-  
-  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
-
-  if(dumpData) cmstree->dumpData();
-
-}
-
-
-
-void CmsCandidateFiller::writeCollectionToTree(const VertexCompositeCandidateCollection *collection,
-					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					       const std::string &columnPrefix, const std::string &columnSuffix,
-					       bool dumpData) {
-
-  privateData_->clearTrkVectorsCandidate();
-  
-  if(collection) {
-    if(hitLimitsMeansNoOutput_ && 
-       (int)collection->size() > maxTracks_){
-      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
-				     << " is too long for declared max length for tree "
-				     << maxTracks_ << " and no output flag is set."
-				     << " No tracks written to tuple for this event ";
-      return;
-    }
-
-    if((int)collection->size() > maxTracks_){
-      LogError("CmsCandidateFiller") << "Track length " << collection->size() 
-				     << " is too long for declared max length for tree "
-				     << maxTracks_ 
-				     << ". Collection will be truncated ";
-    }
-  
-    *(privateData_->ncand) = collection->size();
-
-    reco::VertexCompositeCandidateCollection::const_iterator cand;
-    for(cand=collection->begin(); cand!=collection->end(); cand++) {
-      // fill basic kinematics
-      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
-    }
-  }
-  else {
-    *(privateData_->ncand) = 0;
-  }
-
-  // The class member vectors containing the relevant quantities 
-  // have all been filled. Now transfer those we want into the 
-  // tree 
-
-  int blockSize = (collection) ? collection->size() : 0;
-  
-  std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
-  cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
-  
-  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
-
-  if(dumpData) cmstree->dumpData();
-
-}
-
-
-
-
-void CmsCandidateFiller::writeMcIndicesToTree(const CandidateCollection *recoCollection,
+void CmsCandidateFiller::writeMcIndicesToTree(const edm::View<reco::Candidate> *recoCollection,
 					      const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					      const CandidateCollection *genCollection,
+					      const edm::View<reco::Candidate> *genCollection,
 					      const std::string &columnPrefix, const std::string &columnSuffix,
 					      bool dumpData) {
 
@@ -356,9 +248,9 @@ void CmsCandidateFiller::writeCandInfo(const Candidate *cand,
     const Candidate *d1 = cand->daughter(0);
     const Candidate *d2 = cand->daughter(1);
 
-    std::vector<const CandidateCollection*>::const_iterator daugCollection;
+    std::vector< const edm::View<reco::Candidate>* >::const_iterator daugCollection;
     for(daugCollection=daugCollectionList_.begin(); daugCollection!=daugCollectionList_.end(); ++daugCollection) {
-      CandidateCollection::const_iterator candOrig;
+      reco::CandidateView::const_iterator candOrig;
       int index=0;
       for(candOrig=(*daugCollection)->begin(); candOrig!=(*daugCollection)->end(); ++candOrig) {
 	//	reco::OverlapChecker overlap;
@@ -413,46 +305,30 @@ void CmsCandidateFiller::treeCandInfo(const std::string colPrefix, const std::st
 
 
 
-void CmsCandidateFiller::writeMcMatchInfo(const CandidateCollection *recoCollection, 
+void CmsCandidateFiller::writeMcMatchInfo(const edm::View<reco::Candidate> *recoCollection, 
 					  const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					  const CandidateCollection *genCollection) {
+					  const edm::View<reco::Candidate> *genCollection) {
   
-  edm::Handle<reco::CandMatchMap> mcMatchMap;
-  try { iEvent.getByLabel( matchMap_, mcMatchMap ); }
-  catch( cms::Exception& ex ) { edm::LogWarning("CmsMcTruthTreeFiller") << "Can't get MC match map " << matchMap_; }
-  //  MCCandMatcher match(*mcMatchMap);
-  MCCandMatcher<reco::CandidateCollection> match(*mcMatchMap); // this for releases > 15X, in <=14X defined with no template argument 
+  Handle<GenParticleMatch> match;
+  iEvent.getByLabel( matchMap_, match);
 
   if(recoCollection) {
-    CandidateCollection::const_iterator recoCand;
+    edm::View<reco::Candidate>::const_iterator recoCand;
     for(recoCand=recoCollection->begin(); recoCand!=recoCollection->end(); recoCand++) {
-      CandidateRef mcRef = match(*recoCand);
-    
-      // find the index in the MC collection
-      int indMatched=-1;
-      bool matched=false;
-      int idx=0;
-      reco::CandidateCollection::const_iterator genCandIter;
-      for(genCandIter=genCollection->begin(); genCandIter!=genCollection->end(); genCandIter++) {
-	const Candidate *iCand=&(*genCandIter);
-	if(&(*mcRef)==&(*iCand)) {
-	  indMatched=idx;
-	  matched=true;
-	  break;
-	}
-	idx++;
-      }
-
-      //    if(mcRef) privateData_->mcIndex->push_back(mcRef.key());
-      if(matched) privateData_->mcIndex->push_back(indMatched);
+      GenParticleRef mcRef = (*match)[recoCand->masterClone()];
+      if( mcRef.isNonnull() ) 
+	privateData_->mcIndex->push_back( mcRef.key() );
       else privateData_->mcIndex->push_back(-1);
     }
   }
 }
 
-bool CmsCandidateFiller::candOverlap(const Candidate *cand1, const Candidate *cand2) {
+
+
+bool CmsCandidateFiller::candOverlap(const reco::Candidate *cand1, const reco::Candidate *cand2) {
   return cand1->p4() == cand2->p4() && cand1->vertex() == cand2->vertex() && cand1->charge() == cand2->charge();
 }
+
 
 
 void CmsCandidateFiller::treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix) {
@@ -461,9 +337,12 @@ void CmsCandidateFiller::treeMcMatchInfo(const std::string colPrefix, const std:
 }
 
 
-void CmsCandidateFiller::addDaughterList(const CandidateCollection *daugCollectionList) {
+
+void CmsCandidateFiller::addDaughterList(const edm::View<reco::Candidate> *daugCollectionList) {
   daugCollectionList_.push_back(daugCollectionList);
 }
+
+
 
 void CmsCandidateFillerData::initialiseCandidate() {
 

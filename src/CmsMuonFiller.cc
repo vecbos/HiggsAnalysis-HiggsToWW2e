@@ -98,7 +98,7 @@ CmsMuonFiller::~CmsMuonFiller() { }
 // Methods   --
 //-------------
 
-void CmsMuonFiller::writeCollectionToTree(const CandidateCollection *collection,
+void CmsMuonFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
 					 bool dumpData) {
@@ -124,7 +124,7 @@ void CmsMuonFiller::writeCollectionToTree(const CandidateCollection *collection,
   
     *(privateData_->ncand) = collection->size();
 
-    CandidateCollection::const_iterator cand;
+    edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       // fill basic kinematics
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);

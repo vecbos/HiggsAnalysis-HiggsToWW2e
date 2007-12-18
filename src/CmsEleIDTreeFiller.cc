@@ -77,14 +77,14 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
 void CmsEleIDTreeFiller::setStandalone(bool what) { standalone_=what; }
 
 
-void CmsEleIDTreeFiller::writeCollectionToTree(const CandidateCollection *collection,
+void CmsEleIDTreeFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
 					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
   privateData_->clearTrkVectors();
   
   if(collection) {
-    CandidateCollection::const_iterator cand;
+    edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       if ( cand->hasMasterClone() ) {   
 	CandidateBaseRef master = cand->masterClone();

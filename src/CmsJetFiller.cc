@@ -134,7 +134,7 @@ CmsJetFiller::~CmsJetFiller() {
 
 void CmsJetFiller::saveJetExtras(bool what) { saveJetExtras_=what; }
 
-void CmsJetFiller::writeCollectionToTree(const CandidateCollection *collection,
+void CmsJetFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
 					 bool dumpData) {
@@ -172,7 +172,7 @@ void CmsJetFiller::writeCollectionToTree(const CandidateCollection *collection,
       jetVtxAlphaItr = JV_alpha->begin();
     }
 
-    CandidateCollection::const_iterator cand;
+    edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       // fill basic kinematics
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);

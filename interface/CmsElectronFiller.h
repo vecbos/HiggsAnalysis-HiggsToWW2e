@@ -92,7 +92,7 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
   // run number and all of that --- to implement
 
-  void writeCollectionToTree(const CandidateCollection *,
+  void writeCollectionToTree(const edm::View<reco::Candidate> *,
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);

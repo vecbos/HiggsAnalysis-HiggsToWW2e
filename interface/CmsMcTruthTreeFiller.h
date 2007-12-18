@@ -41,7 +41,7 @@ class CmsMcTruthTreeFiller {
   virtual ~CmsMcTruthTreeFiller();
 
   // Write the content of the collection
-  void writeCollectionToTree(const reco::CandidateCollection *, int range=100);
+  void writeCollectionToTree(const edm::View<reco::Candidate> *, int range=100);
 
   // Modifiers
 

@@ -27,6 +27,8 @@
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Candidate/interface/CompositeCandidate.h"
 #include "DataFormats/Candidate/interface/VertexCompositeCandidate.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
+#include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
 
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
@@ -93,30 +95,20 @@ class CmsCandidateFiller {
 
   // run number and all of that --- to implement
 
-  virtual void writeCollectionToTree(const CandidateCollection *,
+  virtual void writeCollectionToTree(const edm::View<reco::Candidate> *,
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
 
-  virtual void writeCollectionToTree(const CompositeCandidateCollection *,
-			     const edm::Event&, const edm::EventSetup&,
-			     const std::string &columnPrefix, const std::string &columnSuffix,
-			     bool dumpData=false);
-
-  virtual void writeCollectionToTree(const VertexCompositeCandidateCollection *,
-			     const edm::Event&, const edm::EventSetup&,
-			     const std::string &columnPrefix, const std::string &columnSuffix,
-			     bool dumpData=false);
-
-  virtual void writeMcIndicesToTree(const CandidateCollection *,
+  virtual void writeMcIndicesToTree(const edm::View<reco::Candidate> *,
 			    const edm::Event&, const edm::EventSetup&,
-			    const CandidateCollection *,
+			    const edm::View<reco::Candidate> *,
 			    const std::string &columnPrefix, const std::string &columnSuffix,
 			    bool dumpData=false);
 
 
   // Add daughter list
-  virtual void addDaughterList(const CandidateCollection *);
+  virtual void addDaughterList(const edm::View<reco::Candidate> *);
 
  protected:
   
@@ -125,18 +117,18 @@ class CmsCandidateFiller {
 		     const edm::Event&, const edm::EventSetup&);
   virtual void treeCandInfo(const std::string colPrefix, const std::string colSuffix);
   
-  virtual void writeMcMatchInfo(const CandidateCollection *, 
+  virtual void writeMcMatchInfo(const edm::View<reco::Candidate> *, 
 			const edm::Event&, const edm::EventSetup&, 
-			const CandidateCollection *);
+			const edm::View<reco::Candidate> *);
   virtual void treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix);
 
-  virtual bool candOverlap(const Candidate *cand1, const Candidate *cand2);
+  virtual bool candOverlap(const reco::Candidate *cand1, const reco::Candidate *cand2);
 
   // Friends
 
   CmsCandidateFillerData *privateData_;
   edm::InputTag matchMap_;
-  std::vector<const CandidateCollection*> daugCollectionList_;
+  std::vector< const edm::View<reco::Candidate>* > daugCollectionList_;
 
   CmsTree *cmstree;
 
