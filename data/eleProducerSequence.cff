@@ -26,7 +26,7 @@ include "EgammaAnalysis/ElectronIDESSources/data/likelihoodESetup.cfi"
 # --- ele cloning ------------------------------
 module electronCollectionClone = PixelMatchGsfElectronShallowCloneProducer
 {
-    InputTag src = pixelMatchGsfElectrons
+    InputTag src = ambSolving
 }	
 
 # module electronMatchMap = MCTruthDeltaRMatcher {    
