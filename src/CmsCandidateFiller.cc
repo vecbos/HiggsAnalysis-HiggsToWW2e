@@ -134,6 +134,8 @@ CmsCandidateFiller::~CmsCandidateFiller() {
   delete privateData_->nDau;
   delete privateData_->d1Index;
   delete privateData_->d2Index;
+  delete privateData_->d1pdgId;
+  delete privateData_->d2pdgId;
 }
 
 
@@ -158,7 +160,10 @@ void CmsCandidateFiller::writeCollectionToTree(const edm::View<reco::Candidate> 
 					       bool dumpData) {
 
   privateData_->clearTrkVectorsCandidate();
-  
+
+  std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
+  LogInfo("CmsCandidateFiller") << "=== Writing collection " << nCandString << " ===";
+
   if(collection) {
     if(hitLimitsMeansNoOutput_ && 
        (int)collection->size() > maxTracks_){
@@ -194,9 +199,9 @@ void CmsCandidateFiller::writeCollectionToTree(const edm::View<reco::Candidate> 
 
   int blockSize = (collection) ? collection->size() : 0;
   
-  std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
+  //  std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
-  
+
   if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
 
   if(dumpData) cmstree->dumpData();
@@ -216,8 +221,6 @@ void CmsCandidateFiller::writeMcIndicesToTree(const edm::View<reco::Candidate> *
   treeMcMatchInfo(columnPrefix, columnSuffix);
 
 }
-
-
 
 
 
@@ -248,25 +251,49 @@ void CmsCandidateFiller::writeCandInfo(const Candidate *cand,
     const Candidate *d1 = cand->daughter(0);
     const Candidate *d2 = cand->daughter(1);
 
+    privateData_->d1pdgId->push_back(d1->pdgId());
+    privateData_->d2pdgId->push_back(d2->pdgId());
+
+    LogInfo("CmsCandidateFiller") << "d1->p4() = " << d1->p4() << std::endl
+				  << "d2->p4() = " << d2->p4();
+
+    vector<int> candIndex;
+    candIndex.reserve(daugCollectionList_.size());
+    int collectionIndex=0;
+    bool foundD1=false;
+    bool foundD2=false;
     std::vector< const edm::View<reco::Candidate>* >::const_iterator daugCollection;
     for(daugCollection=daugCollectionList_.begin(); daugCollection!=daugCollectionList_.end(); ++daugCollection) {
       reco::CandidateView::const_iterator candOrig;
-      int index=0;
+      candIndex[collectionIndex]=0;
       for(candOrig=(*daugCollection)->begin(); candOrig!=(*daugCollection)->end(); ++candOrig) {
-	//	reco::OverlapChecker overlap;
-	//	if( overlap(&(*d2), &(*candOrig)) ) {
+	// FIXME: use the official reco::OverlapChecker when it will compile
+	//	OverlapChecker overlap_;
+	//	  if( overlap_(&(*d1), &(*candOrig)) ) {
+	LogInfo("CmsCandidateFiller") << "candOrig->p4() = " << candOrig->p4();
 	if( candOverlap(d1,&(*candOrig)) ) {
-	  privateData_->d1Index->push_back(index);
+	  foundD1=true;
+	  privateData_->d1Index->push_back(candIndex[collectionIndex]);
+	  LogInfo("CmsCandidateFiller") << "candidate overlaps with d1!" << std::endl
+					<< "candOrig->pdgId() = " << candOrig->pdgId();
 	}
-	//	if( overlap(&(*d2), &(*candOrig)) ) {
+	//	  if( overlap_(&(*d2), &(*candOrig)) ) {
 	if( candOverlap(d2,&(*candOrig)) ) {
-	  privateData_->d2Index->push_back(index);
+	  foundD2=true;
+	  privateData_->d2Index->push_back(candIndex[collectionIndex]);
+	  LogInfo("CmsCandidateFiller") << "candidate overlaps with d2!" << std::endl
+					<< "candOrig->pdgId() = " << candOrig->pdgId();
 	}
-	++index;
+	++candIndex[collectionIndex];
       }
+      ++collectionIndex;
     }
-  } 
+    if(!foundD1) privateData_->d1Index->push_back(-1);
+    if(!foundD2) privateData_->d2Index->push_back(-1);
+  }
   else {
+    privateData_->d1pdgId->push_back(-1);
+    privateData_->d2pdgId->push_back(-1);
     privateData_->d1Index->push_back(-1);
     privateData_->d2Index->push_back(-1);
   }
@@ -300,7 +327,8 @@ void CmsCandidateFiller::treeCandInfo(const std::string colPrefix, const std::st
   cmstree->column((colPrefix+"nDau"+colSuffix).c_str(), *privateData_->nDau, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"d1Index"+colSuffix).c_str(), *privateData_->d1Index, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"d2Index"+colSuffix).c_str(), *privateData_->d2Index, nCandString.c_str(), 0, "Reco");
-
+  cmstree->column((colPrefix+"d1pdgId"+colSuffix).c_str(), *privateData_->d1pdgId, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"d2pdgId"+colSuffix).c_str(), *privateData_->d2pdgId, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -326,7 +354,37 @@ void CmsCandidateFiller::writeMcMatchInfo(const edm::View<reco::Candidate> *reco
 
 
 bool CmsCandidateFiller::candOverlap(const reco::Candidate *cand1, const reco::Candidate *cand2) {
-  return cand1->p4() == cand2->p4() && cand1->vertex() == cand2->vertex() && cand1->charge() == cand2->charge();
+  if( cand1!=0 && cand2!=0 ) {
+    const RecoCandidate * c1 = 0;
+    const RecoCandidate * c2 = 0;
+    if( cand1->hasMasterClone() && cand2->hasMasterClone() ) {
+      c1 = dynamic_cast<const RecoCandidate *>( &(*cand1->masterClone()) );
+      c2 = dynamic_cast<const RecoCandidate *>( &(*cand2->masterClone()) );
+    }
+    else return false;
+
+    if( cand1->pdgId() != cand2->pdgId() ) return false;
+
+    reco::GsfTrackRef gsfTrack1 = c1->gsfTrack();
+    reco::GsfTrackRef gsfTrack2 = c2->gsfTrack();
+
+    if( c1 !=0 && c2 !=0 &&
+	&gsfTrack1 != 0 && &gsfTrack2 != 0 ) {
+
+      return ( checkOverlap( gsfTrack1, gsfTrack2 ) ||
+	       checkOverlap( c1->superCluster(), c2->superCluster() )
+	       );
+
+    }
+    else {
+      
+      return ( checkOverlap( c1->track(), c2->track() ) ||
+	       checkOverlap( c1->superCluster(), c2->superCluster() )
+	       );
+      
+    }
+  }
+  return false;
 }
 
 
@@ -366,6 +424,8 @@ void CmsCandidateFillerData::initialiseCandidate() {
   nDau = new vector<int>;
   d1Index = new vector<int>;
   d2Index = new vector<int>;
+  d1pdgId = new vector<int>;
+  d2pdgId = new vector<int>;
 
   mcIndex = new vector<int>;
 
@@ -393,5 +453,7 @@ void CmsCandidateFillerData::clearTrkVectorsCandidate() {
   nDau->clear();
   d1Index->clear();
   d2Index->clear();
+  d1pdgId->clear();
+  d2pdgId->clear();
 
 }

@@ -54,8 +54,8 @@ struct CmsCandidateFillerData {
   vector<float> *mass, *mt;
   vector<int> *pdgId;
   vector<int> *nDau;
-  vector<int> *d1Index;
-  vector<int> *d2Index;
+  vector<int> *d1Index, *d2Index;
+  vector<int> *d1pdgId, *d2pdgId;
 
   vector<int> *mcIndex;
   int *ncand;
@@ -123,6 +123,11 @@ class CmsCandidateFiller {
   virtual void treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix);
 
   virtual bool candOverlap(const reco::Candidate *cand1, const reco::Candidate *cand2);
+
+  template<typename R>
+  bool checkOverlap( const R & r1, const R & r2 ) const {
+    return( ! r1.isNull() && ! r2.isNull() && r1 == r2 );
+  }
 
   // Friends
 
