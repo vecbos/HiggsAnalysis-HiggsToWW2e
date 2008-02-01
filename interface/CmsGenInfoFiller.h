@@ -45,7 +45,7 @@ class CmsGenInfoFiller {
 
   // to be used also in AODSIM 
   void
-  writeGenInfoToTree (double processID, double ptHat, double genFilterEff,  double genXsec,  double weight);
+  writeGenInfoToTree (double processID, double ptHat, double genFilterEff,  double genXsec,  double weight, double AlpgenID=0);
 
   void 
   writeGenInfoToTree (edm::Handle<GenInfoProduct> & gi, edm::Handle<HepMCProduct>& mc, double weight );

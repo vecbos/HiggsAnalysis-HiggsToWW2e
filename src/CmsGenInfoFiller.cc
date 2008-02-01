@@ -88,7 +88,7 @@ CmsGenInfoFiller::~CmsGenInfoFiller() {
 
 // ---------------------------------------------------------------
 void
-CmsGenInfoFiller::writeGenInfoToTree (double processID, double ptHat, double genFilterEff,  double genXsec,  double weight)
+CmsGenInfoFiller::writeGenInfoToTree (double processID, double ptHat, double genFilterEff,  double genXsec,  double weight, double AlpgenID)
 {
   
   std::cout << processID << " " << ptHat << " " << genFilterEff << " " << genXsec << " " << weight << std::endl;
@@ -97,6 +97,7 @@ CmsGenInfoFiller::writeGenInfoToTree (double processID, double ptHat, double gen
   privateData_->cmstree->column ("genFilterEff", genFilterEff, 0., "Gen");
   privateData_->cmstree->column ("genXsec", genXsec, 0., "Gen");
   privateData_->cmstree->column ("genWeight", weight, 0., "Gen");
+  privateData_->cmstree->column ("genAlpgenID", AlpgenID, 0., "Gen");
   return;
 }
 
@@ -112,5 +113,5 @@ CmsGenInfoFiller::writeGenInfoToTree (edm::Handle<edm::GenInfoProduct> & gi, edm
   double external_cross_section = gi->external_cross_section(); // is the precalculated one written in the cfg file -- units is pb
   double filter_eff = gi->filter_efficiency();
 
-  writeGenInfoToTree(processID,pthat,filter_eff, external_cross_section, weight);
+  writeGenInfoToTree(processID,pthat,filter_eff, external_cross_section, weight, 0);
 }
