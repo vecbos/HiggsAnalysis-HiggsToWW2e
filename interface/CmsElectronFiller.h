@@ -45,6 +45,11 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
 
   vector<float> *pxAtInner, *pyAtInner, *pzAtInner, *xAtInner, *yAtInner, *zAtInner;
   vector<float> *pxAtOuter, *pyAtOuter, *pzAtOuter, *xAtOuter, *yAtOuter, *zAtOuter;
+  vector<float> *eleTrackNormalizedChi2;
+  vector<float> *eleTrackDxy, *eleTrackD0, *eleTrackDsz, *eleTrackDz;
+  vector<float> *eleTrackDxyError, *eleTrackD0Error, *eleTrackDszError, *eleTrackDzError;
+  vector<float> *eleTrackValidHits, *eleTrackLostHits;
+  vector<float> *eleTrackVx, *eleTrackVy, *eleTrackVz; 
 
   vector<float> *ecal, *eraw, *caloEta, *caloPhi;
   vector<int> *nClu, *nCry;

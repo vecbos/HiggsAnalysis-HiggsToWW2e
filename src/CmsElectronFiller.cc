@@ -133,6 +133,20 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->xAtOuter;
   delete privateData_->yAtOuter;
   delete privateData_->zAtOuter;
+  delete privateData_->eleTrackNormalizedChi2;
+  delete privateData_->eleTrackDxy;
+  delete privateData_->eleTrackD0;
+  delete privateData_->eleTrackDsz;
+  delete privateData_->eleTrackDz;
+  delete privateData_->eleTrackDxyError;
+  delete privateData_->eleTrackD0Error;
+  delete privateData_->eleTrackDszError;
+  delete privateData_->eleTrackDzError;
+  delete privateData_->eleTrackValidHits;
+  delete privateData_->eleTrackLostHits;
+  delete privateData_->eleTrackVx;
+  delete privateData_->eleTrackVy;
+  delete privateData_->eleTrackVz;
 
   delete privateData_->ecal;
   delete privateData_->eraw;
@@ -266,6 +280,24 @@ void CmsElectronFiller::writeTrkInfo(const Candidate *cand,
     privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
     privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
 
+    privateData_->eleTrackNormalizedChi2->push_back(trkRef->normalizedChi2());
+
+    privateData_->eleTrackDxy->push_back(trkRef->dxy());
+    privateData_->eleTrackD0 ->push_back(trkRef->d0());
+    privateData_->eleTrackDsz->push_back(trkRef->dsz());
+    privateData_->eleTrackDz ->push_back(trkRef->dz());
+
+    privateData_->eleTrackDxyError->push_back(trkRef->dxyError());
+    privateData_->eleTrackD0Error ->push_back(trkRef->d0Error());
+    privateData_->eleTrackDszError->push_back(trkRef->dszError());
+    privateData_->eleTrackDzError ->push_back(trkRef->dzError());
+
+    privateData_->eleTrackValidHits->push_back(trkRef->numberOfValidHits());
+    privateData_->eleTrackLostHits ->push_back(trkRef->numberOfLostHits());
+
+    privateData_->eleTrackVx ->push_back(trkRef->vx());
+    privateData_->eleTrackVy ->push_back(trkRef->vy());
+    privateData_->eleTrackVz ->push_back(trkRef->vz());
   }
   else {
     privateData_->pxAtInner->push_back(-1.);
@@ -284,6 +316,24 @@ void CmsElectronFiller::writeTrkInfo(const Candidate *cand,
     privateData_->yAtOuter->push_back(-1.);
     privateData_->zAtOuter->push_back(-1.);
 
+    privateData_->eleTrackNormalizedChi2->push_back(-1.);
+
+    privateData_->eleTrackDxy->push_back(-1.);
+    privateData_->eleTrackD0 ->push_back(-1.);
+    privateData_->eleTrackDsz->push_back(-1.);
+    privateData_->eleTrackDz ->push_back(-1.);
+
+    privateData_->eleTrackDxyError->push_back(-1.);
+    privateData_->eleTrackD0Error ->push_back(-1.);
+    privateData_->eleTrackDszError->push_back(-1.);
+    privateData_->eleTrackDzError ->push_back(-1.);
+
+    privateData_->eleTrackValidHits->push_back(-1.);					       
+    privateData_->eleTrackLostHits ->push_back(-1.);
+
+    privateData_->eleTrackVx ->push_back(-1.);
+    privateData_->eleTrackVy ->push_back(-1.);
+    privateData_->eleTrackVz ->push_back(-1.);
   }
 }
 
@@ -307,6 +357,20 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
     cmstree->column((colPrefix+"xAtInner"+colSuffix).c_str(), *privateData_->xAtInner, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"yAtInner"+colSuffix).c_str(), *privateData_->yAtInner, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"zAtInner"+colSuffix).c_str(), *privateData_->zAtInner, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackNormalizedChi2"+colSuffix).c_str(), *privateData_->eleTrackNormalizedChi2, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackDxy"+colSuffix).c_str(), *privateData_->eleTrackDxy, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackD0"+colSuffix).c_str(),  *privateData_->eleTrackD0, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackDsz"+colSuffix).c_str(), *privateData_->eleTrackDsz, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackDz"+colSuffix).c_str(),  *privateData_->eleTrackDz, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackDxyError"+colSuffix).c_str(), *privateData_->eleTrackDxyError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackD0Error"+colSuffix).c_str(),  *privateData_->eleTrackD0Error, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackDszError"+colSuffix).c_str(), *privateData_->eleTrackDszError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackDzError"+colSuffix).c_str(),  *privateData_->eleTrackDzError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackValidHits"+colSuffix).c_str(),  *privateData_->eleTrackValidHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackLostHits"+colSuffix).c_str(),   *privateData_->eleTrackLostHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackVx"+colSuffix).c_str(),  *privateData_->eleTrackVx, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackVy"+colSuffix).c_str(),  *privateData_->eleTrackVy, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eleTrackVz"+colSuffix).c_str(),  *privateData_->eleTrackVz, nCandString.c_str(), 0, "Reco");
   }
 }
 
@@ -458,6 +522,20 @@ void CmsElectronFillerData::initialise() {
   xAtOuter = new vector<float>;
   yAtOuter = new vector<float>;
   zAtOuter = new vector<float>;
+  eleTrackNormalizedChi2 = new vector<float>;
+  eleTrackDxy = new vector<float>;
+  eleTrackD0 = new vector<float>;
+  eleTrackDsz = new vector<float>;
+  eleTrackDz = new vector<float>;
+  eleTrackDxyError = new vector<float>;
+  eleTrackD0Error = new vector<float>;
+  eleTrackDszError = new vector<float>;
+  eleTrackDzError = new vector<float>;
+  eleTrackValidHits = new vector<float>;
+  eleTrackLostHits = new vector<float>;
+  eleTrackVx = new vector<float>;
+  eleTrackVy = new vector<float>;
+  eleTrackVz = new vector<float>;
 
   ecal = new vector<float>;
   nClu = new vector<int>;
@@ -499,6 +577,21 @@ void CmsElectronFillerData::clearTrkVectors() {
   xAtInner->clear();
   yAtInner->clear();
   zAtInner->clear();
+
+  eleTrackNormalizedChi2->clear();
+  eleTrackDxy->clear();
+  eleTrackD0 ->clear();
+  eleTrackDsz->clear();
+  eleTrackDz ->clear();
+  eleTrackDxyError->clear();
+  eleTrackD0Error ->clear();
+  eleTrackDszError->clear();
+  eleTrackDzError ->clear();
+  eleTrackValidHits->clear();
+  eleTrackLostHits ->clear();
+  eleTrackVx->clear();
+  eleTrackVy->clear();
+  eleTrackVz->clear();
 
   ecal->clear();
   nClu->clear();
