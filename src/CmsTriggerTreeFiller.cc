@@ -64,11 +64,9 @@ struct CmsTriggerTreeFillerData {
 //----------------
 
 
-CmsTriggerTreeFiller::CmsTriggerTreeFiller(CmsTree *cmstree):
-  privateData_(new CmsTriggerTreeFillerData)
+CmsTriggerTreeFiller::CmsTriggerTreeFiller(CmsTree *cmsTree)
 {
-  privateData_->cmstree=cmstree;
-
+  cmstree=cmsTree;
 }
 
 
@@ -97,8 +95,11 @@ CmsTriggerTreeFiller::writeTriggerToTree (edm::Handle<edm::TriggerResults> & trh
   }
   
   std::string nTrgString = columnPrefix+"n"+columnSuffix;
-  privateData_->cmstree->column(nTrgString.c_str(), TrSize, 0, "Reco" );
-  privateData_->cmstree->column((columnPrefix+"fired"+columnSuffix).c_str(), Trfired, nTrgString.c_str(), 0, "Reco");
+  cmstree->column(nTrgString.c_str(), TrSize, 0, "Reco" );
+  cmstree->column((columnPrefix+"fired"+columnSuffix).c_str(), Trfired, nTrgString.c_str(), 0, "Reco");
 
   return ;
 }
+
+
+

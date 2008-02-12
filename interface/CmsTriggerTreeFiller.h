@@ -20,34 +20,34 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "CLHEP/HepMC/GenEvent.h"
+
+#include <TTree.h>
+#include <string>
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
-
-#include "CLHEP/HepMC/GenEvent.h"
-#include <TTree.h>
-
-class CmsTriggerTreeFillerData;
 
 class CmsTriggerTreeFiller {
 
  public:
 
-  //! Constructors
+  /// Constructors
   CmsTriggerTreeFiller(CmsTree *);
 
-  //! Destructor
+  /// Destructor
   virtual ~CmsTriggerTreeFiller();
 
+  /// Write the trigger bits to the tree
   void writeTriggerToTree (edm::Handle<edm::TriggerResults> & trh,
                            const std::string & columnPrefix, const std::string & columnSuffix) ;
 
- private:
+ protected:
   
-  CmsTriggerTreeFillerData *privateData_;
   std::vector<std::string> m_TrigNames ;
+
+  CmsTree *cmstree;
 
 };
 
