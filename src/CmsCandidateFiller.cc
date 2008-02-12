@@ -267,18 +267,15 @@ void CmsCandidateFiller::writeCandInfo(const Candidate *cand,
       reco::CandidateView::const_iterator candOrig;
       candIndex[collectionIndex]=0;
       for(candOrig=(*daugCollection)->begin(); candOrig!=(*daugCollection)->end(); ++candOrig) {
-	// FIXME: use the official reco::OverlapChecker when it will compile
-	//	OverlapChecker overlap_;
-	//	  if( overlap_(&(*d1), &(*candOrig)) ) {
-	LogInfo("CmsCandidateFiller") << "candOrig->p4() = " << candOrig->p4();
-	if( candOverlap(d1,&(*candOrig)) ) {
+	OverlapChecker overlap_;
+	if( overlap_(*d1, *candOrig) ) {
+	  LogInfo("CmsCandidateFiller") << "candOrig->p4() = " << candOrig->p4();
 	  foundD1=true;
 	  privateData_->d1Index->push_back(candIndex[collectionIndex]);
 	  LogInfo("CmsCandidateFiller") << "candidate overlaps with d1!" << std::endl
 					<< "candOrig->pdgId() = " << candOrig->pdgId();
 	}
-	//	  if( overlap_(&(*d2), &(*candOrig)) ) {
-	if( candOverlap(d2,&(*candOrig)) ) {
+	if( overlap_(*d2, *candOrig) ) {
 	  foundD2=true;
 	  privateData_->d2Index->push_back(candIndex[collectionIndex]);
 	  LogInfo("CmsCandidateFiller") << "candidate overlaps with d2!" << std::endl
@@ -349,42 +346,6 @@ void CmsCandidateFiller::writeMcMatchInfo(const edm::View<reco::Candidate> *reco
       else privateData_->mcIndex->push_back(-1);
     }
   }
-}
-
-
-
-bool CmsCandidateFiller::candOverlap(const reco::Candidate *cand1, const reco::Candidate *cand2) {
-  if( cand1!=0 && cand2!=0 ) {
-    const RecoCandidate * c1 = 0;
-    const RecoCandidate * c2 = 0;
-    if( cand1->hasMasterClone() && cand2->hasMasterClone() ) {
-      c1 = dynamic_cast<const RecoCandidate *>( &(*cand1->masterClone()) );
-      c2 = dynamic_cast<const RecoCandidate *>( &(*cand2->masterClone()) );
-    }
-    else return false;
-
-    if( cand1->pdgId() != cand2->pdgId() ) return false;
-
-    reco::GsfTrackRef gsfTrack1 = c1->gsfTrack();
-    reco::GsfTrackRef gsfTrack2 = c2->gsfTrack();
-
-    if( c1 !=0 && c2 !=0 &&
-	&gsfTrack1 != 0 && &gsfTrack2 != 0 ) {
-
-      return ( checkOverlap( gsfTrack1, gsfTrack2 ) ||
-	       checkOverlap( c1->superCluster(), c2->superCluster() )
-	       );
-
-    }
-    else {
-      
-      return ( checkOverlap( c1->track(), c2->track() ) ||
-	       checkOverlap( c1->superCluster(), c2->superCluster() )
-	       );
-      
-    }
-  }
-  return false;
 }
 
 

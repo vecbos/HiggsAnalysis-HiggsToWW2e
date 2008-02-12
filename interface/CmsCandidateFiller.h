@@ -122,8 +122,6 @@ class CmsCandidateFiller {
 			const edm::View<reco::Candidate> *);
   virtual void treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix);
 
-  virtual bool candOverlap(const reco::Candidate *cand1, const reco::Candidate *cand2);
-
   template<typename R>
   bool checkOverlap( const R & r1, const R & r2 ) const {
     return( ! r1.isNull() && ! r2.isNull() && r1 == r2 );
