@@ -3,8 +3,8 @@
 
 # this creates the 1to1 map between reco candidates and gen particles
 module electronMatchMap = MCTruthDeltaRMatcher {    
-    InputTag src = electronCollectionClone
-    InputTag matched = genParticleCandidates
+    InputTag src = ambSolving
+    InputTag matched = genParticle
     double distMin = 0.1
     vint32 matchPDGId = { 11 }  
 }
