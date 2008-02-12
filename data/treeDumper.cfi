@@ -3,15 +3,15 @@
 
 module treeDumper = HWWTreeDumper {
     InputTag TriggerResultsTag = TriggerResults::HLT
-    InputTag electronCollection = electronCollectionClone:
-    InputTag hybridSCCollection = correctedHybridSuperClusters:
-    InputTag islandSCCollection = correctedEndcapSuperClustersWithPreshower:
-    InputTag jetCollection = caloJetCollectionClone:
-    InputTag genJetCollection = genJetCollectionClone:
+    InputTag electronCollection = ambSolving
+    InputTag hybridSCCollection = correctedHybridSuperClusters
+    InputTag islandSCCollection = correctedEndcapSuperClustersWithPreshower
+    InputTag jetCollection = iterativeCone5CaloJets
+    InputTag genJetCollection = iterativeCone5GenJets
     InputTag jetVertexAlphaCollection = jetVertexAlpha:Var
     InputTag jetVertexBetaCollection = jetVertexBeta:Var
-    InputTag metCollection = caloMetCollectionClone:
-    InputTag genMetCollection = genMetCollectionClone:
+    InputTag metCollection = met
+    InputTag genMetCollection = genMet
     InputTag Z0Collection = dummy:dummy
     InputTag hepMcCollection = source
     InputTag genInfoCollection = source
