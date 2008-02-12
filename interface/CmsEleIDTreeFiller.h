@@ -69,7 +69,7 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   virtual ~CmsEleIDTreeFiller();
 
   // Modifiers
-  // write the electron ID starting from a Shallow-Cloned candidate collection
+  // write the electron ID starting from a candidate collection
   void writeCollectionToTree(const edm::View<reco::Candidate> *,
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,

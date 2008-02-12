@@ -86,12 +86,11 @@ void CmsEleIDTreeFiller::writeCollectionToTree(const edm::View<reco::Candidate> 
   if(collection) {
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
-      if ( cand->hasMasterClone() ) {   
-	CandidateBaseRef master = cand->masterClone();
-	PixelMatchGsfElectronRef electronRef = cand->masterClone().castTo<PixelMatchGsfElectronRef>();
-	const PixelMatchGsfElectron &electron = *electronRef;
-	writeEleInfo(&electron,iEvent,iSetup);
-      }
+	const PixelMatchGsfElectron *electron = dynamic_cast< const PixelMatchGsfElectron * > ( &(*cand) );
+	if ( electron != 0 )
+	  writeEleInfo(electron,iEvent,iSetup);
+	else LogInfo("CmsEleIDTreeFiller") << "Warning! The collection seems to be not made by "
+					   << "electrons, electron-specific infos will be set to default.";
     }
   }
 
@@ -228,10 +227,11 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron,
     if(seedShpItr==endcapClShpMap.end()) hasEndcap=false;
   }
   if(hasBarrel || hasEndcap) {
-    const ClusterShapeRef& sClShape = seedShpItr->val;  
-    edm::ESHandle<ElectronLikelihood> likelihood;
-    iSetup.getData( likelihood );
-    privateData_->eleLik->push_back( likelihood->result(*electron,*sClShape) );
+//     const ClusterShapeRef& sClShape = seedShpItr->val;  
+//     edm::ESHandle<ElectronLikelihood> likelihood;
+//     iSetup.getData( likelihood );
+//     privateData_->eleLik->push_back( likelihood->result(*electron,*sClShape) );
+    privateData_->eleLik->push_back( -1. );
 
   }
   else {

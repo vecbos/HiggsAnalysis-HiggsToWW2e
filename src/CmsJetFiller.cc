@@ -182,8 +182,8 @@ void CmsJetFiller::writeCollectionToTree(const edm::View<reco::Candidate> *colle
 	jetVtxAlphaItr++;
 	
 	// em, had fractions
-	CaloJetRef thisRecoJet= cand->masterClone().castTo<CaloJetRef>();
-	if( thisRecoJet.isNonnull() ) { 
+	const CaloJet *thisRecoJet = dynamic_cast< const CaloJet * > ( &(*cand) );
+	if( thisRecoJet != 0 ) { 
 	  privateData_->emFrac->push_back( thisRecoJet->emEnergyFraction() );
 	  privateData_->hadFrac->push_back( thisRecoJet->energyFractionHadronic() );
 	}
