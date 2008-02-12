@@ -3,20 +3,10 @@
 
 include "RecoMET/METProducers/data/genMet.cfi"
 
-module caloMetCollectionClone = CaloMETShallowCloneProducer {
-    InputTag src = met
-}
-
-module genMetCollectionClone = GenMETShallowCloneProducer {
-    InputTag src = genMet
-}
-
 # MET corrections
 include "HiggsAnalysis/HiggsToWW2e/data/metCorrSequence.cff"
 
 sequence metSequence = {
     genCandidatesForMET, genMet,
-    caloMetCollectionClone,
-    genMetCollectionClone,
     metCorrSequence
 }

@@ -1,27 +1,5 @@
 #reconstruction of jets
 
-# this is to get a CandidateCollection from a JetCollection
-module caloJetCollectionClone = CaloJetShallowCloneProducer{
-    InputTag src = iterativeCone5CaloJets
-}
-
-#PG recover the generated jets
-module genJetCollectionClone = GenJetShallowCloneProducer{
-    InputTag src = iterativeCone5GenJets
-}
-
-# Selection of jets
-module caloJetSele = PtMinCandSelector{
-    InputTag src = caloJetCollectionClone
-    double ptMin        = 20.0
-}
-
-# selection of generated jets
-module genJetSele = PtMinCandSelector{
-    InputTag src = genJetCollectionClone
-    double ptMin        = 20.0
-}
-
 # jet vertex associations
 # JV_type_Algo 1=alpha, 2=beta (CMS NOTE 2006/91)
 
@@ -42,9 +20,5 @@ module jetVertexAlpha = JetVertexAssociation {
 } 
 
 sequence jetSequence = {
-    caloJetCollectionClone, 
-    genJetCollectionClone,
     jetVertexAlpha
-    #caloJetSele, 
-    #genJetSele, 
 }
