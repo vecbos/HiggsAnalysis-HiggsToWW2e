@@ -1,18 +1,20 @@
 # module producing the analysis ntuple with high level informations
-# Emanuele Di Marco    29/Apr/2007
 
 module treeDumper = HWWTreeDumper {
-    InputTag TriggerResultsTag = TriggerResults::HLT
-    InputTag electronCollection = ambSolving
+    InputTag TriggerResultsTag = TriggerResults::HLT    
+    #InputTag electronCollection = ambSolving
+    InputTag electronCollection = pixelMatchGsfElectrons
+    InputTag muonCollection     = isolatedMuons
     InputTag hybridSCCollection = correctedHybridSuperClusters
     InputTag islandSCCollection = correctedEndcapSuperClustersWithPreshower
+    InputTag ecalBarrelClusterShapes = hybridSuperClusters:hybridShapeAssoc
+    InputTag ecalEndcapClusterShapes = islandBasicClusters:islandEndcapShapeAssoc
+    InputTag electronIDAssocProducer = electronId:electronId
     InputTag jetCollection = iterativeCone5CaloJets
     InputTag genJetCollection = iterativeCone5GenJets
     InputTag jetVertexAlphaCollection = jetVertexAlpha:Var
-    InputTag jetVertexBetaCollection = jetVertexBeta:Var
-    InputTag metCollection = met
+    InputTag metCollection = muonCorrectedMET
     InputTag genMetCollection = genMet
-    InputTag Z0Collection = dummy:dummy
     InputTag hepMcCollection = source
     InputTag genInfoCollection = source
     InputTag genWeightCollection = weight:
@@ -20,10 +22,10 @@ module treeDumper = HWWTreeDumper {
     untracked string nameTree = "ntp1"
     # switch ON/OFF the candidate collections to dump
     untracked bool dumpElectrons = true
-    untracked bool dumpSCs = true
+    untracked bool dumpMuons = true
+    untracked bool dumpSCs  = false
     untracked bool dumpJets = true
     untracked bool dumpMet = true
-    untracked bool dumpZ0 = false
     # switch ON/OFF the additional informations to dump
     untracked bool saveEcal = true
     untracked bool saveFatEcal = true
@@ -32,13 +34,16 @@ module treeDumper = HWWTreeDumper {
     untracked bool saveEleID = true
     untracked bool saveJetAlpha = true
     # MC truth
-    InputTag mcTruthCollection = genParticleCandidates
+    InputTag mcTruthCollection = genParticleCandidates # genParticles from >= 168
     InputTag electronMatchMap  = electronMatchMap
-    untracked bool dumpGenMet = true
-    untracked bool dumpGenJets = true
-    untracked bool dumpMCTruth = true
-    untracked bool dumpGenInfo = true
-    untracked bool doMCmatch = false
+    InputTag muonMatchMap  = muonMatchMap
+    untracked bool dumpGenMet     = true
+    untracked bool dumpGenJets    = true
+    untracked bool dumpMCTruth    = true
+    untracked bool dumpGenInfo    = true
+    untracked bool dumpPreselInfo = true
+    untracked bool doMCEleMatch   = false
+    untracked bool doMCMuonMatch  = false
     # trigger results
     untracked bool dumpTriggerResults = false
     # effectively dump the data into the tree
