@@ -28,6 +28,7 @@
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "DataFormats/METReco/interface/GenMETCollection.h"
+#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -71,47 +72,52 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
  public:
 
-  // Constructors
-
-  // Dump everything
+  //! Dump everything
   CmsElectronFiller(CmsTree *, int maxTracks=500,
 		int maxMCTracks=2000, bool noOutputIfLimitsReached=false );
 
-  // Dump  everything if fatTree is true and less informations otherwise
+  //! Dump  everything if fatTree is true and less informations otherwise
   CmsElectronFiller(CmsTree *, bool fatTree, int maxTracks=500,
 		int maxMCTracks=2000, bool noOutputIfLimitsReached=false );
 
 
-  // Destructor
+  //! Destructor
   virtual ~CmsElectronFiller();
 
-  // Modifiers
-
+  //! dump tracking related variables
   void saveTrk(bool );
+  //! dump ECAL related variables
   void saveEcal(bool );
+  //! dump more tracking related variables
   void saveFatTrk(bool );
+  //! dump more ECAL related variables
   void saveFatEcal(bool );
+  //! dump electron ID variables
   void saveEleID(bool );
 
-  // Operators
-
-  // run number and all of that --- to implement
-
-  void writeCollectionToTree(const edm::View<reco::Candidate> *,
+  //! write the electron related informations for the given collection
+  void writeCollectionToTree(edm::InputTag collectionTag,
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
+
+  //! set the cluster shape association map for ECAL barrel
+  void setEcalBarrelClusterShapes( edm::InputTag EcalBarrelClusterShapes ) { EcalBarrelClusterShapes_ = EcalBarrelClusterShapes; }
+  //! set the cluster shape association map for ECAL endcap
+  void setEcalEndcapClusterShapes( edm::InputTag EcalEndcapClusterShapes ) { EcalEndcapClusterShapes_ = EcalEndcapClusterShapes; }
+  //! set the electron ID association map
+  void setElectronIdAssociation( edm::InputTag electronIDAssocProducer ) { electronIDAssocProducer_ = electronIDAssocProducer; }
 
  private:
   
   void writeTrkInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, GsfTrackRef trkRef);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
-  void writeEcalInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, SuperClusterRef);
+  void writeEcalInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, SuperClusterRef sclusRef,
+		     const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, const reco::BasicClusterShapeAssociationCollection& endcapClShpMap);
   void treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix);
 
 
-  // Friends
   bool saveTrk_;
   bool saveEcal_;
   bool saveFatTrk_;
@@ -126,6 +132,11 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
   CmsElectronFillerData *privateData_;
   edm::InputTag matchMap_;
+
+  edm::InputTag EcalBarrelClusterShapes_;
+  edm::InputTag EcalEndcapClusterShapes_;
+
+  edm::InputTag electronIDAssocProducer_;
 
   CmsTree *cmstree;
 

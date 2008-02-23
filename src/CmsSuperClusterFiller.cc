@@ -91,21 +91,27 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
 // Set boolean control options for quantities that are written out
 
 
-void CmsSuperClusterFiller::writeCollectionToTree(const SuperClusterCollection *collection,
+void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
 						  const edm::Event& iEvent, const edm::EventSetup& iSetup,
 						  const std::string &columnPrefix, const std::string &columnSuffix,
 						  bool dumpData) 
 {
+  
+  Handle<SuperClusterCollection> collectionHandle;
+  try { iEvent.getByLabel(collectionTag, collectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get SC Collection: " << collectionTag; }
+  const SuperClusterCollection *collection = collectionHandle.product();
+
   privateData_->clear();
   
   if(collection) 
     {
       if((int)collection->size() > maxSC_)
 	{
-	  LogError("CmsSuperClusterFiller") << "Track length " << collection->size() 
-					    << " is too long for declared max length for tree "
-					    << maxSC_ 
-					    << ". Collection will be truncated ";
+	  edm::LogError("CmsSuperClusterFiller") << "Track length " << collection->size() 
+						 << " is too long for declared max length for tree "
+						 << maxSC_ 
+						 << ". Collection will be truncated ";
 	}
       
       *(privateData_->nSC) = collection->size();

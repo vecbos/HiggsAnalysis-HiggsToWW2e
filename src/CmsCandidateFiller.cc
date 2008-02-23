@@ -154,10 +154,15 @@ void CmsCandidateFiller::doMcMatch(bool what) { doMcMatch_=what;}
 
 
 
-void CmsCandidateFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
+void CmsCandidateFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
+
+  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+  try { iEvent.getByLabel(collectionTag, collectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << collectionTag; }
+  const edm::View<reco::Candidate> *collection = collectionHandle.product();
 
   privateData_->clearTrkVectorsCandidate();
 
@@ -211,11 +216,21 @@ void CmsCandidateFiller::writeCollectionToTree(const edm::View<reco::Candidate> 
 
 
 
-void CmsCandidateFiller::writeMcIndicesToTree(const edm::View<reco::Candidate> *recoCollection,
+void CmsCandidateFiller::writeMcIndicesToTree(edm::InputTag recoCollectionTag,
 					      const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					      const edm::View<reco::Candidate> *genCollection,
+					      edm::InputTag genCollectionTag,
 					      const std::string &columnPrefix, const std::string &columnSuffix,
 					      bool dumpData) {
+
+  edm::Handle< edm::View<reco::Candidate> > recoCollectionHandle;
+  try { iEvent.getByLabel(recoCollectionTag, recoCollectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << recoCollectionTag; }
+  const edm::View<reco::Candidate> *recoCollection = recoCollectionHandle.product();
+
+  edm::Handle< edm::View<reco::Candidate> > genCollectionHandle;
+  try { iEvent.getByLabel(genCollectionTag, genCollectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << genCollectionTag; }
+  const edm::View<reco::Candidate> *genCollection = genCollectionHandle.product();
 
   writeMcMatchInfo(recoCollection, iEvent, iSetup, genCollection);
   treeMcMatchInfo(columnPrefix, columnSuffix);

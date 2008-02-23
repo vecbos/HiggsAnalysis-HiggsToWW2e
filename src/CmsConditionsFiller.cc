@@ -1,5 +1,5 @@
+#include "DataFormats/Common/interface/TriggerResults.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsConditionsFiller.h"
-
 
 /// Constructor
 CmsConditionsFiller::CmsConditionsFiller(CmsTree *cmsTree, int maxLenght, bool noOutputIfLimitsReached) :
@@ -31,8 +31,13 @@ void CmsConditionsFiller::writeConditionsToTree(const edm::EventSetup& iSetup,
 
 
 
-void CmsConditionsFiller::setHLTResults(edm::Handle<edm::TriggerResults> & trh) {
+void CmsConditionsFiller::setHLTResults(edm::InputTag triggerTag,
+					const edm::Event& iEvent) {
   
+  edm::Handle<edm::TriggerResults> trh;
+  try {iEvent.getByLabel(triggerTag,trh);} 
+  catch( cms::Exception& ex ) { std::cout << "Trigger results: " << triggerTag << " not found"; }
+
   hltNames_.init(*trh);
   HLTinitialised_ = true;
 

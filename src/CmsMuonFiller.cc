@@ -98,17 +98,22 @@ CmsMuonFiller::~CmsMuonFiller() { }
 // Methods   --
 //-------------
 
-void CmsMuonFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
+void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
 					 bool dumpData) {
+
+  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+  try { iEvent.getByLabel(collectionTag, collectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsMuonFiller") << "Can't get candidate collection: " << collectionTag; }
+  const edm::View<reco::Candidate> *collection = collectionHandle.product();
 
   privateData_->clearTrkVectors();
 
   if(collection) {
     if(hitLimitsMeansNoOutput_ && 
        (int)collection->size() > maxTracks_){
-      LogInfo("CmsMuonFiller") << "Track length " << collection->size() 
+      edm::LogInfo("CmsMuonFiller") << "Track length " << collection->size() 
 			       << " is too long for declared max length for tree "
 			       << maxTracks_ << " and no output flag is set."
 			       << " No tracks written to tuple for this event ";
@@ -116,7 +121,7 @@ void CmsMuonFiller::writeCollectionToTree(const edm::View<reco::Candidate> *coll
     }
 
     if((int)collection->size() > maxTracks_){
-      LogInfo("CmsMuonFiller") << "Track length " << collection->size() 
+      edm::LogInfo("CmsMuonFiller") << "Track length " << collection->size() 
 			       << " is too long for declared max length for tree "
 			       << maxTracks_ 
 			       << ". Collection will be truncated ";

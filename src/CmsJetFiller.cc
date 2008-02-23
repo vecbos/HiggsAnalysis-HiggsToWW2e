@@ -134,17 +134,22 @@ CmsJetFiller::~CmsJetFiller() {
 
 void CmsJetFiller::saveJetExtras(bool what) { saveJetExtras_=what; }
 
-void CmsJetFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
+void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
 					 bool dumpData) {
+
+  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+  try { iEvent.getByLabel(collectionTag, collectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << collectionTag; }
+  const edm::View<reco::Candidate> *collection = collectionHandle.product();
 
   privateData_->clearTrkVectors();
 
   if(collection) {
     if(hitLimitsMeansNoOutput_ && 
        (int)collection->size() > maxTracks_){
-      LogInfo("CmsJetFiller") << "Track length " << collection->size() 
+      edm::LogInfo("CmsJetFiller") << "Track length " << collection->size() 
 			       << " is too long for declared max length for tree "
 			       << maxTracks_ << " and no output flag is set."
 			       << " No tracks written to tuple for this event ";
@@ -152,7 +157,7 @@ void CmsJetFiller::writeCollectionToTree(const edm::View<reco::Candidate> *colle
     }
 
     if((int)collection->size() > maxTracks_){
-      LogInfo("CmsJetFiller") << "Track length " << collection->size() 
+      edm::LogInfo("CmsJetFiller") << "Track length " << collection->size() 
 			       << " is too long for declared max length for tree "
 			       << maxTracks_ 
 			       << ". Collection will be truncated ";
@@ -166,7 +171,7 @@ void CmsJetFiller::writeCollectionToTree(const edm::View<reco::Candidate> *colle
     if(saveJetExtras_) {
       try { iEvent.getByLabel(jetVertexAlphaCollection_,JV_alpha); }
       catch ( cms::Exception& ex ) { 
-	LogWarning("CmsJetFiller") << "Can't get jet vertex alpha collection " 
+	edm::LogWarning("CmsJetFiller") << "Can't get jet vertex alpha collection " 
 				   << jetVertexAlphaCollection_;   
       }     
       jetVtxAlphaItr = JV_alpha->begin();

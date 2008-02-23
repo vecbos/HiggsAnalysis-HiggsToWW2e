@@ -40,7 +40,8 @@ class CmsTriggerTreeFiller {
   virtual ~CmsTriggerTreeFiller();
 
   /// Write the trigger bits to the tree
-  void writeTriggerToTree (edm::Handle<edm::TriggerResults> & trh,
+  void writeTriggerToTree (edm::InputTag triggerResultsTag,
+			   const edm::Event& iEvent,
                            const std::string & columnPrefix, const std::string & columnSuffix) ;
 
  protected:

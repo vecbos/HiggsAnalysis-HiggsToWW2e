@@ -95,16 +95,16 @@ class CmsCandidateFiller {
 
   // run number and all of that --- to implement
 
-  virtual void writeCollectionToTree(const edm::View<reco::Candidate> *,
-			     const edm::Event&, const edm::EventSetup&,
-			     const std::string &columnPrefix, const std::string &columnSuffix,
-			     bool dumpData=false);
-
-  virtual void writeMcIndicesToTree(const edm::View<reco::Candidate> *,
-			    const edm::Event&, const edm::EventSetup&,
-			    const edm::View<reco::Candidate> *,
-			    const std::string &columnPrefix, const std::string &columnSuffix,
-			    bool dumpData=false);
+  virtual void writeCollectionToTree(edm::InputTag collection,
+				     const edm::Event&, const edm::EventSetup&,
+				     const std::string &columnPrefix, const std::string &columnSuffix,
+				     bool dumpData=false);
+  
+  virtual void writeMcIndicesToTree(edm::InputTag recoCollection,
+				    const edm::Event&, const edm::EventSetup&,
+				    edm::InputTag mcTruthCollection,
+				    const std::string &columnPrefix, const std::string &columnSuffix,
+				    bool dumpData=false);
 
 
   // Add daughter list

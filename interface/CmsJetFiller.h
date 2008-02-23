@@ -77,7 +77,7 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   // run number and all of that --- to implement
 
-  void writeCollectionToTree(const edm::View<reco::Candidate> *,
+  void writeCollectionToTree(edm::InputTag collectionTag,
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);

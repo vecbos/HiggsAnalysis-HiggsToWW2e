@@ -33,7 +33,7 @@ class CmsConditionsFiller {
 				     bool dumpData=false);
 
   /// set the HLT results handle
-  virtual void setHLTResults(edm::Handle<edm::TriggerResults> & trh);
+  virtual void setHLTResults(edm::InputTag triggerTag, const edm::Event& iEvent);
 
  protected:
   

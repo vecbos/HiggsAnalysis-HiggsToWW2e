@@ -34,7 +34,6 @@
 
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
-#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchElectronFwd.h"
@@ -193,17 +192,22 @@ void CmsElectronFiller::saveEleID(bool what) { saveEleID_=what;}
 
 
 
-void CmsElectronFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
+void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					      const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					      const std::string &columnPrefix, const std::string &columnSuffix,
 					      bool dumpData) {
+
+  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+  try { iEvent.getByLabel(collectionTag, collectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get candidate collection: " << collectionTag; }
+  const edm::View<reco::Candidate> *collection = collectionHandle.product();
 
   privateData_->clearTrkVectors();
 
   if(collection) {
     if(hitLimitsMeansNoOutput_ && 
        (int)collection->size() > maxTracks_){
-      LogInfo("CmsElectronFiller") << "Track length " << collection->size() 
+      edm::LogInfo("CmsElectronFiller") << "Track length " << collection->size() 
 				   << " is too long for declared max length for tree "
 				   << maxTracks_ << " and no output flag is set."
 				   << " No tracks written to tuple for this event ";
@@ -211,7 +215,7 @@ void CmsElectronFiller::writeCollectionToTree(const edm::View<reco::Candidate> *
     }
   
     if((int)collection->size() > maxTracks_){
-      LogInfo("CmsElectronFiller") << "Track length " << collection->size() 
+      edm::LogInfo("CmsElectronFiller") << "Track length " << collection->size() 
 				   << " is too long for declared max length for tree "
 				   << maxTracks_ 
 				   << ". Collection will be truncated ";
@@ -219,13 +223,24 @@ void CmsElectronFiller::writeCollectionToTree(const edm::View<reco::Candidate> *
 
     *(privateData_->ncand) = collection->size();
 
+    // Cluster shape variables --- 
+    Handle<BasicClusterShapeAssociationCollection> barrelClShpHandle;
+    try { iEvent.getByLabel(EcalBarrelClusterShapes_, barrelClShpHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL barrel Cluster Shape Collection" << EcalBarrelClusterShapes_; }
+    const reco::BasicClusterShapeAssociationCollection& barrelClShpMap = *barrelClShpHandle;
+
+    Handle<BasicClusterShapeAssociationCollection> endcapClShpHandle;
+    try { iEvent.getByLabel(EcalEndcapClusterShapes_, endcapClShpHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap Cluster Shape Collection" << EcalEndcapClusterShapes_; }
+    const reco::BasicClusterShapeAssociationCollection& endcapClShpMap = *endcapClShpHandle;
+
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       // fill basic kinematics
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
       // fill Cluster Adapter
       SuperClusterRef sclusRef = cand->get<SuperClusterRef>();
-      if(saveEcal_) writeEcalInfo(&(*cand),iEvent,iSetup,sclusRef);
+      if(saveEcal_) writeEcalInfo(&(*cand),iEvent,iSetup,sclusRef,barrelClShpMap,endcapClShpMap );
       // fill (GSF) Track Adapter
       GsfTrackRef trkRef = cand->get<GsfTrackRef>();
       if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,trkRef);
@@ -248,7 +263,10 @@ void CmsElectronFiller::writeCollectionToTree(const edm::View<reco::Candidate> *
   if(saveEleID_) {
     CmsEleIDTreeFiller eIDFiller(cmstree);
     eIDFiller.setStandalone(false);
-      eIDFiller.writeCollectionToTree(collection,iEvent,iSetup,columnPrefix,columnSuffix,false);
+    eIDFiller.setEcalBarrelClusterShapes(EcalBarrelClusterShapes_);
+    eIDFiller.setEcalEndcapClusterShapes(EcalEndcapClusterShapes_);
+    eIDFiller.setElectronIdAssociation(electronIDAssocProducer_);
+    eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
   
@@ -380,7 +398,10 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
 
 void CmsElectronFiller::writeEcalInfo(const Candidate *cand, 
 				      const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-				      SuperClusterRef sclusRef) {
+				      SuperClusterRef sclusRef,
+				      const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, 
+				      const reco::BasicClusterShapeAssociationCollection& endcapClShpMap) {
+
   bool hasBarrel=true;
   bool hasEndcap=true;
   if(&sclusRef) {
@@ -402,17 +423,7 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
       privateData_->caloPhi->push_back(sclusRef->phi());
     }
 
-    // Cluster shape variables
-    Handle<BasicClusterShapeAssociationCollection> barrelClShpHandle;
-    try { iEvent.getByLabel("hybridSuperClusters","hybridShapeAssoc", barrelClShpHandle); }
-    catch ( cms::Exception& ex ) { LogWarning("CmsElectronFiller") << "Can't get ECAL barrel Cluster Shape Collection"; }
-    const reco::BasicClusterShapeAssociationCollection& barrelClShpMap = *barrelClShpHandle;
-
-    Handle<BasicClusterShapeAssociationCollection> endcapClShpHandle;
-    try { iEvent.getByLabel("islandBasicClusters","islandEndcapShapeAssoc", endcapClShpHandle); }
-    catch ( cms::Exception& ex ) { LogWarning("CmsElectronFiller") << "Can't get ECAL endcap Cluster Shape Collection"; }
-    const reco::BasicClusterShapeAssociationCollection& endcapClShpMap = *endcapClShpHandle;
-
+    // search the cluster shape for the seed of the SC associated to the electron
     reco::BasicClusterShapeAssociationCollection::const_iterator seedShpItr;
     seedShpItr = barrelClShpMap.find(sclusRef->seed());
     if(seedShpItr==barrelClShpMap.end()) {
@@ -442,7 +453,7 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
  	privateData_->a42->push_back(sClShape->zernike42());
       }
     }
-    else { LogWarning("CmsElectronFiller") << "Cannot find hits in ECAL barrel or ECAL encap. Why are you requesting filling ECAL infos?";}
+    else { edm::LogWarning("CmsElectronFiller") << "Cannot find hits in ECAL barrel or ECAL encap. Why are you requesting filling ECAL infos?";}
   }
   if(!(&sclusRef) || ((&sclusRef) && (!hasBarrel & !hasEndcap)) ) {
     privateData_->ecal->push_back(-1.);

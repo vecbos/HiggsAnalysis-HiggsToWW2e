@@ -49,7 +49,7 @@ public:
 
 class CmsSuperClusterFiller {
 
- public:
+public:
 
   // Constructors
 
@@ -64,17 +64,17 @@ class CmsSuperClusterFiller {
 
   // run number and all of that --- to implement
 
-  virtual void writeCollectionToTree(const SuperClusterCollection *,
-			     const edm::Event&, const edm::EventSetup&,
-			     const std::string &columnPrefix, const std::string &columnSuffix,
-			     bool dumpData=false);
+  virtual void writeCollectionToTree(edm::InputTag collectionTag,
+				     const edm::Event&, const edm::EventSetup&,
+				     const std::string &columnPrefix, const std::string &columnSuffix,
+				     bool dumpData=false);
 
 
- protected:
+protected:
   
 
   virtual void writeSCInfo(const SuperCluster *cand, 
-		     const edm::Event&, const edm::EventSetup&);
+			   const edm::Event&, const edm::EventSetup&);
   virtual void treeSCInfo(const std::string colPrefix, const std::string colSuffix);
   
   // Friends

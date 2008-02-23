@@ -77,9 +77,17 @@ CmsTriggerTreeFiller::~CmsTriggerTreeFiller() {
 
 
 void
-CmsTriggerTreeFiller::writeTriggerToTree (edm::Handle<edm::TriggerResults> & trh,
+CmsTriggerTreeFiller::writeTriggerToTree (edm::InputTag triggerResultsTag,
+					  const edm::Event& iEvent,
 					  const std::string & columnPrefix, const std::string & columnSuffix) 
 {
+
+  edm::Handle<edm::TriggerResults> trh;
+  try {iEvent.getByLabel(triggerResultsTag, trh);} 
+  catch( cms::Exception& ex ) { edm::LogWarning("CmsTriggerTreeFiller") << "Trigger results: " << triggerResultsTag << " not found"; }
+  if (!trh.isValid())
+      throw cms::Exception("ProductNotValid") << "TriggerResults product not valid";
+
 
   vector<bool> Trfired;
   edm::TriggerNames hltNam;
