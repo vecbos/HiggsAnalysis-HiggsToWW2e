@@ -6,9 +6,9 @@
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
-#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/HcalRecHit/interface/HBHERecHit.h"
+#include "AnalysisDataFormats/Egamma/interface/ElectronID.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
 
@@ -17,7 +17,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 
-#include "EgammaAnalysis/ElectronIDAlgos/interface/ElectronLikelihood.h"
 
 
 //		----------------------------------------
@@ -67,6 +66,7 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->eleCaloIso_minDR;
   delete privateData_->eleCaloIso_sumPt;
   delete privateData_->eleLik;
+  delete privateData_->eleIdCutBasedDecision;
   delete privateData_->eleTip;
 }
 
@@ -77,21 +77,52 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
 void CmsEleIDTreeFiller::setStandalone(bool what) { standalone_=what; }
 
 
-void CmsEleIDTreeFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection,
+void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					       const std::string &columnPrefix, const std::string &columnSuffix,
 					       bool dumpData) {
+
+  // used for the general tree dump
+  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+  try { iEvent.getByLabel(collectionTag, collectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << collectionTag; }
+  const edm::View<reco::Candidate> *collection = collectionHandle.product();
+
+  // used only for the electron ID association map
+  try { iEvent.getByLabel(collectionTag, explicitElectronCollectionHandle_); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << collectionTag; }
+
   privateData_->clearTrkVectors();
   
   if(collection) {
+
+    // Cluster shape variables --- 
+    Handle<BasicClusterShapeAssociationCollection> barrelClShpHandle;
+    try { iEvent.getByLabel(EcalBarrelClusterShapes_, barrelClShpHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get ECAL barrel Cluster Shape Collection" << EcalBarrelClusterShapes_; }
+    const reco::BasicClusterShapeAssociationCollection& barrelClShpMap = *barrelClShpHandle;
+
+    Handle<BasicClusterShapeAssociationCollection> endcapClShpHandle;
+    try { iEvent.getByLabel(EcalEndcapClusterShapes_, endcapClShpHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get ECAL endcap Cluster Shape Collection" << EcalEndcapClusterShapes_; }
+    const reco::BasicClusterShapeAssociationCollection& endcapClShpMap = *endcapClShpHandle;
+
+    // Read in electron ID association map
+    edm::Handle<reco::ElectronIDAssociationCollection> electronIDAssocHandle;
+    iEvent.getByLabel(electronIDAssocProducer_, electronIDAssocHandle);
+    const reco::ElectronIDAssociationCollection& eleIdAssoc = *electronIDAssocHandle;
+
+    int index=0;
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
-	const PixelMatchGsfElectron *electron = dynamic_cast< const PixelMatchGsfElectron * > ( &(*cand) );
-	if ( electron != 0 )
-	  writeEleInfo(electron,iEvent,iSetup);
-	else LogInfo("CmsEleIDTreeFiller") << "Warning! The collection seems to be not made by "
-					   << "electrons, electron-specific infos will be set to default.";
+      const PixelMatchGsfElectron *electron = dynamic_cast< const PixelMatchGsfElectron * > ( &(*cand) );
+      if ( electron != 0 )
+	writeEleInfo(electron,index,iEvent,iSetup,barrelClShpMap,endcapClShpMap,eleIdAssoc);
+      else edm::LogInfo("CmsEleIDTreeFiller") << "Warning! The collection seems to be not made by "
+					 << "electrons, electron-specific infos will be set to default.";
+      index++;
     }
+
   }
 
   // if used standalone, it is necessary to initialize the size of the block event by event
@@ -106,49 +137,24 @@ void CmsEleIDTreeFiller::writeCollectionToTree(const edm::View<reco::Candidate> 
 
 
 
-
-
-void CmsEleIDTreeFiller::writeCollectionToTree(const PixelMatchGsfElectronCollection *collection,
-					       const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					       const std::string &columnPrefix, const std::string &columnSuffix,
-					       bool dumpData) {
-  privateData_->clearTrkVectors();
-
-  if(collection) {
-    PixelMatchGsfElectronCollection::const_iterator electron;
-    for(electron=collection->begin(); electron!=collection->end(); electron++) {
-      writeEleInfo(&(*electron),iEvent,iSetup);
-    }
-  }
-
-  // if used standalone, it is necessary to initialize the size of the block event by event
-  if(standalone_) {
-    std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
-    cmstree->column(nCandString.c_str(),collection->size(),0,"Reco");
-  }
-
-  treeEleInfo(columnPrefix,columnSuffix);
-  if(dumpData) cmstree->dumpData();
-}
-
-
-
-
-void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, 
-				      const edm::Event& iEvent, const edm::EventSetup& iSetup) { 
+void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int index,
+				      const edm::Event& iEvent, const edm::EventSetup& iSetup,
+				      const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, 
+				      const reco::BasicClusterShapeAssociationCollection& endcapClShpMap,
+				      const reco::ElectronIDAssociationCollection& eleIdAssoc) { 
 
   // --------------------------------------
-  // collections needed for isolation
+  // collections needed for isolation - FIXME: take once per event, not once per electron: slow
   //
   // get reconstructed tracks
   edm::Handle<TrackCollection> tracks;
   try { iEvent.getByLabel("ctfWithMaterialTracks","",tracks); }
-  catch ( cms::Exception& ex ) { cout << "Can't get collection: " << "ctfWithMaterialTracks" << endl; }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "ctfWithMaterialTracks"; }
 
   /// get hcal cells
   edm::Handle<HBHERecHitCollection> hcalrhits;
   try { iEvent.getByLabel("hbhereco", hcalrhits); }
-  catch ( cms::Exception& ex ) { cout << "Can't get collection: " << "hbhereco" << endl; }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "hbhereco"; }
 
   // taking the calo geometry
   edm::ESHandle<CaloGeometry> pG;
@@ -173,7 +179,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron,
       double Ebrem = 0.;  
       basicCluster_iterator bc;
       for(bc = sclusRef->clustersBegin(); bc!=sclusRef->clustersEnd(); bc++) {
-	Ebrem = Ebrem + (*bc)->energy();
+	Ebrem = Ebrem +(*bc)->energy();
       }
       Ebrem = Ebrem - mySeedE;
       mySeedCorrE = myEleNxtalCorrE - Ebrem;
@@ -203,40 +209,50 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron,
   privateData_->eleDeltaPhiAtCalo->push_back(electron->deltaPhiSeedClusterTrackAtCalo());
   privateData_->eleTip           ->push_back(myTip);
 
-  // electron likelihood
-  // FIX: reorganize this, cluster shape collections have to be passed
-  // in the cfg file as parameters
+  // electron ID (cut-based and likelihood)
+  // for the cut-based, store the decision
+  // for the likelihood, store the output of the algorithm
+  
   bool hasBarrel=true;
   bool hasEndcap=true;
-
-  Handle<BasicClusterShapeAssociationCollection> barrelClShpHandle;
-  try { iEvent.getByLabel("hybridSuperClusters","hybridShapeAssoc", barrelClShpHandle); }
-  catch ( cms::Exception& ex ) { LogWarning("CmsTreeFiller") << "Can't get ECAL barrel Cluster Shape Collection"; }
-  const reco::BasicClusterShapeAssociationCollection& barrelClShpMap = *barrelClShpHandle;
-
-  Handle<BasicClusterShapeAssociationCollection> endcapClShpHandle;
-  try { iEvent.getByLabel("islandBasicClusters","islandEndcapShapeAssoc", endcapClShpHandle); }
-  catch ( cms::Exception& ex ) { LogWarning("CmsTreeFiller") << "Can't get ECAL endcap Cluster Shape Collection"; }
-  const reco::BasicClusterShapeAssociationCollection& endcapClShpMap = *endcapClShpHandle;
-
   reco::BasicClusterShapeAssociationCollection::const_iterator seedShpItr;
   seedShpItr = barrelClShpMap.find(sclusRef->seed());
+
   if(seedShpItr==barrelClShpMap.end()) {
     hasBarrel=false;
     seedShpItr=endcapClShpMap.find(sclusRef->seed());
     if(seedShpItr==endcapClShpMap.end()) hasEndcap=false;
   }
+
   if(hasBarrel || hasEndcap) {
-//     const ClusterShapeRef& sClShape = seedShpItr->val;  
-//     edm::ESHandle<ElectronLikelihood> likelihood;
-//     iSetup.getData( likelihood );
-//     privateData_->eleLik->push_back( likelihood->result(*electron,*sClShape) );
-    privateData_->eleLik->push_back( -1. );
+
+    edm::Ref< reco::PixelMatchGsfElectronCollection > electronRef(explicitElectronCollectionHandle_, index);
+
+    reco::ElectronIDAssociationCollection::const_iterator electronIDAssocItr;
+
+    if( !(electronRef.isNull()) ) {
+
+      electronIDAssocItr = eleIdAssoc.find( electronRef );
+      
+      if ( electronIDAssocItr==eleIdAssoc.end() ) edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron id associated with electron";
+      
+      const reco::ElectronIDRef& id = electronIDAssocItr->val;
+      
+      privateData_->eleIdCutBasedDecision->push_back( id->cutBasedDecision() );
+      privateData_->eleLik->push_back( id->likelihood() );
+    }
+    
+    else {
+      edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron ref in the electron collection";
+      privateData_->eleIdCutBasedDecision->push_back( false );
+      privateData_->eleLik->push_back( -1.);
+    }
 
   }
   else {
     edm::LogWarning("CmsEleIDTreeFiller") << "cannot find cluster shapes in ECAL barrel or endcap "
-					  << " setting likelihood value to -1";
+					  << " setting electron ID results to the default";
+    privateData_->eleIdCutBasedDecision->push_back( false );
     privateData_->eleLik->push_back( -1.);
   }
 
@@ -289,6 +305,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleTrackerIso_sumPt"+colSuffix).c_str(), *privateData_->eleTrackerIso_sumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleCaloIso_minDR"+colSuffix).c_str(), *privateData_->eleCaloIso_minDR, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleCaloIso_sumPt"+colSuffix).c_str(), *privateData_->eleCaloIso_sumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
 }
@@ -318,6 +335,7 @@ void CmsEleIDTreeFillerData::initialise() {
   eleTrackerIso_sumPt      = new vector<float>;
   eleCaloIso_minDR         = new vector<float>;
   eleCaloIso_sumPt         = new vector<float>;
+  eleIdCutBasedDecision    = new vector<bool>;
   eleLik                   = new vector<float>;
   eleTip                   = new vector<float>;
 }
@@ -327,27 +345,28 @@ void CmsEleIDTreeFillerData::initialise() {
 
 void CmsEleIDTreeFillerData::clearTrkVectors() {
   clearTrkVectorsCandidate();
-  eleClass            ->clear();
-  eleHoE              ->clear();
-  eleNotCorrEoP       ->clear();
-  eleCorrEoP          ->clear();
-  eleNotCorrEoPout    ->clear();
-  eleCorrEoPout       ->clear();
-  eleDeltaEtaAtVtx    ->clear();
-  eleDeltaEtaAtCalo   ->clear();
-  eleDeltaPhiAtVtx    ->clear();
-  eleDeltaPhiAtCalo   ->clear();
-  eleFullCorrE        ->clear();
-  eleCaloCorrE        ->clear();
-  eleNxtalCorrE       ->clear();
-  eleRawE             ->clear();
-  eleTrackerP         ->clear();
-  eleTrackerIso_minDR ->clear();
+  eleClass                 ->clear();
+  eleHoE                   ->clear();
+  eleNotCorrEoP            ->clear();
+  eleCorrEoP               ->clear();
+  eleNotCorrEoPout         ->clear();
+  eleCorrEoPout            ->clear();
+  eleDeltaEtaAtVtx         ->clear();
+  eleDeltaEtaAtCalo        ->clear();
+  eleDeltaPhiAtVtx         ->clear();
+  eleDeltaPhiAtCalo        ->clear();
+  eleFullCorrE             ->clear();
+  eleCaloCorrE             ->clear();
+  eleNxtalCorrE            ->clear();
+  eleRawE                  ->clear();
+  eleTrackerP              ->clear();
+  eleTrackerIso_minDR      ->clear();
   eleTrackerIso_minDR_veto ->clear();
-  eleTrackerIso_sumPt ->clear();
-  eleCaloIso_minDR    ->clear();
-  eleCaloIso_sumPt    ->clear();
-  eleLik              ->clear();
-  eleTip              ->clear();
+  eleTrackerIso_sumPt      ->clear();
+  eleCaloIso_minDR         ->clear();
+  eleCaloIso_sumPt         ->clear();
+  eleIdCutBasedDecision    ->clear();
+  eleLik                   ->clear();
+  eleTip                   ->clear();
 }
 
