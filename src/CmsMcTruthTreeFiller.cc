@@ -17,8 +17,9 @@
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
-#include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
-#include "CLHEP/HepMC/GenParticle.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
+#include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+//#include "CLHEP/HepMC/GenParticle.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
@@ -50,29 +51,42 @@ CmsMcTruthTreeFiller::~CmsMcTruthTreeFiller() {
 //-------------
 // Methods   --
 //-------------
-void CmsMcTruthTreeFiller::writeCollectionToTree(const edm::View<reco::Candidate> *collection, int range) {
+void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection, 
+						 const edm::Event& iEvent, int range) {
+
+  // prepared for 200, when CandidateCollection will be substituted by GenParticleCollection
+  //  edm::Handle< reco::GenParticleCollection > genParticleHandle;
+  edm::Handle< reco::CandidateCollection > genParticleHandle;
+  try { iEvent.getByLabel(mcTruthCollection, genParticleHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("HWWTreeDumper") << "Can't get MC Truth Collection: " << mcTruthCollection; }
+  //  const reco::GenParticleCollection *genParticleCollection = genParticleHandle.product();
+  const reco::CandidateCollection *genParticleCollection = genParticleHandle.product(); 
 
   vector<float> pMC,massMC,thetaMC,etaMC,phiMC,energyMC;
   vector<float> xMC,yMC,zMC;
   vector<int> idMC,mothMC,nDauMC;
 
-  edm::View<reco::Candidate>::const_iterator cand;
-  for(cand=collection->begin(); cand!=collection->end(); cand++) {
+  //  reco::GenParticleCollection::const_iterator genPart;
+  reco::CandidateCollection::const_iterator genPart;
+  for(genPart=genParticleCollection->begin(); genPart!=genParticleCollection->end(); genPart++) {
+    const reco::Candidate & cand = *genPart;
     if((int)pMC.size()>range) break;
-    pMC.push_back(cand->p());
-    massMC.push_back(cand->mass());
-    thetaMC.push_back(cand->theta());
-    etaMC.push_back(cand->eta());
-    phiMC.push_back(cand->phi());
-    energyMC.push_back(cand->energy());
-    idMC.push_back(cand->pdgId());
-    nDauMC.push_back(cand->numberOfDaughters());
+    pMC.push_back(cand.p());
+    massMC.push_back(cand.mass());
+    thetaMC.push_back(cand.theta());
+    etaMC.push_back(cand.eta());
+    phiMC.push_back(cand.phi());
+    energyMC.push_back(cand.energy());
+    idMC.push_back(cand.pdgId());
+    nDauMC.push_back(cand.numberOfDaughters());
     
     int indMom=-1;
     int idx=0;
-    edm::View<reco::Candidate>::const_iterator candIter;
-    for(candIter=collection->begin(); candIter!=collection->end(); candIter++) {
-      if(&(*candIter)==cand->mother()) {
+    //    reco::GenParticleCollection::const_iterator candIter;
+    reco::CandidateCollection::const_iterator candIter;
+    for(candIter=genParticleCollection->begin(); candIter!=genParticleCollection->end(); candIter++) {
+      const reco::Candidate *mom = cand.mother();
+      if(&(*candIter)==&(*mom)) {
 	indMom=idx;
 	break;
       }
@@ -81,9 +95,9 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(const edm::View<reco::Candidate
     mothMC.push_back(indMom);
     
     // decay vertex
-    xMC.push_back(cand->vx());
-    yMC.push_back(cand->vy());
-    zMC.push_back(cand->vz());
+    xMC.push_back(cand.vx());
+    yMC.push_back(cand.vy());
+    zMC.push_back(cand.vz());
       
   }
   

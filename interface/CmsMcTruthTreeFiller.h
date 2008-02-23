@@ -41,7 +41,7 @@ class CmsMcTruthTreeFiller {
   virtual ~CmsMcTruthTreeFiller();
 
   // Write the content of the collection
-  void writeCollectionToTree(const edm::View<reco::Candidate> *, int range=100);
+  void writeCollectionToTree( edm::InputTag mcTruthCollection, const edm::Event& iEvent, int range=100 );
 
   // Modifiers
 
