@@ -2,15 +2,12 @@
 //-----------------------------------------------------------------------
 //
 // Package:    
-//      HWWTreeDumper
+//      HiggsAnalysis/HiggsToWW2e
 // Description:
 //      Class HWWTreeDumper
 //      Analyzer module that takes the Candidate Collections from
 //      the analysis producers and dumps an ntuple
 //      
-// Original Author:  Emanuele Di Marco
-//         Created:  Fri Apr  6 18:05:34 CEST 2007
-//
 //-----------------------------------------------------------------------
 
 
@@ -34,8 +31,6 @@
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 #include "CLHEP/HepMC/GenEvent.h"
 
-#include "DataFormats/Common/interface/TriggerResults.h"
-
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
@@ -44,7 +39,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
-
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsConditionsFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
@@ -56,11 +51,12 @@
 HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 {
   
-  nameFile_     = iConfig.getUntrackedParameter<std::string>("nameFile", "RootOutput.root");
-  nameTree_     = iConfig.getUntrackedParameter<std::string>("nameTree", "BaseTree");
-  dumpTree_     = iConfig.getUntrackedParameter<bool>("dumpTree", false);
-  dumpMCTruth_  = iConfig.getUntrackedParameter<bool>("dumpMCTruth", false);
-  doMCmatch_    = iConfig.getUntrackedParameter<bool>("doMCmatch", false);
+  nameFile_      = iConfig.getUntrackedParameter<std::string>("nameFile", "RootOutput.root");
+  nameTree_      = iConfig.getUntrackedParameter<std::string>("nameTree", "BaseTree");
+  dumpTree_      = iConfig.getUntrackedParameter<bool>("dumpTree", false);
+  dumpMCTruth_   = iConfig.getUntrackedParameter<bool>("dumpMCTruth", false);
+  doMCEleMatch_  = iConfig.getUntrackedParameter<bool>("doMCEleMatch", false);
+  doMCMuonMatch_ = iConfig.getUntrackedParameter<bool>("doMCMuonMatch", false);
   
   // control level of Reco Adapters in the tree
   saveTrk_      = iConfig.getUntrackedParameter<bool>("saveTrk", false);
@@ -84,9 +80,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveCand_  = iConfig.getUntrackedParameter<bool>("saveCand", true);
   
   // Candidate Collections
-  dumpGenInfo_  = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
+  dumpPreselInfo_ = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
+  dumpGenInfo_    = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
   dumpElectrons_  = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
-  dumpSCs_  = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
+  dumpSCs_        = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
   dumpMuons_      = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
   dumpJets_       = iConfig.getUntrackedParameter<bool>("dumpJets", false);
   dumpGenJets_    = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
@@ -96,21 +93,23 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // jet vertex collections
   jetVertexAlphaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection");
 
-  electronCollection_ = iConfig.getParameter<edm::InputTag>("electronCollection");
-  hybridSCCollection_ = iConfig.getParameter<edm::InputTag>("hybridSCCollection");
-  islandSCCollection_ = iConfig.getParameter<edm::InputTag>("islandSCCollection");
-  //   muonCollection_     = iConfig.getParameter<edm::InputTag>("muonCollection");
-  jetCollection_      = iConfig.getParameter<edm::InputTag>("jetCollection");
-  genJetCollection_   = iConfig.getParameter<edm::InputTag>("genJetCollection");
-  metCollection_      = iConfig.getParameter<edm::InputTag>("metCollection");
-  genMetCollection_   = iConfig.getParameter<edm::InputTag>("genMetCollection");
-  Z0Collection_       = iConfig.getParameter<edm::InputTag>("Z0Collection");
-  mcTruthCollection_  = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
-  electronMatchMap_   = iConfig.getParameter<edm::InputTag>("electronMatchMap");
-  //  muonMatchMap_       = iConfig.getParameter<edm::InputTag>("muonMatchMap");
-  hepMcCollection_ = iConfig.getParameter<edm::InputTag>("hepMcCollection");
-  genInfoCollection_ = iConfig.getParameter<edm::InputTag>("genInfoCollection");
-  genWeightCollection_ = iConfig.getParameter<edm::InputTag>("genWeightCollection");
+  electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
+  muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
+  hybridSCCollection_      = iConfig.getParameter<edm::InputTag>("hybridSCCollection");
+  islandSCCollection_      = iConfig.getParameter<edm::InputTag>("islandSCCollection");
+  ecalBarrelClusterShapes_ = iConfig.getParameter<edm::InputTag>("ecalBarrelClusterShapes");
+  ecalEndcapClusterShapes_ = iConfig.getParameter<edm::InputTag>("ecalEndcapClusterShapes");
+  electronIDAssocProducer_ = iConfig.getParameter<edm::InputTag>("electronIDAssocProducer");
+  jetCollection_           = iConfig.getParameter<edm::InputTag>("jetCollection");
+  genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
+  metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
+  genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
+  mcTruthCollection_       = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
+  electronMatchMap_        = iConfig.getParameter<edm::InputTag>("electronMatchMap");
+  muonMatchMap_            = iConfig.getParameter<edm::InputTag>("muonMatchMap");
+  hepMcCollection_         = iConfig.getParameter<edm::InputTag>("hepMcCollection");
+  genInfoCollection_       = iConfig.getParameter<edm::InputTag>("genInfoCollection");
+  genWeightCollection_     = iConfig.getParameter<edm::InputTag>("genWeightCollection");
 
   // trigger Collections
   triggerInputTag_     = iConfig.getParameter<edm::InputTag>("TriggerResultsTag") ;
@@ -118,55 +117,64 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 }
 
 
-HWWTreeDumper::~HWWTreeDumper()
-{
- 
-   // do anything here that needs to be done at desctruction time
-   // (e.g. close files, deallocate resources etc.)
-}
+
+HWWTreeDumper::~HWWTreeDumper() { }
 
 
-//
-// member functions
-//
 
 // ------------ method called to for each event  ------------
-void
-HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
 
   // get MC truth
   CmsMcTruthTreeFiller treeFill(tree_);
-  Handle< edm::View<reco::Candidate> > genParticleHandle;
-  try { iEvent.getByLabel(mcTruthCollection_, genParticleHandle); }
-  catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get MC Truth Collection: " << mcTruthCollection_; }
-  const edm::View<reco::Candidate> *genParticleCollection = genParticleHandle.product();
 
   if(dumpMCTruth_) {
-    treeFill.writeCollectionToTree(genParticleCollection);
+
+    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent );
+
   }
+
+
 
   // fill the trigger paths info
   if(dumpTriggerResults_) {
-    edm::Handle<edm::TriggerResults> trh;
-    try {iEvent.getByLabel(triggerInputTag_,trh);} 
-    catch( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Trigger results: " << triggerInputTag_ << " not found"; }
-    if (!trh.isValid())
-      throw cms::Exception("ProductNotValid") << "TriggerResults product not valid";
+
     CmsTriggerTreeFiller triggerTreeFill (tree_) ;
     std::string prefix ("") ;
     std::string suffix ("Trg") ;
-    triggerTreeFill.writeTriggerToTree (trh,prefix,suffix) ;
+    triggerTreeFill.writeTriggerToTree (triggerInputTag_, iEvent, prefix, suffix) ;
+
+    /// fill the trigger mask in the Conditions tree
+    if ( jevt_ == 1 ) {
+
+      CmsConditionsFiller conditionsFiller( treeConditions_ );
+      conditionsFiller.setHLTResults( triggerInputTag_, iEvent );
+      conditionsFiller.writeConditionsToTree( iSetup, "", "", true);
+
+      jevt_++;
+
+    }
+
   }
 
-  Handle< edm::View<reco::Candidate> > electronCollectionHandle;
-  try { iEvent.getByLabel(electronCollection_, electronCollectionHandle); }
-  catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " << electronCollection_; }
-  const edm::View<reco::Candidate> *electronCollection = electronCollectionHandle.product();
+
+  // fill preselection output
+  if (dumpPreselInfo_) {
+
+    Handle<bool> selected;
+    iEvent.getByLabel("preselectionMarker", selected );
+    bool isSelected = *selected;
+    tree_->column ("evtPresel", isSelected, false, "Pres");
+
+  }
+
+
 
   // fill Electrons block
   if(dumpElectrons_) {
+
     CmsElectronFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("Ele");
@@ -175,92 +183,106 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     treeFill.saveEcal(saveEcal_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.saveFatEcal(saveFatEcal_);
+    treeFill.setEcalBarrelClusterShapes(ecalBarrelClusterShapes_);
+    treeFill.setEcalEndcapClusterShapes(ecalEndcapClusterShapes_);
+    treeFill.setElectronIdAssociation(electronIDAssocProducer_);
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
 
-    treeFill.writeCollectionToTree(electronCollection, iEvent, iSetup, prefix, suffix, false);
-    if(doMCmatch_) {
-      treeFill.writeMcIndicesToTree(electronCollection, iEvent, iSetup, genParticleCollection, prefix, suffix, false);
+    treeFill.writeCollectionToTree(electronCollection_, iEvent, iSetup, prefix, suffix, false);
+    if(doMCEleMatch_) {
+      treeFill.writeMcIndicesToTree(electronCollection_, iEvent, iSetup, mcTruthCollection_, prefix, suffix, false);
     }
+
   }
 
+
+
   // fill SC block
-  if (dumpSCs_)
-    {
+  if (dumpSCs_) {
+
       CmsSuperClusterFiller treeFillHybrid(tree_, 100);
       std::string prefix("");
       std::string hybridSuffix("HybridSCEB");
-      Handle<SuperClusterCollection> hybridSCCollectionHandle;
-      try { iEvent.getByLabel(hybridSCCollection_, hybridSCCollectionHandle); }
-      catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get SC Collection: " << hybridSCCollection_; }
-      const SuperClusterCollection *hybridSCCollection = hybridSCCollectionHandle.product();
-      LogDebug("HWWTreeDumper") << "SC collection size = " << hybridSCCollection->size();
-      treeFillHybrid.writeCollectionToTree(hybridSCCollection, iEvent, iSetup, prefix, hybridSuffix, false);
+      treeFillHybrid.writeCollectionToTree(hybridSCCollection_, iEvent, iSetup, prefix, hybridSuffix, false);
 
       CmsSuperClusterFiller treeFillIsland(tree_, 100);
-
       std::string islandSuffix("IslandSCEE");
-      Handle<SuperClusterCollection> islandSCCollectionHandle;
-      try { iEvent.getByLabel(islandSCCollection_, islandSCCollectionHandle); }
-      catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get SC Collection: " << islandSCCollection_; }
-      const SuperClusterCollection *islandSCCollection = islandSCCollectionHandle.product();
-      LogDebug("HWWTreeDumper") << "SC collection size = " << islandSCCollection->size();
-      treeFillIsland.writeCollectionToTree(islandSCCollection, iEvent, iSetup, prefix, islandSuffix, false);
+      treeFillIsland.writeCollectionToTree(islandSCCollection_, iEvent, iSetup, prefix, islandSuffix, false);
+
+  }
+
+
+
+
+  // fill muons block
+  if(dumpMuons_) {
+
+    CmsCandidateFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("Muon");
+    treeFill.saveCand(saveCand_);
+    treeFill.setMatchMap(muonMatchMap_);
+
+    treeFill.writeCollectionToTree(muonCollection_, iEvent, iSetup, prefix, suffix, false);
+
+    if(doMCMuonMatch_) {
+      treeFill.writeMcIndicesToTree(muonCollection_, iEvent, iSetup, mcTruthCollection_, prefix, suffix, false);
     }
+
+  }
+
+
+
   // fill MET block
   if(dumpMet_) {
+
     CmsCandidateFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("Met");
     treeFill.saveCand(saveCand_);
 
-    Handle< edm::View<reco::Candidate> > metCollectionHandle;
-    try { iEvent.getByLabel(metCollection_, metCollectionHandle); }
-    catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " << metCollection_; }
-    const edm::View<reco::Candidate> *metCollection = metCollectionHandle.product();
-    LogDebug("HWWTreeDumper") << "Met collection size = " << metCollection->size();
-    treeFill.writeCollectionToTree(metCollection, iEvent, iSetup, prefix, suffix, false);
+    treeFill.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // dump generated MET
     if(dumpGenMet_) {
+
       std::string suffix("GenMet");
-      Handle< edm::View<reco::Candidate> > genMetCollectionHandle;
-      try { iEvent.getByLabel(genMetCollection_, genMetCollectionHandle); }
-      catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " <<genMetCollection_; }
-      const edm::View<reco::Candidate> *genMetCollection = genMetCollectionHandle.product();
-      treeFill.writeCollectionToTree(genMetCollection, iEvent, iSetup, prefix, suffix, false);
+      treeFill.writeCollectionToTree(genMetCollection_, iEvent, iSetup, prefix, suffix, false);
+
     }
+
   }
+
+
 
   // fill JET block
   if(dumpJets_) {
+
     CmsJetFiller treeFill(tree_, jetVertexAlphaCollection_, true);
     std::string prefix("");
     std::string suffix("Jet");
     treeFill.saveCand(saveCand_);
     treeFill.saveJetExtras(saveJetAlpha_);
 
-    Handle< edm::View<reco::Candidate> > jetCollectionHandle;
-    try { iEvent.getByLabel(jetCollection_, jetCollectionHandle); }
-    catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " << jetCollection_; }
-    const edm::View<reco::Candidate> *jetCollection = jetCollectionHandle.product();
-    LogDebug("HWWTreeDumper") << "Jet collection size = " << jetCollection->size();
-    treeFill.writeCollectionToTree(jetCollection, iEvent, iSetup, prefix, suffix, false);
+    treeFill.writeCollectionToTree(jetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // dump generated JETs
     if(dumpGenJets_) {
+
       std::string suffix("GenJet");
       treeFill.saveJetExtras(false);
-      Handle< edm::View<reco::Candidate> > genJetCollectionHandle;
-      try { iEvent.getByLabel(genJetCollection_, genJetCollectionHandle); }
-      catch ( cms::Exception& ex ) { LogWarning("HWWTreeDumper") << "Can't get Candidate Collection: " <<genJetCollection_; }
-      const edm::View<reco::Candidate> *genJetCollection = genJetCollectionHandle.product();
-      treeFill.writeCollectionToTree(genJetCollection, iEvent, iSetup, prefix, suffix, false);
+      treeFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
+
     }
+
   }
   
-  if (dumpGenInfo_)
-    {
+
+
+  // dump infos on MC production 
+  if (dumpGenInfo_) {
+
       CmsGenInfoFiller treeFill(tree_);
       Handle<int> genProcessID;
       iEvent.getByLabel( "genEventProcID", genProcessID );
@@ -269,15 +291,12 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
       Handle<double> genEventScale;
       iEvent.getByLabel( "genEventScale", genEventScale );
       double pthat = *genEventScale;
-      
-      
 
       double filter_eff = -99.;
       double cross_section = -99.;
       
-      
-      if (processID != 4)
-	{
+      if (processID != 4) {
+
 	  Handle<double> genFilterEff;
 	  iEvent.getByLabel( "genEventRunInfo", "FilterEfficiency", genFilterEff);
 	  filter_eff = *genFilterEff;
@@ -285,44 +304,59 @@ HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 	  Handle<double> genCrossSect;
 	  iEvent.getByLabel( "genEventRunInfo", "PreCalculatedCrossSection", genCrossSect); 
 	  cross_section = *genCrossSect;
-	}
-      else
-	{ //ALPGEN case
+
+      } else { //ALPGEN case
 	  Handle<int> alpgenId;
 	  iEvent.getByLabel (genWeightCollection_, alpgenId);
 	  processID = *alpgenId;
-	}
-//       Handle< HepMCProduct > mc;
-//       iEvent.getByLabel( hepMcCollection_, mc );
-//       Handle< GenInfoProduct > gi;
-//       iEvent.getRun().getByLabel( genInfoCollection_, gi);
+      }
+      
+      //       Handle< HepMCProduct > mc;
+      //       iEvent.getByLabel( hepMcCollection_, mc );
+      //       Handle< GenInfoProduct > gi;
+      //       iEvent.getRun().getByLabel( genInfoCollection_, gi);
+
       Handle< double> weightHandle;
       iEvent.getByLabel (genWeightCollection_, weightHandle);
       double weight = * weightHandle;
       treeFill.writeGenInfoToTree(processID,pthat,filter_eff, cross_section, weight);
-    }
+
+  }
 
   if(dumpTree_) tree_->dumpData();
 
 }
 
 
+
 // ------------ method called once each job just before starting event loop  ------------
-void 
-HWWTreeDumper::beginJob(const edm::EventSetup&)
-{
+void HWWTreeDumper::beginJob(const edm::EventSetup&) {
+  
   fileOut_ = TFile::Open(nameFile_.c_str(), "RECREATE");
+
   tree_  = new  CmsTree(nameTree_.c_str(),nameTree_.c_str());
+
+  treeConditions_ = new CmsTree("Conditions","Conditions");
+
+  jevt_ = 1;
 
 }
 
+
+
 // ------------ method called once each job just after ending the event loop  ------------
-void 
-HWWTreeDumper::endJob() {
+void  HWWTreeDumper::endJob() {
+
   fileOut_->cd();
-  TTree* treeOut = tree_->getTree();
-  treeOut->Write();
+
+  TTree* treeEventsOut = tree_->getTree();
+  treeEventsOut->Write();
+
+  TTree* treeConditionsOut = treeConditions_->getTree();
+  treeConditionsOut->Write();
+
   fileOut_->Close();
+
 }
 
 
