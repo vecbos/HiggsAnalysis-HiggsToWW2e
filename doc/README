@@ -1,0 +1,36 @@
+--- Recipe to Build and run the H->WW->2e2nu analysis in CMSSW_1_6_9 ---
+
+> get the release:
+scramv1 p -n vanilla169 CMSSW CMSSW_1_6_9
+cd vanilla169/src 
+
+> check out the necessary packages:
+cvs co -r V00-00-07-01        EgammaAnalysis/ElectronIDAlgos
+cvs co -r V00-00-04           EgammaAnalysis/ElectronIDProducers
+cvs co -r V00-00-03-01        EgammaAnalysis/ElectronIDESSources
+cvs co -r V00-01-01           CondCore/EgammaPlugins
+cvs co -r V02-06-02           CondFormats/DataRecord
+cvs co -r V00-02-00           CondFormats/EgammaObjects
+cvs co -r V00-01-03           CondFormats/PhysicsToolsObjects
+cvs co -r V00-05-00           DataFormats/EgammaReco
+cvs co -r V00-05-07           RecoEcal/EgammaClusterProducers
+cvs co -r V00-03-00           RecoEcal/EgammaCoreTools
+cvs co                        HiggsAnalysis/HiggsToWW2Leptons
+cvs co -r V01-00-01           HiggsAnalysis/HiggsToWW2e
+
+> and execute:
+cvs up -r 1.10 DataFormats/EgammaReco/interface/BasicCluster.h
+cvs up -r 1.10 RecoEcal/EgammaCoreTools/interface/PositionCalc.h
+
+> build and test interactively:
+scramv1 b
+cmsRun cmsRun HiggsAnalysis/HiggsToWW2e/test/HWW2eAnalysis.cfg
+
+> to run with CRAB, change, in EgammaAnalysis/ElectronIDESSources/data/likelihoodPdfsDB.cfi:
+replace CondDBCommon.connect = "sqlite_file:electronIdLikelihoodTkIsolated.db"    
+replace CondDBCommon.catalog = "file:electronIdLikelihoodTkIsolatedCRAB.xml"
+> and put, in CRAB cfg file:
+## files to be put in InputSandBox, full path or in the current directory
+## (wildcard * are allowed): comma separated list
+additional_input_files = /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_1_6_8/electronIdLikelihoodTkIsolated.db, 
+/afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_1_6_8/electronIdLikelihoodTkIsolatedCRAB.xml
