@@ -1,4 +1,4 @@
---- Recipe to Build and run the H->WW->2e2nu analysis in CMSSW_1_6_9 ---
+--- Recipe to build and run the H->WW->2e2nu analysis in CMSSW_1_6_9 ---
 
 > get the release:
 scramv1 p -n vanilla169 CMSSW CMSSW_1_6_9
@@ -24,7 +24,7 @@ cvs up -r 1.10 RecoEcal/EgammaCoreTools/interface/PositionCalc.h
 
 > build and test interactively:
 scramv1 b
-cmsRun cmsRun HiggsAnalysis/HiggsToWW2e/test/HWW2eAnalysis.cfg
+cmsRun HiggsAnalysis/HiggsToWW2e/test/HWW2eAnalysis.cfg
 
 > to run with CRAB, change, in EgammaAnalysis/ElectronIDESSources/data/likelihoodPdfsDB.cfi:
 replace CondDBCommon.connect = "sqlite_file:electronIdLikelihoodTkIsolated.db"    
