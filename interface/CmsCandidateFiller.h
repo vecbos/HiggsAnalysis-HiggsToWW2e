@@ -70,36 +70,31 @@ class CmsCandidateFiller {
 
  public:
 
-  // Constructors
-
-  // Dump everything
+  //! Dump everything
   CmsCandidateFiller(CmsTree *, int maxTracks=500, 
 		    int maxMCTracks=2000, bool noOutputIfLimitsReached=false );
 
-  // Dump  everything if fatTree is true and less informations otherwise
+  //! Dump  everything if fatTree is true and less informations otherwise
   CmsCandidateFiller(CmsTree *, bool fatTree, int maxTracks=500, 
 		     int maxMCTracks=2000, bool noOutputIfLimitsReached=false );
 
-  // Destructor
+  //! Destructor
   virtual ~CmsCandidateFiller();
 
-  // Modifiers
-
-
+  //! dump the particle candidate informations
   void saveCand(bool );
+  //! do CM truth - reco particle matching, based on delta R
   void doMcMatch(bool );
-
+  //! set the association map between reco - truth particles
   void setMatchMap(edm::InputTag matchMap) { matchMap_ = matchMap;};
 
-  // Operators
-
-  // run number and all of that --- to implement
-
+  //! write the basic candidate informations for the collection "collection"
   virtual void writeCollectionToTree(edm::InputTag collection,
 				     const edm::Event&, const edm::EventSetup&,
 				     const std::string &columnPrefix, const std::string &columnSuffix,
 				     bool dumpData=false);
   
+  //! write a column with indices connecting reco - MC truth particles in the tree
   virtual void writeMcIndicesToTree(edm::InputTag recoCollection,
 				    const edm::Event&, const edm::EventSetup&,
 				    edm::InputTag mcTruthCollection,
@@ -107,8 +102,9 @@ class CmsCandidateFiller {
 				    bool dumpData=false);
 
 
-  // Add daughter list
-  virtual void addDaughterList(const edm::View<reco::Candidate> *);
+  //! add a collection where to look for daughters of a composite collection 
+  virtual void addDaughterCollection(edm::InputTag daugCollectionTag,
+				     const edm::Event& iEvent, const edm::EventSetup& iSetup);
 
  protected:
   

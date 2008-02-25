@@ -372,8 +372,16 @@ void CmsCandidateFiller::treeMcMatchInfo(const std::string colPrefix, const std:
 
 
 
-void CmsCandidateFiller::addDaughterList(const edm::View<reco::Candidate> *daugCollectionList) {
-  daugCollectionList_.push_back(daugCollectionList);
+void CmsCandidateFiller::addDaughterCollection(edm::InputTag daugCollectionTag,
+					       const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
+  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+  try { iEvent.getByLabel(daugCollectionTag, collectionHandle); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << daugCollectionTag; }
+  const edm::View<reco::Candidate> *daugCollection = collectionHandle.product();
+
+  daugCollectionList_.push_back(daugCollection);
+
 }
 
 
