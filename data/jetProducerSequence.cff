@@ -3,8 +3,8 @@
 # jet vertex associations
 # JV_type_Algo 1=alpha, 2=beta (CMS NOTE 2006/91)
 
-module jetVertexAlpha = J3tVertexAssociation {
-    double JV_deltaZ = 0.4
+module jetVertexAlpha = JetVertexAssociation {
+    double JV_deltaZ = 0.3
     double JV_sigmaZ = 9.5 // distance from signal vertex in terms of sigma Z
     double JV_alpha_threshold = 0.2
     double JV_cone_size = 0.5
