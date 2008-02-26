@@ -237,18 +237,19 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill MET block
   if(dumpMet_) {
 
-    CmsCandidateFiller treeFill(tree_, true);
+    CmsCandidateFiller treeRecoFill(tree_, true);
     std::string prefix("");
     std::string suffix("Met");
-    treeFill.saveCand(saveCand_);
+    treeRecoFill.saveCand(saveCand_);
 
-    treeFill.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
+    treeRecoFill.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // dump generated MET
     if(dumpGenMet_) {
 
+      CmsCandidateFiller treeGenFill(tree_, true);
       std::string suffix("GenMet");
-      treeFill.writeCollectionToTree(genMetCollection_, iEvent, iSetup, prefix, suffix, false);
+      treeGenFill.writeCollectionToTree(genMetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     }
 
@@ -259,20 +260,21 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-    CmsJetFiller treeFill(tree_, jetVertexAlphaCollection_, true);
+    CmsJetFiller treeRecoFill(tree_, jetVertexAlphaCollection_, true);
     std::string prefix("");
     std::string suffix("Jet");
-    treeFill.saveCand(saveCand_);
-    treeFill.saveJetExtras(saveJetAlpha_);
+    treeRecoFill.saveCand(saveCand_);
+    treeRecoFill.saveJetExtras(saveJetAlpha_);
 
-    treeFill.writeCollectionToTree(jetCollection_, iEvent, iSetup, prefix, suffix, false);
+    treeRecoFill.writeCollectionToTree(jetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // dump generated JETs
     if(dumpGenJets_) {
 
+      CmsJetFiller treeGenFill(tree_, jetVertexAlphaCollection_, true);
       std::string suffix("GenJet");
-      treeFill.saveJetExtras(false);
-      treeFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
+      treeGenFill.saveJetExtras(false);
+      treeGenFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     }
 
