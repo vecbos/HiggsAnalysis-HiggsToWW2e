@@ -163,11 +163,11 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->covEtaEta;
   delete privateData_->covEtaPhi;
   delete privateData_->covPhiPhi;
-  delete privateData_->lat;
-  delete privateData_->phiLat;
-  delete privateData_->etaLat;
-  delete privateData_->a20;
-  delete privateData_->a42;
+//   delete privateData_->lat;
+//   delete privateData_->phiLat;
+//   delete privateData_->etaLat;
+//   delete privateData_->a20;
+//   delete privateData_->a42;
 
   delete privateData_->ncand;
 
@@ -265,9 +265,7 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     eIDFiller.setStandalone(false);
     eIDFiller.setEcalBarrelClusterShapes(EcalBarrelClusterShapes_);
     eIDFiller.setEcalEndcapClusterShapes(EcalEndcapClusterShapes_);
-    eIDFiller.setElectronIdProducer(electronIDAssocProducer_);
-    eIDFiller.setTkIsolationProducer(tkIsolationProducer_);
-    eIDFiller.setTowerIsolationProducer(towerIsolationProducer_);
+    eIDFiller.setElectronIdAssociation(electronIDAssocProducer_);
     eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
@@ -440,9 +438,9 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
       privateData_->e3x3->push_back(sClShape->e3x3());
       privateData_->e5x5->push_back(sClShape->e5x5());
       privateData_->eMax->push_back(sClShape->eMax());
-      privateData_->lat->push_back(sClShape->lat());
-      privateData_->phiLat->push_back(sClShape->phiLat());
-      privateData_->etaLat->push_back(sClShape->etaLat());
+//       privateData_->lat->push_back(sClShape->lat());
+//       privateData_->phiLat->push_back(sClShape->phiLat());
+//       privateData_->etaLat->push_back(sClShape->etaLat());
       if(saveFatEcal_) {
 	privateData_->e2x2->push_back(sClShape->e2x2());
 	privateData_->e2nd->push_back(sClShape->e2nd());
@@ -451,8 +449,8 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
 	privateData_->covEtaEta->push_back(sClShape->covEtaEta());
 	privateData_->covEtaPhi->push_back(sClShape->covEtaPhi());
 	privateData_->covPhiPhi->push_back(sClShape->covPhiPhi());
- 	privateData_->a20->push_back(sClShape->zernike20());
- 	privateData_->a42->push_back(sClShape->zernike42());
+//  	privateData_->a20->push_back(sClShape->zernike20());
+//  	privateData_->a42->push_back(sClShape->zernike42());
       }
     }
     else { edm::LogWarning("CmsElectronFiller") << "Cannot find hits in ECAL barrel or ECAL encap. Why are you requesting filling ECAL infos?";}
@@ -464,9 +462,9 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
     privateData_->e3x3->push_back(-1.);
     privateData_->e5x5->push_back(-1.);
     privateData_->eMax->push_back(-1.);
-    privateData_->lat->push_back(-1.);
-    privateData_->phiLat->push_back(-1.);
-    privateData_->etaLat->push_back(-1.);
+//     privateData_->lat->push_back(-1.);
+//     privateData_->phiLat->push_back(-1.);
+//     privateData_->etaLat->push_back(-1.);
     if(saveFatEcal_) {
       privateData_->eraw->push_back(-1.);
       privateData_->caloEta->push_back(-1.);
@@ -478,8 +476,8 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
       privateData_->covEtaEta->push_back(-1.);
       privateData_->covEtaPhi->push_back(-1.);
       privateData_->covPhiPhi->push_back(-1.);
-      privateData_->a20->push_back(-1.);
-      privateData_->a42->push_back(-1.);
+//       privateData_->a20->push_back(-1.);
+//       privateData_->a42->push_back(-1.);
     }
   }
 }
@@ -497,9 +495,9 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
   
   if(saveFatEcal_) {
     cmstree->column((colPrefix+"eraw"+colSuffix).c_str(), *privateData_->eraw, nCandString.c_str(), 0, "Reco");
@@ -512,8 +510,8 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
     cmstree->column((colPrefix+"covEtaEta"+colSuffix).c_str(), *privateData_->covEtaEta, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"covEtaPhi"+colSuffix).c_str(), *privateData_->covEtaPhi, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"covPhiPhi"+colSuffix).c_str(), *privateData_->covPhiPhi, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"a20"+colSuffix).c_str(), *privateData_->a20, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"a42"+colSuffix).c_str(), *privateData_->a42, nCandString.c_str(), 0, "Reco");
+//     cmstree->column((colPrefix+"a20"+colSuffix).c_str(), *privateData_->a20, nCandString.c_str(), 0, "Reco");
+//     cmstree->column((colPrefix+"a42"+colSuffix).c_str(), *privateData_->a42, nCandString.c_str(), 0, "Reco");
   }
 }
 
@@ -566,11 +564,11 @@ void CmsElectronFillerData::initialise() {
   covEtaEta = new vector<float>;
   covEtaPhi = new vector<float>;
   covPhiPhi = new vector<float>;
-  lat = new vector<float>;
-  phiLat = new vector<float>;
-  etaLat = new vector<float>;
-  a20 = new vector<float>;
-  a42 = new vector<float>;
+//   lat = new vector<float>;
+//   phiLat = new vector<float>;
+//   etaLat = new vector<float>;
+//   a20 = new vector<float>;
+//   a42 = new vector<float>;
 
 }
 
@@ -612,9 +610,9 @@ void CmsElectronFillerData::clearTrkVectors() {
   e3x3->clear();
   e5x5->clear();
   eMax->clear();
-  lat->clear();
-  phiLat->clear();
-  etaLat->clear();
+//   lat->clear();
+//   phiLat->clear();
+//   etaLat->clear();
   eraw->clear();
   caloEta->clear();
   caloPhi->clear();
@@ -625,7 +623,7 @@ void CmsElectronFillerData::clearTrkVectors() {
   covEtaEta->clear();
   covEtaPhi->clear();
   covPhiPhi->clear();
-  a20->clear();
-  a42->clear();
+//   a20->clear();
+//   a42->clear();
 
 }
