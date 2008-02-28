@@ -70,12 +70,8 @@ private:
   edm::InputTag hybridSCCollection_, islandSCCollection_;
   //! association maps between the clusters and the cluster shapes
   edm::InputTag ecalBarrelClusterShapes_, ecalEndcapClusterShapes_;
-  //! producer of association map between the electron and the electron ID outputs
+  //! association map between the electron and the electron ID outputs
   edm::InputTag electronIDAssocProducer_;
-  //! producer of the electron tracker isolation collection
-  edm::InputTag tkIsolationProducer_;
-  //! producer of the electron HCAL isolation collection from the calo towers
-  edm::InputTag towerIsolationProducer_;
   //! collection of jet vertices for alpha evaluation
   edm::InputTag jetVertexAlphaCollection_;
   //! generator-level particle collection in input
