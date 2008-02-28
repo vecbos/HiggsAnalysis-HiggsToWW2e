@@ -14,16 +14,9 @@ cvs co -r V02-06-02           CondFormats/DataRecord
 cvs co -r V00-02-00           CondFormats/EgammaObjects
 cvs co -r V00-01-03           CondFormats/PhysicsToolsObjects
 cvs co -r V00-07-00-02	      DataFormats/EgammaCandidates
-cvs co -r V00-05-00           DataFormats/EgammaReco
-cvs co -r V00-05-07           RecoEcal/EgammaClusterProducers
-cvs co -r V00-03-00           RecoEcal/EgammaCoreTools
 cvs co -r V00-00-04           RecoEgamma/EgammaIsolationAlgos
 cvs co                        HiggsAnalysis/HiggsToWW2Leptons
 cvs co 		              HiggsAnalysis/HiggsToWW2e
-
-> and execute:
-cvs up -r 1.10 DataFormats/EgammaReco/interface/BasicCluster.h
-cvs up -r 1.10 RecoEcal/EgammaCoreTools/interface/PositionCalc.h
 
 > build and test interactively:
 scramv1 b
