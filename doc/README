@@ -6,7 +6,7 @@ cd vanilla169/src
 
 > check out the necessary packages:
 cvs co -r V00-00-04 	      EgammaAnalysis/EgammaIsolationProducers
-cvs co -r V00-00-07-01        EgammaAnalysis/ElectronIDAlgos
+cvs co -r V00-00-07-02        EgammaAnalysis/ElectronIDAlgos
 cvs co -r V00-00-04           EgammaAnalysis/ElectronIDProducers
 cvs co -r V00-00-03-01        EgammaAnalysis/ElectronIDESSources
 cvs co -r V00-01-01           CondCore/EgammaPlugins
