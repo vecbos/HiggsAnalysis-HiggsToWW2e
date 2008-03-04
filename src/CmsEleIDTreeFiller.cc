@@ -18,7 +18,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 
 
-
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
 //		----------------------------------------
