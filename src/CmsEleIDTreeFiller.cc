@@ -18,6 +18,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 
 
+
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
 //		----------------------------------------
@@ -59,10 +60,7 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->eleNxtalCorrE;
   delete privateData_->eleRawE;
   delete privateData_->eleTrackerP;
-  delete privateData_->eleTrackerIso_minDR;
-  delete privateData_->eleTrackerIso_minDR_veto;
   delete privateData_->eleTrackerIso_sumPt;
-  delete privateData_->eleCaloIso_minDR;
   delete privateData_->eleCaloIso_sumPt;
   delete privateData_->eleLik;
   delete privateData_->eleIdCutBasedDecision;
@@ -108,8 +106,16 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     // Read in electron ID association map
     edm::Handle<reco::ElectronIDAssociationCollection> electronIDAssocHandle;
-    iEvent.getByLabel(electronIDAssocProducer_, electronIDAssocHandle);
+    try { iEvent.getByLabel(electronIDAssocProducer_, electronIDAssocHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get electronId Assoc Producer" << electronIDAssocProducer_; }
     const reco::ElectronIDAssociationCollection& eleIdAssoc = *electronIDAssocHandle;
+
+    // Read the tracker and HCAL isolation association vectors
+    try { iEvent.getByLabel(tkIsolationProducer_, tkIsolationHandle_); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracker isolation product" << tkIsolationProducer_; }
+
+    try { iEvent.getByLabel(towerIsolationProducer_, towerIsolationHandle_); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get HCAL tower isolation product" << towerIsolationProducer_; }
 
     int index=0;
     edm::View<reco::Candidate>::const_iterator cand;
@@ -146,19 +152,19 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
   // collections needed for isolation - FIXME: take once per event, not once per electron: slow
   //
   // get reconstructed tracks
-  edm::Handle<TrackCollection> tracks;
-  try { iEvent.getByLabel("ctfWithMaterialTracks","",tracks); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "ctfWithMaterialTracks"; }
+//   edm::Handle<TrackCollection> tracks;
+//   try { iEvent.getByLabel("ctfWithMaterialTracks","",tracks); }
+//   catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "ctfWithMaterialTracks"; }
 
-  /// get hcal cells
-  edm::Handle<HBHERecHitCollection> hcalrhits;
-  try { iEvent.getByLabel("hbhereco", hcalrhits); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "hbhereco"; }
+//   /// get hcal cells
+//   edm::Handle<HBHERecHitCollection> hcalrhits;
+//   try { iEvent.getByLabel("hbhereco", hcalrhits); }
+//   catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "hbhereco"; }
 
-  // taking the calo geometry
-  edm::ESHandle<CaloGeometry> pG;
-  iSetup.get<IdealGeometryRecord>().get(pG);
-  caloGeo = pG.product();
+//   // taking the calo geometry
+//   edm::ESHandle<CaloGeometry> pG;
+//   iSetup.get<IdealGeometryRecord>().get(pG);
+//   caloGeo = pG.product();
   //--------------------------------------
 
   SuperClusterRef sclusRef = electron->superCluster();
@@ -231,6 +237,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
 
     if( !(electronRef.isNull()) ) {
 
+      // electron ID
       electronIDAssocItr = eleIdAssoc.find( electronRef );
       
       if ( electronIDAssocItr==eleIdAssoc.end() ) edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron id associated with electron";
@@ -239,12 +246,16 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
       
       privateData_->eleIdCutBasedDecision->push_back( id->cutBasedDecision() );
       privateData_->eleLik->push_back( id->likelihood() );
+
+
     }
     
     else {
+
       edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron ref in the electron collection";
       privateData_->eleIdCutBasedDecision->push_back( false );
       privateData_->eleLik->push_back( -1.);
+      
     }
 
   }
@@ -255,27 +266,43 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
     privateData_->eleLik->push_back( -1.);
   }
 
+
+  // isolations
+  double sumPt = (*tkIsolationHandle_)[index].second;
+  double sumEt = (*towerIsolationHandle_)[index].second;
+  privateData_->eleTrackerIso_sumPt->push_back( sumPt );
+  privateData_->eleCaloIso_sumPt->push_back( sumEt );
+
+
   // tracker isolation
-  const TrackCollection tracksC = *(tracks.product());
-  hwwEleTrackerIsolation trackIsolation(electron, tracksC);
-  trackIsolation.setExtRadius(0.2);    
-  trackIsolation.setIntRadius(0.015);    
-  float minDR_tracker     = trackIsolation.minDeltaR(0.15);  
-  float minDRveto_tracker = trackIsolation.minDeltaR_withVeto(0.15);  
-  float sumPt_tracker     = trackIsolation.getPtTracks();  
-  privateData_->eleTrackerIso_minDR->push_back(minDR_tracker);
-  privateData_->eleTrackerIso_minDR_veto->push_back(minDRveto_tracker);
-  privateData_->eleTrackerIso_sumPt->push_back(sumPt_tracker);
+//   const TrackCollection tracksC = *(tracks.product());
+//   hwwEleTrackerIsolation trackIsolation(electron, tracksC);
+//   trackIsolation.setExtRadius(0.2);    
+//   trackIsolation.setIntRadius(0.015);    
+//   float minDR_tracker     = trackIsolation.minDeltaR(0.15);  
+//   float minDRveto_tracker = trackIsolation.minDeltaR_withVeto(0.15);  
+//   float sumPt_tracker     = trackIsolation.getPtTracks();  
+
+//   std::cout << "sumPt = " << sumPt << "\tsumPt_tracker = " << sumPt_tracker << std::endl;
+
+//   privateData_->eleTrackerIso_minDR->push_back(minDR_tracker);
+//   privateData_->eleTrackerIso_minDR_veto->push_back(minDRveto_tracker);
+//   privateData_->eleTrackerIso_sumPt->push_back(sumPt_tracker);
 
   // calo isolation
-  const HBHERecHitCollection hcalRecHits = *(hcalrhits.product());
-  hwwEleCaloIsolation caloIsolation(electron, hcalRecHits, caloGeo);
-  //float minDR_calo = caloIsolation.minDeltaR(0.15);  
-  float minDR_calo = -1000.;
-  caloIsolation.setExtRadius(0.2);    
-  float sumEt_calo = caloIsolation.getEtHcal();  
-  privateData_->eleCaloIso_minDR->push_back(minDR_calo);
-  privateData_->eleCaloIso_sumPt->push_back(sumEt_calo);
+//   const HBHERecHitCollection hcalRecHits = *(hcalrhits.product());
+//   hwwEleCaloIsolation caloIsolation(electron, hcalRecHits, caloGeo);
+//   //float minDR_calo = caloIsolation.minDeltaR(0.15);  
+//   float minDR_calo = -1000.;
+//   caloIsolation.setExtRadius(0.2);    
+//   float sumEt_calo = caloIsolation.getEtHcal();  
+
+//   std::cout << "sumEt = " << sumEt << "\tsumEt_calo = " << sumEt_calo << std::endl;
+
+//   privateData_->eleCaloIso_minDR->push_back(minDR_calo);
+//   privateData_->eleCaloIso_sumPt->push_back(sumEt_calo);
+  
+  
 
 }
 
@@ -299,10 +326,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleDeltaPhiAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtVtx, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleDeltaEtaAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleDeltaPhiAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackerIso_minDR"+colSuffix).c_str(), *privateData_->eleTrackerIso_minDR, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackerIso_minDR_veto"+colSuffix).c_str(), *privateData_->eleTrackerIso_minDR_veto, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTrackerIso_sumPt"+colSuffix).c_str(), *privateData_->eleTrackerIso_sumPt, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleCaloIso_minDR"+colSuffix).c_str(), *privateData_->eleCaloIso_minDR, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleCaloIso_sumPt"+colSuffix).c_str(), *privateData_->eleCaloIso_sumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
@@ -329,10 +353,7 @@ void CmsEleIDTreeFillerData::initialise() {
   eleNxtalCorrE            = new vector<float>;
   eleRawE                  = new vector<float>;
   eleTrackerP              = new vector<float>;
-  eleTrackerIso_minDR      = new vector<float>;
-  eleTrackerIso_minDR_veto = new vector<float>;
   eleTrackerIso_sumPt      = new vector<float>;
-  eleCaloIso_minDR         = new vector<float>;
   eleCaloIso_sumPt         = new vector<float>;
   eleIdCutBasedDecision    = new vector<bool>;
   eleLik                   = new vector<float>;
@@ -359,10 +380,7 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   eleNxtalCorrE            ->clear();
   eleRawE                  ->clear();
   eleTrackerP              ->clear();
-  eleTrackerIso_minDR      ->clear();
-  eleTrackerIso_minDR_veto ->clear();
   eleTrackerIso_sumPt      ->clear();
-  eleCaloIso_minDR         ->clear();
   eleCaloIso_sumPt         ->clear();
   eleIdCutBasedDecision    ->clear();
   eleLik                   ->clear();

@@ -27,11 +27,12 @@
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
+#include "DataFormats/Candidate/interface/CandAssociation.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
 #include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
+#include "DataFormats/EgammaCandidates/interface/PMGsfElectronIsoCollection.h"
 #include "AnalysisDataFormats/Egamma/interface/ElectronIDAssociation.h"
-
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 
@@ -46,9 +47,8 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *eleDeltaEtaAtVtx, *eleDeltaEtaAtCalo;
   vector<float> *eleDeltaPhiAtVtx, *eleDeltaPhiAtCalo;
   vector<float> *eleTrackerP;
-  vector<float> *eleTrackerIso_minDR, *eleTrackerIso_sumPt;
-  vector<float> *eleTrackerIso_minDR_veto;
-  vector<float> *eleCaloIso_minDR,    *eleCaloIso_sumPt;
+  vector<float> *eleTrackerIso_sumPt;
+  vector<float> *eleCaloIso_sumPt;
   vector<float> *eleFullCorrE,     *eleCaloCorrE;
   vector<float> *eleNxtalCorrE,    *eleRawE;
   vector<float> *eleLik;
@@ -84,7 +84,11 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   //! set the cluster shape association map for ECAL endcap
   void setEcalEndcapClusterShapes( edm::InputTag EcalEndcapClusterShapes ) { EcalEndcapClusterShapes_ = EcalEndcapClusterShapes; }
   //! set the electron ID association map
-  void setElectronIdAssociation( edm::InputTag electronIDAssocProducer ) { electronIDAssocProducer_ = electronIDAssocProducer; }
+  void setElectronIdProducer( edm::InputTag electronIDAssocProducer ) { electronIDAssocProducer_ = electronIDAssocProducer; }
+  //! set the tracker isolation producer
+  void setTkIsolationProducer( edm::InputTag tkIsolationProducer ) { tkIsolationProducer_ = tkIsolationProducer; }
+  //! set the HCAL isolation producer with calo towers
+  void setTowerIsolationProducer( edm::InputTag towerIsolationProducer ) { towerIsolationProducer_ = towerIsolationProducer; }
   //! set to false if the column with the block size is set by another object
   void setStandalone(bool );
 
@@ -104,11 +108,15 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   edm::InputTag EcalEndcapClusterShapes_;
   
   edm::InputTag electronIDAssocProducer_;
+  edm::InputTag tkIsolationProducer_;
+  edm::InputTag towerIsolationProducer_;
 
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
 
   edm::Handle<reco::PixelMatchGsfElectronCollection> explicitElectronCollectionHandle_;
+  edm::Handle< reco::CandViewDoubleAssociations > towerIsolationHandle_;
+  edm::Handle< reco::PMGsfElectronIsoCollection > tkIsolationHandle_;
 
   const CaloGeometry* caloGeo;
 };
