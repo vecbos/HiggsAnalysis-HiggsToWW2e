@@ -106,7 +106,11 @@ class CmsElectronFiller : public CmsCandidateFiller {
   //! set the cluster shape association map for ECAL endcap
   void setEcalEndcapClusterShapes( edm::InputTag EcalEndcapClusterShapes ) { EcalEndcapClusterShapes_ = EcalEndcapClusterShapes; }
   //! set the electron ID association map
-  void setElectronIdAssociation( edm::InputTag electronIDAssocProducer ) { electronIDAssocProducer_ = electronIDAssocProducer; }
+  void setElectronIdProducer( edm::InputTag electronIDAssocProducer ) { electronIDAssocProducer_ = electronIDAssocProducer; }
+  //! set the tracker isolation producer
+  void setTkIsolationProducer( edm::InputTag tkIsolationProducer ) { tkIsolationProducer_ = tkIsolationProducer; }
+  //! set the HCAL isolation producer with calo towers
+  void setTowerIsolationProducer( edm::InputTag towerIsolationProducer ) { towerIsolationProducer_ = towerIsolationProducer; }
 
  private:
   
@@ -137,6 +141,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
   edm::InputTag EcalEndcapClusterShapes_;
 
   edm::InputTag electronIDAssocProducer_;
+  edm::InputTag tkIsolationProducer_;
+  edm::InputTag towerIsolationProducer_;
 
   CmsTree *cmstree;
 

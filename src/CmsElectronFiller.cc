@@ -265,7 +265,9 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     eIDFiller.setStandalone(false);
     eIDFiller.setEcalBarrelClusterShapes(EcalBarrelClusterShapes_);
     eIDFiller.setEcalEndcapClusterShapes(EcalEndcapClusterShapes_);
-    eIDFiller.setElectronIdAssociation(electronIDAssocProducer_);
+    eIDFiller.setElectronIdProducer(electronIDAssocProducer_);
+    eIDFiller.setTkIsolationProducer(tkIsolationProducer_);
+    eIDFiller.setTowerIsolationProducer(towerIsolationProducer_);
     eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
