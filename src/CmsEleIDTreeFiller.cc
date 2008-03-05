@@ -82,12 +82,8 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
   // used for the general tree dump
   edm::Handle< edm::View<reco::Candidate> > collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << collectionTag; }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
-
-  // used only for the electron ID association map
-  try { iEvent.getByLabel(collectionTag, explicitElectronCollectionHandle_); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << collectionTag; }
 
   privateData_->clearTrkVectors();
   
@@ -117,15 +113,14 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(towerIsolationProducer_, towerIsolationHandle_); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get HCAL tower isolation product" << towerIsolationProducer_; }
 
-    int index=0;
-    edm::View<reco::Candidate>::const_iterator cand;
-    for(cand=collection->begin(); cand!=collection->end(); cand++) {
-      const PixelMatchGsfElectron *electron = dynamic_cast< const PixelMatchGsfElectron * > ( &(*cand) );
-      if ( electron != 0 )
-	writeEleInfo(electron,index,iEvent,iSetup,barrelClShpMap,endcapClShpMap,eleIdAssoc);
+    for(int index = 0; index < (int)collection->size(); index++) {
+	  
+      const PixelMatchGsfElectronRef electronRef = collection->refAt(index).castTo<PixelMatchGsfElectronRef>();
+      if ( !(electronRef.isNull()) )
+	writeEleInfo(electronRef,iEvent,iSetup,barrelClShpMap,endcapClShpMap,eleIdAssoc);
       else edm::LogInfo("CmsEleIDTreeFiller") << "Warning! The collection seems to be not made by "
-					 << "electrons, electron-specific infos will be set to default.";
-      index++;
+					      << "electrons, electron-specific infos will be set to default.";
+
     }
 
   }
@@ -142,7 +137,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 
 
-void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int index,
+void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef,
 				      const edm::Event& iEvent, const edm::EventSetup& iSetup,
 				      const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, 
 				      const reco::BasicClusterShapeAssociationCollection& endcapClShpMap,
@@ -167,11 +162,11 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
 //   caloGeo = pG.product();
   //--------------------------------------
 
-  SuperClusterRef sclusRef = electron->superCluster();
+  SuperClusterRef sclusRef = electronRef->superCluster();
   // ele corr - notcorr energy
-  float myEleTrackerP   = electron->trackMomentumAtVtx().r();
-  float myEleFullCorrE  = electron->energy();
-  float myEleCaloCorrE  = electron->caloEnergy();
+  float myEleTrackerP   = electronRef->trackMomentumAtVtx().r();
+  float myEleFullCorrE  = electronRef->energy();
+  float myEleCaloCorrE  = electronRef->caloEnergy();
   float myEleNxtalCorrE = 0.;
   float myEleRawE       = 0.;
   float mySeedE         = 0.;
@@ -180,7 +175,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
     myEleNxtalCorrE = sclusRef->energy();
     myEleRawE       = sclusRef->rawEnergy();
     mySeedE         = sclusRef->seed()->energy();
-    if ((int(electron->classification()/10) == 3) || (int(electron->classification()/10) == 13) ){
+    if ((int(electronRef->classification()/10) == 3) || (int(electronRef->classification()/10) == 13) ){
       double Ebrem = 0.;  
       basicCluster_iterator bc;
       for(bc = sclusRef->clustersBegin(); bc!=sclusRef->clustersEnd(); bc++) {
@@ -193,7 +188,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
   }
 
   // transverse impact parameter
-  GsfTrackRef trRef = electron->gsfTrack();
+  GsfTrackRef trRef = electronRef->gsfTrack();
   float myTip = sqrt((trRef->vertex().x())*(trRef->vertex().x()) + (trRef->vertex().y())*(trRef->vertex().y()));
 
   // eleID
@@ -202,16 +197,16 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
   privateData_->eleNxtalCorrE    ->push_back(myEleNxtalCorrE); 
   privateData_->eleRawE          ->push_back(myEleRawE); 
   privateData_->eleTrackerP      ->push_back(myEleTrackerP);
-  privateData_->eleClass         ->push_back(electron->classification());
-  privateData_->eleHoE           ->push_back(electron->hadronicOverEm());
-  privateData_->eleCorrEoP       ->push_back(electron->eSuperClusterOverP());
+  privateData_->eleClass         ->push_back(electronRef->classification());
+  privateData_->eleHoE           ->push_back(electronRef->hadronicOverEm());
+  privateData_->eleCorrEoP       ->push_back(electronRef->eSuperClusterOverP());
   privateData_->eleNotCorrEoP    ->push_back(myEleRawE/myEleTrackerP);
-  privateData_->eleCorrEoPout    ->push_back(electron->eSeedClusterOverPout());
-  privateData_->eleNotCorrEoPout ->push_back(electron->eSeedClusterOverPout()*(mySeedCorrE/mySeedE));
-  privateData_->eleDeltaEtaAtVtx ->push_back(electron->deltaEtaSuperClusterTrackAtVtx());
-  privateData_->eleDeltaPhiAtVtx ->push_back(electron->deltaPhiSuperClusterTrackAtVtx());
-  privateData_->eleDeltaEtaAtCalo->push_back(electron->deltaEtaSeedClusterTrackAtCalo());
-  privateData_->eleDeltaPhiAtCalo->push_back(electron->deltaPhiSeedClusterTrackAtCalo());
+  privateData_->eleCorrEoPout    ->push_back(electronRef->eSeedClusterOverPout());
+  privateData_->eleNotCorrEoPout ->push_back(electronRef->eSeedClusterOverPout()*(mySeedCorrE/mySeedE));
+  privateData_->eleDeltaEtaAtVtx ->push_back(electronRef->deltaEtaSuperClusterTrackAtVtx());
+  privateData_->eleDeltaPhiAtVtx ->push_back(electronRef->deltaPhiSuperClusterTrackAtVtx());
+  privateData_->eleDeltaEtaAtCalo->push_back(electronRef->deltaEtaSeedClusterTrackAtCalo());
+  privateData_->eleDeltaPhiAtCalo->push_back(electronRef->deltaPhiSeedClusterTrackAtCalo());
   privateData_->eleTip           ->push_back(myTip);
 
   // electron ID (cut-based and likelihood)
@@ -231,32 +226,17 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
 
   if(hasBarrel || hasEndcap) {
 
-    edm::Ref< reco::PixelMatchGsfElectronCollection > electronRef(explicitElectronCollectionHandle_, index);
-
     reco::ElectronIDAssociationCollection::const_iterator electronIDAssocItr;
 
-    if( !(electronRef.isNull()) ) {
-
-      // electron ID
-      electronIDAssocItr = eleIdAssoc.find( electronRef );
-      
-      if ( electronIDAssocItr==eleIdAssoc.end() ) edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron id associated with electron";
-      
-      const reco::ElectronIDRef& id = electronIDAssocItr->val;
-      
-      privateData_->eleIdCutBasedDecision->push_back( id->cutBasedDecision() );
-      privateData_->eleLik->push_back( id->likelihood() );
-
-
-    }
+    // electron ID
+    electronIDAssocItr = eleIdAssoc.find( electronRef );
     
-    else {
-
-      edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron ref in the electron collection";
-      privateData_->eleIdCutBasedDecision->push_back( false );
-      privateData_->eleLik->push_back( -1.);
-      
-    }
+    if ( electronIDAssocItr==eleIdAssoc.end() ) edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron id associated with electron";
+    
+    const reco::ElectronIDRef& id = electronIDAssocItr->val;
+    
+    privateData_->eleIdCutBasedDecision->push_back( id->cutBasedDecision() );
+    privateData_->eleLik->push_back( id->likelihood() );
 
   }
   else {
@@ -267,7 +247,11 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectron *electron, int
   }
 
 
-  // isolations
+  // --- isolations ---
+  
+  // this retrieves the index in the original collection associated to the reference to electron
+  int index = electronRef.key();
+
   double sumPt = (*tkIsolationHandle_)[index].second;
   double sumEt = (*towerIsolationHandle_)[index].second;
   privateData_->eleTrackerIso_sumPt->push_back( sumPt );
