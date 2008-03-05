@@ -94,7 +94,7 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
 
  private:
 
-  void writeEleInfo(const PixelMatchGsfElectron *, int index, const edm::Event&, const edm::EventSetup&,
+  void writeEleInfo(const PixelMatchGsfElectronRef, const edm::Event&, const edm::EventSetup&,
 		    const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, 
 		    const reco::BasicClusterShapeAssociationCollection& endcapClShpMap,
 		    const reco::ElectronIDAssociationCollection& eleIdAssoc);
@@ -114,7 +114,6 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
 
-  edm::Handle<reco::PixelMatchGsfElectronCollection> explicitElectronCollectionHandle_;
   edm::Handle< reco::CandViewDoubleAssociations > towerIsolationHandle_;
   edm::Handle< reco::PMGsfElectronIsoCollection > tkIsolationHandle_;
 
