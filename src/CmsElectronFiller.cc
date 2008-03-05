@@ -199,7 +199,7 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
   edm::Handle< edm::View<reco::Candidate> > collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get candidate collection: " << collectionTag; }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get electron candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
 
   privateData_->clearTrkVectors();
@@ -410,7 +410,7 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
     // Cluster related variables
     privateData_->ecal->push_back(sclusRef->energy());
     privateData_->nClu->push_back(sclusRef->clustersSize());
-    
+
     int ncry=0;
     reco::basicCluster_iterator bcItr;
     for(bcItr=sclusRef->clustersBegin(); bcItr!=sclusRef->clustersEnd(); bcItr++){
