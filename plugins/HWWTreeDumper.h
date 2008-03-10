@@ -40,6 +40,8 @@ private:
   bool dumpGenInfo_;
   //! dump H->WW->2lep 2nu preselection marker
   bool dumpPreselInfo_;
+  //! dump H->WW->2lep 2nu gg fusion signal k-factor
+  bool dumpSignalKfactor_;
   //! dump the basic candidate informations (4-vectors)
   bool saveCand_;
   //! dump specific reco informations in addition to candidate variables

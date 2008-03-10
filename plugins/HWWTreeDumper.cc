@@ -80,15 +80,16 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveCand_  = iConfig.getUntrackedParameter<bool>("saveCand", true);
   
   // Candidate Collections
-  dumpPreselInfo_ = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
-  dumpGenInfo_    = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
-  dumpElectrons_  = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
-  dumpSCs_        = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
-  dumpMuons_      = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
-  dumpJets_       = iConfig.getUntrackedParameter<bool>("dumpJets", false);
-  dumpGenJets_    = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
-  dumpMet_        = iConfig.getUntrackedParameter<bool>("dumpMet", false);
-  dumpGenMet_     = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
+  dumpPreselInfo_    = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
+  dumpSignalKfactor_ = iConfig.getUntrackedParameter<bool>("dumpSignalKfactor", false);
+  dumpGenInfo_       = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
+  dumpElectrons_     = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
+  dumpSCs_           = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
+  dumpMuons_         = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
+  dumpJets_          = iConfig.getUntrackedParameter<bool>("dumpJets", false);
+  dumpGenJets_       = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
+  dumpMet_           = iConfig.getUntrackedParameter<bool>("dumpMet", false);
+  dumpGenMet_        = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
   
   // jet vertex collections
   jetVertexAlphaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection");
@@ -172,6 +173,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   }
 
+
+  // fill signal gg fusion k-factor
+  if (dumpSignalKfactor_) {
+    Handle<double> theFactor;
+    iEvent.getByLabel("KFactorProducer", theFactor );
+    double theKfactor = *theFactor;
+    tree_->column ("evtKfactor", theKfactor, 0., "kFac");
+  } 
 
 
   // fill Electrons block
