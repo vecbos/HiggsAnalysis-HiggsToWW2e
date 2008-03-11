@@ -38,14 +38,15 @@ module treeDumper = HWWTreeDumper {
     InputTag mcTruthCollection = genParticleCandidates # genParticles from >= 168
     InputTag electronMatchMap  = electronMatchMap
     InputTag muonMatchMap  = muonMatchMap
-    untracked bool dumpGenMet        = true
-    untracked bool dumpGenJets       = true
-    untracked bool dumpMCTruth       = true
-    untracked bool dumpGenInfo       = true
-    untracked bool dumpPreselInfo    = true
-    untracked bool dumpSignalKfactor = true
-    untracked bool doMCEleMatch      = false
-    untracked bool doMCMuonMatch     = false
+    untracked bool dumpGenMet         = true
+    untracked bool dumpGenJets        = true
+    untracked bool dumpMCTruth        = true
+    untracked bool dumpGenInfo        = true
+    untracked bool dumpPreselInfo     = true
+    untracked bool dumpSignalKfactor  = true
+    untracked bool dumpGenInfoMcAtNlo = false
+    untracked bool doMCEleMatch       = false
+    untracked bool doMCMuonMatch      = false
     # trigger results
     untracked bool dumpTriggerResults = false
     # effectively dump the data into the tree

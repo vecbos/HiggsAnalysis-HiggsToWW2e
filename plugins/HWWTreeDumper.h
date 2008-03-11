@@ -42,6 +42,8 @@ private:
   bool dumpPreselInfo_;
   //! dump H->WW->2lep 2nu gg fusion signal k-factor
   bool dumpSignalKfactor_;
+  //! dump event weight in case of MC@NLO production
+  bool dumpGenInfoMcAtNlo_;
   //! dump the basic candidate informations (4-vectors)
   bool saveCand_;
   //! dump specific reco informations in addition to candidate variables

@@ -80,16 +80,17 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveCand_  = iConfig.getUntrackedParameter<bool>("saveCand", true);
   
   // Candidate Collections
-  dumpPreselInfo_    = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
-  dumpSignalKfactor_ = iConfig.getUntrackedParameter<bool>("dumpSignalKfactor", false);
-  dumpGenInfo_       = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
-  dumpElectrons_     = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
-  dumpSCs_           = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
-  dumpMuons_         = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
-  dumpJets_          = iConfig.getUntrackedParameter<bool>("dumpJets", false);
-  dumpGenJets_       = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
-  dumpMet_           = iConfig.getUntrackedParameter<bool>("dumpMet", false);
-  dumpGenMet_        = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
+  dumpPreselInfo_     = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
+  dumpSignalKfactor_  = iConfig.getUntrackedParameter<bool>("dumpSignalKfactor", false);
+  dumpGenInfoMcAtNlo_ = iConfig.getUntrackedParameter<bool>("dumpGenInfoMcAtNlo", false);
+  dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
+  dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
+  dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
+  dumpMuons_          = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
+  dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
+  dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
+  dumpMet_            = iConfig.getUntrackedParameter<bool>("dumpMet", false);
+  dumpGenMet_         = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
   
   // jet vertex collections
   jetVertexAlphaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection");
@@ -182,6 +183,16 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     tree_->column ("evtKfactor", theKfactor, 0., "kFac");
   } 
 
+  // dump infos on MC production in case of MC@NLO production
+  if (dumpGenInfoMcAtNlo_) {
+
+    Handle<HepMCProduct> theEvt;
+    iEvent.getByType(theEvt);
+    HepMC::GenEvent* thisEvt = new  HepMC::GenEvent(*(theEvt->GetEvent()));
+    HepMC::WeightContainer allWeights = thisEvt->weights();   
+    double theWeight = allWeights.front();
+    tree_->column ("evtMcAtNlo", theWeight, 0., "weight");
+  }
 
   // fill Electrons block
   if(dumpElectrons_) {
@@ -335,9 +346,9 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       iEvent.getByLabel (genWeightCollection_, weightHandle);
       double weight = * weightHandle;
       treeFill.writeGenInfoToTree(processID,pthat,filter_eff, cross_section, weight);
-
   }
 
+ 
   if(dumpTree_) tree_->dumpData();
 
 }
