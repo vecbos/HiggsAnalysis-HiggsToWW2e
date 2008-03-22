@@ -64,41 +64,44 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
 
   vector<float> pMC,massMC,thetaMC,etaMC,phiMC,energyMC;
   vector<float> xMC,yMC,zMC;
-  vector<int> idMC,mothMC,nDauMC;
+  vector<int> idMC,mothMC,nDauMC,statusMC;
 
   //  reco::GenParticleCollection::const_iterator genPart;
   reco::CandidateCollection::const_iterator genPart;
   for(genPart=genParticleCollection->begin(); genPart!=genParticleCollection->end(); genPart++) {
     const reco::Candidate & cand = *genPart;
     if((int)pMC.size()>range) break;
-    pMC.push_back(cand.p());
-    massMC.push_back(cand.mass());
-    thetaMC.push_back(cand.theta());
-    etaMC.push_back(cand.eta());
-    phiMC.push_back(cand.phi());
-    energyMC.push_back(cand.energy());
-    idMC.push_back(cand.pdgId());
-    nDauMC.push_back(cand.numberOfDaughters());
+    // write only stables or documentation particles
+    if(cand.status() == 1 || cand.status() == 3) { 
+      pMC.push_back(cand.p());
+      massMC.push_back(cand.mass());
+      thetaMC.push_back(cand.theta());
+      etaMC.push_back(cand.eta());
+      phiMC.push_back(cand.phi());
+      energyMC.push_back(cand.energy());
+      idMC.push_back(cand.pdgId());
+      nDauMC.push_back(cand.numberOfDaughters());
+      statusMC.push_back(cand.status());
     
-    int indMom=-1;
-    int idx=0;
-    //    reco::GenParticleCollection::const_iterator candIter;
-    reco::CandidateCollection::const_iterator candIter;
-    for(candIter=genParticleCollection->begin(); candIter!=genParticleCollection->end(); candIter++) {
-      const reco::Candidate *mom = cand.mother();
-      if(&(*candIter)==&(*mom)) {
-	indMom=idx;
-	break;
+      int indMom=-1;
+      int idx=0;
+      //    reco::GenParticleCollection::const_iterator candIter;
+      reco::CandidateCollection::const_iterator candIter;
+      for(candIter=genParticleCollection->begin(); candIter!=genParticleCollection->end(); candIter++) {
+	const reco::Candidate *mom = cand.mother();
+	if(&(*candIter)==&(*mom)) {
+	  indMom=idx;
+	  break;
+	}
+	idx++;
       }
-      idx++;
-    }
-    mothMC.push_back(indMom);
+      mothMC.push_back(indMom);
     
-    // decay vertex
-    xMC.push_back(cand.vx());
-    yMC.push_back(cand.vy());
-    zMC.push_back(cand.vz());
-      
+      // decay vertex
+      xMC.push_back(cand.vx());
+      yMC.push_back(cand.vy());
+      zMC.push_back(cand.vz());
+    }
   }
   
   std::string theName = "Mc";
@@ -113,6 +116,7 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
   privateData_->cmstree->column(("id"+theName).c_str(), idMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("moth"+theName).c_str(), mothMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("nDau"+theName).c_str(), nDauMC, indName.c_str(), 0, theName.c_str());
+  privateData_->cmstree->column(("status"+theName).c_str(), statusMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("x"+theName).c_str(), xMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("y"+theName).c_str(), yMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("z"+theName).c_str(), zMC, indName.c_str(), 0, theName.c_str());
