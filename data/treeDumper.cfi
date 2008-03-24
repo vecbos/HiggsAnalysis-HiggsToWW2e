@@ -18,7 +18,7 @@ module treeDumper = HWWTreeDumper {
     InputTag genMetCollection = genMet
     InputTag hepMcCollection = source
     InputTag genInfoCollection = source
-    InputTag genWeightCollection = weight:
+    untracked string genWeightCollection = "CSA07WeightProducer"
     untracked string nameFile = "analysisTree.root"
     untracked string nameTree = "ntp1"
     # switch ON/OFF the candidate collections to dump
