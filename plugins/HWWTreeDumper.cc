@@ -113,7 +113,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   muonMatchMap_            = iConfig.getParameter<edm::InputTag>("muonMatchMap");
   hepMcCollection_         = iConfig.getParameter<edm::InputTag>("hepMcCollection");
   genInfoCollection_       = iConfig.getParameter<edm::InputTag>("genInfoCollection");
-  genWeightCollection_     = iConfig.getParameter<edm::InputTag>("genWeightCollection");
+  genWeightCollection_     = iConfig.getUntrackedParameter<std::string>("genWeightCollection");
 
   // trigger Collections
   triggerInputTag_     = iConfig.getParameter<edm::InputTag>("TriggerResultsTag") ;
@@ -313,7 +313,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       Handle<int> genProcessID;
       iEvent.getByLabel( "genEventProcID", genProcessID );
       double processID = *genProcessID;
-      
+      int alpgenId=-1;
+
       Handle<double> genEventScale;
       iEvent.getByLabel( "genEventScale", genEventScale );
       double pthat = *genEventScale;
@@ -332,20 +333,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	  cross_section = *genCrossSect;
 
       } else { //ALPGEN case
-	  Handle<int> alpgenId;
-	  iEvent.getByLabel (genWeightCollection_, alpgenId);
-	  processID = *alpgenId;
+	  Handle<int> alpgenIdHandle;
+	  iEvent.getByLabel (genWeightCollection_, "AlpgenProcessID", alpgenIdHandle);
+	  alpgenId = *alpgenIdHandle;
       }
       
-      //       Handle< HepMCProduct > mc;
-      //       iEvent.getByLabel( hepMcCollection_, mc );
-      //       Handle< GenInfoProduct > gi;
-      //       iEvent.getRun().getByLabel( genInfoCollection_, gi);
-
       Handle< double> weightHandle;
-      iEvent.getByLabel (genWeightCollection_, weightHandle);
+      iEvent.getByLabel (genWeightCollection_, "weight", weightHandle);
       double weight = * weightHandle;
-      treeFill.writeGenInfoToTree(processID,pthat,filter_eff, cross_section, weight);
+      treeFill.writeGenInfoToTree(processID,pthat,filter_eff, cross_section, weight, alpgenId);
   }
 
  

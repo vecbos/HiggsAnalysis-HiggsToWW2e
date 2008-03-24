@@ -87,7 +87,8 @@ private:
   //! association map between reco and generated particles
   edm::InputTag electronMatchMap_, muonMatchMap_;
   //! generator-level informations present in the soups
-  edm::InputTag hepMcCollection_, genInfoCollection_, genWeightCollection_;
+  edm::InputTag hepMcCollection_, genInfoCollection_;
+  std::string genWeightCollection_;
   //! results of the HLT
   edm::InputTag triggerInputTag_ ;
 
