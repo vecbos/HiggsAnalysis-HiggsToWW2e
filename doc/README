@@ -18,6 +18,27 @@ cvs co -r V00-00-04           RecoEgamma/EgammaIsolationAlgos
 cvs co                        HiggsAnalysis/HiggsToWW2Leptons
 cvs co 		              HiggsAnalysis/HiggsToWW2e
 
+[ --- running on the soups:
+> to run on the soups saving the process ID, etc, add:
+cvs co -r V06-18-03      PhysicsTools/HepMCCandAlgos
+
+> and modify the ttbar cross sections:
+vector<double> CSA07EventWeightProducer::GetTTbarCrossSection() {
+  vector<double> vec;
+  vec.push_back(619.0);
+  vec.push_back(176.0);
+  vec.push_back(34.0);
+  vec.push_back(6.0);
+  vec.push_back(1.5);
+  return vec;
+}
+
+> and remember to turn on the CSA07WeightProducer module in the path "hlRecoPath" and
+  turn on the dumping of the infos with 
+  replace treeDumper.dumpGenInfo = true
+  in the cfg file.
+end running on the soups --- ]
+
 > build and test interactively:
 scramv1 b
 cmsRun HiggsAnalysis/HiggsToWW2e/test/HWW2eAnalysis.cfg
