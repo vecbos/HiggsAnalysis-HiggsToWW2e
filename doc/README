@@ -16,7 +16,7 @@ cvs co -r V00-01-03           CondFormats/PhysicsToolsObjects
 cvs co -r V00-07-00-02	      DataFormats/EgammaCandidates
 cvs co -r V00-00-04           RecoEgamma/EgammaIsolationAlgos
 cvs co                        HiggsAnalysis/HiggsToWW2Leptons
-cvs co 		              HiggsAnalysis/HiggsToWW2e
+cvs co -r edm-25Mar08	      HiggsAnalysis/HiggsToWW2e
 
 [ --- running on the soups:
 > to run on the soups saving the process ID, etc, add:
@@ -37,6 +37,10 @@ vector<double> CSA07EventWeightProducer::GetTTbarCrossSection() {
   turn on the dumping of the infos with 
   replace treeDumper.dumpGenInfo = true
   in the cfg file.
+
+> if the soups are skimmed, only AOD are saved, where trackExtras are not present. Do:
+  replace treeDumper.saveFatTrk = false
+
 end running on the soups --- ]
 
 > build and test interactively:
