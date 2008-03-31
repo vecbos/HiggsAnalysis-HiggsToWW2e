@@ -22,7 +22,8 @@ HWWEleAmbiguityResolve::HWWEleAmbiguityResolve (const edm::ParameterSet& conf)
 
 
 void 
-HWWEleAmbiguityResolve::select (edm::Handle<collection> input, const edm::Event& evt ) 
+HWWEleAmbiguityResolve::select (edm::Handle<collection> input, 
+				const edm::Event& evt,  const edm::EventSetup& evtSetup ) 
 {
 
   m_selected.clear() ;
