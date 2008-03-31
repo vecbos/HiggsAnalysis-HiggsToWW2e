@@ -1,0 +1,11 @@
+cd TrackingTools/TrackAssociator/src/
+\rm TrackDetectorAssociator.cc
+wget http://cmsdoc.cern.ch/~mpierini/cms/Vecbos/TrackAssociator/TrackDetectorAssociator.cc
+cd ../test/
+\rm TestTrackAssociator.cc
+wget http://cmsdoc.cern.ch/~mpierini/cms/Vecbos/TrackAssociator/TestTrackAssociator.cc
+cd ../interface
+\rm MuonChamberMatch.h MuonSegmentMatch.h
+wget http://cmsdoc.cern.ch/~mpierini/cms/Vecbos/TrackAssociator/MuonChamberMatch.h
+wget http://cmsdoc.cern.ch/~mpierini/cms/Vecbos/TrackAssociator/MuonSegmentMatch.h
+cd ../../../
