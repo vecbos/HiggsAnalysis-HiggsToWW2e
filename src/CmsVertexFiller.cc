@@ -120,7 +120,6 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
   privateData_->clearTrkVectors();
   
   int nVtx = 0;
-  int nTrk = 0;
 
   Handle<reco::VertexCollection> primaryVertex;
   try { iEvent.getByLabel(vtxcollectionTag, primaryVertex); }
