@@ -15,7 +15,10 @@
 #include <iostream>
 
 HWWEleAmbiguityResolve::HWWEleAmbiguityResolve (const edm::ParameterSet& conf)
-{}
+{
+  m_reducedElectronsRefCollectionLabel = conf.getParameter<edm::InputTag>("reducedElectronsRefCollectionLabel");
+  m_doRefCheck                         = conf.getParameter<bool>("doRefCheck");
+}
 
 
 // ------------------------------------------------------------
@@ -23,11 +26,16 @@ HWWEleAmbiguityResolve::HWWEleAmbiguityResolve (const edm::ParameterSet& conf)
 
 void 
 HWWEleAmbiguityResolve::select (edm::Handle<collection> input, 
-				const edm::Event& evt,  const edm::EventSetup& evtSetup ) 
+				const edm::Event& evt )
+				// for CMSSW >= 1_6_10
+				//				const edm::Event& evt,  const edm::EventSetup& evtSetup ) 
 {
 
   m_selected.clear() ;
   ambEle.clear();
+
+  if ( m_doRefCheck ) 
+    evt.getByLabel(m_reducedElectronsRefCollectionLabel, m_reduced);
 
   edm::LogInfo("HWWEleAmbiguityResolve") << "HWWEleAmbiguityResolve starting, original collection size = " 
 					 << input->size();
@@ -92,7 +100,14 @@ void HWWEleAmbiguityResolve::Init(const edm::Handle<collection> & input) {
       reco::PixelMatchGsfElectronRef electronRef(input, ii);
       edm::LogInfo("HWWEleAmbiguityResolve") << "easy, not ambiguous at all. SuperClusterRef->energy() = " 
 					     << electronRef->superCluster()->energy();
-      m_selected.push_back(electronRef);
+      bool presentInReducedCollection=true;
+      if ( m_doRefCheck ) {
+	if (find(m_reduced->begin(), m_reduced->end(), electronRef) == m_reduced->end())
+	  presentInReducedCollection=false;
+      }
+      
+      if ( presentInReducedCollection )
+	m_selected.push_back(electronRef);
     }
   }
 }
@@ -129,7 +144,15 @@ void HWWEleAmbiguityResolve::ResolveByEoverP(const edm::Handle<collection> & inp
       edm::LogInfo("HWWEleAmbiguityResolve") << "looping on the ambiguous electrons: best ele index = " 
 					     <<  bestEleId << std::endl;
       reco::PixelMatchGsfElectronRef electronRef(input, bestEleId);
-      m_selected.push_back(electronRef);
+      
+      bool presentInReducedCollection=true;
+      if ( m_doRefCheck ) {
+	if (find(m_reduced->begin(), m_reduced->end(), electronRef) == m_reduced->end())
+	  presentInReducedCollection=false;
+      }
+      
+      if ( presentInReducedCollection )
+	m_selected.push_back(electronRef);
     }
     
   }

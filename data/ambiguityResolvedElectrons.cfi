@@ -1,5 +1,7 @@
 # --- ambiguity solving ---
 module ambiguityResolvedElectrons = AmbResolver {
     InputTag src = pixelMatchGsfElectrons
-    bool filter = true
+    bool filter = false
+    InputTag reducedElectronsRefCollectionLabel = isolatedElectronsRef
+    bool doRefCheck = true
 }

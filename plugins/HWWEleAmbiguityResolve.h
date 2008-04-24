@@ -35,7 +35,9 @@ class HWWEleAmbiguityResolve{
   const_iterator end () const { return m_selected.end () ; }
 
   //! the actual selector method 
-  void select (edm::Handle<collection>, const edm::Event&, const edm::EventSetup& ) ;
+  void select (edm::Handle<collection>, const edm::Event& );
+  // for CMSSW >= 1_6_10
+  //  void select (edm::Handle<collection>, const edm::Event&, const edm::EventSetup& ) ;
      
 
  private:
@@ -51,6 +53,12 @@ class HWWEleAmbiguityResolve{
  
   //! map between the ambiguous electrons
   std::vector<std::pair<unsigned int, unsigned int> > ambEle;
+
+  //! if doRefCheck, select only among the elements present in the reducedElectron collection
+  bool m_doRefCheck;
+  edm::InputTag m_reducedElectronsRefCollectionLabel;
+  edm::Handle< edm::RefVector<collection> > m_reduced;
+
 };  
 
 #endif
