@@ -61,6 +61,15 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->eleRawE;
   delete privateData_->eleTrackerP;
   delete privateData_->eleTrackerIso_sumPt;
+  delete privateData_->minDR_tracker02;
+  delete privateData_->minDRveto_tracker02;
+  delete privateData_->sumPtRel_tracker02;
+  delete privateData_->sumPt_tracker02;
+  delete privateData_->sumPtRelSquared_tracker02;
+  delete privateData_->sumPtSquared_tracker02;
+  delete privateData_->sumN_tracker02;
+  delete privateData_->sumPtRel_tracker03;
+  delete privateData_->sumPtRel_tracker05;
   delete privateData_->eleCaloIso_sumPt;
   delete privateData_->eleLik;
   delete privateData_->eleIdCutBasedDecision;
@@ -147,9 +156,9 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
   // collections needed for isolation - FIXME: take once per event, not once per electron: slow
   //
   // get reconstructed tracks
-//   edm::Handle<TrackCollection> tracks;
-//   try { iEvent.getByLabel("ctfWithMaterialTracks","",tracks); }
-//   catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "ctfWithMaterialTracks"; }
+  edm::Handle<TrackCollection> tracks;
+  try { iEvent.getByLabel("ctfWithMaterialTracks","",tracks); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "ctfWithMaterialTracks"; }
 
 //   /// get hcal cells
 //   edm::Handle<HBHERecHitCollection> hcalrhits;
@@ -258,15 +267,37 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
   privateData_->eleCaloIso_sumPt->push_back( sumEt );
 
 
-  // tracker isolation
-//   const TrackCollection tracksC = *(tracks.product());
-//   hwwEleTrackerIsolation trackIsolation(electron, tracksC);
-//   trackIsolation.setExtRadius(0.2);    
-//   trackIsolation.setIntRadius(0.015);    
-//   float minDR_tracker     = trackIsolation.minDeltaR(0.15);  
-//   float minDRveto_tracker = trackIsolation.minDeltaR_withVeto(0.15);  
-//   float sumPt_tracker     = trackIsolation.getPtTracks();  
+  // for tracker isolation studies
+  const TrackCollection tracksC = *(tracks.product());
+  hwwEleTrackerIsolation trackIsolation(&(*electronRef), tracksC);
+  trackIsolation.setExtRadius(0.2);    
+  trackIsolation.setIntRadius(0.015);    
+  float minDR_tracker02     = trackIsolation.minDeltaR(0.15);  
+  float minDRveto_tracker02 = trackIsolation.minDeltaR_withVeto(0.15);  
+  float sumPtRel_tracker02  = trackIsolation.getPtTracks(true,false);
+  float sumPt_tracker02 = trackIsolation.getPtTracks(false,false);
+  float sumPtRelSquared_tracker02  = trackIsolation.getPtTracks(true,true);
+  float sumPtSquared_tracker02 = trackIsolation.getPtTracks(false,true);
+  float sumN_tracker02 = trackIsolation.getNTracks(1.0);
 
+  trackIsolation.setExtRadius(0.3);    
+  trackIsolation.setIntRadius(0.015);    
+  float sumPtRel_tracker03     = trackIsolation.getPtTracks();  
+
+  trackIsolation.setExtRadius(0.5);
+  trackIsolation.setIntRadius(0.015);    
+  float sumPtRel_tracker05     = trackIsolation.getPtTracks();  
+
+  privateData_->minDR_tracker02->push_back(minDR_tracker02);
+  privateData_->minDRveto_tracker02->push_back(minDRveto_tracker02);
+  privateData_->sumPtRel_tracker02->push_back(sumPtRel_tracker02);
+  privateData_->sumPt_tracker02->push_back(sumPt_tracker02);
+  privateData_->sumPtRelSquared_tracker02->push_back(sumPtRelSquared_tracker02);
+  privateData_->sumPtSquared_tracker02->push_back(sumPtSquared_tracker02);
+  privateData_->sumN_tracker02->push_back(sumN_tracker02);
+  privateData_->sumPtRel_tracker03->push_back(sumPtRel_tracker03);
+  privateData_->sumPtRel_tracker05->push_back(sumPtRel_tracker05);
+  
 //   std::cout << "sumPt = " << sumPt << "\tsumPt_tracker = " << sumPt_tracker << std::endl;
 
 //   privateData_->eleTrackerIso_minDR->push_back(minDR_tracker);
@@ -311,6 +342,15 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleDeltaEtaAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleDeltaPhiAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTrackerIso_sumPt"+colSuffix).c_str(), *privateData_->eleTrackerIso_sumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleMinDR_tracker02"+colSuffix).c_str(), *privateData_->minDR_tracker02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleMinDRveto_tracker02"+colSuffix).c_str(), *privateData_->minDRveto_tracker02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPtRel_tracker02"+colSuffix).c_str(), *privateData_->sumPtRel_tracker02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPt_tracker02"+colSuffix).c_str(), *privateData_->sumPt_tracker02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPtRelSquared_tracker02"+colSuffix).c_str(), *privateData_->sumPtRelSquared_tracker02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPtSquared_tracker02"+colSuffix).c_str(), *privateData_->sumPtSquared_tracker02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumN_tracker02"+colSuffix).c_str(), *privateData_->sumN_tracker02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPtRel_tracker03"+colSuffix).c_str(), *privateData_->sumPtRel_tracker03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPtRel_tracker05"+colSuffix).c_str(), *privateData_->sumPtRel_tracker05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleCaloIso_sumPt"+colSuffix).c_str(), *privateData_->eleCaloIso_sumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
@@ -338,6 +378,15 @@ void CmsEleIDTreeFillerData::initialise() {
   eleRawE                  = new vector<float>;
   eleTrackerP              = new vector<float>;
   eleTrackerIso_sumPt      = new vector<float>;
+  minDR_tracker02          = new vector<float>;
+  minDRveto_tracker02      = new vector<float>;
+  sumPtRel_tracker02       = new vector<float>;
+  sumPt_tracker02          = new vector<float>;
+  sumPtRelSquared_tracker02= new vector<float>;
+  sumPtSquared_tracker02   = new vector<float>;
+  sumN_tracker02           = new vector<float>;
+  sumPtRel_tracker03       = new vector<float>;
+  sumPtRel_tracker05       = new vector<float>;
   eleCaloIso_sumPt         = new vector<float>;
   eleIdCutBasedDecision    = new vector<bool>;
   eleLik                   = new vector<float>;
@@ -365,6 +414,15 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   eleRawE                  ->clear();
   eleTrackerP              ->clear();
   eleTrackerIso_sumPt      ->clear();
+  minDR_tracker02          ->clear();
+  minDRveto_tracker02      ->clear();
+  sumPtRel_tracker02       ->clear();
+  sumPt_tracker02          ->clear();
+  sumPtRelSquared_tracker02->clear();
+  sumPtSquared_tracker02   ->clear();
+  sumN_tracker02           ->clear();
+  sumPtRel_tracker03       ->clear();
+  sumPtRel_tracker05       ->clear();
   eleCaloIso_sumPt         ->clear();
   eleIdCutBasedDecision    ->clear();
   eleLik                   ->clear();
