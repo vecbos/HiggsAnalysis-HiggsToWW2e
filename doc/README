@@ -16,7 +16,10 @@ cvs co -r V00-01-03           CondFormats/PhysicsToolsObjects
 cvs co -r V00-07-00-02	      DataFormats/EgammaCandidates
 cvs co -r V00-00-04           RecoEgamma/EgammaIsolationAlgos
 cvs co                        HiggsAnalysis/HiggsToWW2Leptons
-cvs co -r edm-25Mar08	      HiggsAnalysis/HiggsToWW2e
+cvs co -r edm-24Apr08	      HiggsAnalysis/HiggsToWW2e
+cvs co -r V02-15-10           TrackingTools/TrackAssociator
+
+source HiggsAnalysis/HiggsToWW2e/doc/patch.src
 
 [ --- running on the soups:
 > to run on the soups saving the process ID, etc, add:
