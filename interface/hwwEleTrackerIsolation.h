@@ -44,7 +44,8 @@ class hwwEleTrackerIsolation{
   void setExtRadius (float extRadius);
   void setIntRadius (float intRadius);
   
-  float getPtTracks () const;
+  float getPtTracks (bool relative=true, bool squared=false) const;
+  float getNTracks (float minPtTrack=1.0) const;
   float minDeltaR (float minPt) const;
   float minDeltaR_withVeto (float minPt) const;
   bool isIsolated (float ptCut = 0.05) const;
