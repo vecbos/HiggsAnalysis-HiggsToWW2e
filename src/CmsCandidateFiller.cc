@@ -95,6 +95,9 @@ CmsCandidateFiller::CmsCandidateFiller(CmsTree *cmsTree, bool fatTree, int maxTr
 {
   cmstree=cmsTree;
 
+  saveCand_=true;
+  doMcMatch_=false;
+
   trkIndexName_ = new std::string("n");
 
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
