@@ -50,9 +50,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 
-#include "CLHEP/HepMC/GenParticle.h"
-
-
 #include <TTree.h>
 
 #include <string>

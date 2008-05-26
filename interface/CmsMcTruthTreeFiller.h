@@ -23,7 +23,6 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 
-#include "CLHEP/HepMC/GenEvent.h"
 #include <string>
 #include <TTree.h>
 

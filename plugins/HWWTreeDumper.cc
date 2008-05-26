@@ -29,7 +29,6 @@
 #include "DataFormats/EgammaCandidates/interface/ElectronFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Electron.h"
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
-#include "CLHEP/HepMC/GenEvent.h"
 
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"

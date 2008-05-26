@@ -39,11 +39,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
 
-#include "CLHEP/HepMC/GenEvent.h"
-
 #include "PhysicsTools/HepMCCandAlgos/interface/MCCandMatcher.h"
-#include "CLHEP/HepMC/GenParticle.h"
-
 #include "FWCore/Framework/interface/TriggerNames.h"
 
 #include <TTree.h>

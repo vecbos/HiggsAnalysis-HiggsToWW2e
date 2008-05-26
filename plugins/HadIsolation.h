@@ -8,6 +8,7 @@
 //CMSSW includes
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "RecoCaloTools/MetaCollections/interface/CaloRecHitMetaCollections.h"
 

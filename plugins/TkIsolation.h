@@ -11,8 +11,9 @@
 //CMSSW includes 
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
-
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 
 class TkIsolation {
  public:

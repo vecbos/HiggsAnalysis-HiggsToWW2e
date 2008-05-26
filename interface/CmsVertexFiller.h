@@ -26,9 +26,6 @@
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
-
-
-#include "CLHEP/HepMC/GenEvent.h"
 #include <TTree.h>
 
 using namespace cms;

@@ -36,7 +36,6 @@
 #include "DataFormats/METReco/interface/GenMETCollection.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
-#include "CLHEP/HepMC/GenEvent.h"
 #include <TTree.h>
 
 using namespace cms;
