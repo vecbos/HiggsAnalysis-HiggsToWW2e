@@ -38,7 +38,6 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
-#include "CLHEP/HepMC/GenEvent.h"
 #include <TTree.h>
 
 using namespace cms;

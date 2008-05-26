@@ -37,9 +37,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
 
-#include "CLHEP/HepMC/GenParticle.h"
-
-
 #include <TTree.h>
 
 #include <string>
@@ -275,21 +272,45 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
 				     TrackRef trkRef) {
   if(&trkRef) {
     
-    privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
-    privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
-    privateData_->pzAtInner->push_back(trkRef->innerMomentum().z());
+    if ( saveFatTrk_ ) { 
+      
+      privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
+      privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
+      privateData_->pzAtInner->push_back(trkRef->innerMomentum().z());
+      
+      privateData_->xAtInner->push_back(trkRef->innerPosition().x());
+      privateData_->yAtInner->push_back(trkRef->innerPosition().y());
+      privateData_->zAtInner->push_back(trkRef->innerPosition().z());
+      
+      privateData_->pxAtOuter->push_back(trkRef->outerMomentum().x());
+      privateData_->pyAtOuter->push_back(trkRef->outerMomentum().y());
+      privateData_->pzAtOuter->push_back(trkRef->outerMomentum().z());
+      
+      privateData_->xAtOuter->push_back(trkRef->outerPosition().x());
+      privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
+      privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
+      
+    }
 
-    privateData_->xAtInner->push_back(trkRef->innerPosition().x());
-    privateData_->yAtInner->push_back(trkRef->innerPosition().y());
-    privateData_->zAtInner->push_back(trkRef->innerPosition().z());
+    else {
 
-    privateData_->pxAtOuter->push_back(trkRef->outerMomentum().x());
-    privateData_->pyAtOuter->push_back(trkRef->outerMomentum().y());
-    privateData_->pzAtOuter->push_back(trkRef->outerMomentum().z());
+      privateData_->pxAtInner->push_back( -1.0 );
+      privateData_->pyAtInner->push_back( -1.0 );
+      privateData_->pzAtInner->push_back( -1.0 );
+      
+      privateData_->xAtInner->push_back( -1.0 );
+      privateData_->yAtInner->push_back( -1.0 );
+      privateData_->zAtInner->push_back( -1.0 );
+      
+      privateData_->pxAtOuter->push_back( -1.0 );
+      privateData_->pyAtOuter->push_back( -1.0 );
+      privateData_->pzAtOuter->push_back( -1.0 );
+      
+      privateData_->xAtOuter->push_back( -1.0 );
+      privateData_->yAtOuter->push_back( -1.0 );
+      privateData_->zAtOuter->push_back( -1.0 );
 
-    privateData_->xAtOuter->push_back(trkRef->outerPosition().x());
-    privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
-    privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
+    }
 
     privateData_->muTrackNormalizedChi2->push_back(trkRef->normalizedChi2());
 
@@ -310,60 +331,57 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
     privateData_->muTrackVy ->push_back(trkRef->vy());
     privateData_->muTrackVz ->push_back(trkRef->vz());
 
+    // commented out for 184
     // Create the FreeTrajectoryState from the track
-    GlobalVector vector( trkRef->momentum().x(), trkRef->momentum().y(), trkRef->momentum().z() );
-    GlobalPoint point( trkRef->vertex().x(), trkRef->vertex().y(),  trkRef->vertex().z() );
-    GlobalTrajectoryParameters tPars(point, vector, trkRef->charge(), &*bField);    
-    // Dmytro WILL FIX THIS !!!
-    // http://cmslxr.fnal.gov/lxr/source/TrackingTools/TrackAssociator/src/TrackDetectorAssociator.cc
-    // need to convert from perigee to global or helix (curvilinear) frame
-    // for now just an arbitrary matrix.
-    HepSymMatrix covT(6,1); covT *= 1e-6; // initialize to sigma=1e-3
-    CartesianTrajectoryError tCov(covT);
+//     GlobalVector vector( trkRef->momentum().x(), trkRef->momentum().y(), trkRef->momentum().z() );
+//     GlobalPoint point( trkRef->vertex().x(), trkRef->vertex().y(),  trkRef->vertex().z() );
+//     GlobalTrajectoryParameters tPars(point, vector, trkRef->charge(), &*bField);    
+//     HepSymMatrix covT(6,1); covT *= 1e-6; // initialize to sigma=1e-3
+//     CartesianTrajectoryError tCov(covT);
     
-    // Create the Helix and propagate it
-    FreeTrajectoryState* innerState = new FreeTrajectoryState(tPars, tCov);
-    SteppingHelixStateInfo trackOrigin(*innerState);
-    cachedTrajectory_.setStateAtIP(trackOrigin);
+//     // Create the Helix and propagate it
+//     FreeTrajectoryState* innerState = new FreeTrajectoryState(tPars, tCov);
+//     SteppingHelixStateInfo trackOrigin(*innerState);
+//     cachedTrajectory_.setStateAtIP(trackOrigin);
 
-    cachedTrajectory_.propagateAll(trackOrigin);
+//     cachedTrajectory_.propagateAll(trackOrigin);
 
-    // get trajectory in calorimeters
-    cachedTrajectory_.findEcalTrajectory(ecalDetIdAssociator_.volume() );
-    cachedTrajectory_.findHcalTrajectory(hcalDetIdAssociator_.volume() );
-    cachedTrajectory_.findHOTrajectory( hoDetIdAssociator_.volume() );
+//     // get trajectory in calorimeters
+//     cachedTrajectory_.findEcalTrajectory(ecalDetIdAssociator_.volume() );
+//     cachedTrajectory_.findHcalTrajectory(hcalDetIdAssociator_.volume() );
+//     cachedTrajectory_.findHOTrajectory( hoDetIdAssociator_.volume() );
     
     //    XYZPoint ECALPoint = cachedTrajectory_.getStateAtEcal().position(); 
 
-    // 3Momentum at ECAL inner surface
-    privateData_->xECAL->push_back(cachedTrajectory_.getStateAtEcal().position().x());
-    privateData_->yECAL->push_back(cachedTrajectory_.getStateAtEcal().position().y());
-    privateData_->zECAL->push_back(cachedTrajectory_.getStateAtEcal().position().z());
+//     // 3Momentum at ECAL inner surface
+//     privateData_->xECAL->push_back(cachedTrajectory_.getStateAtEcal().position().x());
+//     privateData_->yECAL->push_back(cachedTrajectory_.getStateAtEcal().position().y());
+//     privateData_->zECAL->push_back(cachedTrajectory_.getStateAtEcal().position().z());
     
-    // 3D Position at ECAL inner surface
-    privateData_->pxECAL->push_back(cachedTrajectory_.getStateAtEcal().momentum().x());
-    privateData_->pyECAL->push_back(cachedTrajectory_.getStateAtEcal().momentum().y());
-    privateData_->pzECAL->push_back(cachedTrajectory_.getStateAtEcal().momentum().z());
+//     // 3D Position at ECAL inner surface
+//     privateData_->pxECAL->push_back(cachedTrajectory_.getStateAtEcal().momentum().x());
+//     privateData_->pyECAL->push_back(cachedTrajectory_.getStateAtEcal().momentum().y());
+//     privateData_->pzECAL->push_back(cachedTrajectory_.getStateAtEcal().momentum().z());
     
-    // 3Momentum at HCAL inner surface
-    privateData_->xHCAL->push_back(cachedTrajectory_.getStateAtHcal().position().x());
-    privateData_->yHCAL->push_back(cachedTrajectory_.getStateAtHcal().position().y());
-    privateData_->zHCAL->push_back(cachedTrajectory_.getStateAtHcal().position().z());
+//     // 3Momentum at HCAL inner surface
+//     privateData_->xHCAL->push_back(cachedTrajectory_.getStateAtHcal().position().x());
+//     privateData_->yHCAL->push_back(cachedTrajectory_.getStateAtHcal().position().y());
+//     privateData_->zHCAL->push_back(cachedTrajectory_.getStateAtHcal().position().z());
     
-    // 3D Position at HCAL inner surface
-    privateData_->pxHCAL->push_back(cachedTrajectory_.getStateAtHcal().momentum().x());
-    privateData_->pyHCAL->push_back(cachedTrajectory_.getStateAtHcal().momentum().y());
-    privateData_->pzHCAL->push_back(cachedTrajectory_.getStateAtHcal().momentum().z());
+//     // 3D Position at HCAL inner surface
+//     privateData_->pxHCAL->push_back(cachedTrajectory_.getStateAtHcal().momentum().x());
+//     privateData_->pyHCAL->push_back(cachedTrajectory_.getStateAtHcal().momentum().y());
+//     privateData_->pzHCAL->push_back(cachedTrajectory_.getStateAtHcal().momentum().z());
     
-    // 3Momentum at HO inner surface
-    privateData_->xHO->push_back(cachedTrajectory_.getStateAtHO().position().x());
-    privateData_->yHO->push_back(cachedTrajectory_.getStateAtHO().position().y());
-    privateData_->zHO->push_back(cachedTrajectory_.getStateAtHO().position().z());
+//     // 3Momentum at HO inner surface
+//     privateData_->xHO->push_back(cachedTrajectory_.getStateAtHO().position().x());
+//     privateData_->yHO->push_back(cachedTrajectory_.getStateAtHO().position().y());
+//     privateData_->zHO->push_back(cachedTrajectory_.getStateAtHO().position().z());
     
-    // 3D Position at HO inner surface
-    privateData_->pxHO->push_back(cachedTrajectory_.getStateAtHO().momentum().x());
-    privateData_->pyHO->push_back(cachedTrajectory_.getStateAtHO().momentum().y());
-    privateData_->pzHO->push_back(cachedTrajectory_.getStateAtHO().momentum().z());
+//     // 3D Position at HO inner surface
+//     privateData_->pxHO->push_back(cachedTrajectory_.getStateAtHO().momentum().x());
+//     privateData_->pyHO->push_back(cachedTrajectory_.getStateAtHO().momentum().y());
+//     privateData_->pzHO->push_back(cachedTrajectory_.getStateAtHO().momentum().z());
     
   }
   else {
@@ -403,78 +421,95 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
     privateData_->muTrackVz ->push_back(-1.);
 
     // 3Momentum at ECAL inner surface
-    privateData_->pxECAL->push_back(-1.);
-    privateData_->pyECAL->push_back(-1.);
-    privateData_->pzECAL->push_back(-1.);
+//     privateData_->pxECAL->push_back(-1.);
+//     privateData_->pyECAL->push_back(-1.);
+//     privateData_->pzECAL->push_back(-1.);
     
-    // 3D Position at ECAL inner surface
-    privateData_->xECAL->push_back(-1.);
-    privateData_->yECAL->push_back(-1.);
-    privateData_->zECAL->push_back(-1.);
+//     // 3D Position at ECAL inner surface
+//     privateData_->xECAL->push_back(-1.);
+//     privateData_->yECAL->push_back(-1.);
+//     privateData_->zECAL->push_back(-1.);
     
-    // 3Momentum at HCAL inner surface
-    privateData_->pxHCAL->push_back(-1.);
-    privateData_->pyHCAL->push_back(-1.);
-    privateData_->pzHCAL->push_back(-1.);
+//     // 3Momentum at HCAL inner surface
+//     privateData_->pxHCAL->push_back(-1.);
+//     privateData_->pyHCAL->push_back(-1.);
+//     privateData_->pzHCAL->push_back(-1.);
     
-    // 3D Position at HCAL inner surface
-    privateData_->xHCAL->push_back(-1.);
-    privateData_->yHCAL->push_back(-1.);
-    privateData_->zHCAL->push_back(-1.);
+//     // 3D Position at HCAL inner surface
+//     privateData_->xHCAL->push_back(-1.);
+//     privateData_->yHCAL->push_back(-1.);
+//     privateData_->zHCAL->push_back(-1.);
     
-    // 3Momentum at HO inner surface
-    privateData_->pxHO->push_back(-1.);
-    privateData_->pyHO->push_back(-1.);
-    privateData_->pzHO->push_back(-1.);
+//     // 3Momentum at HO inner surface
+//     privateData_->pxHO->push_back(-1.);
+//     privateData_->pyHO->push_back(-1.);
+//     privateData_->pzHO->push_back(-1.);
     
-    // 3D Position at HO inner surface
-    privateData_->xHO->push_back(-1.);
-    privateData_->yHO->push_back(-1.);
-    privateData_->zHO->push_back(-1.);
+//     // 3D Position at HO inner surface
+//     privateData_->xHO->push_back(-1.);
+//     privateData_->yHO->push_back(-1.);
+//     privateData_->zHO->push_back(-1.);
     
   }
 }
 
 void CmsMuonFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
-  std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
 
-  cmstree->column((colPrefix+"pxAtOuter"+colSuffix).c_str(), *privateData_->pxAtOuter, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pyAtOuter"+colSuffix).c_str(), *privateData_->pyAtOuter, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pzAtOuter"+colSuffix).c_str(), *privateData_->pzAtOuter, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"xAtOuter"+colSuffix).c_str(), *privateData_->xAtOuter, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"yAtOuter"+colSuffix).c_str(), *privateData_->yAtOuter, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"zAtOuter"+colSuffix).c_str(), *privateData_->zAtOuter, nCandString.c_str(), 0, "Reco");
+  std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
+  
+  cmstree->column((colPrefix+"muTrackNormalizedChi2"+colSuffix).c_str(), *privateData_->muTrackNormalizedChi2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackDxy"+colSuffix).c_str(), *privateData_->muTrackDxy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackD0"+colSuffix).c_str(),  *privateData_->muTrackD0, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackDsz"+colSuffix).c_str(), *privateData_->muTrackDsz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackDz"+colSuffix).c_str(),  *privateData_->muTrackDz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackDxyError"+colSuffix).c_str(), *privateData_->muTrackDxyError, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackD0Error"+colSuffix).c_str(),  *privateData_->muTrackD0Error, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackDszError"+colSuffix).c_str(), *privateData_->muTrackDszError, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackDzError"+colSuffix).c_str(),  *privateData_->muTrackDzError, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackValidHits"+colSuffix).c_str(),  *privateData_->muTrackValidHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackLostHits"+colSuffix).c_str(),   *privateData_->muTrackLostHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackVx"+colSuffix).c_str(),  *privateData_->muTrackVx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackVy"+colSuffix).c_str(),  *privateData_->muTrackVy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muTrackVz"+colSuffix).c_str(),  *privateData_->muTrackVz, nCandString.c_str(), 0, "Reco");
+
+  // 3Momentum at ECAL inner surface
+  //     cmstree->column((colPrefix+"pxECAL"+colSuffix).c_str(), *privateData_->pxECAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"pyECAL"+colSuffix).c_str(), *privateData_->pyECAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"pzECAL"+colSuffix).c_str(), *privateData_->pzECAL, nCandString.c_str(), 0, "Reco");  
+    
+  //     // 3D Position at ECAL inner surface
+  //     cmstree->column((colPrefix+"xECAL"+colSuffix).c_str(), *privateData_->xECAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"yECAL"+colSuffix).c_str(), *privateData_->yECAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"zECAL"+colSuffix).c_str(), *privateData_->zECAL, nCandString.c_str(), 0, "Reco");
+    
+  //     // 3Momentum at HCAL inner surface
+  //     cmstree->column((colPrefix+"pxHCAL"+colSuffix).c_str(), *privateData_->pxHCAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"pyHCAL"+colSuffix).c_str(), *privateData_->pyHCAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"pzHCAL"+colSuffix).c_str(), *privateData_->pzHCAL, nCandString.c_str(), 0, "Reco");  
+    
+  //     // 3D Position at HCAL inner surface
+  //     cmstree->column((colPrefix+"xHCAL"+colSuffix).c_str(), *privateData_->xHCAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"yHCAL"+colSuffix).c_str(), *privateData_->yHCAL, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"zHCAL"+colSuffix).c_str(), *privateData_->zHCAL, nCandString.c_str(), 0, "Reco");
+    
+  //     // 3Momentum at HO inner surface
+  //     cmstree->column((colPrefix+"pxHO"+colSuffix).c_str(), *privateData_->pxHO, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"pyHO"+colSuffix).c_str(), *privateData_->pyHO, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"pzHO"+colSuffix).c_str(), *privateData_->pzHO, nCandString.c_str(), 0, "Reco");  
+    
+  //     // 3D Position at HO inner surface
+  //     cmstree->column((colPrefix+"xHO"+colSuffix).c_str(), *privateData_->xHO, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"yHO"+colSuffix).c_str(), *privateData_->yHO, nCandString.c_str(), 0, "Reco");
+  //     cmstree->column((colPrefix+"zHO"+colSuffix).c_str(), *privateData_->zHO, nCandString.c_str(), 0, "Reco");
 
   if(saveFatTrk_) {
-    // 3Momentum at ECAL inner surface
-    cmstree->column((colPrefix+"pxECAL"+colSuffix).c_str(), *privateData_->pxECAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyECAL"+colSuffix).c_str(), *privateData_->pyECAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzECAL"+colSuffix).c_str(), *privateData_->pzECAL, nCandString.c_str(), 0, "Reco");  
-    
-    // 3D Position at ECAL inner surface
-    cmstree->column((colPrefix+"xECAL"+colSuffix).c_str(), *privateData_->xECAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"yECAL"+colSuffix).c_str(), *privateData_->yECAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"zECAL"+colSuffix).c_str(), *privateData_->zECAL, nCandString.c_str(), 0, "Reco");
-    
-    // 3Momentum at HCAL inner surface
-    cmstree->column((colPrefix+"pxHCAL"+colSuffix).c_str(), *privateData_->pxHCAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyHCAL"+colSuffix).c_str(), *privateData_->pyHCAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzHCAL"+colSuffix).c_str(), *privateData_->pzHCAL, nCandString.c_str(), 0, "Reco");  
-    
-    // 3D Position at HCAL inner surface
-    cmstree->column((colPrefix+"xHCAL"+colSuffix).c_str(), *privateData_->xHCAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"yHCAL"+colSuffix).c_str(), *privateData_->yHCAL, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"zHCAL"+colSuffix).c_str(), *privateData_->zHCAL, nCandString.c_str(), 0, "Reco");
-    
-    // 3Momentum at HO inner surface
-    cmstree->column((colPrefix+"pxHO"+colSuffix).c_str(), *privateData_->pxHO, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyHO"+colSuffix).c_str(), *privateData_->pyHO, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzHO"+colSuffix).c_str(), *privateData_->pzHO, nCandString.c_str(), 0, "Reco");  
-    
-    // 3D Position at HO inner surface
-    cmstree->column((colPrefix+"xHO"+colSuffix).c_str(), *privateData_->xHO, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"yHO"+colSuffix).c_str(), *privateData_->yHO, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"zHO"+colSuffix).c_str(), *privateData_->zHO, nCandString.c_str(), 0, "Reco");
+
+    cmstree->column((colPrefix+"pxAtOuter"+colSuffix).c_str(), *privateData_->pxAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pyAtOuter"+colSuffix).c_str(), *privateData_->pyAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pzAtOuter"+colSuffix).c_str(), *privateData_->pzAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"xAtOuter"+colSuffix).c_str(), *privateData_->xAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"yAtOuter"+colSuffix).c_str(), *privateData_->yAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"zAtOuter"+colSuffix).c_str(), *privateData_->zAtOuter, nCandString.c_str(), 0, "Reco");
     
     cmstree->column((colPrefix+"pxAtInner"+colSuffix).c_str(), *privateData_->pxAtInner, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pyAtInner"+colSuffix).c_str(), *privateData_->pyAtInner, nCandString.c_str(), 0, "Reco");
@@ -482,20 +517,6 @@ void CmsMuonFiller::treeTrkInfo(const std::string &colPrefix, const std::string 
     cmstree->column((colPrefix+"xAtInner"+colSuffix).c_str(), *privateData_->xAtInner, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"yAtInner"+colSuffix).c_str(), *privateData_->yAtInner, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"zAtInner"+colSuffix).c_str(), *privateData_->zAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackNormalizedChi2"+colSuffix).c_str(), *privateData_->muTrackNormalizedChi2, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackDxy"+colSuffix).c_str(), *privateData_->muTrackDxy, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackD0"+colSuffix).c_str(),  *privateData_->muTrackD0, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackDsz"+colSuffix).c_str(), *privateData_->muTrackDsz, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackDz"+colSuffix).c_str(),  *privateData_->muTrackDz, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackDxyError"+colSuffix).c_str(), *privateData_->muTrackDxyError, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackD0Error"+colSuffix).c_str(),  *privateData_->muTrackD0Error, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackDszError"+colSuffix).c_str(), *privateData_->muTrackDszError, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackDzError"+colSuffix).c_str(),  *privateData_->muTrackDzError, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackValidHits"+colSuffix).c_str(),  *privateData_->muTrackValidHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackLostHits"+colSuffix).c_str(),   *privateData_->muTrackLostHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackVx"+colSuffix).c_str(),  *privateData_->muTrackVx, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackVy"+colSuffix).c_str(),  *privateData_->muTrackVy, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"muTrackVz"+colSuffix).c_str(),  *privateData_->muTrackVz, nCandString.c_str(), 0, "Reco");
 
   }
 }
@@ -512,7 +533,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->hoEt03->push_back(Iso03.hoEt);
     privateData_->nTrk03->push_back(Iso03.nTracks);
     privateData_->nJets03->push_back(Iso03.nJets);
-    
+
     // default isolation variables 0.5
     MuonIsolation Iso05  = muon->getIsolationR05();
     privateData_->sumPt05->push_back(Iso05.sumPt);
@@ -754,7 +775,7 @@ void CmsMuonFiller::SetGeometry(const edm::EventSetup& iSetup) {
 
   // setup propagator
   iSetup.get<IdealMagneticFieldRecord>().get(bField);
-  
+
   SteppingHelixPropagator* prop  = new SteppingHelixPropagator(&*bField,anyDirection);
   prop->setMaterialMode(false);
   prop->applyRadX0Correction(true);
@@ -783,8 +804,10 @@ void CmsMuonFiller::SetGeometry(const edm::EventSetup& iSetup) {
   //   iSetup.get<DetIdAssociatorRecord>().get("CaloDetIdAssociator", caloDetIdAssociator_);
   //   iSetup.get<DetIdAssociatorRecord>().get("MuonDetIdAssociator", muonDetIdAssociator_);  
 
-  cachedTrajectory_.setDetectorRadius(muonDetIdAssociator_.volume().maxR());
-  cachedTrajectory_.setDetectorLength(2.*muonDetIdAssociator_.volume().maxZ());
+  //! CHECK! changed setDetectorRadius and setDetectorLength to the following in 1_8_4 migration
+  // crashes: map is not valid
+//   cachedTrajectory_.setMaxDetectorRadius(muonDetIdAssociator_.volume().maxR());
+//   cachedTrajectory_.setMaxDetectorLength(2.*muonDetIdAssociator_.volume().maxZ());
 
 //     double HOmaxR = hoDetIdAssociator_.volume().maxR();
 //     double HOmaxZ = hoDetIdAssociator_.volume().maxZ();
