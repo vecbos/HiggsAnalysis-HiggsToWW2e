@@ -37,6 +37,7 @@
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchElectronFwd.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
@@ -47,8 +48,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 
 #include "PhysicsTools/HepMCCandAlgos/interface/MCCandMatcher.h"
-#include "CLHEP/HepMC/GenParticle.h"
-
 
 #include <TTree.h>
 
@@ -266,8 +265,12 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     eIDFiller.setEcalBarrelClusterShapes(EcalBarrelClusterShapes_);
     eIDFiller.setEcalEndcapClusterShapes(EcalEndcapClusterShapes_);
     eIDFiller.setElectronIdProducer(electronIDAssocProducer_);
+    // those for egamma official isolations
     eIDFiller.setTkIsolationProducer(tkIsolationProducer_);
     eIDFiller.setTowerIsolationProducer(towerIsolationProducer_);
+    // those for private H->WW isolations
+    eIDFiller.setTracksProducer(tracksProducer_);
+    eIDFiller.setCalotowersProducer(calotowersProducer_);
     eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
@@ -340,7 +343,6 @@ void CmsElectronFiller::writeTrkInfo(const Candidate *cand,
       privateData_->xAtOuter->push_back( -1.0 );
       privateData_->yAtOuter->push_back( -1.0 );
       privateData_->zAtOuter->push_back( -1.0 );
-
 
     }
     

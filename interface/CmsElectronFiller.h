@@ -32,7 +32,6 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
-#include "CLHEP/HepMC/GenEvent.h"
 #include <TTree.h>
 
 using namespace cms;
@@ -111,6 +110,11 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void setTkIsolationProducer( edm::InputTag tkIsolationProducer ) { tkIsolationProducer_ = tkIsolationProducer; }
   //! set the HCAL isolation producer with calo towers
   void setTowerIsolationProducer( edm::InputTag towerIsolationProducer ) { towerIsolationProducer_ = towerIsolationProducer; }
+  //! set the track producer for tracker isolation
+  void setTracksProducer( edm::InputTag tracksProducer ) { tracksProducer_ = tracksProducer; }
+  //! set the calotower producer for calorimetric isolation
+  void setCalotowersProducer( edm::InputTag calotowersProducer ) { calotowersProducer_ = calotowersProducer; }
+
 
  private:
   
@@ -143,6 +147,9 @@ class CmsElectronFiller : public CmsCandidateFiller {
   edm::InputTag electronIDAssocProducer_;
   edm::InputTag tkIsolationProducer_;
   edm::InputTag towerIsolationProducer_;
+
+  edm::InputTag tracksProducer_;
+  edm::InputTag calotowersProducer_;
 
   CmsTree *cmstree;
 
