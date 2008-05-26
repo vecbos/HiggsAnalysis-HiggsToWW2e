@@ -30,7 +30,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "DataFormats/Math/interface/Point3D.h"
-#include "CLHEP/HepMC/GenEvent.h"
 #include <TTree.h>
 
 using namespace cms;
@@ -84,7 +83,7 @@ class CmsTrackFiller : public CmsCandidateFiller {
 
   /// dump tracking related variables
   void saveTrk(bool );
-  /// dump more ECAL related variables
+  /// dump track-extras related variables
   void saveFatTrk(bool );
   /// Find Primary Vertex
   void findPrimaryVertex(const edm::Event& iEvent);
