@@ -6,6 +6,8 @@
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaReco/interface/BasicCluster.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/HcalRecHit/interface/HBHERecHit.h"
 #include "AnalysisDataFormats/Egamma/interface/ElectronID.h"
@@ -13,7 +15,7 @@
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCaloIsolation.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCalotowerIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 
@@ -60,17 +62,15 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->eleNxtalCorrE;
   delete privateData_->eleRawE;
   delete privateData_->eleTrackerP;
-  delete privateData_->eleTrackerIso_sumPt;
-  delete privateData_->minDR_tracker02;
-  delete privateData_->minDRveto_tracker02;
-  delete privateData_->sumPtRel_tracker02;
-  delete privateData_->sumPt_tracker02;
-  delete privateData_->sumPtRelSquared_tracker02;
-  delete privateData_->sumPtSquared_tracker02;
-  delete privateData_->sumN_tracker02;
-  delete privateData_->sumPtRel_tracker03;
-  delete privateData_->sumPtRel_tracker05;
-  delete privateData_->eleCaloIso_sumPt;
+  delete privateData_->minDR02;
+  delete privateData_->minDRveto02;
+  delete privateData_->sumPt02;
+  delete privateData_->sumPtSquared02;
+  delete privateData_->sumN02;
+  delete privateData_->sumPt04;
+  delete privateData_->sumPt05;
+  delete privateData_->sumHadEt;
+  delete privateData_->sumEmEt;
   delete privateData_->eleLik;
   delete privateData_->eleIdCutBasedDecision;
   delete privateData_->eleTip;
@@ -115,12 +115,19 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get electronId Assoc Producer" << electronIDAssocProducer_; }
     const reco::ElectronIDAssociationCollection& eleIdAssoc = *electronIDAssocHandle;
 
-    // Read the tracker and HCAL isolation association vectors
-    try { iEvent.getByLabel(tkIsolationProducer_, tkIsolationHandle_); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracker isolation product" << tkIsolationProducer_; }
+    // Read the tracker and HCAL isolation association vectors (egamma isolations)
+//     try { iEvent.getByLabel(tkIsolationProducer_, tkIsolationHandle_); }
+//     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracker isolation product" << tkIsolationProducer_; }
 
-    try { iEvent.getByLabel(towerIsolationProducer_, towerIsolationHandle_); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get HCAL tower isolation product" << towerIsolationProducer_; }
+//     try { iEvent.getByLabel(towerIsolationProducer_, towerIsolationHandle_); }
+//     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get HCAL tower isolation product" << towerIsolationProducer_; }
+
+    // Read the tracks and calotowers collections for isolation
+    try { iEvent.getByLabel(tracksProducer_, m_tracks); }
+    catch (  cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracks product" << tracksProducer_; }
+    
+    try { iEvent.getByLabel(calotowersProducer_, m_calotowers); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get calotowers product" << calotowersProducer_; }
 
     for(int index = 0; index < (int)collection->size(); index++) {
 	  
@@ -151,25 +158,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
 				      const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, 
 				      const reco::BasicClusterShapeAssociationCollection& endcapClShpMap,
 				      const reco::ElectronIDAssociationCollection& eleIdAssoc) { 
-
-  // --------------------------------------
-  // collections needed for isolation - FIXME: take once per event, not once per electron: slow
-  //
-  // get reconstructed tracks
-  edm::Handle<TrackCollection> tracks;
-  try { iEvent.getByLabel("ctfWithMaterialTracks","",tracks); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "ctfWithMaterialTracks"; }
-
-//   /// get hcal cells
-//   edm::Handle<HBHERecHitCollection> hcalrhits;
-//   try { iEvent.getByLabel("hbhereco", hcalrhits); }
-//   catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get collection: " << "hbhereco"; }
-
-//   // taking the calo geometry
-//   edm::ESHandle<CaloGeometry> pG;
-//   iSetup.get<IdealGeometryRecord>().get(pG);
-//   caloGeo = pG.product();
-  //--------------------------------------
 
   SuperClusterRef sclusRef = electronRef->superCluster();
   // ele corr - notcorr energy
@@ -243,7 +231,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
     if ( electronIDAssocItr==eleIdAssoc.end() ) edm::LogWarning("CmsEleIDTreeFiller") << "cannot find the electron id associated with electron";
     
     const reco::ElectronIDRef& id = electronIDAssocItr->val;
-    
+
     privateData_->eleIdCutBasedDecision->push_back( id->cutBasedDecision() );
     privateData_->eleLik->push_back( id->likelihood() );
 
@@ -258,53 +246,44 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
 
   // --- isolations ---
   
+  // in the egamma style: use private one for now, to study
   // this retrieves the index in the original collection associated to the reference to electron
-  int index = electronRef.key();
+  //  int index = electronRef.key();
 
-  double sumPt = (*tkIsolationHandle_)[index].second;
-  double sumEt = (*towerIsolationHandle_)[index].second;
-  privateData_->eleTrackerIso_sumPt->push_back( sumPt );
-  privateData_->eleCaloIso_sumPt->push_back( sumEt );
+  //   double sumPt = (*tkIsolationHandle_)[index].second;
+  //   double sumEt = (*towerIsolationHandle_)[index].second;
+  //   privateData_->eleTrackerIso_sumPt->push_back( sumPt );
+  //   privateData_->eleCaloIso_sumPt->push_back( sumEt );
 
 
   // for tracker isolation studies
-  const TrackCollection tracksC = *(tracks.product());
+  const TrackCollection tracksC = *(m_tracks.product());
   hwwEleTrackerIsolation trackIsolation(&(*electronRef), tracksC);
   trackIsolation.setExtRadius(0.2);    
   trackIsolation.setIntRadius(0.015);    
-  float minDR_tracker02     = trackIsolation.minDeltaR(0.15);  
-  float minDRveto_tracker02 = trackIsolation.minDeltaR_withVeto(0.15);  
-  float sumPtRel_tracker02  = trackIsolation.getPtTracks(true,false);
-  float sumPt_tracker02 = trackIsolation.getPtTracks(false,false);
-  float sumPtRelSquared_tracker02  = trackIsolation.getPtTracks(true,true);
-  float sumPtSquared_tracker02 = trackIsolation.getPtTracks(false,true);
-  float sumN_tracker02 = trackIsolation.getNTracks(1.0);
+  float minDR02     = trackIsolation.minDeltaR(0.15);  
+  float minDRveto02 = trackIsolation.minDeltaR_withVeto(0.15);  
+  float sumPt02  = trackIsolation.getPtTracks(true,false);
+  float sumPtSquared02  = trackIsolation.getPtTracks(true,true);
+  float sumN02 = trackIsolation.getNTracks(1.0);
 
-  trackIsolation.setExtRadius(0.3);    
+  trackIsolation.setExtRadius(0.4);    
   trackIsolation.setIntRadius(0.015);    
-  float sumPtRel_tracker03     = trackIsolation.getPtTracks();  
+  float sumPt04     = trackIsolation.getPtTracks();  
 
   trackIsolation.setExtRadius(0.5);
   trackIsolation.setIntRadius(0.015);    
-  float sumPtRel_tracker05     = trackIsolation.getPtTracks();  
+  float sumPt05     = trackIsolation.getPtTracks();  
 
-  privateData_->minDR_tracker02->push_back(minDR_tracker02);
-  privateData_->minDRveto_tracker02->push_back(minDRveto_tracker02);
-  privateData_->sumPtRel_tracker02->push_back(sumPtRel_tracker02);
-  privateData_->sumPt_tracker02->push_back(sumPt_tracker02);
-  privateData_->sumPtRelSquared_tracker02->push_back(sumPtRelSquared_tracker02);
-  privateData_->sumPtSquared_tracker02->push_back(sumPtSquared_tracker02);
-  privateData_->sumN_tracker02->push_back(sumN_tracker02);
-  privateData_->sumPtRel_tracker03->push_back(sumPtRel_tracker03);
-  privateData_->sumPtRel_tracker05->push_back(sumPtRel_tracker05);
+  privateData_->minDR02->push_back(minDR02);
+  privateData_->minDRveto02->push_back(minDRveto02);
+  privateData_->sumPt02->push_back(sumPt02);
+  privateData_->sumPtSquared02->push_back(sumPtSquared02);
+  privateData_->sumN02->push_back(sumN02);
+  privateData_->sumPt04->push_back(sumPt04);
+  privateData_->sumPt05->push_back(sumPt05);
   
-//   std::cout << "sumPt = " << sumPt << "\tsumPt_tracker = " << sumPt_tracker << std::endl;
-
-//   privateData_->eleTrackerIso_minDR->push_back(minDR_tracker);
-//   privateData_->eleTrackerIso_minDR_veto->push_back(minDRveto_tracker);
-//   privateData_->eleTrackerIso_sumPt->push_back(sumPt_tracker);
-
-  // calo isolation
+  // calo isolation - rechit based: cannot be used on AOD
 //   const HBHERecHitCollection hcalRecHits = *(hcalrhits.product());
 //   hwwEleCaloIsolation caloIsolation(electron, hcalRecHits, caloGeo);
 //   //float minDR_calo = caloIsolation.minDeltaR(0.15);  
@@ -312,7 +291,18 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
 //   caloIsolation.setExtRadius(0.2);    
 //   float sumEt_calo = caloIsolation.getEtHcal();  
 
-//   std::cout << "sumEt = " << sumEt << "\tsumEt_calo = " << sumEt_calo << std::endl;
+  // calo isolation - calotower based: can be used on both RECO and AOD
+  const CaloTowerCollection *calotowersC = m_calotowers.product();
+  hwwEleCalotowerIsolation calotowerIsolation(&(*electronRef), calotowersC);
+  calotowerIsolation.setIntRadius(0.1);
+  calotowerIsolation.setExtRadius(0.40);
+  
+  bool relative = true;
+  float sumHadEt = calotowerIsolation.getEtHcal(relative);
+  float sumEmEt = calotowerIsolation.getEtEcal(relative);
+
+  privateData_->sumHadEt->push_back(sumHadEt);
+  privateData_->sumEmEt->push_back(sumEmEt);
 
 //   privateData_->eleCaloIso_minDR->push_back(minDR_calo);
 //   privateData_->eleCaloIso_sumPt->push_back(sumEt_calo);
@@ -341,17 +331,13 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleDeltaPhiAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtVtx, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleDeltaEtaAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleDeltaPhiAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackerIso_sumPt"+colSuffix).c_str(), *privateData_->eleTrackerIso_sumPt, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleMinDR_tracker02"+colSuffix).c_str(), *privateData_->minDR_tracker02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleMinDRveto_tracker02"+colSuffix).c_str(), *privateData_->minDRveto_tracker02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPtRel_tracker02"+colSuffix).c_str(), *privateData_->sumPtRel_tracker02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPt_tracker02"+colSuffix).c_str(), *privateData_->sumPt_tracker02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPtRelSquared_tracker02"+colSuffix).c_str(), *privateData_->sumPtRelSquared_tracker02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPtSquared_tracker02"+colSuffix).c_str(), *privateData_->sumPtSquared_tracker02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumN_tracker02"+colSuffix).c_str(), *privateData_->sumN_tracker02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPtRel_tracker03"+colSuffix).c_str(), *privateData_->sumPtRel_tracker03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPtRel_tracker05"+colSuffix).c_str(), *privateData_->sumPtRel_tracker05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleCaloIso_sumPt"+colSuffix).c_str(), *privateData_->eleCaloIso_sumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleMinDR02"+colSuffix).c_str(), *privateData_->minDR02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleMinDRveto02"+colSuffix).c_str(), *privateData_->minDRveto02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPt02"+colSuffix).c_str(), *privateData_->sumPt02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPtSquared02"+colSuffix).c_str(), *privateData_->sumPtSquared02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumN02"+colSuffix).c_str(), *privateData_->sumN02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPt04"+colSuffix).c_str(), *privateData_->sumPt04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPt05"+colSuffix).c_str(), *privateData_->sumPt05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
@@ -377,17 +363,15 @@ void CmsEleIDTreeFillerData::initialise() {
   eleNxtalCorrE            = new vector<float>;
   eleRawE                  = new vector<float>;
   eleTrackerP              = new vector<float>;
-  eleTrackerIso_sumPt      = new vector<float>;
-  minDR_tracker02          = new vector<float>;
-  minDRveto_tracker02      = new vector<float>;
-  sumPtRel_tracker02       = new vector<float>;
-  sumPt_tracker02          = new vector<float>;
-  sumPtRelSquared_tracker02= new vector<float>;
-  sumPtSquared_tracker02   = new vector<float>;
-  sumN_tracker02           = new vector<float>;
-  sumPtRel_tracker03       = new vector<float>;
-  sumPtRel_tracker05       = new vector<float>;
-  eleCaloIso_sumPt         = new vector<float>;
+  minDR02                  = new vector<float>;
+  minDRveto02              = new vector<float>;
+  sumPt02                  = new vector<float>;
+  sumPtSquared02           = new vector<float>;
+  sumN02                   = new vector<float>;
+  sumPt04                  = new vector<float>;
+  sumPt05                  = new vector<float>;
+  sumHadEt                 = new vector<float>;
+  sumEmEt                  = new vector<float>;
   eleIdCutBasedDecision    = new vector<bool>;
   eleLik                   = new vector<float>;
   eleTip                   = new vector<float>;
@@ -413,17 +397,15 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   eleNxtalCorrE            ->clear();
   eleRawE                  ->clear();
   eleTrackerP              ->clear();
-  eleTrackerIso_sumPt      ->clear();
-  minDR_tracker02          ->clear();
-  minDRveto_tracker02      ->clear();
-  sumPtRel_tracker02       ->clear();
-  sumPt_tracker02          ->clear();
-  sumPtRelSquared_tracker02->clear();
-  sumPtSquared_tracker02   ->clear();
-  sumN_tracker02           ->clear();
-  sumPtRel_tracker03       ->clear();
-  sumPtRel_tracker05       ->clear();
-  eleCaloIso_sumPt         ->clear();
+  minDR02                  ->clear();
+  minDRveto02              ->clear();
+  sumPt02                  ->clear();
+  sumPtSquared02           ->clear();
+  sumN02                   ->clear();
+  sumPt04                  ->clear();
+  sumPt05                  ->clear();
+  sumHadEt                 ->clear();
+  sumEmEt                  ->clear();
   eleIdCutBasedDecision    ->clear();
   eleLik                   ->clear();
   eleTip                   ->clear();

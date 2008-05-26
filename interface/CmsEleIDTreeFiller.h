@@ -31,7 +31,7 @@
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
 #include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
-#include "DataFormats/EgammaCandidates/interface/PMGsfElectronIsoCollection.h"
+//#include "DataFormats/EgammaCandidates/interface/PMGsfElectronIsoCollection.h"
 #include "AnalysisDataFormats/Egamma/interface/ElectronIDAssociation.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -47,11 +47,9 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *eleDeltaEtaAtVtx, *eleDeltaEtaAtCalo;
   vector<float> *eleDeltaPhiAtVtx, *eleDeltaPhiAtCalo;
   vector<float> *eleTrackerP;
-  vector<float> *eleTrackerIso_sumPt;
-  vector<float> *eleCaloIso_sumPt;
-  vector<float> *minDR_tracker02, *minDRveto_tracker02, 
-    *sumPtRel_tracker02, *sumPt_tracker02, *sumPtRelSquared_tracker02, *sumPtSquared_tracker02, *sumN_tracker02;
-  vector<float> *sumPtRel_tracker03, *sumPtRel_tracker05;
+  vector<float> *minDR02, *minDRveto02, *sumPt02, *sumPtSquared02, *sumN02;
+  vector<float> *sumPt04, *sumPt05;
+  vector<float> *sumHadEt, *sumEmEt;
   vector<float> *eleFullCorrE,     *eleCaloCorrE;
   vector<float> *eleNxtalCorrE,    *eleRawE;
   vector<float> *eleLik;
@@ -88,10 +86,15 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   void setEcalEndcapClusterShapes( edm::InputTag EcalEndcapClusterShapes ) { EcalEndcapClusterShapes_ = EcalEndcapClusterShapes; }
   //! set the electron ID association map
   void setElectronIdProducer( edm::InputTag electronIDAssocProducer ) { electronIDAssocProducer_ = electronIDAssocProducer; }
-  //! set the tracker isolation producer
+  //! set the tracker isolation producer (egamma)
   void setTkIsolationProducer( edm::InputTag tkIsolationProducer ) { tkIsolationProducer_ = tkIsolationProducer; }
-  //! set the HCAL isolation producer with calo towers
+  //! set the HCAL isolation producer with calo towers (egamma)
   void setTowerIsolationProducer( edm::InputTag towerIsolationProducer ) { towerIsolationProducer_ = towerIsolationProducer; }
+  //! set the track producer for tracker isolation
+  void setTracksProducer( edm::InputTag tracksProducer ) { tracksProducer_ = tracksProducer; }
+  //! set the calotower producer for calorimetric isolation
+  void setCalotowersProducer( edm::InputTag calotowersProducer ) { calotowersProducer_ = calotowersProducer; }
+  
   //! set to false if the column with the block size is set by another object
   void setStandalone(bool );
 
@@ -114,11 +117,16 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   edm::InputTag tkIsolationProducer_;
   edm::InputTag towerIsolationProducer_;
 
+  edm::InputTag tracksProducer_;
+  edm::InputTag calotowersProducer_;
+
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
 
-  edm::Handle< reco::CandViewDoubleAssociations > towerIsolationHandle_;
-  edm::Handle< reco::PMGsfElectronIsoCollection > tkIsolationHandle_;
+//   edm::Handle< reco::CandViewDoubleAssociations > towerIsolationHandle_;
+//   edm::Handle< reco::PMGsfElectronIsoCollection > tkIsolationHandle_;
+  edm::Handle<CaloTowerCollection> m_calotowers;
+  edm::Handle<reco::TrackCollection> m_tracks;
 
   const CaloGeometry* caloGeo;
 };
