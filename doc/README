@@ -58,3 +58,13 @@ replace CondDBCommon.catalog = "file:electronIdLikelihoodTkIsolatedCRAB.xml"
 ## (wildcard * are allowed): comma separated list
 additional_input_files = /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_1_6_8/electronIdLikelihoodTkIsolated.db, 
 /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_1_6_8/electronIdLikelihoodTkIsolatedCRAB.xml
+
+
+--- Recipe to build and run the H->WW->2e2nu analysis in CMSSW_1_8_4 ---
+
+recipe is not tested: it compiles for now in 1_8_4
+
+cvs co -r V08-12-11      DataFormats/Candidate
+cvs co -r V00-01-00      EgammaAnalysis/ElectronIDESSources
+cvs co -r V00-00-08      EgammaAnalysis/ElectronIDProducers
+cvs co -r edm-27May08    HiggsAnalysis/HiggsToWW2e
