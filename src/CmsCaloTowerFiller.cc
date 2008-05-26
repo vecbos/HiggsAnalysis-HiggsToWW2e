@@ -64,7 +64,6 @@
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
 #include "RecoLocalCalo/CaloTowersCreator/interface/CaloTowersCreationAlgo.h"
 
-#include "CLHEP/HepMC/GenParticle.h"
 
 
 #include <TTree.h>
@@ -269,7 +268,7 @@ void CmsCaloTowerFiller::writeCollectionToTree(edm::InputTag caloTowersLabel,
 	privateData_->CALO->push_back(0);
 	privateData_->CaloIndex->push_back(itower);
 	icell++;
-	for(int i = 0; i < nConst; i++){
+	for(unsigned int i = 0; i < nConst; i++){
 	  DetId id = thisCaloTower->constituent((size_t)i);
 	  DetId::Detector det = id.det();
 	  
