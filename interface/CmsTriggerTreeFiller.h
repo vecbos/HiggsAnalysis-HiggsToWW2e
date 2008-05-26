@@ -22,7 +22,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "DataFormats/Common/interface/TriggerResults.h"
-#include "CLHEP/HepMC/GenEvent.h"
 
 #include <TTree.h>
 #include <string>
