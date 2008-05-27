@@ -338,6 +338,8 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleSumN02"+colSuffix).c_str(), *privateData_->sumN02, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumPt04"+colSuffix).c_str(), *privateData_->sumPt04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumPt05"+colSuffix).c_str(), *privateData_->sumPt05, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumHadEt"+colSuffix).c_str(), *privateData_->sumHadEt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumEmEt"+colSuffix).c_str(), *privateData_->sumEmEt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
