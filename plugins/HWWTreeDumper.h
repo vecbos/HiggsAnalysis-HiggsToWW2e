@@ -77,9 +77,11 @@ private:
   //! producer of association map between the electron and the electron ID outputs
   edm::InputTag electronIDAssocProducer_;
   //! producer of the electron tracker isolation collection
-  edm::InputTag tkIsolationProducer_;
+  //  edm::InputTag tkIsolationProducer_;
   //! producer of the electron HCAL isolation collection from the calo towers
-  edm::InputTag towerIsolationProducer_;
+  //  edm::InputTag towerIsolationProducer_;
+  //! track and calotowers collection for isolation studies
+  edm::InputTag tracksForIsolationProducer_, calotowersForIsolationProducer_;
   //! collection of jet vertices for alpha evaluation
   edm::InputTag jetVertexAlphaCollection_;
   //! generator-level particle collection in input

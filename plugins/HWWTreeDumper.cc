@@ -101,8 +101,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalBarrelClusterShapes_ = iConfig.getParameter<edm::InputTag>("ecalBarrelClusterShapes");
   ecalEndcapClusterShapes_ = iConfig.getParameter<edm::InputTag>("ecalEndcapClusterShapes");
   electronIDAssocProducer_ = iConfig.getParameter<edm::InputTag>("electronIDAssocProducer");
-  tkIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tkIsolationProducer"); 
-  towerIsolationProducer_  = iConfig.getParameter<edm::InputTag>("towerIsolationProducer"); 
+//   tkIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tkIsolationProducer"); 
+//   towerIsolationProducer_  = iConfig.getParameter<edm::InputTag>("towerIsolationProducer"); 
+  tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
+  calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
   jetCollection_           = iConfig.getParameter<edm::InputTag>("jetCollection");
   genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
@@ -207,8 +209,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setEcalBarrelClusterShapes(ecalBarrelClusterShapes_);
     treeFill.setEcalEndcapClusterShapes(ecalEndcapClusterShapes_);
     treeFill.setElectronIdProducer(electronIDAssocProducer_);
-    treeFill.setTkIsolationProducer(tkIsolationProducer_);
-    treeFill.setTowerIsolationProducer(towerIsolationProducer_);
+    // for official egamma isolations
+    //     treeFill.setTkIsolationProducer(tkIsolationProducer_);
+    //     treeFill.setTowerIsolationProducer(towerIsolationProducer_);
+    // for custom isolation
+    treeFill.setTracksProducer(tracksForIsolationProducer_);
+    treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
 
