@@ -47,9 +47,9 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *eleDeltaEtaAtVtx, *eleDeltaEtaAtCalo;
   vector<float> *eleDeltaPhiAtVtx, *eleDeltaPhiAtCalo;
   vector<float> *eleTrackerP;
-  vector<float> *minDR02, *minDRveto02, *sumPt02, *sumPtSquared02, *sumN02;
+  vector<float> *minDR03, *minDRveto03, *sumPt03, *sumPtSquared03, *sumN03;
   vector<float> *sumPt04, *sumPt05;
-  vector<float> *sumHadEt, *sumEmEt;
+  vector<float> *sumHadEt04, *sumEmEt04, *sumHadEt05, *sumEmEt05;
   vector<float> *eleFullCorrE,     *eleCaloCorrE;
   vector<float> *eleNxtalCorrE,    *eleRawE;
   vector<float> *eleLik;
