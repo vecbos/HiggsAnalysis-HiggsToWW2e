@@ -16,7 +16,7 @@ cvs co -r V00-01-03           CondFormats/PhysicsToolsObjects
 cvs co -r V00-07-00-02	      DataFormats/EgammaCandidates
 cvs co -r V00-00-04           RecoEgamma/EgammaIsolationAlgos
 cvs co                        HiggsAnalysis/HiggsToWW2Leptons
-cvs co -r V01-1_6_9	      HiggsAnalysis/HiggsToWW2e
+cvs co -r V02-1_6_9	      HiggsAnalysis/HiggsToWW2e
 cvs co -r V02-15-10           TrackingTools/TrackAssociator
 
 source HiggsAnalysis/HiggsToWW2e/doc/patch.src
