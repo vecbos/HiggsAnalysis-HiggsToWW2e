@@ -69,6 +69,7 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->sumN03;
   delete privateData_->sumPt04;
   delete privateData_->sumPt05;
+  delete privateData_->sumPtPreselection;
   delete privateData_->sumHadEt04;
   delete privateData_->sumEmEt04;
   delete privateData_->sumHadEt05;
@@ -275,6 +276,10 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
   trackIsolation.setExtRadius(0.5);
   float sumPt05     = trackIsolation.getPtTracks();  
 
+  trackIsolation.setIntRadius(0.015);
+  trackIsolation.setExtRadius(0.2);
+  float sumPtPreselection =  trackIsolation.getPtTracks();
+
   privateData_->minDR03->push_back(minDR03);
   privateData_->minDRveto03->push_back(minDRveto03);
   privateData_->sumPt03->push_back(sumPt03);
@@ -282,7 +287,8 @@ void CmsEleIDTreeFiller::writeEleInfo(const PixelMatchGsfElectronRef electronRef
   privateData_->sumN03->push_back(sumN03);
   privateData_->sumPt04->push_back(sumPt04);
   privateData_->sumPt05->push_back(sumPt05);
-  
+  privateData_->sumPtPreselection->push_back(sumPtPreselection);
+
   // calo isolation - rechit based: cannot be used on AOD
 //   const HBHERecHitCollection hcalRecHits = *(hcalrhits.product());
 //   hwwEleCaloIsolation caloIsolation(electron, hcalRecHits, caloGeo);
@@ -344,6 +350,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleSumN03"+colSuffix).c_str(), *privateData_->sumN03, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumPt04"+colSuffix).c_str(), *privateData_->sumPt04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumPt05"+colSuffix).c_str(), *privateData_->sumPt05, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleSumPtPreselection"+colSuffix).c_str(), *privateData_->sumPtPreselection, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumHadEt04"+colSuffix).c_str(), *privateData_->sumHadEt04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumEmEt04"+colSuffix).c_str(), *privateData_->sumEmEt04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumHadEt05"+colSuffix).c_str(), *privateData_->sumHadEt05, nCandString.c_str(), 0, "Reco");
@@ -380,6 +387,7 @@ void CmsEleIDTreeFillerData::initialise() {
   sumN03                   = new vector<float>;
   sumPt04                  = new vector<float>;
   sumPt05                  = new vector<float>;
+  sumPtPreselection        = new vector<float>;
   sumHadEt04               = new vector<float>;
   sumEmEt04                = new vector<float>;
   sumHadEt05               = new vector<float>;
@@ -416,6 +424,7 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   sumN03                   ->clear();
   sumPt04                  ->clear();
   sumPt05                  ->clear();
+  sumPtPreselection        ->clear();
   sumHadEt04               ->clear();
   sumEmEt04                ->clear();
   sumHadEt05               ->clear();
