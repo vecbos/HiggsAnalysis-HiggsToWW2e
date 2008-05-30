@@ -48,8 +48,8 @@ float hwwEleTrackerIsolation::getPtTracks (bool relative, bool squared) const
     float this_lip = this_track->vz();
     if ( fabs(this_lip - ele_lip) > 0.2 ){ continue; }
 
-    // usually the < 1GeV tracks are fakes 
-    if ( this_pt < 1.0 ) continue;
+    // usually low pt tracks are fakes
+    if ( this_pt < 1.5 ) continue;
 
     double dr = elePAtVtx.deltaR(trackPAtVtx);
     if ( fabs(dr) < _extRadius && fabs(dr) > _intRadius ){ 
