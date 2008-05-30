@@ -2,6 +2,6 @@
 module ambiguityResolvedElectrons = AmbResolver {
     InputTag src = pixelMatchGsfElectrons
     bool filter = false
-    InputTag reducedElectronsRefCollectionLabel = isolatedElectronsRef
+    InputTag reducedElectronsRefCollectionLabel = selectedElectronsRef
     bool doRefCheck = true
 }
