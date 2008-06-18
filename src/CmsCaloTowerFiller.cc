@@ -178,7 +178,6 @@ void CmsCaloTowerFiller::writeCollectionToTree(edm::InputTag caloTowersLabel,
     std::cout << "Did not found " << caloTowersLabel << std::endl;
   }
 
-  std::cout << caloTowersLabel << " collection size = " << collection->size() << std::endl;
   if(collection->size()) {
     if(hitLimitsMeansNoOutput_ && 
        (int)collection->size() > maxTracks_){
@@ -412,8 +411,6 @@ void CmsCaloTowerFiller::writeCollectionToTree(edm::InputTag caloTowersLabel,
   int blockSize = (collection->size()) ? icell : 0;
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
-
-  std::cout << "created the size branch" << std::endl;
 
   //  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
   if(saveCaloTowerExtras_) treeCaloTowerInfo(columnPrefix,columnSuffix);
