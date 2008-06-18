@@ -52,7 +52,11 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsVertexFiller.h"
 
+#include "CLHEP/HepMC/GenEvent.h"
+
 #include "PhysicsTools/HepMCCandAlgos/interface/MCCandMatcher.h"
+#include "CLHEP/HepMC/GenParticle.h"
+
 #include "FWCore/Framework/interface/TriggerNames.h"
 
 #include "DataFormats/VertexReco/interface/Vertex.h"
@@ -126,8 +130,8 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	v != primaryVertex->end(); ++v){
       float SumPt = 0.0;
       if((*v).tracksSize() > 0){
-	std::vector<TrackBaseRef >::const_iterator t;
-	for( t = (*v).tracks_begin(); t != (*v).tracks_end(); t++){
+	for(reco::track_iterator t = (*v).tracks_begin();
+	    t != (*v).tracks_end(); t++){
 	  if((**t).charge() < -1 || (**t).charge() > 1){
 	    //illegal charge
 	  } else {
