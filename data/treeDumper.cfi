@@ -37,7 +37,7 @@ module treeDumper = HWWTreeDumper {
     untracked bool saveEleID = true
     untracked bool saveJetAlpha = true
     # MC truth
-    InputTag mcTruthCollection = genParticleCandidates # genParticles from >= 168
+    InputTag mcTruthCollection = genParticles
     InputTag electronMatchMap  = electronMatchMap
     InputTag muonMatchMap  = muonMatchMap
     untracked bool dumpGenMet         = true
