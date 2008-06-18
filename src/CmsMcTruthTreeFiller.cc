@@ -19,7 +19,6 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
-//#include "CLHEP/HepMC/GenParticle.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
@@ -54,20 +53,16 @@ CmsMcTruthTreeFiller::~CmsMcTruthTreeFiller() {
 void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection, 
 						 const edm::Event& iEvent, int range) {
 
-  // prepared for 200, when CandidateCollection will be substituted by GenParticleCollection
-  //  edm::Handle< reco::GenParticleCollection > genParticleHandle;
-  edm::Handle< reco::CandidateCollection > genParticleHandle;
+  edm::Handle< reco::GenParticleCollection > genParticleHandle;
   try { iEvent.getByLabel(mcTruthCollection, genParticleHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("HWWTreeDumper") << "Can't get MC Truth Collection: " << mcTruthCollection; }
-  //  const reco::GenParticleCollection *genParticleCollection = genParticleHandle.product();
-  const reco::CandidateCollection *genParticleCollection = genParticleHandle.product(); 
+  const reco::GenParticleCollection *genParticleCollection = genParticleHandle.product();
 
   vector<float> pMC,massMC,thetaMC,etaMC,phiMC,energyMC;
   vector<float> xMC,yMC,zMC;
   vector<int> idMC,mothMC,nDauMC,statusMC;
 
-  //  reco::GenParticleCollection::const_iterator genPart;
-  reco::CandidateCollection::const_iterator genPart;
+  reco::GenParticleCollection::const_iterator genPart;
   for(genPart=genParticleCollection->begin(); genPart!=genParticleCollection->end(); genPart++) {
     const reco::Candidate & cand = *genPart;
     if((int)pMC.size()>range) break;
@@ -85,8 +80,7 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
     
       int indMom=-1;
       int idx=0;
-      //    reco::GenParticleCollection::const_iterator candIter;
-      reco::CandidateCollection::const_iterator candIter;
+      reco::GenParticleCollection::const_iterator candIter;
       for(candIter=genParticleCollection->begin(); candIter!=genParticleCollection->end(); candIter++) {
 	if(cand.status() == 1 || cand.status() == 3) {
 	  const reco::Candidate *mom = cand.mother();
