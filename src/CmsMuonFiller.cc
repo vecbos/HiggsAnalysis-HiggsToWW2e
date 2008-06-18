@@ -526,7 +526,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
   if(&muon) {
 
     // default isolation variables 0.3
-    MuonIsolation Iso03  = muon->getIsolationR03();
+    MuonIsolation Iso03  = muon->isolationR03();
     privateData_->sumPt03->push_back(Iso03.sumPt);
     privateData_->emEt03->push_back(Iso03.emEt);
     privateData_->hadEt03->push_back(Iso03.hadEt);
@@ -535,7 +535,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->nJets03->push_back(Iso03.nJets);
 
     // default isolation variables 0.5
-    MuonIsolation Iso05  = muon->getIsolationR05();
+    MuonIsolation Iso05  = muon->isolationR05();
     privateData_->sumPt05->push_back(Iso05.sumPt);
     privateData_->emEt05->push_back(Iso05.emEt);
     privateData_->hadEt05->push_back(Iso05.hadEt);
@@ -544,13 +544,13 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->nJets05->push_back(Iso05.nJets);
 
     // Expected deposits in CALO
-    privateData_->EcalExpDepo->push_back(muon->getCalEnergy().em);
-    privateData_->HcalExpDepo->push_back(muon->getCalEnergy().had);
-    privateData_->HoExpDepo->push_back(muon->getCalEnergy().ho);
-    privateData_->emS9->push_back(muon->getCalEnergy().emS9);
-    privateData_->hadS9->push_back(muon->getCalEnergy().hadS9);
-    privateData_->hoS9->push_back(muon->getCalEnergy().hoS9);
-    privateData_->CaloComp->push_back(muon->getCaloCompatibility());
+    privateData_->EcalExpDepo->push_back(muon->calEnergy().em);
+    privateData_->HcalExpDepo->push_back(muon->calEnergy().had);
+    privateData_->HoExpDepo->push_back(muon->calEnergy().ho);
+    privateData_->emS9->push_back(muon->calEnergy().emS9);
+    privateData_->hadS9->push_back(muon->calEnergy().hadS9);
+    privateData_->hoS9->push_back(muon->calEnergy().hoS9);
+    privateData_->CaloComp->push_back(muon->caloCompatibility());
 
   } else {
 
@@ -774,29 +774,29 @@ void CmsMuonFiller::SetGeometry(const edm::EventSetup& iSetup) {
   // SEE http://cmslxr.fnal.gov/lxr/source/TrackingTools/TrackAssociator/src/TrackDetectorAssociator.cc?v=CMSSW_1_6_9
 
   // setup propagator
-  iSetup.get<IdealMagneticFieldRecord>().get(bField);
+//   iSetup.get<IdealMagneticFieldRecord>().get(bField);
 
-  SteppingHelixPropagator* prop  = new SteppingHelixPropagator(&*bField,anyDirection);
-  prop->setMaterialMode(false);
-  prop->applyRadX0Correction(true);
-  // prop->setDebug(true); // tmp
-  cachedTrajectory_.setPropagator(prop);
+//   SteppingHelixPropagator* prop  = new SteppingHelixPropagator(&*bField,anyDirection);
+//   prop->setMaterialMode(false);
+//   prop->applyRadX0Correction(true);
+//   // prop->setDebug(true); // tmp
+//   cachedTrajectory_.setPropagator(prop);
 
-  // access the calorimeter geometry
-  iSetup.get<IdealGeometryRecord>().get(theCaloGeometry_);
-  if (!theCaloGeometry_.isValid()) 
-    throw cms::Exception("FatalError") << "Unable to find IdealGeometryRecord in event!\n";
-  // get the tracking Geometry
-  iSetup.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry_);
-  if (!theTrackingGeometry_.isValid()) 
-    throw cms::Exception("FatalError") << "Unable to find GlobalTrackingGeometryRecord in event!\n";
+//   // access the calorimeter geometry
+//   iSetup.get<IdealGeometryRecord>().get(theCaloGeometry_);
+//   if (!theCaloGeometry_.isValid()) 
+//     throw cms::Exception("FatalError") << "Unable to find IdealGeometryRecord in event!\n";
+//   // get the tracking Geometry
+//   iSetup.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry_);
+//   if (!theTrackingGeometry_.isValid()) 
+//     throw cms::Exception("FatalError") << "Unable to find GlobalTrackingGeometryRecord in event!\n";
   
 
-  ecalDetIdAssociator_.setGeometry(&*theCaloGeometry_);
-  caloDetIdAssociator_.setGeometry(&*theCaloGeometry_);
-  hcalDetIdAssociator_.setGeometry(&*theCaloGeometry_);
-  hoDetIdAssociator_.setGeometry(&*theCaloGeometry_);
-  muonDetIdAssociator_.setGeometry(&*theTrackingGeometry_);
+//   ecalDetIdAssociator_.setGeometry(&*theCaloGeometry_);
+//   caloDetIdAssociator_.setGeometry(&*theCaloGeometry_);
+//   hcalDetIdAssociator_.setGeometry(&*theCaloGeometry_);
+//   hoDetIdAssociator_.setGeometry(&*theCaloGeometry_);
+//   muonDetIdAssociator_.setGeometry(&*theTrackingGeometry_);
 
   //   iSetup.get<DetIdAssociatorRecord>().get("EcalDetIdAssociator", ecalDetIdAssociator_);
   //   iSetup.get<DetIdAssociatorRecord>().get("HcalDetIdAssociator", hcalDetIdAssociator_);
