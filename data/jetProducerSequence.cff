@@ -12,7 +12,7 @@ module jetVertexAlpha = JetVertexAssociation {
     string JET_ALGO = "iterativeCone5CaloJets"
     // other algo:  KtAlgorithm
     // other algo:  MidPointAlgorithm
-    string TRACK_ALGO = "ctfWithMaterialTracks"
+    string TRACK_ALGO = "generalTracks"
     string VERTEX_ALGO = "offlinePrimaryVerticesFromCTFTracks"
     string JV_cutType = "delta" 
     // "delta" - cut based on deltaZ
