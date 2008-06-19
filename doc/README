@@ -68,3 +68,12 @@ cvs co -r V08-12-11      DataFormats/Candidate
 cvs co -r V00-01-00      EgammaAnalysis/ElectronIDESSources
 cvs co -r V00-00-08      EgammaAnalysis/ElectronIDProducers
 cvs co -r edm-27May08    HiggsAnalysis/HiggsToWW2e
+
+
+--- Recipe to build and run the H->WW->2e2nu analysis in CMSSW_2_0_9 ---
+
+cvs co -r V09-00-04      DataFormats/Candidate
+cvs co -r V01-2_0_9      HiggsAnalysis/HiggsToWW2e
+cvs co -r V07-00-07      PhysicsTools/CandAlgos
+cvs co -r V09-00-05      PhysicsTools/CandUtils
+
