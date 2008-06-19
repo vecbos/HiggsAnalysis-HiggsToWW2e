@@ -48,15 +48,12 @@ struct CmsMuonFillerData : public CmsCandidateFillerData {
 
   vector<float> *pxAtInner, *pyAtInner, *pzAtInner, *xAtInner, *yAtInner, *zAtInner;
   vector<float> *pxAtOuter, *pyAtOuter, *pzAtOuter, *xAtOuter, *yAtOuter, *zAtOuter;
+  vector<int> *isGlobal, *isTracker, *isStandAlone, *isCalo;
   vector<float> *muTrackNormalizedChi2;
   vector<float> *muTrackDxy, *muTrackD0, *muTrackDsz, *muTrackDz;
   vector<float> *muTrackDxyError, *muTrackD0Error, *muTrackDszError, *muTrackDzError;
   vector<float> *muTrackValidHits, *muTrackLostHits;
   vector<float> *muTrackVx, *muTrackVy, *muTrackVz; 
-
-  vector<float> *pxECAL, *pyECAL, *pzECAL, *xECAL, *yECAL, *zECAL, *EexpECAL; 
-  vector<float> *pxHCAL, *pyHCAL, *pzHCAL, *xHCAL, *yHCAL, *zHCAL, *EexpHCAL; 
-  vector<float> *pxHO, *pyHO, *pzHO, *xHO, *yHO, *zHO, *EexpHO; 
 
   vector<float> *sumPt03, *emEt03, *hadEt03, *hoEt03, *nTrk03, *nJets03;
   vector<float> *sumPt05, *emEt05, *hadEt05, *hoEt05, *nTrk05, *nJets05;
@@ -109,7 +106,7 @@ class CmsMuonFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeTrkInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, TrackRef trkRef);
+  void writeTrkInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, const Muon *muon);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   void writeMuonInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, const Muon *muon);
