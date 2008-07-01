@@ -253,10 +253,7 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
   bool hasTrackerTrack = false;
 
   if( & muon ) {  
-    if ( muon->isStandAloneMuon() && ! muon->isGlobalMuon() ) {
-      // it has not tracker track tracker track informations
-    }
-    else {
+    if ( muon->track().isNonnull() ) {
       hasTrackerTrack = true;
       trkRef = cand->get<TrackRef>();
     }
