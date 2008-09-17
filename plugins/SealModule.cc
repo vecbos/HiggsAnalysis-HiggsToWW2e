@@ -1,14 +1,13 @@
 #include "PluginManager/ModuleDef.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "PhysicsTools/UtilAlgos/interface/ObjectSelector.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWEleAmbiguityResolve.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
 typedef ObjectSelector< HWWEleAmbiguityResolve, 
-			reco::PixelMatchGsfElectronRefVector
+			reco::GsfElectronRefVector
 			> AmbResolver ;
 
 DEFINE_SEAL_MODULE () ;

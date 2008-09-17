@@ -5,8 +5,8 @@
 // 
 
 // user include files
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/EgammaReco/interface/BasicClusterFwd.h"
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
@@ -51,7 +51,7 @@ void
 HtoWWEleCloner::produce (edm::Event& e, const edm::EventSetup& iSetup)
 {
   // get reconstructed electrons
-  edm::Handle<reco::PixelMatchGsfElectronCollection> electrons;
+  edm::Handle<reco::GsfElectronCollection> electrons;
   try { e.getByLabel (electronProducer_,electrons) ; }
   catch ( cms::Exception& ex ) 
     { 
@@ -62,7 +62,7 @@ HtoWWEleCloner::produce (edm::Event& e, const edm::EventSetup& iSetup)
   std::auto_ptr<reco::CandidateCollection> recoEleCandColl (
     new reco::CandidateCollection );
 
-  typedef reco::PixelMatchGsfElectronCollection::const_iterator citer ;
+  typedef reco::GsfElectronCollection::const_iterator citer ;
   for (citer MyEle = electrons->begin () ; 
        MyEle != electrons->end () ; 
        ++MyEle) 

@@ -1,6 +1,5 @@
 // my includes
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/EgammaReco/interface/BasicClusterFwd.h"
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
@@ -19,7 +18,7 @@
 using namespace std;
 hwwEleCaloIsolation::hwwEleCaloIsolation (){}
 
-hwwEleCaloIsolation::hwwEleCaloIsolation (const PixelMatchGsfElectron *gsfEle, const HBHERecHitCollection hcalrhColl, edm::ESHandle<CaloGeometry> caloGeo) : 
+hwwEleCaloIsolation::hwwEleCaloIsolation (const GsfElectron *gsfEle, const HBHERecHitCollection hcalrhColl, edm::ESHandle<CaloGeometry> caloGeo) : 
   _myGsfEle(gsfEle),
   _hcalrh(hcalrhColl),   
   _caloGeo(caloGeo)

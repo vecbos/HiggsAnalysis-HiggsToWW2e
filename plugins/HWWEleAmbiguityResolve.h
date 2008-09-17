@@ -2,8 +2,8 @@
 #define HWWEleAmbiguityResolve_h
 
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 
 #include "FWCore/Framework/interface/Event.h"
@@ -18,9 +18,9 @@ class HWWEleAmbiguityResolve{
 
  public:
 
-  typedef const reco::PixelMatchGsfElectron * electron ;
-  typedef reco::PixelMatchGsfElectronCollection collection ;
-  typedef reco::PixelMatchGsfElectronRefVector container;
+  typedef const reco::GsfElectron * electron ;
+  typedef reco::GsfElectronCollection collection ;
+  typedef reco::GsfElectronRefVector container;
   typedef container::const_iterator const_iterator ;
   
   //! ctor

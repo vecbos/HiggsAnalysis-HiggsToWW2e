@@ -10,8 +10,8 @@
 
 //CMSSW includes 
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 
@@ -20,11 +20,11 @@ class TkIsolation {
   
   //constructors
   TkIsolation () ;
-  TkIsolation (const reco::PixelMatchGsfElectron* , 
+  TkIsolation (const reco::GsfElectron* , 
 	       const reco::TrackCollection* ) ;
-  TkIsolation (const reco::PixelMatchGsfElectron* , 
+  TkIsolation (const reco::GsfElectron* , 
 	       const reco::TrackCollection* ,
-	       const reco::PixelMatchGsfElectronCollection* ) ;
+	       const reco::GsfElectronCollection* ) ;
 
   //methods
   void setExtRadius (double extRadius) ;
@@ -44,9 +44,9 @@ class TkIsolation {
   
  private:
   
-  const reco::PixelMatchGsfElectron  *electron_ ;
+  const reco::GsfElectron  *electron_ ;
   const reco::TrackCollection *trackCollection_ ;
-  const reco::PixelMatchGsfElectronCollection *electronCollection_ ;
+  const reco::GsfElectronCollection *electronCollection_ ;
   
   double extRadius_ ;
   double intRadius_ ;

@@ -1,8 +1,7 @@
 #ifndef hwwEleCalotowerIsolation_h
 #define hwwEleCalotowerIsolation_h
 
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/CaloTowers/interface/CaloTower.h"
 #include "DataFormats/CaloTowers/interface/CaloTowerFwd.h"
 
@@ -11,7 +10,7 @@ class hwwEleCalotowerIsolation {
 
   //! ctor
   hwwEleCalotowerIsolation() {}
-  hwwEleCalotowerIsolation(const reco::PixelMatchGsfElectron *gsfEle,
+  hwwEleCalotowerIsolation(const reco::GsfElectron *gsfEle,
 			   const CaloTowerCollection *calotowers);
 
   //! dtor
@@ -29,7 +28,7 @@ class hwwEleCalotowerIsolation {
   
   void getEtTowers();
 
-  const reco::PixelMatchGsfElectron *m_gsfEle;
+  const reco::GsfElectron *m_gsfEle;
   const CaloTowerCollection *m_calotowers;
 
   float m_intRadius, m_extRadius;

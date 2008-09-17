@@ -24,6 +24,7 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
+#include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 #include "DataFormats/METReco/interface/CaloMET.h"
 #include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/METReco/interface/GenMET.h"
@@ -58,7 +59,7 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<float> *eMax, *e2nd;
   vector<float> *s1s9, *s9s25;
   vector<float> *covEtaEta, *covEtaPhi, *covPhiPhi;
-  //  vector<float> *lat, *phiLat, *etaLat, *a20, *a42;
+  vector<float> *lat, *phiLat, *etaLat, *a20, *a42;
   
 public:
   void initialise();
@@ -100,12 +101,13 @@ class CmsElectronFiller : public CmsCandidateFiller {
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
 
-  //! set the cluster shape association map for ECAL barrel
-  void setEcalBarrelClusterShapes( edm::InputTag EcalBarrelClusterShapes ) { EcalBarrelClusterShapes_ = EcalBarrelClusterShapes; }
-  //! set the cluster shape association map for ECAL endcap
-  void setEcalEndcapClusterShapes( edm::InputTag EcalEndcapClusterShapes ) { EcalEndcapClusterShapes_ = EcalEndcapClusterShapes; }
-  //! set the electron ID association map
-  void setElectronIdProducer( edm::InputTag electronIDAssocProducer ) { electronIDAssocProducer_ = electronIDAssocProducer; }
+  //! set the rechits for ECAL barrel (needed for cluster shapes)
+  void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
+  //! set the rechits for ECAL endcap (needed for cluster shapes)
+  void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
+  //! set the electron ID labels
+  void setElectronIdCutsLabel( edm::InputTag electronIdCutsLabel ) { electronIdCutsLabel_ = electronIdCutsLabel; }
+  void setElectronIdLikelihoodLabel( edm::InputTag electronIdLikelihoodLabel ) { electronIdLikelihoodLabel_ = electronIdLikelihoodLabel; }
   //! set the tracker isolation producer
   void setTkIsolationProducer( edm::InputTag tkIsolationProducer ) { tkIsolationProducer_ = tkIsolationProducer; }
   //! set the HCAL isolation producer with calo towers
@@ -122,7 +124,7 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   void writeEcalInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, SuperClusterRef sclusRef,
-		     const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, const reco::BasicClusterShapeAssociationCollection& endcapClShpMap);
+		     const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
   void treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix);
 
 
@@ -141,10 +143,11 @@ class CmsElectronFiller : public CmsCandidateFiller {
   CmsElectronFillerData *privateData_;
   edm::InputTag matchMap_;
 
-  edm::InputTag EcalBarrelClusterShapes_;
-  edm::InputTag EcalEndcapClusterShapes_;
+  edm::InputTag EcalBarrelRecHits_;
+  edm::InputTag EcalEndcapRecHits_;
 
-  edm::InputTag electronIDAssocProducer_;
+  edm::InputTag electronIdCutsLabel_;
+  edm::InputTag electronIdLikelihoodLabel_;
   edm::InputTag tkIsolationProducer_;
   edm::InputTag towerIsolationProducer_;
 

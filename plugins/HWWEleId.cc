@@ -1,6 +1,5 @@
 // my includes
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackBase.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
@@ -175,7 +174,7 @@ HWWEleId::select (edm::Handle<collection> inputHandle,
       // seed cluster variables 
       float seedEne  = mySc->seed ()->energy () ;
       float corrSeedEne = 10000.;            
-//      PixelMatchGsfElectron MyEle2 = *eleIt ; //PG come mai questo??
+//      GsfElectron MyEle2 = *eleIt ; //PG come mai questo??
       if ((int (eleClass/10) == 3) || (int (eleClass/10) == 13))
         {corrSeedEne = hwwEleSeedEnergyCorrector (*eleIt) ; }
 //        {corrSeedEne = hwwEleSeedEnergyCorrector (MyEle2) ; }

@@ -96,11 +96,12 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
-  hybridSCCollection_      = iConfig.getParameter<edm::InputTag>("hybridSCCollection");
-  islandSCCollection_      = iConfig.getParameter<edm::InputTag>("islandSCCollection");
-  ecalBarrelClusterShapes_ = iConfig.getParameter<edm::InputTag>("ecalBarrelClusterShapes");
-  ecalEndcapClusterShapes_ = iConfig.getParameter<edm::InputTag>("ecalEndcapClusterShapes");
-  electronIDAssocProducer_ = iConfig.getParameter<edm::InputTag>("electronIDAssocProducer");
+  ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
+  ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
+  ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
+  ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
+  electronIdCutsLabel_       = iConfig.getUntrackedParameter<std::string>("electronIdCutsLabel");
+  electronIdLikelihoodLabel_ = iConfig.getUntrackedParameter<std::string>("electronIdLikelihoodLabel");
 //   tkIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tkIsolationProducer"); 
 //   towerIsolationProducer_  = iConfig.getParameter<edm::InputTag>("towerIsolationProducer"); 
   tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
@@ -206,9 +207,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveEcal(saveEcal_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.saveFatEcal(saveFatEcal_);
-    treeFill.setEcalBarrelClusterShapes(ecalBarrelClusterShapes_);
-    treeFill.setEcalEndcapClusterShapes(ecalEndcapClusterShapes_);
-    treeFill.setElectronIdProducer(electronIDAssocProducer_);
+    treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
+    treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
+    treeFill.setElectronIdCutsLabel(electronIdCutsLabel_);
+    treeFill.setElectronIdLikelihoodLabel(electronIdLikelihoodLabel_);
     // for official egamma isolations
     //     treeFill.setTkIsolationProducer(tkIsolationProducer_);
     //     treeFill.setTowerIsolationProducer(towerIsolationProducer_);
@@ -230,14 +232,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill SC block
   if (dumpSCs_) {
 
-      CmsSuperClusterFiller treeFillHybrid(tree_, 100);
+      CmsSuperClusterFiller treeFillBarrel(tree_, 100);
       std::string prefix("");
-      std::string hybridSuffix("HybridSCEB");
-      treeFillHybrid.writeCollectionToTree(hybridSCCollection_, iEvent, iSetup, prefix, hybridSuffix, false);
+      std::string barrelSuffix("SCEB");
+      treeFillBarrel.writeCollectionToTree(ecalBarrelSCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
-      CmsSuperClusterFiller treeFillIsland(tree_, 100);
-      std::string islandSuffix("IslandSCEE");
-      treeFillIsland.writeCollectionToTree(islandSCCollection_, iEvent, iSetup, prefix, islandSuffix, false);
+      CmsSuperClusterFiller treeFillEndcap(tree_, 100);
+      std::string endcapSuffix("SCEE");
+      treeFillEndcap.writeCollectionToTree(ecalEndcapSCCollection_, iEvent, iSetup, prefix, endcapSuffix, false);
 
   }
 

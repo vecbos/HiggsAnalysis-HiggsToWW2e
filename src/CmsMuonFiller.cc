@@ -27,7 +27,6 @@
 
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
-#include "PhysicsTools/HepMCCandAlgos/interface/MCCandMatcher.h"
 
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/MuonReco/interface/Muon.h"

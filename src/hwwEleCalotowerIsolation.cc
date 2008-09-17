@@ -1,7 +1,7 @@
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCalotowerIsolation.h"
 
-hwwEleCalotowerIsolation::hwwEleCalotowerIsolation(const reco::PixelMatchGsfElectron *gsfEle,
+hwwEleCalotowerIsolation::hwwEleCalotowerIsolation(const reco::GsfElectron *gsfEle,
 						   const CaloTowerCollection *calotowers)
 {
 

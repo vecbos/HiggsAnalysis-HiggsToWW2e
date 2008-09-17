@@ -2,11 +2,13 @@
 #define HWWEleId_h
 
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 
-#include "FWCore/Framework/interface/Event.h"#include "FWCore/Framework/interface/EventSetup.h"#include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "FWCore/Framework/interface/Event.h"
+#include "FWCore/Framework/interface/EventSetup.h"
+#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include <functional>
 #include <vector>
 #include <map>
@@ -16,10 +18,10 @@ class HWWEleId{
 
  public:
 
-  typedef reco::PixelMatchGsfElectron electron ;
+  typedef reco::GsfElectron electron ;
   typedef const electron * electronPtr ;
-  typedef reco::PixelMatchGsfElectronCollection collection ;
-  typedef std::vector<const reco::PixelMatchGsfElectron *> container ;
+  typedef reco::GsfElectronCollection collection ;
+  typedef std::vector<const reco::GsfElectron *> container ;
   typedef container::const_iterator const_iterator ;
 
   //! ctor

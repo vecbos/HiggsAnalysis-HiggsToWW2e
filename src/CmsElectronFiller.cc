@@ -34,20 +34,24 @@
 
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchElectronFwd.h"
+#include "DataFormats/CaloRecHit/interface/CaloID.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/Electron.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleCandidate.h"
 
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/CaloTopology/interface/CaloTopology.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
-
-#include "PhysicsTools/HepMCCandAlgos/interface/MCCandMatcher.h"
 
 #include <TTree.h>
 
@@ -162,11 +166,11 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->covEtaEta;
   delete privateData_->covEtaPhi;
   delete privateData_->covPhiPhi;
-//   delete privateData_->lat;
-//   delete privateData_->phiLat;
-//   delete privateData_->etaLat;
-//   delete privateData_->a20;
-//   delete privateData_->a42;
+  delete privateData_->lat;
+  delete privateData_->phiLat;
+  delete privateData_->etaLat;
+  delete privateData_->a20;
+  delete privateData_->a42;
 
   delete privateData_->ncand;
 
@@ -222,16 +226,16 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     *(privateData_->ncand) = collection->size();
 
-    // Cluster shape variables --- 
-    Handle<BasicClusterShapeAssociationCollection> barrelClShpHandle;
-    try { iEvent.getByLabel(EcalBarrelClusterShapes_, barrelClShpHandle); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL barrel Cluster Shape Collection" << EcalBarrelClusterShapes_; }
-    const reco::BasicClusterShapeAssociationCollection& barrelClShpMap = *barrelClShpHandle;
+    // for cluster shape variables
+    Handle< EcalRecHitCollection > EcalBarrelRecHits;
+    try { iEvent.getByLabel(EcalBarrelRecHits_, EcalBarrelRecHits); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL barrel rec hits Collection" << EcalBarrelRecHits_; }
+    const EcalRecHitCollection *EBRecHits = EcalBarrelRecHits.product();
 
-    Handle<BasicClusterShapeAssociationCollection> endcapClShpHandle;
-    try { iEvent.getByLabel(EcalEndcapClusterShapes_, endcapClShpHandle); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap Cluster Shape Collection" << EcalEndcapClusterShapes_; }
-    const reco::BasicClusterShapeAssociationCollection& endcapClShpMap = *endcapClShpHandle;
+    Handle< EcalRecHitCollection > EcalEndcapRecHits;
+    try { iEvent.getByLabel(EcalEndcapRecHits_, EcalEndcapRecHits); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
+    const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
@@ -239,7 +243,7 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
       // fill Cluster Adapter
       SuperClusterRef sclusRef = cand->get<SuperClusterRef>();
-      if(saveEcal_) writeEcalInfo(&(*cand),iEvent,iSetup,sclusRef,barrelClShpMap,endcapClShpMap );
+      if(saveEcal_) writeEcalInfo(&(*cand),iEvent,iSetup,sclusRef,EBRecHits,EERecHits );
       // fill (GSF) Track Adapter
       GsfTrackRef trkRef = cand->get<GsfTrackRef>();
       if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,trkRef);
@@ -262,9 +266,10 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
   if(saveEleID_) {
     CmsEleIDTreeFiller eIDFiller(cmstree);
     eIDFiller.setStandalone(false);
-    eIDFiller.setEcalBarrelClusterShapes(EcalBarrelClusterShapes_);
-    eIDFiller.setEcalEndcapClusterShapes(EcalEndcapClusterShapes_);
-    eIDFiller.setElectronIdProducer(electronIDAssocProducer_);
+    eIDFiller.setEcalBarrelRecHits(EcalBarrelRecHits_);
+    eIDFiller.setEcalEndcapRecHits(EcalEndcapRecHits_);
+    eIDFiller.setElectronIdCutsLabel(electronIdCutsLabel_);
+    eIDFiller.setElectronIdLikelihoodLabel(electronIdLikelihoodLabel_);
     // those for egamma official isolations
     eIDFiller.setTkIsolationProducer(tkIsolationProducer_);
     eIDFiller.setTowerIsolationProducer(towerIsolationProducer_);
@@ -431,11 +436,11 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
 void CmsElectronFiller::writeEcalInfo(const Candidate *cand, 
 				      const edm::Event& iEvent, const edm::EventSetup& iSetup, 
 				      SuperClusterRef sclusRef,
-				      const reco::BasicClusterShapeAssociationCollection& barrelClShpMap, 
-				      const reco::BasicClusterShapeAssociationCollection& endcapClShpMap) {
+				      const EcalRecHitCollection *EBRecHits,
+				      const EcalRecHitCollection *EERecHits) {
 
-  bool hasBarrel=true;
-  bool hasEndcap=true;
+
+  bool validTopologyAndGeometry = false;
   if(&sclusRef) {
     // Cluster related variables
     privateData_->ecal->push_back(sclusRef->energy());
@@ -455,48 +460,85 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
       privateData_->caloPhi->push_back(sclusRef->phi());
     }
 
-    // search the cluster shape for the seed of the SC associated to the electron
-    reco::BasicClusterShapeAssociationCollection::const_iterator seedShpItr;
-    seedShpItr = barrelClShpMap.find(sclusRef->seed());
-    if(seedShpItr==barrelClShpMap.end()) {
-      LogDebug("CmsElectronFiller") << "This ECAL cluster has not barrel hit, looking for encap ones";
-      hasBarrel=false;
-      seedShpItr=endcapClShpMap.find(sclusRef->seed());
-      if(seedShpItr==endcapClShpMap.end()) hasEndcap=false;
-    }
-    if(hasBarrel || hasEndcap) {
-      const ClusterShapeRef& sClShape = seedShpItr->val;  
+    edm::ESHandle<CaloTopology> pTopology;
+    iSetup.get<CaloTopologyRecord>().get(pTopology);
 
-      privateData_->e3x3->push_back(sClShape->e3x3());
-      privateData_->e5x5->push_back(sClShape->e5x5());
-      privateData_->eMax->push_back(sClShape->eMax());
-//       privateData_->lat->push_back(sClShape->lat());
-//       privateData_->phiLat->push_back(sClShape->phiLat());
-//       privateData_->etaLat->push_back(sClShape->etaLat());
+    edm::ESHandle<CaloGeometry> pGeometry;
+    iSetup.get<CaloGeometryRecord>().get(pGeometry);
+
+    if ( pTopology.isValid() && pGeometry.isValid() ) {
+
+      validTopologyAndGeometry = true;
+
+      const CaloTopology *topology = pTopology.product();
+      const CaloGeometry *geometry = pGeometry.product();
+
+      BasicClusterRef theSeed = sclusRef->seed();
+
+      const EcalRecHitCollection *rechits = 0;
+
+      float seedEta = theSeed->position().eta();
+
+      if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
+      else rechits = EERecHits; 
+
+      float eMax = EcalClusterTools::eMax( *theSeed, &(*rechits) );
+      float e3x3 = EcalClusterTools::e3x3( *theSeed, &(*rechits), topology );
+      float e5x5 = EcalClusterTools::e5x5( *theSeed, &(*rechits), topology );
+
+      privateData_->e3x3->push_back(e3x3);
+      privateData_->e5x5->push_back(e5x5);
+      privateData_->eMax->push_back(eMax);
+
+      std::vector<float> vLat = EcalClusterTools::lat( *theSeed, &(*rechits), geometry );
+      float etaLat = vLat[0];
+      float phiLat = vLat[1];
+      float lat = vLat[2];
+
+      privateData_->lat->push_back(lat);
+      privateData_->phiLat->push_back(phiLat);
+      privateData_->etaLat->push_back(etaLat);
+
       if(saveFatEcal_) {
-	privateData_->e2x2->push_back(sClShape->e2x2());
-	privateData_->e2nd->push_back(sClShape->e2nd());
-	privateData_->s1s9->push_back(sClShape->eMax()/sClShape->e3x3());
-	privateData_->s9s25->push_back(sClShape->e3x3()/sClShape->e5x5());
-	privateData_->covEtaEta->push_back(sClShape->covEtaEta());
-	privateData_->covEtaPhi->push_back(sClShape->covEtaPhi());
-	privateData_->covPhiPhi->push_back(sClShape->covPhiPhi());
-//  	privateData_->a20->push_back(sClShape->zernike20());
-//  	privateData_->a42->push_back(sClShape->zernike42());
+
+	float e2x2 = EcalClusterTools::e2x2( *theSeed, &(*rechits), topology );
+	float e2nd = EcalClusterTools::e2nd( *theSeed, &(*rechits) );
+	float s1s9 = eMax/e3x3;
+	float s9s25 = e3x3/e5x5;
+	std::vector<float> vCov = EcalClusterTools::covariances( *theSeed, &(*rechits), topology, geometry );
+
+	float covEtaEta = vCov[0];
+	float covEtaPhi = vCov[1];
+	float covPhiPhi = vCov[2];
+
+	privateData_->e2x2->push_back(e2x2);
+	privateData_->e2nd->push_back(e2nd);
+	privateData_->s1s9->push_back(s1s9);
+	privateData_->s9s25->push_back(s9s25);
+	privateData_->covEtaEta->push_back(covEtaEta);
+	privateData_->covEtaPhi->push_back(covEtaPhi);
+	privateData_->covPhiPhi->push_back(covPhiPhi);
+
+	float zernike20 = EcalClusterTools::zernike20( *theSeed, &(*rechits), geometry );
+	float zernike42 = EcalClusterTools::zernike42( *theSeed, &(*rechits), geometry );
+
+ 	privateData_->a20->push_back(zernike20);
+ 	privateData_->a42->push_back(zernike42);
+
       }
     }
-    else { edm::LogWarning("CmsElectronFiller") << "Cannot find hits in ECAL barrel or ECAL encap. Why are you requesting filling ECAL infos?";}
+    else { edm::LogWarning("CmsElectronFiller") << "ECAL topology or geometry not valid, not filling the ECAL cluster shapes"; }
   }
-  if(!(&sclusRef) || ((&sclusRef) && (!hasBarrel & !hasEndcap)) ) {
+  if(!(&sclusRef) || ((&sclusRef) && (!validTopologyAndGeometry)) ) {
     privateData_->ecal->push_back(-1.);
     privateData_->nClu->push_back(-1);
     privateData_->nCry->push_back(-1);
     privateData_->e3x3->push_back(-1.);
     privateData_->e5x5->push_back(-1.);
     privateData_->eMax->push_back(-1.);
-//     privateData_->lat->push_back(-1.);
-//     privateData_->phiLat->push_back(-1.);
-//     privateData_->etaLat->push_back(-1.);
+    privateData_->lat->push_back(-1.);
+    privateData_->phiLat->push_back(-1.);
+    privateData_->etaLat->push_back(-1.);
     if(saveFatEcal_) {
       privateData_->eraw->push_back(-1.);
       privateData_->caloEta->push_back(-1.);
@@ -508,8 +550,8 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
       privateData_->covEtaEta->push_back(-1.);
       privateData_->covEtaPhi->push_back(-1.);
       privateData_->covPhiPhi->push_back(-1.);
-//       privateData_->a20->push_back(-1.);
-//       privateData_->a42->push_back(-1.);
+      privateData_->a20->push_back(-1.);
+      privateData_->a42->push_back(-1.);
     }
   }
 }
@@ -527,9 +569,9 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
   
   if(saveFatEcal_) {
     cmstree->column((colPrefix+"eraw"+colSuffix).c_str(), *privateData_->eraw, nCandString.c_str(), 0, "Reco");
@@ -542,8 +584,8 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
     cmstree->column((colPrefix+"covEtaEta"+colSuffix).c_str(), *privateData_->covEtaEta, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"covEtaPhi"+colSuffix).c_str(), *privateData_->covEtaPhi, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"covPhiPhi"+colSuffix).c_str(), *privateData_->covPhiPhi, nCandString.c_str(), 0, "Reco");
-//     cmstree->column((colPrefix+"a20"+colSuffix).c_str(), *privateData_->a20, nCandString.c_str(), 0, "Reco");
-//     cmstree->column((colPrefix+"a42"+colSuffix).c_str(), *privateData_->a42, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"a20"+colSuffix).c_str(), *privateData_->a20, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"a42"+colSuffix).c_str(), *privateData_->a42, nCandString.c_str(), 0, "Reco");
   }
 }
 
@@ -596,11 +638,11 @@ void CmsElectronFillerData::initialise() {
   covEtaEta = new vector<float>;
   covEtaPhi = new vector<float>;
   covPhiPhi = new vector<float>;
-//   lat = new vector<float>;
-//   phiLat = new vector<float>;
-//   etaLat = new vector<float>;
-//   a20 = new vector<float>;
-//   a42 = new vector<float>;
+  lat = new vector<float>;
+  phiLat = new vector<float>;
+  etaLat = new vector<float>;
+  a20 = new vector<float>;
+  a42 = new vector<float>;
 
 }
 
@@ -642,9 +684,9 @@ void CmsElectronFillerData::clearTrkVectors() {
   e3x3->clear();
   e5x5->clear();
   eMax->clear();
-//   lat->clear();
-//   phiLat->clear();
-//   etaLat->clear();
+  lat->clear();
+  phiLat->clear();
+  etaLat->clear();
   eraw->clear();
   caloEta->clear();
   caloPhi->clear();
@@ -655,7 +697,7 @@ void CmsElectronFillerData::clearTrkVectors() {
   covEtaEta->clear();
   covEtaPhi->clear();
   covPhiPhi->clear();
-//   a20->clear();
-//   a42->clear();
+  a20->clear();
+  a42->clear();
 
 }

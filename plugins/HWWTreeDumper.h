@@ -71,11 +71,12 @@ private:
   edm::InputTag jetCollection_, genJetCollection_;
   edm::InputTag metCollection_, genMetCollection_;
   //! supercluster collections in input
-  edm::InputTag hybridSCCollection_, islandSCCollection_;
-  //! association maps between the clusters and the cluster shapes
-  edm::InputTag ecalBarrelClusterShapes_, ecalEndcapClusterShapes_;
-  //! producer of association map between the electron and the electron ID outputs
-  edm::InputTag electronIDAssocProducer_;
+  edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_;
+  //! ECAL rechits to compute the cluster shapes on the fly
+  edm::InputTag ecalBarrelRecHits_, ecalEndcapRecHits_;
+  //! electron ID labels
+  std::string electronIdCutsLabel_;
+  std::string electronIdLikelihoodLabel_;
   //! producer of the electron tracker isolation collection
   //  edm::InputTag tkIsolationProducer_;
   //! producer of the electron HCAL isolation collection from the calo towers

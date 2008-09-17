@@ -16,8 +16,8 @@
 #include "FWCore/ParameterSet/interface/InputTag.h"
 
 #include "DataFormats/Common/interface/Handle.h" 
-//#include "DataFormats/Common/interface/ESHandle.h" 
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
@@ -31,14 +31,14 @@ class HWWHadIsolation {
   
   ~HWWHadIsolation();
   
-  typedef reco::PixelMatchGsfElectronCollection collection;
-  typedef std::vector<const reco::PixelMatchGsfElectron *> container;
+  typedef reco::GsfElectronCollection collection;
+  typedef std::vector<const reco::GsfElectron *> container;
   typedef container::const_iterator const_iterator;
 
   const_iterator begin() const { return selected_.begin(); }
   const_iterator end() const { return selected_.end(); }
  
-  void select( edm::Handle<reco::PixelMatchGsfElectronCollection>, 
+  void select( edm::Handle<reco::GsfElectronCollection>, 
                const edm::Event&, const edm::EventSetup& );
 
  private:

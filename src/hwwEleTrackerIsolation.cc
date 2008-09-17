@@ -1,6 +1,5 @@
 // my includes
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackBase.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
@@ -15,7 +14,7 @@
 using namespace std;
 hwwEleTrackerIsolation::hwwEleTrackerIsolation (){}
 
-hwwEleTrackerIsolation::hwwEleTrackerIsolation (const PixelMatchGsfElectron *gsfEle, const TrackCollection trackColl) : 
+hwwEleTrackerIsolation::hwwEleTrackerIsolation (const GsfElectron *gsfEle, const TrackCollection trackColl) : 
   _myGsfEle(gsfEle),
   _tracks(trackColl)   
 {

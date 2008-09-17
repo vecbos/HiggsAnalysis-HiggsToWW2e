@@ -28,7 +28,7 @@ TkIsolation::TkIsolation ()
 }
 
 
-TkIsolation::TkIsolation (const reco::PixelMatchGsfElectron* electron,
+TkIsolation::TkIsolation (const reco::GsfElectron* electron,
 				      const reco::TrackCollection* trackCollection)   :
   electron_(electron) ,
   trackCollection_(trackCollection)  
@@ -41,9 +41,9 @@ TkIsolation::TkIsolation (const reco::PixelMatchGsfElectron* electron,
   lip_ = 0.1 ; 
 }
 
-TkIsolation::TkIsolation (const reco::PixelMatchGsfElectron* electron, 
+TkIsolation::TkIsolation (const reco::GsfElectron* electron, 
 				      const reco::TrackCollection* trackCollection,
-				      const reco::PixelMatchGsfElectronCollection* electronCollection) : 
+				      const reco::GsfElectronCollection* electronCollection) : 
   electron_(electron) ,
   trackCollection_(trackCollection) ,
   electronCollection_(electronCollection)  

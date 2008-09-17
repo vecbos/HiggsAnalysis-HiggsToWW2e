@@ -21,8 +21,7 @@
 
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
@@ -37,7 +36,7 @@ class hwwEleCaloIsolation{
   
   //constructors
   hwwEleCaloIsolation();
-  hwwEleCaloIsolation(const PixelMatchGsfElectron *gsfEle, const HBHERecHitCollection trackColl, edm::ESHandle<CaloGeometry>);
+  hwwEleCaloIsolation(const GsfElectron *gsfEle, const HBHERecHitCollection trackColl, edm::ESHandle<CaloGeometry>);
   
   //methods
   void setExtRadius (float extRadius);
@@ -50,7 +49,7 @@ class hwwEleCaloIsolation{
   
  private:
 
-  const PixelMatchGsfElectron* _myGsfEle;  	     
+  const GsfElectron* _myGsfEle;  	     
   const HBHERecHitCollection _hcalrh;
   edm::ESHandle<CaloGeometry> _caloGeo;
   

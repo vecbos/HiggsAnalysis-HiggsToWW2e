@@ -7,8 +7,8 @@
 
 //CMSSW includes
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "RecoCaloTools/MetaCollections/interface/CaloRecHitMetaCollections.h"
 
@@ -19,11 +19,11 @@ class HadIsolation {
   HadIsolation ( ) ;
   HadIsolation (edm::ESHandle<CaloGeometry> ,
                 HBHERecHitMetaCollection*  ,
-		const reco::PixelMatchGsfElectron* ) ;
+		const reco::GsfElectron* ) ;
   HadIsolation (edm::ESHandle<CaloGeometry> , 
                 HBHERecHitMetaCollection*  ,
-		const reco::PixelMatchGsfElectron* ,
-		const reco::PixelMatchGsfElectronCollection* ) ;
+		const reco::GsfElectron* ,
+		const reco::GsfElectronCollection* ) ;
   
   //methods
   void setExtRadius (double extRadius) ;
@@ -40,8 +40,8 @@ class HadIsolation {
   
   edm::ESHandle<CaloGeometry>  theCaloGeom_ ;
   HBHERecHitMetaCollection* mhbhe_ ;
-  const reco::PixelMatchGsfElectron  *electron_ ;
-  const reco::PixelMatchGsfElectronCollection *electronCollection_ ;
+  const reco::GsfElectron  *electron_ ;
+  const reco::GsfElectronCollection *electronCollection_ ;
   
   double extRadius_ ;
   double intRadius_ ;

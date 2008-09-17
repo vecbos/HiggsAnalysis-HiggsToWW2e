@@ -4,7 +4,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
 #include "RecoCaloTools/Selectors/interface/CaloConeSelector.h"
@@ -39,12 +38,12 @@ HWWTkIsolation::~HWWTkIsolation()
     std::cout << "efficiency=" << double(eleOut)/double(eleIn) << std::endl;
 }
 
-void HWWTkIsolation::select(edm::Handle<reco::PixelMatchGsfElectronCollection> c,
+void HWWTkIsolation::select(edm::Handle<reco::GsfElectronCollection> c,
                             const edm::Event& e, const edm::EventSetup& evtStp)
 {
 
   std::cout << "[HWWTkIsolation::select] nbr of initial electrons : " << c->size() << std::endl;
-  for( reco::PixelMatchGsfElectronCollection::const_iterator el = c->begin();  el != c->end(); el++ ) {
+  for( reco::GsfElectronCollection::const_iterator el = c->begin();  el != c->end(); el++ ) {
     std::cout << "[HWWTkIsolation::select] new initial electron with pt = " << (el)->pt() << " and eta = " <<
     (el)->eta() << std::endl;
   }  
@@ -57,7 +56,7 @@ void HWWTkIsolation::select(edm::Handle<reco::PixelMatchGsfElectronCollection> c
   const reco::TrackCollection* trackCollection = tracks.product () ;
   std::cout << "[HWWTkIsolation::select] trackCollection->size()=" << trackCollection->size() << std::endl;
   
-  for( reco::PixelMatchGsfElectronCollection::const_iterator el = c->begin(); 
+  for( reco::GsfElectronCollection::const_iterator el = c->begin(); 
    el != c->end(); el++ ) {
 
     TkIsolation myTkIsolation(&(*el),trackCollection) ;

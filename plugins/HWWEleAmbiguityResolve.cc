@@ -1,6 +1,5 @@
 // my includes
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/PixelMatchGsfElectronFwd.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackBase.h"
 #include "DataFormats/TrackReco/interface/TrackExtra.h"
@@ -70,7 +69,7 @@ void HWWEleAmbiguityResolve::Init(const edm::Handle<collection> & input) {
     no_ambiguity=0;
  
     // first electron
-    const reco::PixelMatchGsfElectron & thisEle1 = (*input)[ii];
+    const reco::GsfElectron & thisEle1 = (*input)[ii];
     reco::GsfTrackRef thisTrack1  = (thisEle1).gsfTrack();
     reco::SuperClusterRef thisSc1 = (thisEle1).superCluster();
 
@@ -78,7 +77,7 @@ void HWWEleAmbiguityResolve::Init(const edm::Handle<collection> & input) {
     for (unsigned int jj=ii+1; jj<input->size(); jj++){
 
       // second electron
-      const reco::PixelMatchGsfElectron & thisEle2 = (*input)[jj];
+      const reco::GsfElectron & thisEle2 = (*input)[jj];
       reco::GsfTrackRef thisTrack2  = (thisEle2).gsfTrack();
       reco::SuperClusterRef thisSc2 = (thisEle2).superCluster();
 
@@ -95,7 +94,7 @@ void HWWEleAmbiguityResolve::Init(const edm::Handle<collection> & input) {
       if (amb_index[iii] == ii ) test=false;
     }
     if ((unsigned int)no_ambiguity == (unsigned int)input->size()-1-ii && test==true) {
-      reco::PixelMatchGsfElectronRef electronRef(input, ii);
+      reco::GsfElectronRef electronRef(input, ii);
       edm::LogInfo("HWWEleAmbiguityResolve") << "easy, not ambiguous at all. SuperClusterRef->energy() = " 
 					     << electronRef->superCluster()->energy();
       bool presentInReducedCollection=true;
@@ -130,8 +129,8 @@ void HWWEleAmbiguityResolve::ResolveByEoverP(const edm::Handle<collection> & inp
       int multiAmbEleId=(int)it->first;
       while((int)it->first==multiAmbEleId && it<ambEle.end()) {
 	//	std::cout << "multiAmbEleId = " << multiAmbEleId << "\tbestEleId = " << bestEleId << std::endl;
-	const reco::PixelMatchGsfElectron & bestEle = (*input)[bestEleId];
-	const reco::PixelMatchGsfElectron & compEle = (*input)[it->second];
+	const reco::GsfElectron & bestEle = (*input)[bestEleId];
+	const reco::GsfElectron & compEle = (*input)[it->second];
 	edm::LogInfo("HWWEleAmbiguityResolve") << "compEle.superCluster()->energy() = " 
 					       << compEle.superCluster()->energy() 
 					       << "\tbestEle.superCluster()->energy() = " 
@@ -141,7 +140,7 @@ void HWWEleAmbiguityResolve::ResolveByEoverP(const edm::Handle<collection> & inp
       }
       edm::LogInfo("HWWEleAmbiguityResolve") << "looping on the ambiguous electrons: best ele index = " 
 					     <<  bestEleId << std::endl;
-      reco::PixelMatchGsfElectronRef electronRef(input, bestEleId);
+      reco::GsfElectronRef electronRef(input, bestEleId);
       
       bool presentInReducedCollection=true;
       if ( m_doRefCheck ) {

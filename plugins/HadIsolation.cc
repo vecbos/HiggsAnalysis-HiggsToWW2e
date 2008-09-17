@@ -23,7 +23,7 @@ HadIsolation::HadIsolation ()
 
 HadIsolation::HadIsolation ( edm::ESHandle<CaloGeometry> theCaloGeom ,
                              HBHERecHitMetaCollection*  mhbhe,
-                             const reco::PixelMatchGsfElectron* electron ) :
+                             const reco::GsfElectron* electron ) :
    theCaloGeom_(theCaloGeom) ,  
    mhbhe_(mhbhe) ,
    electron_(electron) 
@@ -36,8 +36,8 @@ HadIsolation::HadIsolation ( edm::ESHandle<CaloGeometry> theCaloGeom ,
 
 HadIsolation::HadIsolation (edm::ESHandle<CaloGeometry> theCaloGeom ,
                             HBHERecHitMetaCollection*  mhbhe,
-			    const reco::PixelMatchGsfElectron* electron , 
-			    const reco::PixelMatchGsfElectronCollection* electronCollection ) : 
+			    const reco::GsfElectron* electron , 
+			    const reco::GsfElectronCollection* electronCollection ) : 
   theCaloGeom_(theCaloGeom) , 
   mhbhe_(mhbhe) ,
   electron_(electron) ,
