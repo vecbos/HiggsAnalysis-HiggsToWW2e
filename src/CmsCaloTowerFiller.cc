@@ -57,6 +57,7 @@
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloSubdetectorGeometry.h"
 #include "Geometry/CaloGeometry/interface/CaloCellGeometry.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "Geometry/Records/interface/IdealGeometryRecord.h"
 #include "RecoLocalCalo/CaloTowersCreator/interface/HcalMaterials.h"
 #include "Geometry/CaloTopology/interface/CaloTowerConstituentsMap.h"
@@ -204,7 +205,7 @@ void CmsCaloTowerFiller::writeCollectionToTree(edm::InputTag caloTowersLabel,
     edm::ESHandle<HcalTopology> htopo;
     edm::ESHandle<CaloGeometry> pG;
     iSetup.get<IdealGeometryRecord>().get(htopo);
-    iSetup.get<IdealGeometryRecord>().get(pG);
+    iSetup.get<CaloGeometryRecord>().get(pG);
     const HcalTopology *theHcalTopology = htopo.product();
     const CaloGeometry *geo = pG.product();
     const CaloSubdetectorGeometry* theTowerGeometry = geo->getSubdetectorGeometry(DetId::Calo,CaloTowerDetId::SubdetId);
