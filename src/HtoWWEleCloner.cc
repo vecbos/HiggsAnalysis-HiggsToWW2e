@@ -19,7 +19,6 @@
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/GeometryVector/interface/GlobalPoint.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h" 
-#include "Geometry/Records/interface/IdealGeometryRecord.h" 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h" 
 #include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 

@@ -11,7 +11,6 @@
 
 #include "AnalysisDataFormats/Egamma/interface/ElectronID.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
-#include "Geometry/Records/interface/IdealGeometryRecord.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCalotowerIsolation.h"

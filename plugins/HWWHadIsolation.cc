@@ -7,6 +7,8 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+
 #include "RecoCaloTools/Selectors/interface/CaloConeSelector.h"
 
 #include <iostream>
@@ -48,7 +50,7 @@ void HWWHadIsolation::select(edm::Handle<reco::GsfElectronCollection> c,
 
   //services
   //get calo geometry
-  es.get<IdealGeometryRecord>().get(theCaloGeom_);
+  es.get<CaloGeometryRecord>().get(theCaloGeom_);
   //product the geometry
   theCaloGeom_.product() ;
 
