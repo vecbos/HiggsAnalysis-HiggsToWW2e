@@ -8,6 +8,8 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/HcalRecHit/interface/HcalRecHitCollections.h"
 #include "DataFormats/HcalRecHit/interface/HBHERecHit.h"
+#include "DataFormats/RecoCandidate/interface/IsoDeposit.h"
+#include "DataFormats/RecoCandidate/interface/IsoDepositFwd.h"
 
 #include "AnalysisDataFormats/Egamma/interface/ElectronID.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
@@ -38,6 +40,7 @@ CmsEleIDTreeFiller::CmsEleIDTreeFiller(CmsTree *cmsTree, int maxTracks, bool noO
   standalone_ = true;
 
   privateData_->initialise();
+
 }
 
 //--------------
@@ -72,6 +75,9 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->sumEmEt04;
   delete privateData_->sumHadEt05;
   delete privateData_->sumEmEt05;
+  delete privateData_->isoFromDepsTk;
+  delete privateData_->isoFromDepsEcal;
+  delete privateData_->isoFromDepsHcal;
   delete privateData_->eleLik;
   delete privateData_->eleIdCutBasedDecision;
   delete privateData_->eleTip;
@@ -134,6 +140,13 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(calotowersProducer_, m_calotowers); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get calotowers product" << calotowersProducer_; }
 
+    //read the isolation with iso deposits
+    //    eIsoFromDepsValueMap_.reserve(3);
+    eIsoFromDepsValueMap_ = new isoContainer(3);
+    iEvent.getByLabel( "eleIsoFromDepsTk", (*eIsoFromDepsValueMap_)[0] ); 
+    iEvent.getByLabel( "eleIsoFromDepsEcalFromHits", (*eIsoFromDepsValueMap_)[1] ); 
+    iEvent.getByLabel( "eleIsoFromDepsHcalFromHits", (*eIsoFromDepsValueMap_)[2] ); 
+
     for(int index = 0; index < (int)collection->size(); index++) {
 	  
       const GsfElectronRef electronRef = collection->refAt(index).castTo<GsfElectronRef>();
@@ -143,6 +156,8 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					      << "electrons, electron-specific infos will be set to default.";
 
     }
+
+    delete eIsoFromDepsValueMap_;
 
   }
 
@@ -213,6 +228,14 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
 
   privateData_->eleIdCutBasedDecision->push_back( eIdmapCuts[electronRef] );
   privateData_->eleLik->push_back( eIdmapLikelihood[electronRef] );  
+
+  const isoFromDepositsMap & eIsoFromDepsTkVal = *( (*eIsoFromDepsValueMap_)[0] );
+  const isoFromDepositsMap & eIsoFromDepsEcalVal = *( (*eIsoFromDepsValueMap_)[1] );
+  const isoFromDepositsMap & eIsoFromDepsHcalVal = *( (*eIsoFromDepsValueMap_)[2] );
+
+  privateData_->isoFromDepsTk->push_back( eIsoFromDepsTkVal[electronRef] );
+  privateData_->isoFromDepsEcal->push_back( eIsoFromDepsEcalVal[electronRef] );
+  privateData_->isoFromDepsHcal->push_back( eIsoFromDepsHcalVal[electronRef] );
 
   // --- isolations ---
   
@@ -322,6 +345,9 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleSumEmEt04"+colSuffix).c_str(), *privateData_->sumEmEt04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumHadEt05"+colSuffix).c_str(), *privateData_->sumHadEt05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleSumEmEt05"+colSuffix).c_str(), *privateData_->sumEmEt05, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIsoFromDepsTk"+colSuffix).c_str(), *privateData_->isoFromDepsTk, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIsoFromDepsEcal"+colSuffix).c_str(), *privateData_->isoFromDepsEcal, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIsoFromDepsHcal"+colSuffix).c_str(), *privateData_->isoFromDepsHcal, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
@@ -359,6 +385,9 @@ void CmsEleIDTreeFillerData::initialise() {
   sumEmEt04                = new vector<float>;
   sumHadEt05               = new vector<float>;
   sumEmEt05                = new vector<float>;
+  isoFromDepsTk            = new vector<float>;
+  isoFromDepsEcal          = new vector<float>;
+  isoFromDepsHcal          = new vector<float>;
   eleIdCutBasedDecision    = new vector<bool>;
   eleLik                   = new vector<float>;
   eleTip                   = new vector<float>;
@@ -396,6 +425,9 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   sumEmEt04                ->clear();
   sumHadEt05               ->clear();
   sumEmEt05                ->clear();
+  isoFromDepsTk            ->clear();
+  isoFromDepsEcal          ->clear();
+  isoFromDepsHcal          ->clear();
   eleIdCutBasedDecision    ->clear();
   eleLik                   ->clear();
   eleTip                   ->clear();

@@ -21,6 +21,7 @@
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
+#include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -41,6 +42,10 @@
 
 #include "DataFormats/Common/interface/ValueMap.h"
 
+#include "DataFormats/RecoCandidate/interface/IsoDeposit.h"
+#include "DataFormats/RecoCandidate/interface/IsoDepositFwd.h"
+#include "DataFormats/Common/interface/ValueMap.h"
+
 struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
 
   vector<int>   *eleClass;
@@ -54,6 +59,7 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *sumPt04, *sumPt05;
   vector<float> *sumPtPreselection;
   vector<float> *sumHadEt04, *sumEmEt04, *sumHadEt05, *sumEmEt05;
+  vector<float> *isoFromDepsTk, *isoFromDepsEcal, *isoFromDepsHcal;
   vector<float> *eleFullCorrE,     *eleCaloCorrE;
   vector<float> *eleNxtalCorrE,    *eleRawE;
   vector<float> *eleLik;
@@ -129,6 +135,9 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
 
+  typedef edm::ValueMap<double> isoFromDepositsMap;
+  typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
+  isoContainer *eIsoFromDepsValueMap_;
 //   edm::Handle< reco::CandViewDoubleAssociations > towerIsolationHandle_;
 //   edm::Handle< reco::PMGsfElectronIsoCollection > tkIsolationHandle_;
   edm::Handle<CaloTowerCollection> m_calotowers;
