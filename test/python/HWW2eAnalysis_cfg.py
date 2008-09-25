@@ -5,30 +5,27 @@ process = cms.Process("HiggsToWW2e")
 process.extend(cms.include("RecoEcal/EgammaClusterProducers/data/geometryForClustering.cff"))
 
 # --- common preselection code ---
-# TODO????
+process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWPreselectionSequence_cff")
 
 # --- common code to comput gg fusion signal k factor
-# TODO????
+process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWKFactorProducer_cfi")
 
 # --- jet met sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
 
-# --- electron sequence ---
+# --- electron sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
-process.ambiguityResolvedElectrons.reducedElectronsRefCollectionLabel = "pixelMatchGsfElectronsRef" # temporary until the common code is not migrated
-process.ambiguityResolvedElectrons.doRefCheck = False
-
-process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.alternativeIsolationSequence_cff")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default.root'
 process.treeDumper.dumpTriggerResults = True
-process.treeDumper.dumpPreselInfo = False
+process.treeDumper.dumpPreselInfo = True
 process.treeDumper.dumpGenInfo = False
-process.treeDumper.dumpSignalKfactor = False
+process.treeDumper.dumpSignalKfactor = True
 process.treeDumper.dumpGenInfoMcAtNlo = False
-process.treeDumper.saveFatTrk = False
+process.treeDumper.saveFatTrk = True
 process.treeDumper.dumpTree = True
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
@@ -40,7 +37,9 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.p = cms.Path ( process.jetSequence *
-#                       higgsToWW2LeptonsPreselectionSequence *
-                       process.ambiguityResolvedElectrons * process.eIdSequence )
+                       process.KFactorProducer *
+                       process.higgsToWW2LeptonsPreselectionSequence *
+                       # process.alternativeIsolationSequence * # needed only when running on AODs
+                       process.ambiguityResolvedElectrons )
 
 process.q = cms.EndPath ( process.treeDumper )
