@@ -66,10 +66,13 @@ private:
   bool dumpSCs_;
   //! dump trigger results
   bool dumpTriggerResults_;
+  //! dump the Particle Flow objects
+  bool dumpParticleFlowObjects_;
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_;
-  edm::InputTag jetCollection_, genJetCollection_;
+  edm::InputTag jetCollection1_, genJetCollection1_, jetCollection2_, genJetCollection2_;
   edm::InputTag metCollection_, genMetCollection_;
+  edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
   //! supercluster collections in input
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly
@@ -84,7 +87,7 @@ private:
   //! track and calotowers collection for isolation studies
   edm::InputTag tracksForIsolationProducer_, calotowersForIsolationProducer_;
   //! collection of jet vertices for alpha evaluation
-  edm::InputTag jetVertexAlphaCollection_;
+  edm::InputTag jetVertexAlphaCollection1_, jetVertexAlphaCollection2_;
   //! generator-level particle collection in input
   edm::InputTag mcTruthCollection_;
   //! association map between reco and generated particles
