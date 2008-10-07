@@ -40,6 +40,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsConditionsFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
@@ -90,9 +91,13 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
   dumpMet_            = iConfig.getUntrackedParameter<bool>("dumpMet", false);
   dumpGenMet_         = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
+
+  // Particle Flow objects
+  dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
   
   // jet vertex collections
-  jetVertexAlphaCollection_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection");
+  jetVertexAlphaCollection1_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection1");
+  jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
@@ -106,9 +111,14 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 //   towerIsolationProducer_  = iConfig.getParameter<edm::InputTag>("towerIsolationProducer"); 
   tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
-  jetCollection_           = iConfig.getParameter<edm::InputTag>("jetCollection");
-  genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
+  jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
+  genJetCollection1_       = iConfig.getParameter<edm::InputTag>("genJetCollection1");
+  jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
+  genJetCollection2_       = iConfig.getParameter<edm::InputTag>("genJetCollection2");
+  PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
+  PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
+  PFmetCollection_         = iConfig.getParameter<edm::InputTag>("PFmetCollection");
   genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
   mcTruthCollection_       = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
   electronMatchMap_        = iConfig.getParameter<edm::InputTag>("electronMatchMap");
@@ -272,8 +282,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string prefix("");
     std::string suffix("Met");
     treeRecoFill.saveCand(saveCand_);
-
     treeRecoFill.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
+
+    // particle flow met
+    if ( dumpParticleFlowObjects_ ) {
+      CmsCandidateFiller pfMetFiller(tree_, true);
+      suffix = "PFMet";
+      pfMetFiller.saveCand(saveCand_);
+      pfMetFiller.writeCollectionToTree(PFmetCollection_, iEvent, iSetup, prefix, suffix, false);
+    }
 
     // dump generated MET
     if(dumpGenMet_) {
@@ -291,21 +308,46 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-    CmsJetFiller treeRecoFill(tree_, jetVertexAlphaCollection_, true);
+    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
     std::string prefix("");
-    std::string suffix("Jet");
-    treeRecoFill.saveCand(saveCand_);
-    treeRecoFill.saveJetExtras(saveJetAlpha_);
+    std::string suffix("IterativeJet");
+    treeRecoFill1.saveCand(saveCand_);
+    treeRecoFill1.saveJetExtras(saveJetAlpha_);
+    treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
-    treeRecoFill.writeCollectionToTree(jetCollection_, iEvent, iSetup, prefix, suffix, false);
+
+    CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, true);
+    suffix = "SisConeJet";
+    treeRecoFill2.saveCand(saveCand_);
+    treeRecoFill2.saveJetExtras(saveJetAlpha_);
+    treeRecoFill2.writeCollectionToTree(jetCollection2_, iEvent, iSetup, prefix, suffix, false);
+
+
+    // particle flow jets
+    if ( dumpParticleFlowObjects_ ) {  
+      CmsPFJetFiller pfJetFiller1(tree_, true);
+      suffix = "IterativePFJet";
+      pfJetFiller1.saveCand(saveCand_);
+      pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
+      
+      CmsPFJetFiller pfJetFiller2(tree_, true);
+      suffix = "SisConePFJet";
+      pfJetFiller2.saveCand(saveCand_);
+      pfJetFiller2.writeCollectionToTree(PFjetCollection2_, iEvent, iSetup, prefix, suffix, false);
+    }
 
     // dump generated JETs
     if(dumpGenJets_) {
 
-      CmsJetFiller treeGenFill(tree_, jetVertexAlphaCollection_, true);
-      std::string suffix("GenJet");
-      treeGenFill.saveJetExtras(false);
-      treeGenFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
+      CmsJetFiller treeGenFill1(tree_, jetVertexAlphaCollection1_, true);
+      suffix = "GenIterativeJet";
+      treeGenFill1.saveJetExtras(false);
+      treeGenFill1.writeCollectionToTree(genJetCollection1_, iEvent, iSetup, prefix, suffix, false);
+
+      CmsJetFiller treeGenFill2(tree_, jetVertexAlphaCollection2_, true);
+      suffix = "GenSisConeJet";
+      treeGenFill2.saveJetExtras(false);
+      treeGenFill2.writeCollectionToTree(genJetCollection2_, iEvent, iSetup, prefix, suffix, false);
 
     }
 
