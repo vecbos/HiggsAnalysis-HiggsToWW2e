@@ -10,8 +10,9 @@ process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWPreselectionSequence_cff")
 # --- common code to comput gg fusion signal k factor
 process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWKFactorProducer_cfi")
 
-# --- jet met sequence ---
+# --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 
 # --- electron sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
@@ -25,6 +26,7 @@ process.treeDumper.dumpPreselInfo = True
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpSignalKfactor = True
 process.treeDumper.dumpGenInfoMcAtNlo = False
+process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.dumpTree = True
 
@@ -36,9 +38,10 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/relval_Zee_CMSSW_2_1_7.root')
                             )
 
-process.p = cms.Path ( process.jetSequence *
-                       process.KFactorProducer *
+process.p = cms.Path ( process.KFactorProducer *
                        process.higgsToWW2LeptonsPreselectionSequence *
+                       process.jetSequence *
+                       process.metSequence *
                        # process.alternativeIsolationSequence * # needed only when running on AODs
                        process.ambiguityResolvedElectrons )
 
