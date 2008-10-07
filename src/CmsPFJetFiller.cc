@@ -120,12 +120,18 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	  privateData_->neutralHadronEnergy->push_back( thisPFJet->neutralHadronEnergy() );
 	  privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
 	  privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
+	  privateData_->neutralMultiplicity->push_back( thisPFJet->neutralMultiplicity() );
+	  privateData_->chargedMultiplicity->push_back( thisPFJet->chargedMultiplicity() );
+	  privateData_->muonMultiplicity->push_back( thisPFJet->muonMultiplicity() );
 	}
 	else {
 	  privateData_->chargedHadronEnergy->push_back( -1. );
 	  privateData_->neutralHadronEnergy->push_back( -1. );
 	  privateData_->chargedEmEnergy->push_back( -1. );
 	  privateData_->neutralEmEnergy->push_back( -1. );
+	  privateData_->neutralMultiplicity->push_back( -1. );
+	  privateData_->chargedMultiplicity->push_back( -1. );
+	  privateData_->muonMultiplicity->push_back( -1. );
 	}
 
     }
@@ -163,6 +169,9 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"neutralHadronEnergy"+colSuffix).c_str(), *privateData_->neutralHadronEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chargedEmEnergy"+colSuffix).c_str(), *privateData_->chargedEmEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"neutralEmEnergy"+colSuffix).c_str(), *privateData_->neutralEmEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"neutralMultiplicity"+colSuffix).c_str(), *privateData_->neutralMultiplicity, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"chargedMultiplicity"+colSuffix).c_str(), *privateData_->chargedMultiplicity, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"muonMultiplicity"+colSuffix).c_str(), *privateData_->muonMultiplicity, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -179,6 +188,9 @@ void CmsPFJetFillerData::initialise() {
   neutralHadronEnergy = new vector<float>;
   chargedEmEnergy = new vector<float>;
   neutralEmEnergy = new vector<float>;
+  neutralMultiplicity = new vector<float>;
+  chargedMultiplicity = new vector<float>;
+  muonMultiplicity = new vector<float>;
 
 }
 
@@ -189,5 +201,8 @@ void CmsPFJetFillerData::clearTrkVectors() {
   neutralHadronEnergy->clear();
   chargedEmEnergy->clear();
   neutralEmEnergy->clear();
+  neutralMultiplicity->clear();
+  chargedMultiplicity->clear();
+  muonMultiplicity->clear();
 
 }
