@@ -340,12 +340,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     if(dumpGenJets_) {
 
       CmsJetFiller treeGenFill1(tree_, jetVertexAlphaCollection1_, true);
-      suffix = "GenIterativeJet";
+      suffix = "IterativeGenJet";
       treeGenFill1.saveJetExtras(false);
       treeGenFill1.writeCollectionToTree(genJetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
       CmsJetFiller treeGenFill2(tree_, jetVertexAlphaCollection2_, true);
-      suffix = "GenSisConeJet";
+      suffix = "SisConeGenJet";
       treeGenFill2.saveJetExtras(false);
       treeGenFill2.writeCollectionToTree(genJetCollection2_, iEvent, iSetup, prefix, suffix, false);
 
