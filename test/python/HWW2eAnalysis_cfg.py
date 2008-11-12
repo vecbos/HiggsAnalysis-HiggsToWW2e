@@ -16,6 +16,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 
 # --- electron sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
+process.ambiguityResolvedElectrons.doRefCheck = True # dump pre-selected electrons
 process.load("HiggsAnalysis.HiggsToWW2e.alternativeIsolationSequence_cff")
 
 # --- tree dumper ---
