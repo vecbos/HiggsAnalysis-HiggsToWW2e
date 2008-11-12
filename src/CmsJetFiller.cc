@@ -43,6 +43,9 @@
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
+#include "RecoBTag/MCTools/interface/JetFlavour.h"
+#include "SimDataFormats/JetMatching/interface/JetFlavourMatching.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
@@ -66,6 +69,7 @@ using namespace reco;
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
 			   edm::InputTag jetVertexAlphaCollection,
+			   JetFlavourIdentifier jetMCFlavourIdentifier,
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
   CmsCandidateFiller(cmsTree,maxTracks,maxMCTracks,noOutputIfLimitsReached),
@@ -77,16 +81,19 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
   saveJetExtras_=true;
 
   trkIndexName_ = new std::string("n");
-
+  
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
+
+  jetMCFlavourIdentifier_=jetMCFlavourIdentifier;
 
   privateData_->initialise();
 }
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
 			   edm::InputTag jetVertexAlphaCollection,
+			   JetFlavourIdentifier jetMCFlavourIdentifier,
 			   bool fatTree, 
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
@@ -102,6 +109,8 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
 
+  jetMCFlavourIdentifier_=jetMCFlavourIdentifier;
+
   privateData_->initialise();
 }
 
@@ -116,6 +125,7 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->emFrac;
   delete privateData_->hadFrac;
   delete privateData_->alpha;
+  delete privateData_->flavourId;
 
 }
 
@@ -137,6 +147,8 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
+  
+  jetMCFlavourIdentifier_.readEvent(iEvent);
 
   privateData_->clearTrkVectors();
 
@@ -179,22 +191,26 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       if(saveJetExtras_) { 
 	privateData_->alpha->push_back(*jetVtxAlphaItr);
 	jetVtxAlphaItr++;
-	
-	// em, had fractions
+
+	// em, had fractions and jet flavour id
 	const CaloJet *thisRecoJet = dynamic_cast< const CaloJet * > ( &(*cand) );
 	if( thisRecoJet != 0 ) { 
+	  BTagMCTools::JetFlavour jetFlavour = jetMCFlavourIdentifier_.identifyBasedOnPartons(*thisRecoJet);
 	  privateData_->emFrac->push_back( thisRecoJet->emEnergyFraction() );
 	  privateData_->hadFrac->push_back( thisRecoJet->energyFractionHadronic() );
+	  privateData_->flavourId->push_back( jetFlavour.flavour() );
 	}
 	else {
-	  privateData_->emFrac->push_back( -1. );
-	  privateData_->hadFrac->push_back( -1. );
+	  privateData_->emFrac->push_back( -1.);
+	  privateData_->hadFrac->push_back( -1.);
+	  privateData_->flavourId->push_back( -1.);
 	}
       }
       else {
 	privateData_->alpha->push_back( -1. );
 	privateData_->emFrac->push_back( -1. );
 	privateData_->hadFrac->push_back( -1. );
+	privateData_->flavourId->push_back( -1.);
       }
     }
   }
@@ -230,6 +246,7 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
   cmstree->column((colPrefix+"alpha"+colSuffix).c_str(), *privateData_->alpha, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"flavourId"+colSuffix).c_str(), *privateData_->flavourId, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -245,7 +262,7 @@ void CmsJetFillerData::initialise() {
   alpha = new vector<float>;
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
-
+  flavourId = new vector<float>;
 }
 
 void CmsJetFillerData::clearTrkVectors() {
@@ -254,5 +271,6 @@ void CmsJetFillerData::clearTrkVectors() {
   alpha->clear();
   emFrac->clear();
   hadFrac->clear();
+  flavourId->clear();
 
 }

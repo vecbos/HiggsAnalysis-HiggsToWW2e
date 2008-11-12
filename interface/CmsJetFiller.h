@@ -29,6 +29,8 @@
 #include "DataFormats/METReco/interface/GenMET.h"
 #include "DataFormats/METReco/interface/GenMETCollection.h"
 
+#include "RecoBTag/MCTools/interface/JetFlavourIdentifier.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include <TTree.h>
 
@@ -40,6 +42,7 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
 
   std::vector<float> *emFrac, *hadFrac;
   std::vector<float> *alpha;
+  std::vector<float> *flavourId;
 
 public:
   void initialise();
@@ -56,12 +59,14 @@ class CmsJetFiller : public CmsCandidateFiller {
   // Dump everything
   CmsJetFiller(CmsTree *, 
 	       edm::InputTag jetVertexAlphaCollection,
+	       JetFlavourIdentifier jetMCFlavourIdentifier,
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
 
   // Dump  everything if fatTree is true and less informations otherwise
   CmsJetFiller(CmsTree *, 
 	       edm::InputTag jetVertexAlphaCollection,
+	       JetFlavourIdentifier jetMCFlavourIdentifier,
 	       bool fatTree, 
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
@@ -97,8 +102,10 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   CmsJetFillerData *privateData_;
   edm::InputTag jetVertexAlphaCollection_;
+  JetFlavourIdentifier jetMCFlavourIdentifier_;
 
   CmsTree *cmstree;
+
 
 };
 

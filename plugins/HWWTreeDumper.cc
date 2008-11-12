@@ -34,6 +34,8 @@
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
 
+#include "RecoBTag/MCTools/interface/JetFlavourIdentifier.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
@@ -98,6 +100,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // jet vertex collections
   jetVertexAlphaCollection1_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection1");
   jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
+  // jetMCFlavourIdentifier     = JetFlavourIdentifier(iConfig.getParameter<edm::ParameterSet>("jetIdParameters"));
+  jetMCFlavourIdentifier_    = iConfig.getParameter<edm::ParameterSet>("jetIdParameters");
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
@@ -308,7 +312,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
+    JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
+    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, jetMCFlavourIdentifier, true);
     std::string prefix("");
     std::string suffix("IterativeJet");
     treeRecoFill1.saveCand(saveCand_);
@@ -316,7 +321,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
 
-    CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, true);
+    CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, jetMCFlavourIdentifier, true);
     suffix = "SisConeJet";
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.saveJetExtras(saveJetAlpha_);
@@ -339,12 +344,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // dump generated JETs
     if(dumpGenJets_) {
 
-      CmsJetFiller treeGenFill1(tree_, jetVertexAlphaCollection1_, true);
+      JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
+      CmsJetFiller treeGenFill1(tree_, jetVertexAlphaCollection1_, jetMCFlavourIdentifier, true);
       suffix = "IterativeGenJet";
       treeGenFill1.saveJetExtras(false);
       treeGenFill1.writeCollectionToTree(genJetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
-      CmsJetFiller treeGenFill2(tree_, jetVertexAlphaCollection2_, true);
+      CmsJetFiller treeGenFill2(tree_, jetVertexAlphaCollection2_, jetMCFlavourIdentifier, true);
       suffix = "SisConeGenJet";
       treeGenFill2.saveJetExtras(false);
       treeGenFill2.writeCollectionToTree(genJetCollection2_, iEvent, iSetup, prefix, suffix, false);

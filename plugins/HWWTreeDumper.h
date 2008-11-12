@@ -88,6 +88,8 @@ private:
   edm::InputTag tracksForIsolationProducer_, calotowersForIsolationProducer_;
   //! collection of jet vertices for alpha evaluation
   edm::InputTag jetVertexAlphaCollection1_, jetVertexAlphaCollection2_;
+  edm::ParameterSet jetMCFlavourIdentifier_;
+  // JetFlavourIdentifier jetMCFlavourIdentifier;
   //! generator-level particle collection in input
   edm::InputTag mcTruthCollection_;
   //! association map between reco and generated particles

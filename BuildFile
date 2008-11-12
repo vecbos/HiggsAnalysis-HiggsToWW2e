@@ -4,6 +4,7 @@
 <use name=root>
 <use name=rootcore>
 <use name=DataFormats/DetId>
+<use name=DataFormats/BTauReco>
 <use name=DataFormats/TrackerRecHit2D>
 <use name=DataFormats/TrackingRecHit>
 <use name=DataFormats/JetReco>
@@ -25,10 +26,13 @@
 <use name=TrackingTools/TrackAssociator>
 <use name=Geometry/TrackerGeometryBuilder>
 <use name=SimDataFormats/HepMCProduct>
+<use name=RecoBTau/JetTagComputer>
+<use name=RecoBTag/MCTools>	
 <use name=RecoEcal/EgammaCoreTools>
 <use name=RecoEgamma/EgammaElectronAlgos>
 <use name=RecoTracker/CkfPattern>
 <use name=RecoTracker/TrackProducer>
+<use name=SimDataFormats/JetMatching>
 
 <export>
    <lib name=HiggsAnalysisHiggsToWW2e>	
@@ -60,8 +64,12 @@
    <use name=Geometry/TrackerGeometryBuilder>
    <use name=SimDataFormats/HepMCProduct>
    <use name=DataFormats/EgammaCandidates>
+   <use name=RecoBTau/JetTagComputer>
+   <use name=RecoBTag/MCTools>
    <use name=RecoEcal/EgammaCoreTools>
    <use name=RecoEgamma/EgammaElectronAlgos>
    <use name=RecoTracker/CkfPattern>
    <use name=RecoTracker/TrackProducer>
+   <use name=SimDataFormats/JetMatching>
+   <use name=DataFormats/BTauReco>
 </export>

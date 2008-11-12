@@ -36,7 +36,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.source = cms.Source("PoolSource",
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/relval_Zee_CMSSW_2_1_7.root')
+#                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/relval_Zee_CMSSW_2_1_7.root')
+                            fileNames =  cms.untracked.vstring('file:/cmsrm/pc18/emanuele/data/Pool/relvalZee217.root')
                             )
 
 process.p = cms.Path ( process.KFactorProducer *
