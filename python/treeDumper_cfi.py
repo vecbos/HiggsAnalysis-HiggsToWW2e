@@ -64,6 +64,7 @@ treeDumper = cms.EDFilter("HWWTreeDumper",
                           dumpGenInfoMcAtNlo = cms.untracked.bool(False),
                           doMCEleMatch = cms.untracked.bool(False),
                           doMCMuonMatch = cms.untracked.bool(False),
+                          saveJetFlavour = cms.untracked.bool(True),
                           # trigger results
                           dumpTriggerResults = cms.untracked.bool(False),
                           # effectively dump the data into the tree

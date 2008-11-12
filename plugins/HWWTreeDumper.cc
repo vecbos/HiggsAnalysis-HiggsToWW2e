@@ -61,19 +61,20 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   doMCMuonMatch_ = iConfig.getUntrackedParameter<bool>("doMCMuonMatch", false);
   
   // control level of Reco Adapters in the tree
-  saveTrk_      = iConfig.getUntrackedParameter<bool>("saveTrk", false);
-  saveEcal_     = iConfig.getUntrackedParameter<bool>("saveEcal", false);
-  saveHcal_     = iConfig.getUntrackedParameter<bool>("saveHcal", false);
-  saveDT_       = iConfig.getUntrackedParameter<bool>("saveDT", false);
-  saveCSC_      = iConfig.getUntrackedParameter<bool>("saveCSC", false);
-  saveRPC_      = iConfig.getUntrackedParameter<bool>("saveRPC", false);
-  saveFatTrk_   = iConfig.getUntrackedParameter<bool>("saveFatTrk", false);
-  saveFatEcal_  = iConfig.getUntrackedParameter<bool>("saveFatEcal", false);
-  saveFatHcal_  = iConfig.getUntrackedParameter<bool>("saveFatHcal", false);
-  saveFatDT_    = iConfig.getUntrackedParameter<bool>("saveFatDT", false);
-  saveFatCSC_   = iConfig.getUntrackedParameter<bool>("saveFatCSC", false);
-  saveFatRPC_   = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
-  saveJetAlpha_ = iConfig.getUntrackedParameter<bool>("saveJetAlpha", false);
+  saveTrk_        = iConfig.getUntrackedParameter<bool>("saveTrk", false);
+  saveEcal_       = iConfig.getUntrackedParameter<bool>("saveEcal", false);
+  saveHcal_       = iConfig.getUntrackedParameter<bool>("saveHcal", false);
+  saveDT_         = iConfig.getUntrackedParameter<bool>("saveDT", false);
+  saveCSC_        = iConfig.getUntrackedParameter<bool>("saveCSC", false);
+  saveRPC_        = iConfig.getUntrackedParameter<bool>("saveRPC", false);
+  saveFatTrk_     = iConfig.getUntrackedParameter<bool>("saveFatTrk", false);
+  saveFatEcal_    = iConfig.getUntrackedParameter<bool>("saveFatEcal", false);
+  saveFatHcal_    = iConfig.getUntrackedParameter<bool>("saveFatHcal", false);
+  saveFatDT_      = iConfig.getUntrackedParameter<bool>("saveFatDT", false);
+  saveFatCSC_     = iConfig.getUntrackedParameter<bool>("saveFatCSC", false);
+  saveFatRPC_     = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
+  saveJetAlpha_   = iConfig.getUntrackedParameter<bool>("saveJetAlpha", false);
+  saveJetFlavour_ = iConfig.getUntrackedParameter<bool>("saveJetFlavour", false);
 
   // particle identification
   saveEleID_    = iConfig.getUntrackedParameter<bool>("saveEleID", false);
@@ -100,7 +101,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // jet vertex collections
   jetVertexAlphaCollection1_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection1");
   jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
-  // jetMCFlavourIdentifier     = JetFlavourIdentifier(iConfig.getParameter<edm::ParameterSet>("jetIdParameters"));
   jetMCFlavourIdentifier_    = iConfig.getParameter<edm::ParameterSet>("jetIdParameters");
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
@@ -312,19 +312,27 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-    JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
-    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, jetMCFlavourIdentifier, true);
+    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
     std::string prefix("");
     std::string suffix("IterativeJet");
     treeRecoFill1.saveCand(saveCand_);
     treeRecoFill1.saveJetExtras(saveJetAlpha_);
+    treeRecoFill1.saveJetFlavour(saveJetFlavour_);
+    if(saveJetFlavour_) { 
+      JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
+      treeRecoFill1.setJetFlavour(jetMCFlavourIdentifier);
+    }
     treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
 
-    CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, jetMCFlavourIdentifier, true);
+    CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, true);
     suffix = "SisConeJet";
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.saveJetExtras(saveJetAlpha_);
+    if(saveJetFlavour_) { 
+      JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
+      treeRecoFill2.setJetFlavour(jetMCFlavourIdentifier);
+    }
     treeRecoFill2.writeCollectionToTree(jetCollection2_, iEvent, iSetup, prefix, suffix, false);
 
 
@@ -344,15 +352,24 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // dump generated JETs
     if(dumpGenJets_) {
 
-      JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
-      CmsJetFiller treeGenFill1(tree_, jetVertexAlphaCollection1_, jetMCFlavourIdentifier, true);
+      CmsJetFiller treeGenFill1(tree_, jetVertexAlphaCollection1_, true);
       suffix = "IterativeGenJet";
       treeGenFill1.saveJetExtras(false);
+      treeGenFill1.saveJetFlavour(saveJetFlavour_);
+      if(saveJetFlavour_) { 
+	JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
+	treeGenFill1.setJetFlavour(jetMCFlavourIdentifier);
+      }
       treeGenFill1.writeCollectionToTree(genJetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
-      CmsJetFiller treeGenFill2(tree_, jetVertexAlphaCollection2_, jetMCFlavourIdentifier, true);
+      CmsJetFiller treeGenFill2(tree_, jetVertexAlphaCollection2_, true);
       suffix = "SisConeGenJet";
       treeGenFill2.saveJetExtras(false);
+      treeGenFill2.saveJetFlavour(saveJetFlavour_);
+      if(saveJetFlavour_) { 
+	JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
+	treeGenFill2.setJetFlavour(jetMCFlavourIdentifier);
+      }
       treeGenFill2.writeCollectionToTree(genJetCollection2_, iEvent, iSetup, prefix, suffix, false);
 
     }

@@ -49,6 +49,7 @@ module treeDumper = HWWTreeDumper {
     untracked bool dumpGenInfoMcAtNlo = false
     untracked bool doMCEleMatch       = false
     untracked bool doMCMuonMatch      = false
+    untracked bool saveJetFlavour     = true
     # trigger results
     untracked bool dumpTriggerResults = false
     # effectively dump the data into the tree

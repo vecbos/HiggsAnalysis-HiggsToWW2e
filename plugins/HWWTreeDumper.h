@@ -54,6 +54,8 @@ private:
   bool saveEleID_;
   //! dump the jet alpha parameter
   bool saveJetAlpha_;
+  //! dump the jet flavour content (if MC trith available)
+  bool saveJetFlavour_;
   //! dump the electron block
   bool dumpElectrons_;
   //! dump muon block
@@ -89,7 +91,6 @@ private:
   //! collection of jet vertices for alpha evaluation
   edm::InputTag jetVertexAlphaCollection1_, jetVertexAlphaCollection2_;
   edm::ParameterSet jetMCFlavourIdentifier_;
-  // JetFlavourIdentifier jetMCFlavourIdentifier;
   //! generator-level particle collection in input
   edm::InputTag mcTruthCollection_;
   //! association map between reco and generated particles

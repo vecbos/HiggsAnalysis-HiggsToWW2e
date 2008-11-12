@@ -59,14 +59,12 @@ class CmsJetFiller : public CmsCandidateFiller {
   // Dump everything
   CmsJetFiller(CmsTree *, 
 	       edm::InputTag jetVertexAlphaCollection,
-	       JetFlavourIdentifier jetMCFlavourIdentifier,
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
 
   // Dump  everything if fatTree is true and less informations otherwise
   CmsJetFiller(CmsTree *, 
 	       edm::InputTag jetVertexAlphaCollection,
-	       JetFlavourIdentifier jetMCFlavourIdentifier,
 	       bool fatTree, 
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
@@ -76,6 +74,10 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   // Modifiers
   void saveJetExtras(bool );
+
+  void saveJetFlavour(bool );
+  
+  void setJetFlavour(JetFlavourIdentifier );
 
   // Operators
 
@@ -93,6 +95,7 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   // Friends
   bool saveJetExtras_;
+  bool saveJetFlavour_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;

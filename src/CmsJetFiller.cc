@@ -69,7 +69,6 @@ using namespace reco;
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
 			   edm::InputTag jetVertexAlphaCollection,
-			   JetFlavourIdentifier jetMCFlavourIdentifier,
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
   CmsCandidateFiller(cmsTree,maxTracks,maxMCTracks,noOutputIfLimitsReached),
@@ -80,20 +79,19 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 
   saveJetExtras_=true;
 
+  saveJetFlavour_=false;
+
   trkIndexName_ = new std::string("n");
   
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
 
-  jetMCFlavourIdentifier_=jetMCFlavourIdentifier;
-
   privateData_->initialise();
 }
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
 			   edm::InputTag jetVertexAlphaCollection,
-			   JetFlavourIdentifier jetMCFlavourIdentifier,
 			   bool fatTree, 
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
@@ -108,8 +106,6 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
-
-  jetMCFlavourIdentifier_=jetMCFlavourIdentifier;
 
   privateData_->initialise();
 }
@@ -138,6 +134,10 @@ CmsJetFiller::~CmsJetFiller() {
 
 void CmsJetFiller::saveJetExtras(bool what) { saveJetExtras_=what; }
 
+void CmsJetFiller::saveJetFlavour(bool what) { saveJetFlavour_=what; }
+
+void CmsJetFiller::setJetFlavour(JetFlavourIdentifier what) { jetMCFlavourIdentifier_=what; }
+
 void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
@@ -148,7 +148,7 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
   
-  jetMCFlavourIdentifier_.readEvent(iEvent);
+  if(saveJetFlavour_) jetMCFlavourIdentifier_.readEvent(iEvent);
 
   privateData_->clearTrkVectors();
 
@@ -195,10 +195,13 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	// em, had fractions and jet flavour id
 	const CaloJet *thisRecoJet = dynamic_cast< const CaloJet * > ( &(*cand) );
 	if( thisRecoJet != 0 ) { 
-	  BTagMCTools::JetFlavour jetFlavour = jetMCFlavourIdentifier_.identifyBasedOnPartons(*thisRecoJet);
 	  privateData_->emFrac->push_back( thisRecoJet->emEnergyFraction() );
 	  privateData_->hadFrac->push_back( thisRecoJet->energyFractionHadronic() );
-	  privateData_->flavourId->push_back( jetFlavour.flavour() );
+	  if(saveJetFlavour_) { 
+	    BTagMCTools::JetFlavour jetFlavour = jetMCFlavourIdentifier_.identifyBasedOnPartons(*thisRecoJet);
+	    privateData_->flavourId->push_back( jetFlavour.flavour() ); 
+	  }
+	  else privateData_->flavourId->push_back( -1.);
 	}
 	else {
 	  privateData_->emFrac->push_back( -1.);
@@ -246,7 +249,7 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
   cmstree->column((colPrefix+"alpha"+colSuffix).c_str(), *privateData_->alpha, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"flavourId"+colSuffix).c_str(), *privateData_->flavourId, nCandString.c_str(), 0, "Reco");
+  if(saveJetFlavour_) cmstree->column((colPrefix+"flavourId"+colSuffix).c_str(), *privateData_->flavourId, nCandString.c_str(), 0, "Reco");
 
 }
 
