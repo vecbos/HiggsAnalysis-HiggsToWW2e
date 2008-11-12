@@ -54,7 +54,7 @@ private:
   bool saveEleID_;
   //! dump the jet alpha parameter
   bool saveJetAlpha_;
-  //! dump the jet flavour content (if MC trith available)
+  //! dump the jet flavour content (if MC truth available)
   bool saveJetFlavour_;
   //! dump the electron block
   bool dumpElectrons_;

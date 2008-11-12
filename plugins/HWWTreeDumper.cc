@@ -329,6 +329,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     suffix = "SisConeJet";
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.saveJetExtras(saveJetAlpha_);
+    treeRecoFill2.saveJetFlavour(saveJetFlavour_);
     if(saveJetFlavour_) { 
       JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
       treeRecoFill2.setJetFlavour(jetMCFlavourIdentifier);
