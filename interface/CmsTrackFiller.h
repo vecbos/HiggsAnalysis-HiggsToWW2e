@@ -85,6 +85,8 @@ class CmsTrackFiller : public CmsCandidateFiller {
   void saveTrk(bool );
   /// dump track-extras related variables
   void saveFatTrk(bool );
+  /// dump Vtx related variables
+  void saveVtxTrk(bool );
   /// Find Primary Vertex
   void findPrimaryVertex(const edm::Event& iEvent);
 

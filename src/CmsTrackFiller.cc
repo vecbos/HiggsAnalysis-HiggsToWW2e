@@ -153,6 +153,8 @@ void CmsTrackFiller::saveTrk(bool what) { saveTrk_=what;}
 
 void CmsTrackFiller::saveFatTrk(bool what) { saveFatTrk_=what;}
 
+void CmsTrackFiller::saveVtxTrk(bool what) { saveVtxTrk_=what;}
+
 void CmsTrackFiller::findPrimaryVertex(const edm::Event& iEvent) {
 
   edm::Handle< reco::VertexCollection>  primaryVertex  ;
@@ -260,33 +262,38 @@ void CmsTrackFiller::writeTrkInfo(const Candidate *cand,
 
   if(&trkRef) {
     
-    // Find the vertex the track belongs to
-    Handle<reco::VertexCollection> primaryVertex;
-    try { iEvent.getByLabel(vertexCollection_, primaryVertex); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
-    
-    int iVtx = -1;
-    int counter = 0;
-    double weight = 0.;
-    if(saveVtxTrk_) {
-      if(primaryVertex->size() >0 ) { // there is at least one vertex in the event
-	for(VertexCollection::const_iterator v = primaryVertex->begin();
-	    v != primaryVertex->end(); ++v){
-	  double tmpw = v->trackWeight(trkRef);
-	  if(tmpw > weight) {
-	    if(weight >0) edm::LogWarning("CmsTrackFiller") << "I found this track in two vertices!!!!!!" ;
-	    weight = tmpw;
-	    iVtx = counter;
+    if ( saveVtxTrk_ ) { 
+      
+      
+      // Find the vertex the track belongs to
+      Handle<reco::VertexCollection> primaryVertex;
+      try { iEvent.getByLabel(vertexCollection_, primaryVertex); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
+      
+      int iVtx = -1;
+      int counter = 0;
+      double weight = 0.;
+      if(saveVtxTrk_) {
+	if(primaryVertex->size() >0 ) { // there is at least one vertex in the event
+	  for(VertexCollection::const_iterator v = primaryVertex->begin();
+	      v != primaryVertex->end(); ++v){
+	    double tmpw = v->trackWeight(trkRef);
+	    if(tmpw > weight) {
+	      if(weight >0) edm::LogWarning("CmsTrackFiller") << "I found this track in two vertices!!!!!!" ;
+	      weight = tmpw;
+	      iVtx = counter;
+	    }
+	    counter++;
 	  }
-	  counter++;
 	}
       }
+
+      // vertex information
+      privateData_->vtxIndex->push_back(iVtx);
+      privateData_->vtxWeight->push_back(weight);
+      
     }
 
-    // vertex information
-    privateData_->vtxIndex->push_back(iVtx);
-    privateData_->vtxWeight->push_back(weight);
-  
     if ( saveFatTrk_ ) { 
 
       // Inner Tracker information
@@ -356,17 +363,23 @@ void CmsTrackFiller::writeTrkInfo(const Candidate *cand,
     privateData_->trackDszError->push_back(trkRef->dszError());
     privateData_->trackDzError ->push_back(trkRef->dzError());
 
-    // distance w.r.t. primary vertex
-    privateData_->trackDxyPV->push_back(trkRef->dxy(math::XYZPoint(x0,y0,z0)));
-    //    privateData_->trackD0PV->push_back(trkRef->d0(math::XYZPoint(x0,y0,z0)));
-    privateData_->trackDszPV->push_back(trkRef->dsz(math::XYZPoint(x0,y0,z0)));
-    privateData_->trackDzPV->push_back(trkRef->dz(math::XYZPoint(x0,y0,z0)));
-
-    //    privateData_->trackDxyErrorPV->push_back(trkRef->dxyError(math::XYZPoint(x0,y0,z0)));
-    //    privateData_->trackD0ErrorPV->push_back(trkRef->d0Error(math::XYZPoint(x0,y0,z0)));
-    //    privateData_->trackDszErrorPV->push_back(trkRef->dszError(math::XYZPoint(x0,y0,z0)));
-    //    privateData_->trackDzErrorPV->push_back(trkRef->dzError(math::XYZPoint(x0,y0,z0)));
-   
+    if ( saveVtxTrk_ ) { 
+      // distance w.r.t. primary vertex
+      privateData_->trackDxyPV->push_back(trkRef->dxy(math::XYZPoint(x0,y0,z0)));
+      //    privateData_->trackD0PV->push_back(trkRef->d0(math::XYZPoint(x0,y0,z0)));
+      privateData_->trackDszPV->push_back(trkRef->dsz(math::XYZPoint(x0,y0,z0)));
+      privateData_->trackDzPV->push_back(trkRef->dz(math::XYZPoint(x0,y0,z0)));
+      
+      //    privateData_->trackDxyErrorPV->push_back(trkRef->dxyError(math::XYZPoint(x0,y0,z0)));
+      //    privateData_->trackD0ErrorPV->push_back(trkRef->d0Error(math::XYZPoint(x0,y0,z0)));
+      //    privateData_->trackDszErrorPV->push_back(trkRef->dszError(math::XYZPoint(x0,y0,z0)));
+      //    privateData_->trackDzErrorPV->push_back(trkRef->dzError(math::XYZPoint(x0,y0,z0)));
+    } else {
+      privateData_->trackDxyPV->push_back(-1.);
+      //    privateData_->trackD0PV->push_back(-1.);
+      privateData_->trackDszPV->push_back(-1.);
+      privateData_->trackDzPV->push_back(-1.);
+    }
   } else {
     
     // vertex information
