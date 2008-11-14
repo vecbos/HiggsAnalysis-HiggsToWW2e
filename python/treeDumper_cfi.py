@@ -37,6 +37,7 @@ treeDumper = cms.EDFilter("HWWTreeDumper",
                           nameFile = cms.untracked.string('analysisTree.root'),
                           nameTree = cms.untracked.string('ntp1'),
                           # switch ON/OFF the candidate collections to dump
+                          dumpRunInfo = cms.untracked.bool(True),
                           dumpElectrons = cms.untracked.bool(True),
                           dumpMuons = cms.untracked.bool(True),
                           dumpSCs = cms.untracked.bool(False),

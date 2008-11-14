@@ -45,6 +45,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCaloIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
@@ -98,6 +99,9 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
   
+  // data run informations
+  dumpRunInfo_ = iConfig.getUntrackedParameter<bool>("dumpRunInfo",false);
+
   // jet vertex collections
   jetVertexAlphaCollection1_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection1");
   jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
@@ -146,6 +150,12 @@ HWWTreeDumper::~HWWTreeDumper() { }
 void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
   using namespace edm;
+
+  /// fill the run info (run number, event, ...)
+  if(dumpRunInfo_) {
+    CmsRunInfoFiller runFiller( tree_ );
+    runFiller.writeRunInfoToTree(iEvent,iSetup,false);
+  }
 
   // get MC truth
   CmsMcTruthTreeFiller treeFill(tree_);

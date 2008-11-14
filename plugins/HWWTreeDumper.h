@@ -70,6 +70,9 @@ private:
   bool dumpTriggerResults_;
   //! dump the Particle Flow objects
   bool dumpParticleFlowObjects_;
+  //! dump the run info informations
+  bool dumpRunInfo_;
+
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_;
   edm::InputTag jetCollection1_, genJetCollection1_, jetCollection2_, genJetCollection2_;
