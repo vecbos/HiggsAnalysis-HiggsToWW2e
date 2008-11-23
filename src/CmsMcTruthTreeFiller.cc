@@ -67,37 +67,37 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
     const reco::Candidate & cand = *genPart;
     if((int)pMC.size()>range) break;
     // write only stables or documentation particles
-    if(cand.status() == 1 || cand.status() == 3) { 
-      pMC.push_back(cand.p());
-      massMC.push_back(cand.mass());
-      thetaMC.push_back(cand.theta());
-      etaMC.push_back(cand.eta());
-      phiMC.push_back(cand.phi());
-      energyMC.push_back(cand.energy());
-      idMC.push_back(cand.pdgId());
-      nDauMC.push_back(cand.numberOfDaughters());
-      statusMC.push_back(cand.status());
+    // if(cand.status() == 1 || cand.status() == 3) { 
+    pMC.push_back(cand.p());
+    massMC.push_back(cand.mass());
+    thetaMC.push_back(cand.theta());
+    etaMC.push_back(cand.eta());
+    phiMC.push_back(cand.phi());
+    energyMC.push_back(cand.energy());
+    idMC.push_back(cand.pdgId());
+    nDauMC.push_back(cand.numberOfDaughters());
+    statusMC.push_back(cand.status());
     
-      int indMom=-1;
-      int idx=0;
-      reco::GenParticleCollection::const_iterator candIter;
-      for(candIter=genParticleCollection->begin(); candIter!=genParticleCollection->end(); candIter++) {
-	if(cand.status() == 1 || cand.status() == 3) {
-	  const reco::Candidate *mom = cand.mother();
-	  if(&(*candIter)==&(*mom)) {
-	    indMom=idx;
-	    break;
-	  }
-	  idx++;
-	}
+    int indMom=-1;
+    int idx=0;
+    reco::GenParticleCollection::const_iterator candIter;
+    for(candIter=genParticleCollection->begin(); candIter!=genParticleCollection->end(); candIter++) {
+      if(cand.status() == 1 || cand.status() == 3) {
+        const reco::Candidate *mom = cand.mother();
+        if(&(*candIter)==&(*mom)) {
+          indMom=idx;
+          break;
+        }
+        idx++;
       }
-      mothMC.push_back(indMom);
-    
-      // decay vertex
-      xMC.push_back(cand.vx());
-      yMC.push_back(cand.vy());
-      zMC.push_back(cand.vz());
     }
+    mothMC.push_back(indMom);
+    
+    // decay vertex
+    xMC.push_back(cand.vx());
+    yMC.push_back(cand.vy());
+    zMC.push_back(cand.vz());
+    //    }
   }
   
   std::string theName = "Mc";
