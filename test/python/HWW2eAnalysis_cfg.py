@@ -16,18 +16,18 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 
 # --- electron sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
-process.ambiguityResolvedElectrons.doRefCheck = True # dump pre-selected electrons
+process.ambiguityResolvedElectrons.doRefCheck = False # dump pre-selected electrons
 process.load("HiggsAnalysis.HiggsToWW2e.alternativeIsolationSequence_cff")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default.root'
 process.treeDumper.dumpTriggerResults = True
-process.treeDumper.dumpPreselInfo = True
+process.treeDumper.dumpPreselInfo = False
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpSignalKfactor = True
 process.treeDumper.dumpGenInfoMcAtNlo = False
-process.treeDumper.dumpParticleFlowObjects = True
+process.treeDumper.dumpParticleFlowObjects = False
 process.treeDumper.saveFatTrk = True
 process.treeDumper.dumpTree = True
 
