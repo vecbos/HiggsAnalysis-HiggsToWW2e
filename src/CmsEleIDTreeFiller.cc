@@ -14,6 +14,8 @@
 #include "AnalysisDataFormats/Egamma/interface/ElectronID.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 
+#include "MyAnalysis/IsolationTools/interface/SuperClusterHitsEcalIsolation.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCalotowerIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
@@ -78,6 +80,8 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->isoFromDepsTk;
   delete privateData_->isoFromDepsEcal;
   delete privateData_->isoFromDepsHcal;
+  delete privateData_->scBasedEcalSum04;
+  delete privateData_->scBasedEcalSum05;
   delete privateData_->eleLik;
   delete privateData_->eleIdCutBasedDecision;
   delete privateData_->eleTip;
@@ -309,8 +313,17 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
 //   privateData_->eleCaloIso_minDR->push_back(minDR_calo);
 //   privateData_->eleCaloIso_sumPt->push_back(sumEt_calo);
   
-  
+  // ecal isolation with SC rechits removal
+  SuperClusterHitsEcalIsolation scBasedIsolation(EBRecHits,EERecHits);
 
+  scBasedIsolation.setExtRadius(0.4);
+  float scBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*electronRef));
+  privateData_->scBasedEcalSum04->push_back(scBasedEcalSum04);
+  
+  scBasedIsolation.setExtRadius(0.5);
+  float scBasedEcalSum05 = scBasedIsolation.getSum(iEvent,iSetup,&(*electronRef));
+  privateData_->scBasedEcalSum05->push_back(scBasedEcalSum05);
+  
 }
 
 
@@ -348,6 +361,8 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleIsoFromDepsTk"+colSuffix).c_str(), *privateData_->isoFromDepsTk, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIsoFromDepsEcal"+colSuffix).c_str(), *privateData_->isoFromDepsEcal, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIsoFromDepsHcal"+colSuffix).c_str(), *privateData_->isoFromDepsHcal, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleScBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleScBasedEcalSum05"+colSuffix).c_str(), *privateData_->scBasedEcalSum05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
@@ -388,6 +403,8 @@ void CmsEleIDTreeFillerData::initialise() {
   isoFromDepsTk            = new vector<float>;
   isoFromDepsEcal          = new vector<float>;
   isoFromDepsHcal          = new vector<float>;
+  scBasedEcalSum04         = new vector<float>;
+  scBasedEcalSum05         = new vector<float>;
   eleIdCutBasedDecision    = new vector<bool>;
   eleLik                   = new vector<float>;
   eleTip                   = new vector<float>;
@@ -428,6 +445,8 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   isoFromDepsTk            ->clear();
   isoFromDepsEcal          ->clear();
   isoFromDepsHcal          ->clear();
+  scBasedEcalSum04         ->clear();
+  scBasedEcalSum05         ->clear();
   eleIdCutBasedDecision    ->clear();
   eleLik                   ->clear();
   eleTip                   ->clear();

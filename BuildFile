@@ -17,6 +17,7 @@
 <use name=DataFormats/HepMCCandidate>
 <use name=DataFormats/TrackCandidate>
 <use name=DataFormats/EgammaCandidates>
+<use name=MyAnalysis/IsolationTools>
 <use name=DataFormats/Common>
 <use name=PhysicsTools/CandUtils>
 <use name=PhysicsTools/HepMCCandAlgos>
@@ -54,6 +55,7 @@
    <use name=DataFormats/HepMCCandidate>
    <use name=DataFormats/TrackCandidate>
    <use name=DataFormats/EgammaCandidates>
+   <use name=MyAnalysis/IsolationTools>
    <use name=DataFormats/Common>
    <use name=PhysicsTools/CandUtils>
    <use name=PhysicsTools/HepMCCandAlgos>
