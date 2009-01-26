@@ -5,7 +5,7 @@ cd CMSSW_2_1_7/src/
 
 > check out the Higgs->2e2nu package and the dependenies:
 
-cvs co -r V04-2_1_X HiggsAnalysis/HiggsToWW2e
+cvs co -r V05-2_1_X HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-2_1_9 HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V01-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
