@@ -3,15 +3,22 @@
 > scramv1 p CMSSW CMSSW_2_1_7
 cd CMSSW_2_1_7/src/
 
+> in 2_1_X check out the extra tags for correct isolation modules (no more need in 3XX)
+
+cvs co -r V00-16-07  DataFormats/RecoCandidate
+cvs co -r V00-02-05  EgammaAnalysis/EgammaIsolationProducers
+cvs co -r V01-02-00  PhysicsTools/IsolationAlgos
+cvs co -r V00-02-03  RecoEgamma/EgammaIsolationAlgos
+
 > check out the Higgs->2e2nu package and the dependenies:
 
-cvs co -r V05-2_1_X HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-2_1_9 HiggsAnalysis/HiggsToWW2Leptons
-cvs co -r V01-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V06-2_1_X HiggsAnalysis/HiggsToWW2e
+cvs co -r V01-2_1_X HiggsAnalysis/HiggsToWW2Leptons
+cvs co -r V02-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
 scramv1 b
 
-> run (in V01-V00-2_1_7 this runs without the preselection code, not yet migrated to 2_1_X)
+> run
 cd HiggsAnalysis/HiggsToWW2e/test/python
 cmsRun HWW2eAnalysis_cfg.py
 
