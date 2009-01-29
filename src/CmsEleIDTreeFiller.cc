@@ -317,23 +317,24 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   
   // ecal isolation with SC rechits removal
   SuperClusterHitsEcalIsolation scBasedIsolation(EBRecHits,EERecHits);
+  reco::SuperClusterRef sc = electronRef->get<reco::SuperClusterRef>();
 
   scBasedIsolation.setExtRadius(0.4);
   scBasedIsolation.excludeHalo(false);
-  float scBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*electronRef));
+  float scBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scBasedEcalSum04->push_back(scBasedEcalSum04);
 
   scBasedIsolation.excludeHalo(true);
-  float scHaloBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*electronRef));
+  float scHaloBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scHaloBasedEcalSum04->push_back(scHaloBasedEcalSum04);
 
   scBasedIsolation.setExtRadius(0.5);
   scBasedIsolation.excludeHalo(false);
-  float scBasedEcalSum05 = scBasedIsolation.getSum(iEvent,iSetup,&(*electronRef));
+  float scBasedEcalSum05 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scBasedEcalSum05->push_back(scBasedEcalSum05);
   
   scBasedIsolation.excludeHalo(true);
-  float scHaloBasedEcalSum05 = scBasedIsolation.getSum(iEvent,iSetup,&(*electronRef));
+  float scHaloBasedEcalSum05 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scHaloBasedEcalSum05->push_back(scHaloBasedEcalSum05);
 
 }
