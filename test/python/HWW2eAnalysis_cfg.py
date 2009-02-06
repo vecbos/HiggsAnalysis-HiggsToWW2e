@@ -17,6 +17,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 # --- electron sequences ---
 process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 
+# --- track sequences ---
+process.load("HiggsAnalysis.HiggsToWW2e.trackCandidates_cfi")
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default.root'
@@ -25,7 +28,9 @@ process.treeDumper.dumpPreselInfo = True
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpSignalKfactor = True
 process.treeDumper.dumpGenInfoMcAtNlo = False
-process.treeDumper.dumpParticleFlowObjects = False
+process.treeDumper.dumpTracks = True
+process.treeDumper.dumpVertices = True
+process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.dumpTree = True
 
@@ -42,6 +47,7 @@ process.p = cms.Path ( process.KFactorProducer *
                        process.higgsToWW2LeptonsPreselectionSequence *
                        process.jetSequence *
                        process.metSequence *
-                       process.eleIsolationSequence )
+                       process.eleIsolationSequence *
+                       process.trackCandidates )
 
 process.q = cms.EndPath ( process.treeDumper )

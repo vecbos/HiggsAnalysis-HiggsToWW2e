@@ -66,6 +66,10 @@ private:
   bool dumpMet_, dumpGenMet_;
   //! dump SuperClusters block
   bool dumpSCs_;
+  //! dump tracks
+  bool dumpTracks_;
+  //! dump the primary vertices of the event
+  bool dumpVertices_;
   //! dump trigger results
   bool dumpTriggerResults_;
   //! dump the Particle Flow objects
@@ -77,7 +81,9 @@ private:
   edm::InputTag electronCollection_, muonCollection_;
   edm::InputTag jetCollection1_, genJetCollection1_, jetCollection2_, genJetCollection2_;
   edm::InputTag metCollection_, genMetCollection_;
+  edm::InputTag vertexCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
+  edm::InputTag trackCollection_;
   //! supercluster collections in input
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly

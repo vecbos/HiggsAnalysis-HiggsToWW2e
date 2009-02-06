@@ -41,6 +41,8 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsConditionsFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsTrackFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsVertexFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
@@ -90,11 +92,13 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
+  dumpTracks_         = iConfig.getUntrackedParameter<bool>("dumpTracks", false);
   dumpMuons_          = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
   dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
   dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
   dumpMet_            = iConfig.getUntrackedParameter<bool>("dumpMet", false);
   dumpGenMet_         = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
+  dumpVertices_       = iConfig.getUntrackedParameter<bool>("dumpVertices", false);
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
@@ -119,6 +123,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 //   towerIsolationProducer_  = iConfig.getParameter<edm::InputTag>("towerIsolationProducer"); 
   tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
+  trackCollection_    = iConfig.getParameter<edm::InputTag>("trackCollection");
+  vertexCollection_        = iConfig.getParameter<edm::InputTag>("vertexCollection");
   jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
   genJetCollection1_       = iConfig.getParameter<edm::InputTag>("genJetCollection1");
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
@@ -267,8 +273,30 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   }
 
+  // fill track block
+  if(dumpTracks_) {
 
+    CmsTrackFiller treeFiller(tree_, vertexCollection_, true);
+    treeFiller.saveFatTrk(saveFatTrk_);
 
+    treeFiller.findPrimaryVertex(iEvent);
+    treeFiller.saveVtxTrk(true);
+
+    std::string prefix("");
+    std::string suffix("Track");
+    treeFiller.saveCand(saveCand_);
+
+    treeFiller.writeCollectionToTree(trackCollection_, iEvent, iSetup, prefix, suffix, false);
+
+  }
+
+  //fill Primary Vertex and associated tracks
+  if(dumpVertices_){
+    CmsVertexFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("PV");
+    treeFill.writeCollectionToTree(vertexCollection_, iEvent, iSetup, prefix, suffix);
+  }
 
   // fill muons block
   if(dumpMuons_) {
