@@ -2,7 +2,7 @@ import FWCore.ParameterSet.Config as cms
 
 treeDumper = cms.EDFilter("HWWTreeDumper",
                           TriggerResultsTag = cms.InputTag("TriggerResults::HLT"),
-                          electronCollection = cms.InputTag("isolatedElectronsRef"),
+                          electronCollection = cms.InputTag("ambiguityResolvedElectrons"),
                           muonCollection = cms.InputTag("isolatedMuons"), # preselection
                           ecalBarrelSCCollection = cms.InputTag("correctedHybridSuperClusters"),
                           ecalEndcapSCCollection = cms.InputTag("multi5x5SuperClusters","multi5x5EndcapSuperClusters"),
