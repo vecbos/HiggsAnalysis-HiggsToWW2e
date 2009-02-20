@@ -12,8 +12,8 @@ cvs co -r V00-02-03  RecoEgamma/EgammaIsolationAlgos
 
 > check out the Higgs->2e2nu package and the dependenies:
 
-cvs co -r V06-2_1_X HiggsAnalysis/HiggsToWW2e
-cvs co -r V01-2_1_X HiggsAnalysis/HiggsToWW2Leptons
+cvs co -r V08-2_1_X HiggsAnalysis/HiggsToWW2e
+cvs co -r V02-2_1_X HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
 scramv1 b
