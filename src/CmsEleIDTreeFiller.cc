@@ -51,6 +51,7 @@ CmsEleIDTreeFiller::CmsEleIDTreeFiller(CmsTree *cmsTree, int maxTracks, bool noO
 CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   // delete here the vector ptr's
   delete privateData_->eleClass;
+  delete privateData_->eleStandardClass;
   delete privateData_->eleHoE;
   delete privateData_->eleNotCorrEoP;
   delete privateData_->eleCorrEoP;
@@ -85,7 +86,10 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->scHaloBasedEcalSum04;
   delete privateData_->scHaloBasedEcalSum05;
   delete privateData_->eleLik;
-  delete privateData_->eleIdCutBasedDecision;
+  delete privateData_->eleIdCutsLoose;
+  delete privateData_->eleIdStandardCutsRobust;
+  delete privateData_->eleIdStandardCutsLoose;
+  delete privateData_->eleIdStandardCutsTight;
   delete privateData_->eleTip;
 }
 
@@ -122,22 +126,14 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
-    std::vector<edm::Handle<edm::ValueMap<float> > > eIDValueMap(2);
-
-    try { iEvent.getByLabel( electronIdCutsLabel_ , eIDValueMap[0] ); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get electron ID cuts label " << electronIdCutsLabel_; }
-    const edm::ValueMap<float> & eIDmapCuts = * eIDValueMap[0] ;
     
-    try { iEvent.getByLabel( electronIdLikelihoodLabel_ , eIDValueMap[1] ); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get electron ID likelihood label " << electronIdLikelihoodLabel_; }
-    const edm::ValueMap<float> & eIDmapLikelihood = * eIDValueMap[1] ;
+    eleIdResults_ = new eleIdContainer(5);
 
-    // Read the tracker and HCAL isolation association vectors (egamma isolations)
-//     try { iEvent.getByLabel(tkIsolationProducer_, tkIsolationHandle_); }
-//     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracker isolation product" << tkIsolationProducer_; }
-
-//     try { iEvent.getByLabel(towerIsolationProducer_, towerIsolationHandle_); }
-//     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get HCAL tower isolation product" << towerIsolationProducer_; }
+    iEvent.getByLabel( "egammaIDCutsLoose", (*eleIdResults_)[0] );
+    iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[1] );
+    iEvent.getByLabel( "egammaIDStandardCutsRobust", (*eleIdResults_)[2] ); 
+    iEvent.getByLabel( "egammaIDStandardCutsLoose", (*eleIdResults_)[3] );
+    iEvent.getByLabel( "egammaIDStandardCutsTight", (*eleIdResults_)[4] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -147,7 +143,6 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get calotowers product" << calotowersProducer_; }
 
     //read the isolation with iso deposits
-    //    eIsoFromDepsValueMap_.reserve(3);
     eIsoFromDepsValueMap_ = new isoContainer(3);
     iEvent.getByLabel( "eleIsoFromDepsTk", (*eIsoFromDepsValueMap_)[0] ); 
     iEvent.getByLabel( "eleIsoFromDepsEcalFromHits", (*eIsoFromDepsValueMap_)[1] ); 
@@ -157,12 +152,13 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	  
       const GsfElectronRef electronRef = collection->refAt(index).castTo<GsfElectronRef>();
       if ( !(electronRef.isNull()) )
-	writeEleInfo(electronRef,iEvent,iSetup,EBRecHits,EERecHits,eIDmapCuts,eIDmapLikelihood);
+	writeEleInfo(electronRef,iEvent,iSetup,EBRecHits,EERecHits);
       else edm::LogInfo("CmsEleIDTreeFiller") << "Warning! The collection seems to be not made by "
 					      << "electrons, electron-specific infos will be set to default.";
 
     }
 
+    delete eleIdResults_;
     delete eIsoFromDepsValueMap_;
 
   }
@@ -182,8 +178,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
 				      const edm::Event& iEvent, const edm::EventSetup& iSetup,
 				      const EcalRecHitCollection *EBRecHits,
-				      const EcalRecHitCollection *EERecHits,
-				      const edm::ValueMap<float> & eIdmapCuts, const edm::ValueMap<float> & eIdmapLikelihood) {
+				      const EcalRecHitCollection *EERecHits) {
 
   SuperClusterRef sclusRef = electronRef->superCluster();
   // ele corr - notcorr energy
@@ -209,7 +204,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
     }
     else {mySeedCorrE = myEleFullCorrE;}
   }
-
+  
   // transverse impact parameter
   GsfTrackRef trRef = electronRef->gsfTrack();
   float myTip = sqrt((trRef->vertex().x())*(trRef->vertex().x()) + (trRef->vertex().y())*(trRef->vertex().y()));
@@ -221,6 +216,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   privateData_->eleRawE          ->push_back(myEleRawE); 
   privateData_->eleTrackerP      ->push_back(myEleTrackerP);
   privateData_->eleClass         ->push_back(electronRef->classification());
+  privateData_->eleStandardClass ->push_back(stdEleIdClassify(&(*electronRef)));
   privateData_->eleHoE           ->push_back(electronRef->hadronicOverEm());
   privateData_->eleCorrEoP       ->push_back(electronRef->eSuperClusterOverP());
   privateData_->eleNotCorrEoP    ->push_back(myEleRawE/myEleTrackerP);
@@ -232,8 +228,18 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   privateData_->eleDeltaPhiAtCalo->push_back(electronRef->deltaPhiSeedClusterTrackAtCalo());
   privateData_->eleTip           ->push_back(myTip);
 
-  privateData_->eleIdCutBasedDecision->push_back( eIdmapCuts[electronRef] );
-  privateData_->eleLik->push_back( eIdmapLikelihood[electronRef] );  
+  // results of standard electron ID sequences
+  const eleIdMap & eleIdCutsLooseVal = *( (*eleIdResults_)[0] );
+  const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[1] );
+  const eleIdMap & eleIdStandardCutsRobustVal = *( (*eleIdResults_)[2] );
+  const eleIdMap & eleIdStandardCutsLooseVal = *( (*eleIdResults_)[3] );
+  const eleIdMap & eleIdStandardCutsTightVal = *( (*eleIdResults_)[4] );
+
+  privateData_->eleIdCutsLoose->push_back( eleIdCutsLooseVal[electronRef] );
+  privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
+  privateData_->eleIdStandardCutsRobust->push_back( eleIdStandardCutsRobustVal[electronRef] );  
+  privateData_->eleIdStandardCutsLoose->push_back( eleIdStandardCutsLooseVal[electronRef] );  
+  privateData_->eleIdStandardCutsTight->push_back( eleIdStandardCutsTightVal[electronRef] );  
 
   const isoFromDepositsMap & eIsoFromDepsTkVal = *( (*eIsoFromDepsValueMap_)[0] );
   const isoFromDepositsMap & eIsoFromDepsEcalVal = *( (*eIsoFromDepsValueMap_)[1] );
@@ -245,16 +251,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
 
   // --- isolations ---
   
-  // in the egamma style: use private one for now, to study
-  // this retrieves the index in the original collection associated to the reference to electron
-  //  int index = electronRef.key();
-
-  //   double sumPt = (*tkIsolationHandle_)[index].second;
-  //   double sumEt = (*towerIsolationHandle_)[index].second;
-  //   privateData_->eleTrackerIso_sumPt->push_back( sumPt );
-  //   privateData_->eleCaloIso_sumPt->push_back( sumEt );
-
-
   // for tracker isolation studies
   const TrackCollection tracksC = *(m_tracks.product());
   hwwEleTrackerIsolation trackIsolation(&(*electronRef), tracksC);
@@ -285,14 +281,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   privateData_->sumPt05->push_back(sumPt05);
   privateData_->sumPtPreselection->push_back(sumPtPreselection);
 
-  // calo isolation - rechit based: cannot be used on AOD
-//   const HBHERecHitCollection hcalRecHits = *(hcalrhits.product());
-//   hwwEleCaloIsolation caloIsolation(electron, hcalRecHits, caloGeo);
-//   //float minDR_calo = caloIsolation.minDeltaR(0.15);  
-//   float minDR_calo = -1000.;
-//   caloIsolation.setExtRadius(0.2);    
-//   float sumEt_calo = caloIsolation.getEtHcal();  
-
   // calo isolation - calotower based: can be used on both RECO and AOD
   const CaloTowerCollection *calotowersC = m_calotowers.product();
   hwwEleCalotowerIsolation calotowerIsolation(&(*electronRef), calotowersC);
@@ -312,9 +300,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   privateData_->sumHadEt05->push_back(sumHadEt05);
   privateData_->sumEmEt05->push_back(sumEmEt05);
 
-//   privateData_->eleCaloIso_minDR->push_back(minDR_calo);
-//   privateData_->eleCaloIso_sumPt->push_back(sumEt_calo);
-  
   // ecal isolation with SC rechits removal
   SuperClusterHitsEcalIsolation scBasedIsolation(EBRecHits,EERecHits);
   reco::SuperClusterRef sc = electronRef->get<reco::SuperClusterRef>();
@@ -350,6 +335,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleRawE"+colSuffix).c_str(), *privateData_->eleRawE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTrackerP"+colSuffix).c_str(), *privateData_->eleTrackerP, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleClass"+colSuffix).c_str(), *privateData_->eleClass, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleStandardClass"+colSuffix).c_str(), *privateData_->eleStandardClass, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleHoE"+colSuffix).c_str(), *privateData_->eleHoE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleCorrEoP"+colSuffix).c_str(), *privateData_->eleCorrEoP, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleNotCorrEoP"+colSuffix).c_str(), *privateData_->eleNotCorrEoP, nCandString.c_str(), 0, "Reco");
@@ -378,8 +364,11 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"eleScBasedEcalSum05"+colSuffix).c_str(), *privateData_->scBasedEcalSum05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleScHaloBasedEcalSum04"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleScHaloBasedEcalSum05"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutBasedDecision, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutsLoose, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdStandardCutsRobust"+colSuffix).c_str(), *privateData_->eleIdStandardCutsRobust, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdStandardCutsLoose"+colSuffix).c_str(), *privateData_->eleIdStandardCutsLoose, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdStandardCutsTight"+colSuffix).c_str(), *privateData_->eleIdStandardCutsTight, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
 }
 
@@ -389,6 +378,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
 void CmsEleIDTreeFillerData::initialise() {
   initialiseCandidate();
   eleClass                 = new vector<int>;
+  eleStandardClass         = new vector<int>;
   eleHoE                   = new vector<float>;
   eleNotCorrEoP            = new vector<float>;
   eleCorrEoP               = new vector<float>;
@@ -422,17 +412,18 @@ void CmsEleIDTreeFillerData::initialise() {
   scBasedEcalSum05         = new vector<float>;
   scHaloBasedEcalSum04     = new vector<float>;
   scHaloBasedEcalSum05     = new vector<float>;
-  eleIdCutBasedDecision    = new vector<bool>;
+  eleIdCutsLoose           = new vector<bool>;
   eleLik                   = new vector<float>;
+  eleIdStandardCutsRobust  = new vector<bool>;
+  eleIdStandardCutsLoose   = new vector<bool>;
+  eleIdStandardCutsTight   = new vector<bool>;
   eleTip                   = new vector<float>;
 }
-
-
-
 
 void CmsEleIDTreeFillerData::clearTrkVectors() {
   clearTrkVectorsCandidate();
   eleClass                 ->clear();
+  eleStandardClass         ->clear();
   eleHoE                   ->clear();
   eleNotCorrEoP            ->clear();
   eleCorrEoP               ->clear();
@@ -466,8 +457,29 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   scBasedEcalSum05         ->clear();
   scHaloBasedEcalSum04     ->clear();
   scHaloBasedEcalSum05     ->clear();
-  eleIdCutBasedDecision    ->clear();
+  eleIdCutsLoose           ->clear();
   eleLik                   ->clear();
+  eleIdStandardCutsRobust  ->clear();
+  eleIdStandardCutsLoose   ->clear();
+  eleIdStandardCutsTight   ->clear();
   eleTip                   ->clear();
 }
 
+int CmsEleIDTreeFiller::stdEleIdClassify(const GsfElectron* electron) {
+  
+  double eta = electron->p4().Eta();
+  double eOverP = electron->eSuperClusterOverP();
+  double pin  = electron->trackMomentumAtVtx().R(); 
+  double pout = electron->trackMomentumOut().R(); 
+  double fBrem = (pin-pout)/pin;
+  
+  int cat;
+  if((fabs(eta)<1.479 && fBrem<0.06) || (fabs(eta)>1.479 && fBrem<0.1)) 
+    cat=1;
+  else if (eOverP < 1.2 && eOverP > 0.8) 
+    cat=0;
+  else 
+    cat=2;
+  
+  return cat;
+}

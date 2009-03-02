@@ -48,7 +48,7 @@
 
 struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
 
-  vector<int>   *eleClass;
+  vector<int>   *eleClass, *eleStandardClass;
   vector<float> *eleHoE;
   vector<float> *eleNotCorrEoP,    *eleCorrEoP;
   vector<float> *eleNotCorrEoPout, *eleCorrEoPout;
@@ -64,7 +64,7 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *eleFullCorrE,     *eleCaloCorrE;
   vector<float> *eleNxtalCorrE,    *eleRawE;
   vector<float> *eleLik;
-  vector<bool> *eleIdCutBasedDecision;
+  vector<bool> *eleIdCutsLoose, *eleIdStandardCutsRobust, *eleIdStandardCutsLoose, *eleIdStandardCutsTight;
   vector<float> *eleTip;
 
 public:
@@ -95,9 +95,6 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
   void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
-  //! set the electron ID labels
-  void setElectronIdCutsLabel( edm::InputTag electronIdCutsLabel ) { electronIdCutsLabel_ = electronIdCutsLabel; }
-  void setElectronIdLikelihoodLabel( edm::InputTag electronIdLikelihoodLabel ) { electronIdLikelihoodLabel_ = electronIdLikelihoodLabel; }
   //! set the tracker isolation producer (egamma)
   void setTkIsolationProducer( edm::InputTag tkIsolationProducer ) { tkIsolationProducer_ = tkIsolationProducer; }
   //! set the HCAL isolation producer with calo towers (egamma)
@@ -114,9 +111,10 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
 
   void writeEleInfo(const GsfElectronRef, const edm::Event&, const edm::EventSetup&,
 		    const EcalRecHitCollection *EBRecHits,
-		    const EcalRecHitCollection *EERecHits,
-		    const edm::ValueMap<float> & eIdmapCuts, const edm::ValueMap<float> & eIdmapLikelihood);
+		    const EcalRecHitCollection *EERecHits);
   void treeEleInfo(const std::string &colPrefix, const std::string &colSuffix);
+
+  int stdEleIdClassify(const GsfElectron* electron);
 
   int maxTracks_;
   std::string *trkIndexName_;
@@ -136,11 +134,14 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
 
+  typedef edm::ValueMap<float> eleIdMap;
+  typedef std::vector< edm::Handle<eleIdMap> > eleIdContainer;
+  eleIdContainer *eleIdResults_;
+
   typedef edm::ValueMap<double> isoFromDepositsMap;
   typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
   isoContainer *eIsoFromDepsValueMap_;
-//   edm::Handle< reco::CandViewDoubleAssociations > towerIsolationHandle_;
-//   edm::Handle< reco::PMGsfElectronIsoCollection > tkIsolationHandle_;
+
   edm::Handle<CaloTowerCollection> m_calotowers;
   edm::Handle<reco::TrackCollection> m_tracks;
 
