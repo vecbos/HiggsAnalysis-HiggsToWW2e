@@ -88,13 +88,6 @@ private:
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly
   edm::InputTag ecalBarrelRecHits_, ecalEndcapRecHits_;
-  //! electron ID labels
-  std::string electronIdCutsLabel_;
-  std::string electronIdLikelihoodLabel_;
-  //! producer of the electron tracker isolation collection
-  //  edm::InputTag tkIsolationProducer_;
-  //! producer of the electron HCAL isolation collection from the calo towers
-  //  edm::InputTag towerIsolationProducer_;
   //! track and calotowers collection for isolation studies
   edm::InputTag tracksForIsolationProducer_, calotowersForIsolationProducer_;
   //! collection of jet vertices for alpha evaluation

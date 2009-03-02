@@ -267,8 +267,6 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     eIDFiller.setStandalone(false);
     eIDFiller.setEcalBarrelRecHits(EcalBarrelRecHits_);
     eIDFiller.setEcalEndcapRecHits(EcalEndcapRecHits_);
-    eIDFiller.setElectronIdCutsLabel(electronIdCutsLabel_);
-    eIDFiller.setElectronIdLikelihoodLabel(electronIdLikelihoodLabel_);
     // those for egamma official isolations
     eIDFiller.setTkIsolationProducer(tkIsolationProducer_);
     eIDFiller.setTowerIsolationProducer(towerIsolationProducer_);

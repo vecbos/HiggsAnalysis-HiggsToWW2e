@@ -117,8 +117,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
-  electronIdCutsLabel_       = iConfig.getUntrackedParameter<std::string>("electronIdCutsLabel");
-  electronIdLikelihoodLabel_ = iConfig.getUntrackedParameter<std::string>("electronIdLikelihoodLabel");
 //   tkIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tkIsolationProducer"); 
 //   towerIsolationProducer_  = iConfig.getParameter<edm::InputTag>("towerIsolationProducer"); 
   tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
@@ -239,11 +237,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveFatEcal(saveFatEcal_);
     treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
     treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
-    treeFill.setElectronIdCutsLabel(electronIdCutsLabel_);
-    treeFill.setElectronIdLikelihoodLabel(electronIdLikelihoodLabel_);
-    // for official egamma isolations
-    //     treeFill.setTkIsolationProducer(tkIsolationProducer_);
-    //     treeFill.setTowerIsolationProducer(towerIsolationProducer_);
     // for custom isolation
     treeFill.setTracksProducer(tracksForIsolationProducer_);
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);

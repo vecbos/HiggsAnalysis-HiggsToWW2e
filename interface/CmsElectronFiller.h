@@ -105,9 +105,6 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
   void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
-  //! set the electron ID labels
-  void setElectronIdCutsLabel( edm::InputTag electronIdCutsLabel ) { electronIdCutsLabel_ = electronIdCutsLabel; }
-  void setElectronIdLikelihoodLabel( edm::InputTag electronIdLikelihoodLabel ) { electronIdLikelihoodLabel_ = electronIdLikelihoodLabel; }
   //! set the tracker isolation producer
   void setTkIsolationProducer( edm::InputTag tkIsolationProducer ) { tkIsolationProducer_ = tkIsolationProducer; }
   //! set the HCAL isolation producer with calo towers
