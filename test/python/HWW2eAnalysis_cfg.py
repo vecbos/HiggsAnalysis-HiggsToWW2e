@@ -19,6 +19,7 @@ process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.ambiguityResolvedElectrons.reducedElectronsRefCollectionLabel = "isolatedElectronsRef"
 process.ambiguityResolvedElectrons.doRefCheck = True # i.e. take only the isolated electrons and resolve them
+process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
 # --- track sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.trackCandidates_cfi")
@@ -50,6 +51,7 @@ process.p = cms.Path ( process.KFactorProducer *
                        process.higgsToWW2LeptonsPreselectionSequence *
                        process.jetSequence *
                        process.metSequence *
+                       process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons *
                        process.trackCandidates )
