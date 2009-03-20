@@ -117,16 +117,13 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
-//   tkIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tkIsolationProducer"); 
-//   towerIsolationProducer_  = iConfig.getParameter<edm::InputTag>("towerIsolationProducer"); 
   tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
   trackCollection_    = iConfig.getParameter<edm::InputTag>("trackCollection");
   vertexCollection_        = iConfig.getParameter<edm::InputTag>("vertexCollection");
+  genJetCollection_       = iConfig.getParameter<edm::InputTag>("genJetCollection");
   jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
-  genJetCollection1_       = iConfig.getParameter<edm::InputTag>("genJetCollection1");
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
-  genJetCollection2_       = iConfig.getParameter<edm::InputTag>("genJetCollection2");
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
   PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
@@ -345,7 +342,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
     std::string prefix("");
-    std::string suffix("IterativeJet");
+    std::string suffix("SisConeCorrJet");
     treeRecoFill1.saveCand(saveCand_);
     treeRecoFill1.saveJetExtras(saveJetAlpha_);
     treeRecoFill1.saveJetFlavour(saveJetFlavour_);
@@ -371,12 +368,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // particle flow jets
     if ( dumpParticleFlowObjects_ ) {  
       CmsPFJetFiller pfJetFiller1(tree_, true);
-      suffix = "IterativePFJet";
+      suffix = "SisConePFJet";
       pfJetFiller1.saveCand(saveCand_);
       pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
-      
+
       CmsPFJetFiller pfJetFiller2(tree_, true);
-      suffix = "SisConePFJet";
+      suffix = "SisConePFCorrJet";
       pfJetFiller2.saveCand(saveCand_);
       pfJetFiller2.writeCollectionToTree(PFjetCollection2_, iEvent, iSetup, prefix, suffix, false);
     }
@@ -384,25 +381,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // dump generated JETs
     if(dumpGenJets_) {
 
-      CmsJetFiller treeGenFill1(tree_, jetVertexAlphaCollection1_, true);
-      suffix = "IterativeGenJet";
-      treeGenFill1.saveJetExtras(false);
-      treeGenFill1.saveJetFlavour(saveJetFlavour_);
-      if(saveJetFlavour_) { 
-	JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
-	treeGenFill1.setJetFlavour(jetMCFlavourIdentifier);
-      }
-      treeGenFill1.writeCollectionToTree(genJetCollection1_, iEvent, iSetup, prefix, suffix, false);
-
-      CmsJetFiller treeGenFill2(tree_, jetVertexAlphaCollection2_, true);
+      CmsJetFiller treeGenFill(tree_, jetVertexAlphaCollection1_, true);
       suffix = "SisConeGenJet";
-      treeGenFill2.saveJetExtras(false);
-      treeGenFill2.saveJetFlavour(saveJetFlavour_);
+      treeGenFill.saveJetExtras(false);
+      treeGenFill.saveJetFlavour(saveJetFlavour_);
       if(saveJetFlavour_) { 
 	JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
-	treeGenFill2.setJetFlavour(jetMCFlavourIdentifier);
+	treeGenFill.setJetFlavour(jetMCFlavourIdentifier);
       }
-      treeGenFill2.writeCollectionToTree(genJetCollection2_, iEvent, iSetup, prefix, suffix, false);
+      treeGenFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     }
 

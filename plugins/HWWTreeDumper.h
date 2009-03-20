@@ -79,7 +79,7 @@ private:
 
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_;
-  edm::InputTag jetCollection1_, genJetCollection1_, jetCollection2_, genJetCollection2_;
+  edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
   edm::InputTag metCollection_, genMetCollection_;
   edm::InputTag vertexCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
