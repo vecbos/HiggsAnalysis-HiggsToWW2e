@@ -1,7 +1,7 @@
 --- Recipe to build and run the H->WW analysis in 2_1_X ---
 
-> scramv1 p CMSSW CMSSW_2_1_7
-cd CMSSW_2_1_7/src/
+> scramv1 p CMSSW CMSSW_2_1_17
+cd CMSSW_2_1_17/src/
 
 > in 2_1_X check out the extra tags for correct isolation modules (no more need in 3XX)
 
@@ -9,11 +9,14 @@ cvs co -r V00-16-07  DataFormats/RecoCandidate
 cvs co -r V00-02-05  EgammaAnalysis/EgammaIsolationProducers
 cvs co -r V01-02-00  PhysicsTools/IsolationAlgos
 cvs co -r V00-02-03  RecoEgamma/EgammaIsolationAlgos
+cvs co -r V01-06-05  CondFormats/JetMETObjects
+cvs co -r V01-08-10  JetMETCorrections/Configuration
+cvs co -r V02-09-00  JetMETCorrections/Modules
 
 > check out the Higgs->2e2nu package and the dependenies:
 
-cvs co -r V08-2_1_X HiggsAnalysis/HiggsToWW2e
-cvs co -r V02-2_1_X HiggsAnalysis/HiggsToWW2Leptons
+cvs co -r V09-2_1_X HiggsAnalysis/HiggsToWW2e
+cvs co -r V04-2_1_X HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
 scramv1 b
