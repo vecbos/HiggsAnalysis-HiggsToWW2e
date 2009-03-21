@@ -165,6 +165,9 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->covEtaEta;
   delete privateData_->covEtaPhi;
   delete privateData_->covPhiPhi;
+  delete privateData_->covIEtaIEta;
+  delete privateData_->covIEtaIPhi;
+  delete privateData_->covIPhiIPhi;
   delete privateData_->lat;
   delete privateData_->phiLat;
   delete privateData_->etaLat;
@@ -522,6 +525,17 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
  	privateData_->a20->push_back(zernike20);
  	privateData_->a42->push_back(zernike42);
 
+        // local covariances: instead of using absolute eta/phi it counts crystals normalised
+        std::vector<float> vLocCov = EcalClusterTools::localCovariances( *theSeed, &(*rechits), topology );
+
+        float covIEtaIEta = vLocCov[0];
+        float covIEtaIPhi = vLocCov[1];
+        float covIPhiIPhi = vLocCov[2];
+
+        privateData_->covIEtaIEta->push_back(covIEtaIEta);
+        privateData_->covIEtaIPhi->push_back(covIEtaIPhi);
+        privateData_->covIPhiIPhi->push_back(covIPhiIPhi);
+
       }
     }
     else { edm::LogWarning("CmsElectronFiller") << "ECAL topology or geometry not valid, not filling the ECAL cluster shapes"; }
@@ -549,6 +563,9 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
       privateData_->covPhiPhi->push_back(-1.);
       privateData_->a20->push_back(-1.);
       privateData_->a42->push_back(-1.);
+      privateData_->covIEtaIEta->push_back(-1.);
+      privateData_->covIEtaIPhi->push_back(-1.);
+      privateData_->covIPhiIPhi->push_back(-1.);
     }
   }
 }
@@ -581,6 +598,9 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
     cmstree->column((colPrefix+"covEtaEta"+colSuffix).c_str(), *privateData_->covEtaEta, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"covEtaPhi"+colSuffix).c_str(), *privateData_->covEtaPhi, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"covPhiPhi"+colSuffix).c_str(), *privateData_->covPhiPhi, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"a20"+colSuffix).c_str(), *privateData_->a20, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"a42"+colSuffix).c_str(), *privateData_->a42, nCandString.c_str(), 0, "Reco");
   }
@@ -635,6 +655,9 @@ void CmsElectronFillerData::initialise() {
   covEtaEta = new vector<float>;
   covEtaPhi = new vector<float>;
   covPhiPhi = new vector<float>;
+  covIEtaIEta = new vector<float>;
+  covIEtaIPhi = new vector<float>;
+  covIPhiIPhi = new vector<float>;
   lat = new vector<float>;
   phiLat = new vector<float>;
   etaLat = new vector<float>;
@@ -696,5 +719,8 @@ void CmsElectronFillerData::clearTrkVectors() {
   covPhiPhi->clear();
   a20->clear();
   a42->clear();
+  covIEtaIEta->clear();
+  covIEtaIPhi->clear();
+  covIPhiIPhi->clear();
 
 }

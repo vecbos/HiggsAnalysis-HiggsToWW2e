@@ -59,6 +59,7 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<float> *eMax, *e2nd;
   vector<float> *s1s9, *s9s25;
   vector<float> *covEtaEta, *covEtaPhi, *covPhiPhi;
+  vector<float> *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi;
   vector<float> *lat, *phiLat, *etaLat, *a20, *a42;
   
 public:
