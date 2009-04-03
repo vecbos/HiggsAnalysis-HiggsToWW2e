@@ -136,6 +136,7 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->isTracker;
   delete privateData_->isStandAlone;
   delete privateData_->isCalo;
+  delete privateData_->muonId;
   
   delete privateData_->  sumPt03;
   delete privateData_->  emEt03;
@@ -405,6 +406,25 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->isTracker->push_back(muon->isTrackerMuon());
     privateData_->isStandAlone->push_back(muon->isStandAloneMuon());
     privateData_->isCalo->push_back(muon->isCaloMuon());
+    
+    // now put muon ID codified:
+    int TrackerMuonArbitrated = (muon->isGood( Muon::TrackerMuonArbitrated )) ? 1 : 0;
+    int AllArbitrated = (muon->isGood( Muon::AllArbitrated )) ? 1 : 0;
+    int GlobalMuonPromptTight = (muon->isGood( Muon::GlobalMuonPromptTight )) ? 1 : 0;
+    int TMLastStationLoose = (muon->isGood( Muon::TMLastStationLoose )) ? 1 : 0;
+    int TMLastStationTight = (muon->isGood( Muon::TMLastStationTight )) ? 1 : 0;
+    int TM2DCompatibilityLoose = (muon->isGood( Muon::TM2DCompatibilityLoose )) ? 1 : 0;
+    int TM2DCompatibilityTight = (muon->isGood( Muon::TM2DCompatibilityTight )) ? 1 : 0;
+
+    int packed_sel = (TrackerMuonArbitrated << 6) | 
+      (AllArbitrated << 5) |
+      (GlobalMuonPromptTight << 4) |
+      (TMLastStationLoose << 3) |
+      (TMLastStationTight << 2) |
+      (TM2DCompatibilityLoose << 1) |
+      TM2DCompatibilityTight;
+
+    privateData_->muonId->push_back(packed_sel);
 
     // default isolation variables 0.3
     MuonIsolation Iso03  = muon->isolationR03();
@@ -435,6 +455,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
 
   } else {
 
+    privateData_->muonId->push_back(0);
     // default isolation variables 0.3
     privateData_->sumPt03->push_back(-1.);
     privateData_->emEt03->push_back(-1.);
@@ -470,6 +491,9 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"isTracker"+colSuffix).c_str(), *privateData_->isTracker, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"isStandAlone"+colSuffix).c_str(), *privateData_->isStandAlone, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"isCalo"+colSuffix).c_str(), *privateData_->isCalo, nCandString.c_str(), 0, "Reco");
+
+  // muon id 
+  cmstree->column((colPrefix+"muonId"+colSuffix).c_str(), *privateData_->muonId, nCandString.c_str(), 0, "Reco");
 
   // isolation R=0.3
   cmstree->column((colPrefix+"sumPt03"+colSuffix).c_str(), *privateData_->sumPt03, nCandString.c_str(), 0, "Reco");
@@ -533,6 +557,8 @@ void CmsMuonFillerData::initialise() {
   isStandAlone = new vector<int>;
   isCalo = new vector<int>;
   
+  muonId = new vector<int>;
+
   sumPt03 = new vector<float>;
   emEt03 = new vector<float>;
   hadEt03 = new vector<float>;
@@ -592,6 +618,8 @@ void CmsMuonFillerData::clearTrkVectors() {
   isTracker->clear();
   isStandAlone->clear();
   isCalo->clear();
+
+  muonId->clear();
 
   sumPt03->clear();
   emEt03->clear();

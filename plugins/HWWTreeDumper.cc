@@ -37,6 +37,7 @@
 #include "RecoBTag/MCTools/interface/JetFlavourIdentifier.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
@@ -291,10 +292,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill muons block
   if(dumpMuons_) {
 
-    CmsCandidateFiller treeFill(tree_, true);
+    CmsMuonFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("Muon");
     treeFill.saveCand(saveCand_);
+    treeFill.saveFatTrk(saveFatTrk_);
     treeFill.setMatchMap(muonMatchMap_);
 
     treeFill.writeCollectionToTree(muonCollection_, iEvent, iSetup, prefix, suffix, false);
