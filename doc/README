@@ -15,7 +15,7 @@ cvs co -r V02-09-00  JetMETCorrections/Modules
 
 > check out the Higgs->2e2nu package and the dependenies:
 
-cvs co -r V09-2_1_X HiggsAnalysis/HiggsToWW2e
+cvs co -r V10-2_1_X HiggsAnalysis/HiggsToWW2e
 cvs co -r V04-2_1_X HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
