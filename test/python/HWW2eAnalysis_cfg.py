@@ -43,14 +43,12 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.source = cms.Source("PoolSource",
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-#                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/relval_Zee_CMSSW_2_1_7.root')
-                            fileNames =  cms.untracked.vstring('file:/cmsrm/pc18/emanuele/data/Pool/relvalZee217.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc16/emanuele/data/Pool/H160_WW_2l_Summer08_v11redigi.root')
                             )
 
 process.p = cms.Path ( process.KFactorProducer *
                        process.higgsToWW2LeptonsPreselectionSequence *
                        process.jetSequence *
-                       process.metSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons *
