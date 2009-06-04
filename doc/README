@@ -19,10 +19,11 @@ cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/Is
 
 > take the new electron likelihood PDFs (done with Summer08 21X samples):
 
-cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_2_1_X/electronIdLikelihoodTkIsolated.db VecBos/ZJetsAnalysis/test/python
+cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_2_1_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
 
 > patch the DB path:
 cd RecoEgamma/ElectronIdentification/python/
+rm likelihoodPdfsDB_cfi.py
 wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
 cd -
 
