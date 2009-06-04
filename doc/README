@@ -1,7 +1,7 @@
 --- Recipe to build and run the H->WW analysis in 2_2_X ---
 
-> scramv1 p CMSSW CMSSW_2_2_11
-cd CMSSW_2_2_11/src/
+> scramv1 p CMSSW CMSSW_2_2_12
+cd CMSSW_2_2_12/src/
 
 > in 2_2_X check out the extra tags for correct isolation modules (no more need in 3XX)
 
@@ -9,18 +9,32 @@ cvs co -r V00-16-07  DataFormats/RecoCandidate
 cvs co -r V00-02-05  EgammaAnalysis/EgammaIsolationProducers
 cvs co -r V01-02-00  PhysicsTools/IsolationAlgos
 cvs co -r V00-02-03  RecoEgamma/EgammaIsolationAlgos
+cvs co -r V00-01-10  RecoEgamma/ElectronIdentification
 
 > check out the Higgs->2e2nu package and the dependenies:
 
-cvs co -r V00-2_2_X HiggsAnalysis/HiggsToWW2e
+cvs co -r V01-2_2_X HiggsAnalysis/HiggsToWW2e
 cvs co -r V04-2_1_X HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+
+> take the new electron likelihood PDFs (done with Summer08 21X samples):
+
+cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_2_1_X/electronIdLikelihoodTkIsolated.db VecBos/ZJetsAnalysis/test/python
+
+> patch the DB path:
+cd RecoEgamma/ElectronIdentification/python/
+wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
+cd -
+
 
 scramv1 b
 
 > run
 cd HiggsAnalysis/HiggsToWW2e/test/python
 cmsRun HWW2eAnalysis_cfg.py
+
+
+
 
 
 
