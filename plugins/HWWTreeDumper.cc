@@ -370,12 +370,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // particle flow jets
     if ( dumpParticleFlowObjects_ ) {  
       CmsPFJetFiller pfJetFiller1(tree_, true);
-      suffix = "SisConePFJet";
+      suffix = "SisConePFCorrJet";
       pfJetFiller1.saveCand(saveCand_);
       pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
       CmsPFJetFiller pfJetFiller2(tree_, true);
-      suffix = "SisConePFCorrJet";
+      suffix = "SisConePFJet";
       pfJetFiller2.saveCand(saveCand_);
       pfJetFiller2.writeCollectionToTree(PFjetCollection2_, iEvent, iSetup, prefix, suffix, false);
     }
