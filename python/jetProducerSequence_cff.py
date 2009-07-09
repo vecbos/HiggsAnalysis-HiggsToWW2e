@@ -1,6 +1,8 @@
 import FWCore.ParameterSet.Config as cms
 from JetMETCorrections.Configuration.L2L3Corrections_Summer08_cff import *
 
+from HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff import *
+
 jetVertexAlpha1 = cms.EDProducer("JetVertexAssociation",
                                  JV_deltaZ = cms.double(0.3),
                                  JV_sigmaZ = cms.double(9.5),
@@ -23,4 +25,4 @@ jetVertexAlpha2 = cms.EDProducer("JetVertexAssociation",
                                  VERTEX_ALGO = cms.string('offlinePrimaryVertices'),
                                  JV_cutType = cms.string('delta') )
 
-jetSequence = cms.Sequence( L2L3CorJetSC5Calo + L2L3CorJetSC5PF + jetVertexAlpha1 + jetVertexAlpha2 )
+jetSequence = cms.Sequence( L2L3CorJetSC5Calo + L2L3CorJetSC5PF + jetVertexAlpha1 + jetVertexAlpha2 + newBtaggingSequence )

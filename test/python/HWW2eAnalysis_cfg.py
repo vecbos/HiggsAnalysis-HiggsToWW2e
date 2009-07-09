@@ -3,6 +3,11 @@ import FWCore.ParameterSet.Config as cms
 process = cms.Process("HiggsToWW2e")
 
 process.extend(cms.include("RecoEcal/EgammaClusterProducers/data/geometryForClustering.cff"))
+process.load("Configuration.StandardSequences.MagneticField_cff")
+process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.Reconstruction_cff")
+process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
+process.GlobalTag.globaltag = 'IDEAL_V9::All'
 
 # --- common preselection code ---
 process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWPreselectionSequence_cff")
@@ -29,7 +34,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default.root'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpPreselInfo = True
-process.treeDumper.dumpGenInfo = False
+process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpSignalKfactor = True
 process.treeDumper.dumpGenInfoMcAtNlo = False
 process.treeDumper.dumpTracks = True
