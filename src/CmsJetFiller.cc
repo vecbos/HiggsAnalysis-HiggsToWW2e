@@ -44,6 +44,7 @@
 
 #include "RecoBTag/MCTools/interface/JetFlavour.h"
 #include "SimDataFormats/JetMatching/interface/JetFlavourMatching.h"
+#include "DataFormats/BTauReco/interface/JetTag.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -80,6 +81,8 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 
   saveJetFlavour_=false;
 
+  saveJetBTag_ = false;
+  
   trkIndexName_ = new std::string("n");
   
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
@@ -121,6 +124,17 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->hadFrac;
   delete privateData_->alpha;
   delete privateData_->flavourId;
+  delete privateData_->combinedSecondaryVertexBJetTags;
+  delete privateData_->combinedSecondaryVertexMVABJetTags;
+  delete privateData_->impactParameterMVABJetTags;
+  delete privateData_->jetBProbabilityBJetTags;
+  delete privateData_->jetProbabilityBJetTags;
+  delete privateData_->simpleSecondaryVertexBJetTags;
+  delete privateData_->softElectronBJetTags;
+  delete privateData_->softMuonBJetTags;
+  delete privateData_->softMuonNoIPBJetTags;
+  delete privateData_->trackCountingHighPurBJetTags;
+  delete privateData_->trackCountingHighEffBJetTags;
 
 }
 
@@ -134,6 +148,8 @@ CmsJetFiller::~CmsJetFiller() {
 void CmsJetFiller::saveJetExtras(bool what) { saveJetExtras_=what; }
 
 void CmsJetFiller::saveJetFlavour(bool what) { saveJetFlavour_=what; }
+
+void CmsJetFiller::saveJetBTag(bool what) { saveJetBTag_=what; }
 
 void CmsJetFiller::setJetFlavour(JetFlavourIdentifier what) { jetMCFlavourIdentifier_=what; }
 
@@ -182,8 +198,38 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       jetVtxAlphaItr = JV_alpha->begin();
     }
 
+    //    typedef AssociationVector<CandidateBaseRefProd, vector<float> > btagCollection;
+    //    Handle<btagCollection> combinedSecondaryVertexBJetTags, 
+    edm::Handle<reco::JetTagCollection> combinedSecondaryVertexBJetTags,
+      combinedSecondaryVertexMVABJetTags,
+      impactParameterMVABJetTags,
+      jetBProbabilityBJetTags,
+      jetProbabilityBJetTags,
+      simpleSecondaryVertexBJetTags,
+      softElectronBJetTags,
+      softMuonBJetTags,
+      softMuonNoIPBJetTags,
+      trackCountingHighPurBJetTags,
+      trackCountingHighEffBJetTags;
+
+    if(saveJetBTag_) {
+      iEvent.getByLabel("newCombinedSecondaryVertexBJetTags", combinedSecondaryVertexBJetTags);
+      iEvent.getByLabel("newCombinedSecondaryVertexMVABJetTags", combinedSecondaryVertexMVABJetTags);
+      iEvent.getByLabel("newImpactParameterMVABJetTags", impactParameterMVABJetTags);
+      iEvent.getByLabel("newJetBProbabilityBJetTags", jetBProbabilityBJetTags);
+      iEvent.getByLabel("newJetProbabilityBJetTags", jetProbabilityBJetTags);
+      iEvent.getByLabel("newSimpleSecondaryVertexBJetTags", simpleSecondaryVertexBJetTags);
+      iEvent.getByLabel("newSoftElectronBJetTags", softElectronBJetTags);
+      iEvent.getByLabel("newSoftMuonBJetTags", softMuonBJetTags);
+      iEvent.getByLabel("newSoftMuonNoIPBJetTags", softMuonNoIPBJetTags);
+      iEvent.getByLabel("newTrackCountingHighPurBJetTags", trackCountingHighPurBJetTags);
+      iEvent.getByLabel("newTrackCountingHighEffBJetTags", trackCountingHighEffBJetTags);
+    }
+
+    int index = 0;
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
+      const CaloJet *thisRecoJet = dynamic_cast< const CaloJet * > ( &(*cand) );
       // fill basic kinematics
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
       // fill jet extra informations
@@ -192,7 +238,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	jetVtxAlphaItr++;
 
 	// em, had fractions and jet flavour id
-	const CaloJet *thisRecoJet = dynamic_cast< const CaloJet * > ( &(*cand) );
 	if( thisRecoJet != 0 ) { 
 	  privateData_->emFrac->push_back( thisRecoJet->emEnergyFraction() );
 	  privateData_->hadFrac->push_back( thisRecoJet->energyFractionHadronic() );
@@ -214,6 +259,33 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	privateData_->hadFrac->push_back( -1. );
 	privateData_->flavourId->push_back( -1.);
       }
+      // fill the btag algorithms output
+      if(saveJetBTag_) {
+        privateData_->combinedSecondaryVertexBJetTags->push_back( (*combinedSecondaryVertexBJetTags)[index].second );
+        privateData_->combinedSecondaryVertexMVABJetTags->push_back( (*combinedSecondaryVertexMVABJetTags)[index].second );
+        privateData_->impactParameterMVABJetTags->push_back( (*impactParameterMVABJetTags)[index].second );
+        privateData_->jetBProbabilityBJetTags->push_back( (*jetBProbabilityBJetTags)[index].second );
+        privateData_->jetProbabilityBJetTags->push_back( (*jetProbabilityBJetTags)[index].second );
+        privateData_->simpleSecondaryVertexBJetTags->push_back( (*simpleSecondaryVertexBJetTags)[index].second );
+        privateData_->softElectronBJetTags->push_back( (*softElectronBJetTags)[index].second );
+        privateData_->softMuonBJetTags->push_back( (*softMuonBJetTags)[index].second );
+        privateData_->softMuonNoIPBJetTags->push_back( (*softMuonNoIPBJetTags)[index].second );
+        privateData_->trackCountingHighPurBJetTags->push_back( (*trackCountingHighPurBJetTags)[index].second );
+        privateData_->trackCountingHighEffBJetTags->push_back( (*trackCountingHighEffBJetTags)[index].second );
+      } else {
+        privateData_->combinedSecondaryVertexBJetTags->push_back( -1. );
+        privateData_->combinedSecondaryVertexMVABJetTags->push_back( -1. );
+        privateData_->impactParameterMVABJetTags->push_back( -1. );
+        privateData_->jetBProbabilityBJetTags->push_back( -1. );
+        privateData_->jetProbabilityBJetTags->push_back( -1. );
+        privateData_->simpleSecondaryVertexBJetTags->push_back( -1. );
+        privateData_->softElectronBJetTags->push_back( -1. );
+        privateData_->softMuonBJetTags->push_back( 1. );
+        privateData_->softMuonNoIPBJetTags->push_back( -1. );
+        privateData_->trackCountingHighPurBJetTags->push_back( -1. );
+        privateData_->trackCountingHighEffBJetTags->push_back( -1. );
+      }
+      index++;
     }
   }
   else {
@@ -249,7 +321,19 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
   if(saveJetFlavour_) cmstree->column((colPrefix+"flavourId"+colSuffix).c_str(), *privateData_->flavourId, nCandString.c_str(), 0, "Reco");
-
+  if(saveJetBTag_) {
+    cmstree->column((colPrefix+"combinedSecondaryVertexBJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"combinedSecondaryVertexMVABJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexMVABJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"impactParameterMVABJetTags"+colSuffix).c_str(), *privateData_->impactParameterMVABJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"jetBProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetBProbabilityBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"jetProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetProbabilityBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"simpleSecondaryVertexBJetTags"+colSuffix).c_str(), *privateData_->simpleSecondaryVertexBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"softElectronBJetTags"+colSuffix).c_str(), *privateData_->softElectronBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"softMuonBJetTags"+colSuffix).c_str(), *privateData_->softMuonBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"softMuonNoIPBJetTags"+colSuffix).c_str(), *privateData_->softMuonNoIPBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackCountingHighPurBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighPurBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackCountingHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighEffBJetTags, nCandString.c_str(), 0, "Reco");
+  }
 }
 
 
@@ -265,7 +349,22 @@ void CmsJetFillerData::initialise() {
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
   flavourId = new vector<float>;
+  combinedSecondaryVertexBJetTags = new vector<float>;
+  combinedSecondaryVertexMVABJetTags = new vector<float>;
+  impactParameterMVABJetTags = new vector<float>;
+  jetBProbabilityBJetTags = new vector<float>;
+  jetProbabilityBJetTags = new vector<float>;
+  simpleSecondaryVertexBJetTags = new vector<float>;
+  softElectronBJetTags = new vector<float>;
+  softMuonBJetTags = new vector<float>;
+  softMuonNoIPBJetTags = new vector<float>;
+  trackCountingHighPurBJetTags = new vector<float>;
+  trackCountingHighEffBJetTags = new vector<float>;
+
 }
+
+
+
 
 void CmsJetFillerData::clearTrkVectors() {
 
@@ -274,5 +373,16 @@ void CmsJetFillerData::clearTrkVectors() {
   emFrac->clear();
   hadFrac->clear();
   flavourId->clear();
+  combinedSecondaryVertexBJetTags->clear();
+  combinedSecondaryVertexMVABJetTags->clear();
+  impactParameterMVABJetTags->clear();
+  jetBProbabilityBJetTags->clear();
+  jetProbabilityBJetTags->clear();
+  simpleSecondaryVertexBJetTags->clear();
+  softElectronBJetTags->clear();
+  softMuonBJetTags->clear();
+  softMuonNoIPBJetTags->clear();
+  trackCountingHighPurBJetTags->clear();
+  trackCountingHighEffBJetTags->clear();
 
 }

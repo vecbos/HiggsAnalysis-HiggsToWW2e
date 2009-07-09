@@ -43,6 +43,17 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
   std::vector<float> *emFrac, *hadFrac;
   std::vector<float> *alpha;
   std::vector<float> *flavourId;
+  std::vector<float> *combinedSecondaryVertexBJetTags, 
+    *combinedSecondaryVertexMVABJetTags,
+    *impactParameterMVABJetTags,
+    *jetBProbabilityBJetTags,
+    *jetProbabilityBJetTags,
+    *simpleSecondaryVertexBJetTags,
+    *softElectronBJetTags,
+    *softMuonBJetTags,
+    *softMuonNoIPBJetTags,
+    *trackCountingHighPurBJetTags,
+    *trackCountingHighEffBJetTags;
 
 public:
   void initialise();
@@ -77,6 +88,8 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   void saveJetFlavour(bool );
   
+  void saveJetBTag(bool );
+
   void setJetFlavour(JetFlavourIdentifier );
 
   // Operators
@@ -96,6 +109,7 @@ class CmsJetFiller : public CmsCandidateFiller {
   // Friends
   bool saveJetExtras_;
   bool saveJetFlavour_;
+  bool saveJetBTag_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
