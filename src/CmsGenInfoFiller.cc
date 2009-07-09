@@ -81,14 +81,12 @@ CmsGenInfoFiller::~CmsGenInfoFiller() {
 void
 CmsGenInfoFiller::writeGenInfoToTree (double processID, double ptHat, double genFilterEff,  double genXsec,  double weight, double AlpgenID)
 {
-  
-  std::cout << processID << " " << ptHat << " " << genFilterEff << " " << genXsec << " " << weight << std::endl;
-  privateData_->cmstree->column ("genProcessId", processID, 0., "Gen");
+  //  privateData_->cmstree->column ("genProcessId", processID, 0., "Gen");
   privateData_->cmstree->column ("genPtHat", ptHat, 0., "Gen");
-  privateData_->cmstree->column ("genFilterEff", genFilterEff, 0., "Gen");
-  privateData_->cmstree->column ("genXsec", genXsec, 0., "Gen");
+  //  privateData_->cmstree->column ("genFilterEff", genFilterEff, 0., "Gen");
+  //  privateData_->cmstree->column ("genXsec", genXsec, 0., "Gen");
   privateData_->cmstree->column ("genWeight", weight, 0., "Gen");
-  privateData_->cmstree->column ("genAlpgenID", AlpgenID, 0., "Gen");
+  //  privateData_->cmstree->column ("genAlpgenID", AlpgenID, 0., "Gen");
   return;
 }
 

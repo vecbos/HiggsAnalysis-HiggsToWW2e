@@ -402,39 +402,17 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // dump infos on MC production 
   if (dumpGenInfo_) {
 
-      CmsGenInfoFiller treeFill(tree_);
-      Handle<int> genProcessID;
-      iEvent.getByLabel( "genEventProcID", genProcessID );
-      double processID = *genProcessID;
-      int alpgenId=-1;
+    Handle<double> genEventScale;
+    iEvent.getByLabel( "genEventScale", genEventScale );
+    double pthat = *genEventScale;
 
-      Handle<double> genEventScale;
-      iEvent.getByLabel( "genEventScale", genEventScale );
-      double pthat = *genEventScale;
+    Handle<double> genEventWeight;
+    iEvent.getByLabel( "genEventWeight", genEventWeight );
+    double weight = *genEventWeight;
 
-      double filter_eff = -99.;
-      double cross_section = -99.;
-      
-      if (processID != 4) {
+    CmsGenInfoFiller treeFill(tree_);
+    treeFill.writeGenInfoToTree(-1.0, pthat, -1.0, -1.0, weight);
 
-	  Handle<double> genFilterEff;
-	  iEvent.getByLabel( "genEventRunInfo", "FilterEfficiency", genFilterEff);
-	  filter_eff = *genFilterEff;
-	  
-	  Handle<double> genCrossSect;
-	  iEvent.getByLabel( "genEventRunInfo", "PreCalculatedCrossSection", genCrossSect); 
-	  cross_section = *genCrossSect;
-
-      } else { //ALPGEN case
-	  Handle<int> alpgenIdHandle;
-	  iEvent.getByLabel (genWeightCollection_, "AlpgenProcessID", alpgenIdHandle);
-	  alpgenId = *alpgenIdHandle;
-      }
-      
-      Handle< double> weightHandle;
-      iEvent.getByLabel (genWeightCollection_, "weight", weightHandle);
-      double weight = * weightHandle;
-      treeFill.writeGenInfoToTree(processID,pthat,filter_eff, cross_section, weight, alpgenId);
   }
 
  
