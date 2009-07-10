@@ -53,6 +53,7 @@ treeDumper = cms.EDFilter("HWWTreeDumper",
                           saveFatTrk = cms.untracked.bool(True),
                           saveEleID = cms.untracked.bool(True),
                           saveJetAlpha = cms.untracked.bool(True),
+                          saveJetBTag = cms.untracked.bool(True),
                           # MC truth
                           mcTruthCollection = cms.InputTag("genParticles"),
                           electronMatchMap = cms.InputTag("electronMatchMap"),
