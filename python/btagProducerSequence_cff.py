@@ -7,7 +7,7 @@ from RecoBTag.Configuration.RecoBTag_cff import *
 # create a new jets and tracks association
 import RecoJets.JetAssociationProducers.ic5JetTracksAssociatorAtVertex_cfi
 newJetTracksAssociatorAtVertex = RecoJets.JetAssociationProducers.ic5JetTracksAssociatorAtVertex_cfi.ic5JetTracksAssociatorAtVertex.clone()
-newJetTracksAssociatorAtVertex.jets = "sisCone5CaloJets"
+newJetTracksAssociatorAtVertex.jets = "L2L3CorJetSC5Calo"
 newJetTracksAssociatorAtVertex.tracks = "generalTracks"
 
 # impact parameter b-tag
