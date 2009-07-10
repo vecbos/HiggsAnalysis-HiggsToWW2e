@@ -79,6 +79,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveFatRPC_     = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
   saveJetAlpha_   = iConfig.getUntrackedParameter<bool>("saveJetAlpha", false);
   saveJetFlavour_ = iConfig.getUntrackedParameter<bool>("saveJetFlavour", false);
+  saveJetBTag_    = iConfig.getUntrackedParameter<bool>("saveJetBTag", false);
 
   // particle identification
   saveEleID_    = iConfig.getUntrackedParameter<bool>("saveEleID", false);
@@ -348,6 +349,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeRecoFill1.saveCand(saveCand_);
     treeRecoFill1.saveJetExtras(saveJetAlpha_);
     treeRecoFill1.saveJetFlavour(saveJetFlavour_);
+    treeRecoFill1.saveJetBTag(saveJetBTag_);
     if(saveJetFlavour_) { 
       JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
       treeRecoFill1.setJetFlavour(jetMCFlavourIdentifier);
@@ -360,6 +362,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.saveJetExtras(saveJetAlpha_);
     treeRecoFill2.saveJetFlavour(saveJetFlavour_);
+    treeRecoFill2.saveJetBTag(false);
     if(saveJetFlavour_) { 
       JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
       treeRecoFill2.setJetFlavour(jetMCFlavourIdentifier);
@@ -387,6 +390,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       suffix = "SisConeGenJet";
       treeGenFill.saveJetExtras(false);
       treeGenFill.saveJetFlavour(saveJetFlavour_);
+      treeGenFill.saveJetBTag(false);
       if(saveJetFlavour_) { 
 	JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
 	treeGenFill.setJetFlavour(jetMCFlavourIdentifier);

@@ -56,6 +56,8 @@ private:
   bool saveJetAlpha_;
   //! dump the jet flavour content (if MC truth available)
   bool saveJetFlavour_;
+  //! dump the jet b-tag output
+  bool saveJetBTag_;
   //! dump the electron block
   bool dumpElectrons_;
   //! dump muon block
