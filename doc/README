@@ -13,7 +13,7 @@ cvs co -r V00-01-10  RecoEgamma/ElectronIdentification
 
 > check out the Higgs->2e2nu package and the dependenies:
 
-cvs co -r V03-2_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V04-2_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V04-2_1_X HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
