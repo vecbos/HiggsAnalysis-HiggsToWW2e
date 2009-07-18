@@ -41,22 +41,25 @@ process.treeDumper.dumpTracks = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
+process.treeDumper.saveJet1BTag = True
+process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpTree = True
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
                             fileNames = cms.untracked.vstring('file:/cmsrm/pc16/emanuele/data/Pool/H160_WW_2l_Summer08_v11redigi.root')
+#                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/Higgs22X/test_1.root')
                             )
 
 process.p = cms.Path ( process.KFactorProducer *
                        process.higgsToWW2LeptonsPreselectionSequence *
-                       process.jetSequence *
+                       process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons *
-                       process.trackCandidates )
-
+                       process.trackCandidates)
+                       
 process.q = cms.EndPath ( process.treeDumper )
