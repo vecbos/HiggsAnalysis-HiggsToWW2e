@@ -25,4 +25,6 @@ jetVertexAlpha2 = cms.EDProducer("JetVertexAssociation",
                                  VERTEX_ALGO = cms.string('offlinePrimaryVertices'),
                                  JV_cutType = cms.string('delta') )
 
-jetSequence = cms.Sequence( L2L3CorJetSC5Calo + L2L3CorJetSC5PF + jetVertexAlpha1 + jetVertexAlpha2 + newBtaggingSequence )
+jetSequence = cms.Sequence( L2L3CorJetSC5Calo + jetVertexAlpha1 + jetVertexAlpha2 )
+pfjetSCSequence = cms.Sequence( L2L3CorJetSC5PF )
+pfjetICSequence = cms.Sequence( L2L3CorJetIC5PF )
