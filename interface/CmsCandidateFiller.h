@@ -15,11 +15,7 @@
 #ifndef CmsCandidateFiller_h
 #define CmsCandidateFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -30,17 +26,8 @@
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoChargedCandidateFwd.h"
 
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
-
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include <TTree.h>
-
-using namespace cms;
-using namespace edm;
-using namespace reco;
 
 struct CmsCandidateFillerData {
   // All the vectors that will store the stuff
@@ -108,8 +95,8 @@ class CmsCandidateFiller {
  protected:
   
 
-  virtual void writeCandInfo(const Candidate *cand, 
-		     const edm::Event&, const edm::EventSetup&);
+  virtual void writeCandInfo(const reco::Candidate *cand, 
+                             const edm::Event&, const edm::EventSetup&);
   virtual void treeCandInfo(const std::string colPrefix, const std::string colSuffix);
   
   virtual void writeMcMatchInfo(const edm::View<reco::Candidate> *, 

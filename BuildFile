@@ -26,9 +26,7 @@
 <use name=TrackingTools/GeomPropagators>
 <use name=TrackingTools/TrackAssociator>
 <use name=Geometry/TrackerGeometryBuilder>
-<use name=SimDataFormats/HepMCProduct>
 <use name=RecoBTau/JetTagComputer>
-<use name=RecoBTag/MCTools>	
 <use name=RecoEcal/EgammaCoreTools>
 <use name=RecoEgamma/EgammaElectronAlgos>
 <use name=RecoTracker/CkfPattern>
@@ -64,10 +62,8 @@
    <use name=TrackingTools/GeomPropagators>
    <use name=TrackingTools/TrackAssociator>
    <use name=Geometry/TrackerGeometryBuilder>
-   <use name=SimDataFormats/HepMCProduct>
    <use name=DataFormats/EgammaCandidates>
    <use name=RecoBTau/JetTagComputer>
-   <use name=RecoBTag/MCTools>
    <use name=RecoEcal/EgammaCoreTools>
    <use name=RecoEgamma/EgammaElectronAlgos>
    <use name=RecoTracker/CkfPattern>

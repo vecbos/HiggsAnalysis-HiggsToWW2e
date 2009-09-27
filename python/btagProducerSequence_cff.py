@@ -59,8 +59,7 @@ newJetBtaggingIP = cms.Sequence(
        newTrackCountingHighEffBJetTags +
        newTrackCountingHighPurBJetTags +
        newJetProbabilityBJetTags +
-       newJetBProbabilityBJetTags +
-       newImpactParameterMVABJetTags )
+       newJetBProbabilityBJetTags )
     )
 
 newJetBtaggingSV = cms.Sequence(
@@ -72,7 +71,6 @@ newJetBtaggingSV = cms.Sequence(
     )
 
 newJetBtaggingEle = cms.Sequence(
-    btagSoftElectrons *
     newSoftElectronTagInfos *
        newSoftElectronBJetTags
     )

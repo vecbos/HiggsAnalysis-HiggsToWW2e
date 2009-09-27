@@ -41,16 +41,8 @@
 #include <string>
 
 using namespace edm;
-using namespace reco
-;
-struct CmsGenInfoFillerData {
-  CmsTree *cmstree;
-  double processID;
-  double ptHat;
-  double genFilterEff;
-  double genCrossXsec;
-  double weight;
-};
+using namespace reco;
+
 
 
 //		----------------------------------------
@@ -62,11 +54,11 @@ struct CmsGenInfoFillerData {
 //----------------
 
 
-CmsGenInfoFiller::CmsGenInfoFiller(CmsTree *cmstree):
+CmsGenInfoFiller::CmsGenInfoFiller(CmsTree *cmsTree):
   privateData_(new CmsGenInfoFillerData)
 {
-  privateData_->cmstree=cmstree;
-
+  cmstree=cmsTree;
+  privateData_->initialise();
 }
 
 
@@ -74,33 +66,39 @@ CmsGenInfoFiller::CmsGenInfoFiller(CmsTree *cmstree):
 
 
 CmsGenInfoFiller::~CmsGenInfoFiller() {
+  // delete here the privateData_ members
+  delete privateData_->ptHat;
+  delete privateData_->processID;
+  delete privateData_->weight;
+  delete privateData_->alphaQCD;
+  delete privateData_->alphaQED;
 }
 
 
-// ---------------------------------------------------------------
-void
-CmsGenInfoFiller::writeGenInfoToTree (double processID, double ptHat, double genFilterEff,  double genXsec,  double weight, double AlpgenID)
+void CmsGenInfoFiller::writeGenInfoToTree ( edm::Handle<GenEventInfoProduct> & gei )
 {
-  //  privateData_->cmstree->column ("genProcessId", processID, 0., "Gen");
-  privateData_->cmstree->column ("genPtHat", ptHat, 0., "Gen");
-  //  privateData_->cmstree->column ("genFilterEff", genFilterEff, 0., "Gen");
-  //  privateData_->cmstree->column ("genXsec", genXsec, 0., "Gen");
-  privateData_->cmstree->column ("genWeight", weight, 0., "Gen");
-  //  privateData_->cmstree->column ("genAlpgenID", AlpgenID, 0., "Gen");
-  return;
-}
-
-// ---------------------------------------------------------------
-void 
-CmsGenInfoFiller::writeGenInfoToTree (edm::Handle<edm::GenInfoProduct> & gi, edm::Handle<edm::HepMCProduct>& mc, double weight )
-{
-  const HepMC::GenEvent *genEvt = mc->GetEvent();
     
-  double processID = genEvt->signal_process_id();
-  double pthat = genEvt->event_scale(); 
+  *(privateData_->ptHat) = gei->qScale();
+  *(privateData_->processID) = gei->signalProcessID();
+  *(privateData_->weight) = gei->weight();
+  *(privateData_->alphaQCD) = gei->alphaQCD();
+  *(privateData_->alphaQED) = gei->alphaQED();
 
-  double external_cross_section = gi->external_cross_section(); // is the precalculated one written in the cfg file -- units is pb
-  double filter_eff = gi->filter_efficiency();
+  cmstree->column("genPtHat", privateData_->ptHat, 0, "Gen");
+  cmstree->column("genProcessId", privateData_->processID, 0, "Gen");
+  cmstree->column("genWeight", privateData_->weight, 0, "Gen");
+  cmstree->column("genAlphaQCD", privateData_->alphaQCD, 0, "Gen");
+  cmstree->column("genAlphaQED", privateData_->alphaQED, 0, "Gen");
 
-  writeGenInfoToTree(processID,pthat,filter_eff, external_cross_section, weight, 0);
 }
+
+void CmsGenInfoFillerData::initialise() {
+
+  ptHat = new float;
+  processID = new float;
+  weight = new float;
+  alphaQCD = new float;
+  alphaQED = new float;
+
+}
+

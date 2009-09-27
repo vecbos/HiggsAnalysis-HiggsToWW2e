@@ -12,11 +12,7 @@
 #ifndef CmsTrackFiller_h
 #define CmsTrackFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -31,10 +27,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "DataFormats/Math/interface/Point3D.h"
 #include <TTree.h>
-
-using namespace cms;
-using namespace edm;
-using namespace reco;
 
 struct CmsTrackFillerData : public CmsCandidateFillerData {
 
@@ -102,7 +94,7 @@ class CmsTrackFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeTrkInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, TrackRef trkRef);
+  void writeTrkInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, reco::TrackRef trkRef);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   bool saveTrk_;

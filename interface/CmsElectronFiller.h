@@ -15,29 +15,17 @@
 #ifndef CmsElectronFiller_h
 #define CmsElectronFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
-#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
+#include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include <TTree.h>
-
-using namespace cms;
-using namespace edm;
-using namespace reco;
 
 struct CmsElectronFillerData : public CmsCandidateFillerData {
 
@@ -52,9 +40,13 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<float> *eleTrackValidHits, *eleTrackLostHits;
   vector<float> *eleTrackVx, *eleTrackVy, *eleTrackVz; 
 
-  vector<float> *ecal, *eraw, *caloEta, *caloPhi;
-  vector<int> *nClu, *nCry;
+  vector<int> *fiducialFlags;
+  vector<int> *recoFlags;
 
+  vector<float> *ecal, *eraw, *esEnergy, *caloEta, *caloPhi;
+  vector<int> *energyCorrections;
+
+  vector<int> *nClu, *nCry;
   vector<float> *e2x2, *e3x3, *e5x5;
   vector<float> *eMax, *e2nd;
   vector<float> *s1s9, *s9s25;
@@ -118,10 +110,10 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeTrkInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, GsfTrackRef trkRef);
+  void writeTrkInfo(const reco::GsfElectronRef, const edm::Event&, const edm::EventSetup&, reco::GsfTrackRef trkRef);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
-  void writeEcalInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, SuperClusterRef sclusRef,
+  void writeEcalInfo(const reco::GsfElectronRef, const edm::Event&, const edm::EventSetup&, reco::SuperClusterRef sclusRef,
 		     const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
   void treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix);
 

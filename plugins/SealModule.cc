@@ -1,4 +1,3 @@
-#include "PluginManager/ModuleDef.h"
 #include "FWCore/Framework/interface/MakerMacros.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "PhysicsTools/UtilAlgos/interface/ObjectSelector.h"

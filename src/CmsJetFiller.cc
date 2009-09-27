@@ -41,9 +41,6 @@
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
-
-#include "RecoBTag/MCTools/interface/JetFlavour.h"
-#include "SimDataFormats/JetMatching/interface/JetFlavourMatching.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
@@ -78,8 +75,6 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
   jetVertexAlphaCollection_=jetVertexAlphaCollection;
 
   saveJetExtras_=true;
-
-  saveJetFlavour_=false;
 
   saveJetBTag_ = false;
   
@@ -123,10 +118,8 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->emFrac;
   delete privateData_->hadFrac;
   delete privateData_->alpha;
-  delete privateData_->flavourId;
   delete privateData_->combinedSecondaryVertexBJetTags;
   delete privateData_->combinedSecondaryVertexMVABJetTags;
-  delete privateData_->impactParameterMVABJetTags;
   delete privateData_->jetBProbabilityBJetTags;
   delete privateData_->jetProbabilityBJetTags;
   delete privateData_->simpleSecondaryVertexBJetTags;
@@ -147,11 +140,7 @@ CmsJetFiller::~CmsJetFiller() {
 
 void CmsJetFiller::saveJetExtras(bool what) { saveJetExtras_=what; }
 
-void CmsJetFiller::saveJetFlavour(bool what) { saveJetFlavour_=what; }
-
 void CmsJetFiller::saveJetBTag(bool what) { saveJetBTag_=what; }
-
-void CmsJetFiller::setJetFlavour(JetFlavourIdentifier what) { jetMCFlavourIdentifier_=what; }
 
 void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
@@ -163,8 +152,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
   
-  if(saveJetFlavour_) jetMCFlavourIdentifier_.readEvent(iEvent);
-
   privateData_->clearTrkVectors();
 
   if(collection) {
@@ -202,7 +189,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     //    Handle<btagCollection> combinedSecondaryVertexBJetTags, 
     edm::Handle<reco::JetTagCollection> combinedSecondaryVertexBJetTags,
       combinedSecondaryVertexMVABJetTags,
-      impactParameterMVABJetTags,
       jetBProbabilityBJetTags,
       jetProbabilityBJetTags,
       simpleSecondaryVertexBJetTags,
@@ -215,7 +201,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     if(saveJetBTag_) {
       iEvent.getByLabel("newCombinedSecondaryVertexBJetTags", combinedSecondaryVertexBJetTags);
       iEvent.getByLabel("newCombinedSecondaryVertexMVABJetTags", combinedSecondaryVertexMVABJetTags);
-      iEvent.getByLabel("newImpactParameterMVABJetTags", impactParameterMVABJetTags);
       iEvent.getByLabel("newJetBProbabilityBJetTags", jetBProbabilityBJetTags);
       iEvent.getByLabel("newJetProbabilityBJetTags", jetProbabilityBJetTags);
       iEvent.getByLabel("newSimpleSecondaryVertexBJetTags", simpleSecondaryVertexBJetTags);
@@ -237,33 +222,25 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	privateData_->alpha->push_back(*jetVtxAlphaItr);
 	jetVtxAlphaItr++;
 
-	// em, had fractions and jet flavour id
+	// em, had fractions
 	if( thisRecoJet != 0 ) { 
 	  privateData_->emFrac->push_back( thisRecoJet->emEnergyFraction() );
 	  privateData_->hadFrac->push_back( thisRecoJet->energyFractionHadronic() );
-	  if(saveJetFlavour_) { 
-	    BTagMCTools::JetFlavour jetFlavour = jetMCFlavourIdentifier_.identifyBasedOnPartons(*thisRecoJet);
-	    privateData_->flavourId->push_back( jetFlavour.flavour() ); 
-	  }
-	  else privateData_->flavourId->push_back( -1.);
 	}
 	else {
 	  privateData_->emFrac->push_back( -1.);
 	  privateData_->hadFrac->push_back( -1.);
-	  privateData_->flavourId->push_back( -1.);
 	}
       }
       else {
 	privateData_->alpha->push_back( -1. );
 	privateData_->emFrac->push_back( -1. );
 	privateData_->hadFrac->push_back( -1. );
-	privateData_->flavourId->push_back( -1.);
       }
       // fill the btag algorithms output
       if(saveJetBTag_) {
         privateData_->combinedSecondaryVertexBJetTags->push_back( (*combinedSecondaryVertexBJetTags)[index].second );
         privateData_->combinedSecondaryVertexMVABJetTags->push_back( (*combinedSecondaryVertexMVABJetTags)[index].second );
-        privateData_->impactParameterMVABJetTags->push_back( (*impactParameterMVABJetTags)[index].second );
         privateData_->jetBProbabilityBJetTags->push_back( (*jetBProbabilityBJetTags)[index].second );
         privateData_->jetProbabilityBJetTags->push_back( (*jetProbabilityBJetTags)[index].second );
         privateData_->simpleSecondaryVertexBJetTags->push_back( (*simpleSecondaryVertexBJetTags)[index].second );
@@ -275,7 +252,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       } else {
         privateData_->combinedSecondaryVertexBJetTags->push_back( -1. );
         privateData_->combinedSecondaryVertexMVABJetTags->push_back( -1. );
-        privateData_->impactParameterMVABJetTags->push_back( -1. );
         privateData_->jetBProbabilityBJetTags->push_back( -1. );
         privateData_->jetProbabilityBJetTags->push_back( -1. );
         privateData_->simpleSecondaryVertexBJetTags->push_back( -1. );
@@ -320,11 +296,9 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
   cmstree->column((colPrefix+"alpha"+colSuffix).c_str(), *privateData_->alpha, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
-  if(saveJetFlavour_) cmstree->column((colPrefix+"flavourId"+colSuffix).c_str(), *privateData_->flavourId, nCandString.c_str(), 0, "Reco");
   if(saveJetBTag_) {
     cmstree->column((colPrefix+"combinedSecondaryVertexBJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"combinedSecondaryVertexMVABJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexMVABJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"impactParameterMVABJetTags"+colSuffix).c_str(), *privateData_->impactParameterMVABJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"jetBProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetBProbabilityBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"jetProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetProbabilityBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"simpleSecondaryVertexBJetTags"+colSuffix).c_str(), *privateData_->simpleSecondaryVertexBJetTags, nCandString.c_str(), 0, "Reco");
@@ -348,10 +322,8 @@ void CmsJetFillerData::initialise() {
   alpha = new vector<float>;
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
-  flavourId = new vector<float>;
   combinedSecondaryVertexBJetTags = new vector<float>;
   combinedSecondaryVertexMVABJetTags = new vector<float>;
-  impactParameterMVABJetTags = new vector<float>;
   jetBProbabilityBJetTags = new vector<float>;
   jetProbabilityBJetTags = new vector<float>;
   simpleSecondaryVertexBJetTags = new vector<float>;
@@ -372,10 +344,8 @@ void CmsJetFillerData::clearTrkVectors() {
   alpha->clear();
   emFrac->clear();
   hadFrac->clear();
-  flavourId->clear();
   combinedSecondaryVertexBJetTags->clear();
   combinedSecondaryVertexMVABJetTags->clear();
-  impactParameterMVABJetTags->clear();
   jetBProbabilityBJetTags->clear();
   jetProbabilityBJetTags->clear();
   simpleSecondaryVertexBJetTags->clear();

@@ -42,8 +42,6 @@ private:
   bool dumpPreselInfo_;
   //! dump H->WW->2lep 2nu gg fusion signal k-factor
   bool dumpSignalKfactor_;
-  //! dump event weight in case of MC@NLO production
-  bool dumpGenInfoMcAtNlo_;
   //! dump the basic candidate informations (4-vectors)
   bool saveCand_;
   //! dump specific reco informations in addition to candidate variables
@@ -54,8 +52,6 @@ private:
   bool saveEleID_;
   //! dump the jet alpha parameter
   bool saveJetAlpha_;
-  //! dump the jet flavour content (if MC truth available)
-  bool saveJetFlavour_;
   //! dump the jet b-tag output
   bool saveJet1BTag_, saveJet2BTag_;
   //! dump the electron block
@@ -94,7 +90,6 @@ private:
   edm::InputTag tracksForIsolationProducer_, calotowersForIsolationProducer_;
   //! collection of jet vertices for alpha evaluation
   edm::InputTag jetVertexAlphaCollection1_, jetVertexAlphaCollection2_;
-  edm::ParameterSet jetMCFlavourIdentifier_;
   //! generator-level particle collection in input
   edm::InputTag mcTruthCollection_;
   //! association map between reco and generated particles

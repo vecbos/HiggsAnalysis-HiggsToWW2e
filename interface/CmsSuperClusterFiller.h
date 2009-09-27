@@ -15,11 +15,7 @@
 #ifndef CmsSuperClusterFiller_h
 #define CmsSuperClusterFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -29,10 +25,6 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include <TTree.h>
-
-using namespace cms;
-using namespace edm;
-using namespace reco;
 
 struct CmsSuperClusterFillerData {
   // All the vectors that will store the stuff
@@ -73,7 +65,7 @@ public:
 protected:
   
 
-  virtual void writeSCInfo(const SuperCluster *cand, 
+  virtual void writeSCInfo(const reco::SuperCluster *cand, 
 			   const edm::Event&, const edm::EventSetup&);
   virtual void treeSCInfo(const std::string colPrefix, const std::string colSuffix);
   

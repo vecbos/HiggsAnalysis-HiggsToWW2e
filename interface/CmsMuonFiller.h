@@ -2,21 +2,20 @@
 //-----------------------------------------------------------------------
 //
 // Package:    
-//      ZjetsAnalysis/ZllProducer
+//      HiggsAnalysis/HiggsToWW2e
 // Description:
-//      Class CmsMuonFiller
+//      Class CmsElectronFiller
 //      Simple class for dumping RECO (or AOD) contents to a ROOT tree
 //      
+// Original Author:  Emanuele Di Marco
+//         Created:  Fri Apr  6 18:05:34 CEST 2007
+//
 //-----------------------------------------------------------------------
 
 #ifndef CmsMuonFiller_h
 #define CmsMuonFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -40,15 +39,10 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include <TTree.h>
 
-using namespace cms;
-using namespace edm;
-using namespace reco;
-
 struct CmsMuonFillerData : public CmsCandidateFillerData {
 
   vector<float> *pxAtInner, *pyAtInner, *pzAtInner, *xAtInner, *yAtInner, *zAtInner;
   vector<float> *pxAtOuter, *pyAtOuter, *pzAtOuter, *xAtOuter, *yAtOuter, *zAtOuter;
-  vector<int> *isGlobal, *isTracker, *isStandAlone, *isCalo;
   vector<float> *muTrackNormalizedChi2;
   vector<float> *muTrackDxy, *muTrackD0, *muTrackDsz, *muTrackDz;
   vector<float> *muTrackDxyError, *muTrackD0Error, *muTrackDszError, *muTrackDzError;
@@ -107,10 +101,10 @@ class CmsMuonFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeTrkInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, const Muon *muon);
+  void writeTrkInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, const reco::Muon *muon);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
-  void writeMuonInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&, const Muon *muon);
+  void writeMuonInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, const reco::Muon *muon);
   void treeMuonInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   bool saveMuonExtras_;

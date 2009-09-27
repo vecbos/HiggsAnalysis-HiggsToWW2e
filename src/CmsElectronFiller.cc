@@ -149,8 +149,14 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->eleTrackVy;
   delete privateData_->eleTrackVz;
 
+  delete privateData_->fiducialFlags;
+  delete privateData_->recoFlags;
+
   delete privateData_->ecal;
   delete privateData_->eraw;
+  delete privateData_->esEnergy;
+  delete privateData_->energyCorrections;
+
   delete privateData_->caloEta;
   delete privateData_->caloPhi;
   delete privateData_->nClu;
@@ -239,17 +245,30 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
-    edm::View<reco::Candidate>::const_iterator cand;
-    for(cand=collection->begin(); cand!=collection->end(); cand++) {
+    for(int index = 0; index < (int)collection->size(); index++) {
+
       // fill basic kinematics
-      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
-      // fill Cluster Adapter
-      SuperClusterRef sclusRef = cand->get<SuperClusterRef>();
-      if(saveEcal_) writeEcalInfo(&(*cand),iEvent,iSetup,sclusRef,EBRecHits,EERecHits );
-      // fill (GSF) Track Adapter
-      GsfTrackRef trkRef = cand->get<GsfTrackRef>();
-      if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,trkRef);
+      const Candidate *cand = &(collection->at(index));
+      if(saveCand_) writeCandInfo(cand,iEvent,iSetup);
+
+      const GsfElectronRef electronRef = collection->refAt(index).castTo<GsfElectronRef>();
+
+      if ( !(electronRef.isNull()) ) {
+
+        // fill Cluster Adapter
+        SuperClusterRef sclusRef = cand->get<SuperClusterRef>();
+        if(saveEcal_) writeEcalInfo(electronRef,iEvent,iSetup,sclusRef,EBRecHits,EERecHits );
+        // fill (GSF) Track Adapter
+        GsfTrackRef trkRef = cand->get<GsfTrackRef>();
+        if(saveTrk_) writeTrkInfo(electronRef,iEvent,iSetup,trkRef);
+
+      } else {
+        edm::LogWarning("CmsElectronFiller") << "Warning! The collection seems to be not made by "
+                                             << "electrons, electron-specific infos will be set to default.";
+      }
+
     }
+
   }
   else {
     *(privateData_->ncand) = 0;
@@ -287,7 +306,7 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 
 
-void CmsElectronFiller::writeTrkInfo(const Candidate *cand, 
+void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef, 
 				     const edm::Event& iEvent, const edm::EventSetup& iSetup, 
 				     GsfTrackRef trkRef) {
   if(&trkRef) {
@@ -433,7 +452,7 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
 
 
 
-void CmsElectronFiller::writeEcalInfo(const Candidate *cand, 
+void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef, 
 				      const edm::Event& iEvent, const edm::EventSetup& iSetup, 
 				      SuperClusterRef sclusRef,
 				      const EcalRecHitCollection *EBRecHits,
@@ -442,15 +461,51 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
 
   bool validTopologyAndGeometry = false;
   if(&sclusRef) {
+
+    // fiducial flags in ECAL
+    int packed_sel = -1;
+    int isEB = ( electronRef->isEB() ) ? 1 : 0;
+    int isEE = ( electronRef->isEE() ) ? 1 : 0;
+    int isGap = ( electronRef->isGap() ) ? 1 : 0;
+    int isEBEEGap = ( electronRef->isEBEEGap() ) ? 1 : 0;
+    int isEBGap = ( electronRef->isEBGap() ) ? 1 : 0;
+    int isEBEtaGap = ( electronRef->isEBEtaGap() ) ? 1 : 0;
+    int isEBPhiGap = ( electronRef->isEBPhiGap() ) ? 1 : 0;
+    int isEEGap = ( electronRef->isEEGap() ) ? 1 : 0;
+    int isEEDeeGap = ( electronRef->isEEDeeGap() ) ? 1 : 0;
+    int isEERingGap = ( electronRef->isEERingGap() ) ? 1 : 0;
+    
+    packed_sel = ( isEB << 9 ) | ( isEE << 8 ) | ( isGap << 7 ) |
+      ( isEBEEGap << 6 ) | ( isEBGap << 5 ) | ( isEBEtaGap << 4 ) | ( isEBPhiGap << 3 ) |
+      ( isEEGap << 2 ) | ( isEEDeeGap << 1 ) | isEERingGap;
+
+    privateData_->fiducialFlags->push_back(packed_sel);
+
+    int packed_reco;
+    int isEcalDriven = ( electronRef->isEcalDriven() ) ? 1 : 0;
+    int isTrackerDriven = ( electronRef->isTrackerDriven() ) ? 1 : 0;
+    packed_reco = ( isEcalDriven << 1 ) | isTrackerDriven;
+    privateData_->recoFlags->push_back( packed_reco );
+
+    int packed_corr;
+    // ecal corrected energy
+    privateData_->ecal->push_back(electronRef->ecalEnergy());
+    
+    int isEcalEnergyCorrected = ( electronRef->isEcalEnergyCorrected() ) ? 1 : 0;
+    int isMomentumCorrected = ( electronRef->isMomentumCorrected() ) ? 1 : 0;
+    
+    packed_corr = ( isEcalEnergyCorrected << 1 ) | isMomentumCorrected;
+    
+    privateData_->energyCorrections->push_back( packed_corr );
+
     // Cluster related variables
-    privateData_->ecal->push_back(sclusRef->energy());
+    privateData_->esEnergy->push_back(sclusRef->preshowerEnergy());
     privateData_->nClu->push_back(sclusRef->clustersSize());
 
     int ncry=0;
-    reco::basicCluster_iterator bcItr;
-    for(bcItr=sclusRef->clustersBegin(); bcItr!=sclusRef->clustersEnd(); bcItr++){
-      reco::BasicClusterRef bclusRef = *bcItr;
-      ncry+=bclusRef->getHitsByDetId().size();
+    for(CaloCluster_iterator bcItr=sclusRef->clustersBegin(); bcItr!=sclusRef->clustersEnd(); bcItr++){
+      const Ptr<CaloCluster> basicCluster = *bcItr;
+      ncry += basicCluster->size();
     }
     privateData_->nCry->push_back(ncry);
     
@@ -473,7 +528,7 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
       const CaloTopology *topology = pTopology.product();
       const CaloGeometry *geometry = pGeometry.product();
 
-      BasicClusterRef theSeed = sclusRef->seed();
+      const Ptr<CaloCluster> theSeed = sclusRef->seed();
 
       const EcalRecHitCollection *rechits = 0;
 
@@ -542,6 +597,9 @@ void CmsElectronFiller::writeEcalInfo(const Candidate *cand,
   }
   if(!(&sclusRef) || ((&sclusRef) && (!validTopologyAndGeometry)) ) {
     privateData_->ecal->push_back(-1.);
+    privateData_->esEnergy->push_back(-1.);
+    privateData_->fiducialFlags->push_back(-1);
+    privateData_->recoFlags->push_back(-1);
     privateData_->nClu->push_back(-1);
     privateData_->nCry->push_back(-1);
     privateData_->e3x3->push_back(-1.);
@@ -578,6 +636,10 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
 
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"ecal"+colSuffix).c_str(), *privateData_->ecal, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esEnergy"+colSuffix).c_str(), *privateData_->esEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"fiducialFlags"+colSuffix).c_str(), *privateData_->fiducialFlags, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"recoFlags"+colSuffix).c_str(), *privateData_->recoFlags, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"energyCorrections"+colSuffix).c_str(), *privateData_->energyCorrections, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nClu"+colSuffix).c_str(), *privateData_->nClu, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nCry"+colSuffix).c_str(), *privateData_->nCry, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
@@ -639,7 +701,12 @@ void CmsElectronFillerData::initialise() {
   eleTrackVy = new vector<float>;
   eleTrackVz = new vector<float>;
 
+  fiducialFlags = new vector<int>;
+  recoFlags = new vector<int>;
+
   ecal = new vector<float>;
+  esEnergy = new vector<float>;
+  energyCorrections = new vector<int>;
   nClu = new vector<int>;
   nCry = new vector<int>;
   eraw = new vector<float>;
@@ -699,6 +766,8 @@ void CmsElectronFillerData::clearTrkVectors() {
   eleTrackVz->clear();
 
   ecal->clear();
+  esEnergy->clear();
+  energyCorrections->clear();
   nClu->clear();
   nCry->clear();
   e3x3->clear();
@@ -710,6 +779,8 @@ void CmsElectronFillerData::clearTrkVectors() {
   eraw->clear();
   caloEta->clear();
   caloPhi->clear();
+  fiducialFlags->clear();
+  recoFlags->clear();
   e2x2->clear();
   e2nd->clear();
   s1s9->clear();

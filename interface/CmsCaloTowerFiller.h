@@ -15,26 +15,13 @@
 #ifndef CmsCaloTowerFiller_h
 #define CmsCaloTowerFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
-
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include <TTree.h>
-
-using namespace cms;
-using namespace edm;
-using namespace reco;
 
 struct CmsCaloTowerFillerData : public CmsCandidateFillerData {
 

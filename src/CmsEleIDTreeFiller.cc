@@ -16,12 +16,12 @@
 
 #include "MyAnalysis/IsolationTools/interface/SuperClusterHitsEcalIsolation.h"
 
-#include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCalotowerIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 
-
+using namespace std;
+using namespace edm;
+using namespace reco;
 
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
@@ -50,47 +50,31 @@ CmsEleIDTreeFiller::CmsEleIDTreeFiller(CmsTree *cmsTree, int maxTracks, bool noO
 //--------------
 CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   // delete here the vector ptr's
-  delete privateData_->eleClass;
-  delete privateData_->eleStandardClass;
-  delete privateData_->eleHoE;
-  delete privateData_->eleNotCorrEoP;
-  delete privateData_->eleCorrEoP;
-  delete privateData_->eleNotCorrEoPout;
-  delete privateData_->eleCorrEoPout;
-  delete privateData_->eleDeltaEtaAtVtx;
-  delete privateData_->eleDeltaEtaAtCalo;
-  delete privateData_->eleDeltaPhiAtVtx;
-  delete privateData_->eleDeltaPhiAtCalo;
-  delete privateData_->eleFullCorrE;
-  delete privateData_->eleCaloCorrE;
-  delete privateData_->eleNxtalCorrE;
-  delete privateData_->eleRawE;
-  delete privateData_->eleTrackerP;
-  delete privateData_->minDR03;
-  delete privateData_->minDRveto03;
-  delete privateData_->sumPt03;
-  delete privateData_->sumPtSquared03;
-  delete privateData_->sumN03;
-  delete privateData_->sumPt04;
-  delete privateData_->sumPt05;
-  delete privateData_->sumPtPreselection;
-  delete privateData_->sumHadEt04;
-  delete privateData_->sumEmEt04;
-  delete privateData_->sumHadEt05;
-  delete privateData_->sumEmEt05;
-  delete privateData_->isoFromDepsTk;
-  delete privateData_->isoFromDepsEcal;
-  delete privateData_->isoFromDepsHcal;
+  delete privateData_->classification;
+  delete privateData_->standardClassification;
+  delete privateData_->fbrem;
+  delete privateData_->nbrems;
+  delete privateData_->hOverE;
+  delete privateData_->eSuperClusterOverP;
+  delete privateData_->eSeedOverPout;
+  delete privateData_->deltaEtaAtVtx;
+  delete privateData_->deltaEtaAtCalo;
+  delete privateData_->deltaPhiAtVtx;
+  delete privateData_->deltaPhiAtCalo;
+  delete privateData_->tip;
+  delete privateData_->dr03TkSumPt;
+  delete privateData_->dr03EcalRecHitSumEt;
+  delete privateData_->dr03HcalTowerSumEt;
+  delete privateData_->dr04TkSumPt;
+  delete privateData_->dr04EcalRecHitSumEt;
+  delete privateData_->dr04HcalTowerSumEt;
+  delete privateData_->scBasedEcalSum03;
   delete privateData_->scBasedEcalSum04;
-  delete privateData_->scBasedEcalSum05;
+  delete privateData_->scHaloBasedEcalSum03;
   delete privateData_->scHaloBasedEcalSum04;
-  delete privateData_->scHaloBasedEcalSum05;
+  delete privateData_->eleIdCuts;
   delete privateData_->eleLik;
-  delete privateData_->eleIdCutsLoose;
-  delete privateData_->eleIdStandardCutsRobust;
-  delete privateData_->eleIdStandardCutsLoose;
-  delete privateData_->eleIdStandardCutsTight;
-  delete privateData_->eleTip;
+  delete privateData_->pflowMVA;
 }
 
 
@@ -127,13 +111,14 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
     
-    eleIdResults_ = new eleIdContainer(5);
+    eleIdResults_ = new eleIdContainer(6);
 
-    iEvent.getByLabel( "egammaIDCutsLoose", (*eleIdResults_)[0] );
-    iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[1] );
-    iEvent.getByLabel( "egammaIDStandardCutsRobust", (*eleIdResults_)[2] ); 
-    iEvent.getByLabel( "egammaIDStandardCutsLoose", (*eleIdResults_)[3] );
-    iEvent.getByLabel( "egammaIDStandardCutsTight", (*eleIdResults_)[4] );
+    iEvent.getByLabel( "eidLoose", (*eleIdResults_)[0] );
+    iEvent.getByLabel( "eidTight", (*eleIdResults_)[1] );
+    iEvent.getByLabel( "eidRobustLoose", (*eleIdResults_)[2] );
+    iEvent.getByLabel( "eidRobustTight", (*eleIdResults_)[3] );
+    iEvent.getByLabel( "eidRobustHighEnergy", (*eleIdResults_)[4] );
+    iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[5] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -142,24 +127,17 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(calotowersProducer_, m_calotowers); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get calotowers product" << calotowersProducer_; }
 
-    //read the isolation with iso deposits
-    eIsoFromDepsValueMap_ = new isoContainer(3);
-    iEvent.getByLabel( "eleIsoFromDepsTk", (*eIsoFromDepsValueMap_)[0] ); 
-    iEvent.getByLabel( "eleIsoFromDepsEcalFromHits", (*eIsoFromDepsValueMap_)[1] ); 
-    iEvent.getByLabel( "eleIsoFromDepsHcalFromHits", (*eIsoFromDepsValueMap_)[2] ); 
-
     for(int index = 0; index < (int)collection->size(); index++) {
 	  
       const GsfElectronRef electronRef = collection->refAt(index).castTo<GsfElectronRef>();
       if ( !(electronRef.isNull()) )
 	writeEleInfo(electronRef,iEvent,iSetup,EBRecHits,EERecHits);
-      else edm::LogInfo("CmsEleIDTreeFiller") << "Warning! The collection seems to be not made by "
-					      << "electrons, electron-specific infos will be set to default.";
+      else edm::LogWarning("CmsEleIDTreeFiller") << "Warning! The collection seems to be not made by "
+                                                 << "electrons, electron-specific infos will be set to default.";
 
     }
 
     delete eleIdResults_;
-    delete eIsoFromDepsValueMap_;
 
   }
 
@@ -181,128 +159,71 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
 				      const EcalRecHitCollection *EERecHits) {
 
   SuperClusterRef sclusRef = electronRef->superCluster();
-  // ele corr - notcorr energy
-  float myEleTrackerP   = electronRef->trackMomentumAtVtx().r();
-  float myEleFullCorrE  = electronRef->energy();
-  float myEleCaloCorrE  = electronRef->caloEnergy();
-  float myEleNxtalCorrE = 0.;
-  float myEleRawE       = 0.;
   float mySeedE         = 0.;
-  float mySeedCorrE     = 0.;            
-  if(&sclusRef) {
-    myEleNxtalCorrE = sclusRef->energy();
-    myEleRawE       = sclusRef->rawEnergy();
-    mySeedE         = sclusRef->seed()->energy();
-    if ((int(electronRef->classification()/10) == 3) || (int(electronRef->classification()/10) == 13) ){
-      double Ebrem = 0.;  
-      basicCluster_iterator bc;
-      for(bc = sclusRef->clustersBegin(); bc!=sclusRef->clustersEnd(); bc++) {
-	Ebrem = Ebrem +(*bc)->energy();
-      }
-      Ebrem = Ebrem - mySeedE;
-      mySeedCorrE = myEleNxtalCorrE - Ebrem;
-    }
-    else {mySeedCorrE = myEleFullCorrE;}
-  }
+  if(&sclusRef) mySeedE = sclusRef->seed()->energy();
   
   // transverse impact parameter
   GsfTrackRef trRef = electronRef->gsfTrack();
   float myTip = sqrt((trRef->vertex().x())*(trRef->vertex().x()) + (trRef->vertex().y())*(trRef->vertex().y()));
 
   // eleID
-  privateData_->eleFullCorrE     ->push_back(myEleFullCorrE);  
-  privateData_->eleCaloCorrE     ->push_back(myEleCaloCorrE);  
-  privateData_->eleNxtalCorrE    ->push_back(myEleNxtalCorrE); 
-  privateData_->eleRawE          ->push_back(myEleRawE); 
-  privateData_->eleTrackerP      ->push_back(myEleTrackerP);
-  privateData_->eleClass         ->push_back(electronRef->classification());
-  privateData_->eleStandardClass ->push_back(stdEleIdClassify(&(*electronRef)));
-  privateData_->eleHoE           ->push_back(electronRef->hadronicOverEm());
-  privateData_->eleCorrEoP       ->push_back(electronRef->eSuperClusterOverP());
-  privateData_->eleNotCorrEoP    ->push_back(myEleRawE/myEleTrackerP);
-  privateData_->eleCorrEoPout    ->push_back(electronRef->eSeedClusterOverPout());
-  privateData_->eleNotCorrEoPout ->push_back(electronRef->eSeedClusterOverPout()*(mySeedCorrE/mySeedE));
-  privateData_->eleDeltaEtaAtVtx ->push_back(electronRef->deltaEtaSuperClusterTrackAtVtx());
-  privateData_->eleDeltaPhiAtVtx ->push_back(electronRef->deltaPhiSuperClusterTrackAtVtx());
-  privateData_->eleDeltaEtaAtCalo->push_back(electronRef->deltaEtaSeedClusterTrackAtCalo());
-  privateData_->eleDeltaPhiAtCalo->push_back(electronRef->deltaPhiSeedClusterTrackAtCalo());
-  privateData_->eleTip           ->push_back(myTip);
+  privateData_->classification->push_back(electronRef->classification());
+  privateData_->standardClassification->push_back(stdEleIdClassify(&(*electronRef)));
+  privateData_->fbrem->push_back(electronRef->fbrem());
+  privateData_->nbrems->push_back(electronRef->numberOfBrems());
+  privateData_->hOverE->push_back(electronRef->hadronicOverEm());
+  privateData_->eSuperClusterOverP->push_back(electronRef->eSuperClusterOverP());
+  privateData_->eSeedOverPout->push_back(electronRef->eSeedClusterOverPout());
+  privateData_->deltaEtaAtVtx->push_back(electronRef->deltaEtaSuperClusterTrackAtVtx());
+  privateData_->deltaPhiAtVtx->push_back(electronRef->deltaPhiSuperClusterTrackAtVtx());
+  privateData_->deltaEtaAtCalo->push_back(electronRef->deltaEtaSeedClusterTrackAtCalo());
+  privateData_->deltaPhiAtCalo->push_back(electronRef->deltaPhiSeedClusterTrackAtCalo());
+  privateData_->tip->push_back(myTip);
 
   // results of standard electron ID sequences
-  const eleIdMap & eleIdCutsLooseVal = *( (*eleIdResults_)[0] );
-  const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[1] );
-  const eleIdMap & eleIdStandardCutsRobustVal = *( (*eleIdResults_)[2] );
-  const eleIdMap & eleIdStandardCutsLooseVal = *( (*eleIdResults_)[3] );
-  const eleIdMap & eleIdStandardCutsTightVal = *( (*eleIdResults_)[4] );
+  const eleIdMap & eleIdLooseVal = *( (*eleIdResults_)[0] );
+  const eleIdMap & eleIdTightVal = *( (*eleIdResults_)[1] );
+  const eleIdMap & eleIdRobustLooseVal = *( (*eleIdResults_)[2] );
+  const eleIdMap & eleIdRobustTightVal = *( (*eleIdResults_)[3] );
+  const eleIdMap & eleIdRobustHighEnergyVal = *( (*eleIdResults_)[4] );
+  const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[5] );
 
-  privateData_->eleIdCutsLoose->push_back( eleIdCutsLooseVal[electronRef] );
+  int packed_sel = -1;
+  int eleIdLoose = ( eleIdLooseVal[electronRef] ) ? 1 : 0;
+  int eleIdTight = ( eleIdTightVal[electronRef] ) ? 1 : 0;
+  int eleIdRobustLoose = ( eleIdRobustLooseVal[electronRef] ) ? 1 : 0;
+  int eleIdRobustTight = ( eleIdRobustTightVal[electronRef] ) ? 1 : 0;
+  int eleIdRobustHighEnergy = ( eleIdRobustHighEnergyVal[electronRef] ) ? 1 : 0;
+
+  packed_sel = ( eleIdLoose << 4 ) | ( eleIdTight << 3 ) |
+    ( eleIdRobustLoose << 2 ) | ( eleIdRobustTight << 1 ) | eleIdRobustHighEnergy;
+
+  privateData_->eleIdCuts->push_back( packed_sel );
   privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
-  privateData_->eleIdStandardCutsRobust->push_back( eleIdStandardCutsRobustVal[electronRef] );  
-  privateData_->eleIdStandardCutsLoose->push_back( eleIdStandardCutsLooseVal[electronRef] );  
-  privateData_->eleIdStandardCutsTight->push_back( eleIdStandardCutsTightVal[electronRef] );  
-
-  const isoFromDepositsMap & eIsoFromDepsTkVal = *( (*eIsoFromDepsValueMap_)[0] );
-  const isoFromDepositsMap & eIsoFromDepsEcalVal = *( (*eIsoFromDepsValueMap_)[1] );
-  const isoFromDepositsMap & eIsoFromDepsHcalVal = *( (*eIsoFromDepsValueMap_)[2] );
-
-  privateData_->isoFromDepsTk->push_back( eIsoFromDepsTkVal[electronRef] );
-  privateData_->isoFromDepsEcal->push_back( eIsoFromDepsEcalVal[electronRef] );
-  privateData_->isoFromDepsHcal->push_back( eIsoFromDepsHcalVal[electronRef] );
+  privateData_->pflowMVA->push_back( electronRef->mva() );
 
   // --- isolations ---
-  
-  // for tracker isolation studies
-  const TrackCollection tracksC = *(m_tracks.product());
-  hwwEleTrackerIsolation trackIsolation(&(*electronRef), tracksC);
-  trackIsolation.setExtRadius(0.3);    
-  trackIsolation.setIntRadius(0.02);    
-  float minDR03     = trackIsolation.minDeltaR(0.15);  
-  float minDRveto03 = trackIsolation.minDeltaR_withVeto(0.15);  
-  float sumPt03  = trackIsolation.getPtTracks(true,false);
-  float sumPtSquared03  = trackIsolation.getPtTracks(true,true);
-  float sumN03 = trackIsolation.getNTracks(1.0);
 
-  trackIsolation.setExtRadius(0.4);    
-  float sumPt04     = trackIsolation.getPtTracks();  
+  privateData_->dr03TkSumPt->push_back( electronRef->dr03TkSumPt() );
+  privateData_->dr03EcalRecHitSumEt->push_back( electronRef->dr03EcalRecHitSumEt() );
+  privateData_->dr03HcalTowerSumEt->push_back( electronRef->dr03HcalTowerSumEt() );
 
-  trackIsolation.setExtRadius(0.5);
-  float sumPt05     = trackIsolation.getPtTracks();  
-
-  trackIsolation.setIntRadius(0.015);
-  trackIsolation.setExtRadius(0.2);
-  float sumPtPreselection =  trackIsolation.getPtTracks();
-
-  privateData_->minDR03->push_back(minDR03);
-  privateData_->minDRveto03->push_back(minDRveto03);
-  privateData_->sumPt03->push_back(sumPt03);
-  privateData_->sumPtSquared03->push_back(sumPtSquared03);
-  privateData_->sumN03->push_back(sumN03);
-  privateData_->sumPt04->push_back(sumPt04);
-  privateData_->sumPt05->push_back(sumPt05);
-  privateData_->sumPtPreselection->push_back(sumPtPreselection);
-
-  // calo isolation - calotower based: can be used on both RECO and AOD
-  const CaloTowerCollection *calotowersC = m_calotowers.product();
-  hwwEleCalotowerIsolation calotowerIsolation(&(*electronRef), calotowersC);
-  calotowerIsolation.setIntRadius(0.1);
-  calotowerIsolation.setExtRadius(0.40);
-  
-  bool relative = true;
-  float sumHadEt04 = calotowerIsolation.getEtHcal(relative);
-  float sumEmEt04 = calotowerIsolation.getEtEcal(relative);
-
-  calotowerIsolation.setExtRadius(0.50);
-  float sumHadEt05 = calotowerIsolation.getEtHcal(relative);
-  float sumEmEt05 = calotowerIsolation.getEtEcal(relative);
-
-  privateData_->sumHadEt04->push_back(sumHadEt04);
-  privateData_->sumEmEt04->push_back(sumEmEt04);
-  privateData_->sumHadEt05->push_back(sumHadEt05);
-  privateData_->sumEmEt05->push_back(sumEmEt05);
+  privateData_->dr04TkSumPt->push_back( electronRef->dr04TkSumPt() );
+  privateData_->dr04EcalRecHitSumEt->push_back( electronRef->dr04EcalRecHitSumEt() );
+  privateData_->dr04HcalTowerSumEt->push_back( electronRef->dr04HcalTowerSumEt() );
 
   // ecal isolation with SC rechits removal
   SuperClusterHitsEcalIsolation scBasedIsolation(EBRecHits,EERecHits);
   reco::SuperClusterRef sc = electronRef->get<reco::SuperClusterRef>();
+
+  scBasedIsolation.setExtRadius(0.3);
+  scBasedIsolation.excludeHalo(false);
+  float scBasedEcalSum03 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
+  privateData_->scBasedEcalSum03->push_back(scBasedEcalSum03);
+  
+  scBasedIsolation.excludeHalo(true);
+  float scHaloBasedEcalSum03 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
+  privateData_->scHaloBasedEcalSum03->push_back(scHaloBasedEcalSum03);
 
   scBasedIsolation.setExtRadius(0.4);
   scBasedIsolation.excludeHalo(false);
@@ -313,15 +234,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   float scHaloBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scHaloBasedEcalSum04->push_back(scHaloBasedEcalSum04);
 
-  scBasedIsolation.setExtRadius(0.5);
-  scBasedIsolation.excludeHalo(false);
-  float scBasedEcalSum05 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
-  privateData_->scBasedEcalSum05->push_back(scBasedEcalSum05);
-  
-  scBasedIsolation.excludeHalo(true);
-  float scHaloBasedEcalSum05 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
-  privateData_->scHaloBasedEcalSum05->push_back(scHaloBasedEcalSum05);
-
 }
 
 
@@ -329,47 +241,29 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
 
 void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
-  cmstree->column((colPrefix+"eleFullCorrE"+colSuffix).c_str(), *privateData_->eleFullCorrE, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleCaloCorrE"+colSuffix).c_str(), *privateData_->eleCaloCorrE, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleNxtalCorrE"+colSuffix).c_str(), *privateData_->eleNxtalCorrE, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleRawE"+colSuffix).c_str(), *privateData_->eleRawE, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackerP"+colSuffix).c_str(), *privateData_->eleTrackerP, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleClass"+colSuffix).c_str(), *privateData_->eleClass, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleStandardClass"+colSuffix).c_str(), *privateData_->eleStandardClass, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleHoE"+colSuffix).c_str(), *privateData_->eleHoE, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleCorrEoP"+colSuffix).c_str(), *privateData_->eleCorrEoP, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleNotCorrEoP"+colSuffix).c_str(), *privateData_->eleNotCorrEoP, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleCorrEoPout"+colSuffix).c_str(), *privateData_->eleCorrEoPout, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleNotCorrEoPout"+colSuffix).c_str(), *privateData_->eleNotCorrEoPout, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleDeltaEtaAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtVtx, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleDeltaPhiAtVtx"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtVtx, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleDeltaEtaAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleDeltaPhiAtCalo"+colSuffix).c_str(), *privateData_->eleDeltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleMinDR03"+colSuffix).c_str(), *privateData_->minDR03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleMinDRveto03"+colSuffix).c_str(), *privateData_->minDRveto03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPt03"+colSuffix).c_str(), *privateData_->sumPt03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPtSquared03"+colSuffix).c_str(), *privateData_->sumPtSquared03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumN03"+colSuffix).c_str(), *privateData_->sumN03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPt04"+colSuffix).c_str(), *privateData_->sumPt04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPt05"+colSuffix).c_str(), *privateData_->sumPt05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumPtPreselection"+colSuffix).c_str(), *privateData_->sumPtPreselection, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumHadEt04"+colSuffix).c_str(), *privateData_->sumHadEt04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumEmEt04"+colSuffix).c_str(), *privateData_->sumEmEt04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumHadEt05"+colSuffix).c_str(), *privateData_->sumHadEt05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleSumEmEt05"+colSuffix).c_str(), *privateData_->sumEmEt05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIsoFromDepsTk"+colSuffix).c_str(), *privateData_->isoFromDepsTk, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIsoFromDepsEcal"+colSuffix).c_str(), *privateData_->isoFromDepsEcal, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIsoFromDepsHcal"+colSuffix).c_str(), *privateData_->isoFromDepsHcal, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleScBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleScBasedEcalSum05"+colSuffix).c_str(), *privateData_->scBasedEcalSum05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleScHaloBasedEcalSum04"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleScHaloBasedEcalSum05"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdCutBased"+colSuffix).c_str(), *privateData_->eleIdCutsLoose, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdStandardCutsRobust"+colSuffix).c_str(), *privateData_->eleIdStandardCutsRobust, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdStandardCutsLoose"+colSuffix).c_str(), *privateData_->eleIdStandardCutsLoose, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdStandardCutsTight"+colSuffix).c_str(), *privateData_->eleIdStandardCutsTight, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTip"+colSuffix).c_str(), *privateData_->eleTip, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"classification"+colSuffix).c_str(), *privateData_->classification, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"standardClassification"+colSuffix).c_str(), *privateData_->standardClassification, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hOverE"+colSuffix).c_str(), *privateData_->hOverE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eSuperClusterOverP"+colSuffix).c_str(), *privateData_->eSuperClusterOverP, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eSeedOverPout"+colSuffix).c_str(), *privateData_->eSeedOverPout, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"deltaEtaAtVtx"+colSuffix).c_str(), *privateData_->deltaEtaAtVtx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"deltaPhiAtVtx"+colSuffix).c_str(), *privateData_->deltaPhiAtVtx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"deltaEtaAtCalo"+colSuffix).c_str(), *privateData_->deltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"deltaPhiAtCalo"+colSuffix).c_str(), *privateData_->deltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"tip"+colSuffix).c_str(), *privateData_->tip, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr03TkSumPt"+colSuffix).c_str(), *privateData_->dr03TkSumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr03EcalRecHitSumEt"+colSuffix).c_str(), *privateData_->dr03EcalRecHitSumEt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr03HcalTowerSumEt"+colSuffix).c_str(), *privateData_->dr03HcalTowerSumEt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr04TkSumPt"+colSuffix).c_str(), *privateData_->dr04TkSumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr04EcalRecHitSumEt"+colSuffix).c_str(), *privateData_->dr04EcalRecHitSumEt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr04HcalTowerSumEt"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"scBasedEcalSum03"+colSuffix).c_str(), *privateData_->scBasedEcalSum03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"scBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"scHaloBasedEcalSum03"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"scHaloBasedEcalSum04"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdCuts"+colSuffix).c_str(), *privateData_->eleIdCuts, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -377,92 +271,60 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
 
 void CmsEleIDTreeFillerData::initialise() {
   initialiseCandidate();
-  eleClass                 = new vector<int>;
-  eleStandardClass         = new vector<int>;
-  eleHoE                   = new vector<float>;
-  eleNotCorrEoP            = new vector<float>;
-  eleCorrEoP               = new vector<float>;
-  eleNotCorrEoPout         = new vector<float>;
-  eleCorrEoPout            = new vector<float>;
-  eleDeltaEtaAtVtx         = new vector<float>;
-  eleDeltaEtaAtCalo        = new vector<float>;
-  eleDeltaPhiAtVtx         = new vector<float>;
-  eleDeltaPhiAtCalo        = new vector<float>;
-  eleFullCorrE             = new vector<float>;
-  eleCaloCorrE             = new vector<float>;
-  eleNxtalCorrE            = new vector<float>;
-  eleRawE                  = new vector<float>;
-  eleTrackerP              = new vector<float>;
-  minDR03                  = new vector<float>;
-  minDRveto03              = new vector<float>;
-  sumPt03                  = new vector<float>;
-  sumPtSquared03           = new vector<float>;
-  sumN03                   = new vector<float>;
-  sumPt04                  = new vector<float>;
-  sumPt05                  = new vector<float>;
-  sumPtPreselection        = new vector<float>;
-  sumHadEt04               = new vector<float>;
-  sumEmEt04                = new vector<float>;
-  sumHadEt05               = new vector<float>;
-  sumEmEt05                = new vector<float>;
-  isoFromDepsTk            = new vector<float>;
-  isoFromDepsEcal          = new vector<float>;
-  isoFromDepsHcal          = new vector<float>;
+  classification           = new vector<int>;
+  standardClassification   = new vector<int>;
+  fbrem                    = new vector<float>;
+  nbrems                   = new vector<int>;
+  hOverE                   = new vector<float>;
+  eSuperClusterOverP       = new vector<float>;
+  eSeedOverPout            = new vector<float>;
+  deltaEtaAtVtx            = new vector<float>;
+  deltaEtaAtCalo           = new vector<float>;
+  deltaPhiAtVtx            = new vector<float>;
+  deltaPhiAtCalo           = new vector<float>;
+  tip                      = new vector<float>;
+  dr03TkSumPt              = new vector<float>;
+  dr03EcalRecHitSumEt      = new vector<float>;
+  dr03HcalTowerSumEt       = new vector<float>;
+  dr04TkSumPt              = new vector<float>;
+  dr04EcalRecHitSumEt      = new vector<float>;
+  dr04HcalTowerSumEt       = new vector<float>;
+  scBasedEcalSum03         = new vector<float>;
   scBasedEcalSum04         = new vector<float>;
-  scBasedEcalSum05         = new vector<float>;
+  scHaloBasedEcalSum03     = new vector<float>;
   scHaloBasedEcalSum04     = new vector<float>;
-  scHaloBasedEcalSum05     = new vector<float>;
-  eleIdCutsLoose           = new vector<bool>;
+  eleIdCuts                = new vector<int>;
   eleLik                   = new vector<float>;
-  eleIdStandardCutsRobust  = new vector<bool>;
-  eleIdStandardCutsLoose   = new vector<bool>;
-  eleIdStandardCutsTight   = new vector<bool>;
-  eleTip                   = new vector<float>;
+  pflowMVA                 = new vector<bool>;
 }
 
 void CmsEleIDTreeFillerData::clearTrkVectors() {
   clearTrkVectorsCandidate();
-  eleClass                 ->clear();
-  eleStandardClass         ->clear();
-  eleHoE                   ->clear();
-  eleNotCorrEoP            ->clear();
-  eleCorrEoP               ->clear();
-  eleNotCorrEoPout         ->clear();
-  eleCorrEoPout            ->clear();
-  eleDeltaEtaAtVtx         ->clear();
-  eleDeltaEtaAtCalo        ->clear();
-  eleDeltaPhiAtVtx         ->clear();
-  eleDeltaPhiAtCalo        ->clear();
-  eleFullCorrE             ->clear();
-  eleCaloCorrE             ->clear();
-  eleNxtalCorrE            ->clear();
-  eleRawE                  ->clear();
-  eleTrackerP              ->clear();
-  minDR03                  ->clear();
-  minDRveto03              ->clear();
-  sumPt03                  ->clear();
-  sumPtSquared03           ->clear();
-  sumN03                   ->clear();
-  sumPt04                  ->clear();
-  sumPt05                  ->clear();
-  sumPtPreselection        ->clear();
-  sumHadEt04               ->clear();
-  sumEmEt04                ->clear();
-  sumHadEt05               ->clear();
-  sumEmEt05                ->clear();
-  isoFromDepsTk            ->clear();
-  isoFromDepsEcal          ->clear();
-  isoFromDepsHcal          ->clear();
+  classification           ->clear();
+  standardClassification   ->clear();
+  fbrem                    ->clear();
+  nbrems                   ->clear();
+  hOverE                   ->clear();
+  eSuperClusterOverP       ->clear();
+  eSeedOverPout            ->clear();
+  deltaEtaAtVtx            ->clear();
+  deltaEtaAtCalo           ->clear();
+  deltaPhiAtVtx            ->clear();
+  deltaPhiAtCalo           ->clear();
+  tip                      ->clear();
+  dr03TkSumPt              ->clear();
+  dr03EcalRecHitSumEt      ->clear();
+  dr03HcalTowerSumEt       ->clear();
+  dr04TkSumPt              ->clear();
+  dr04EcalRecHitSumEt      ->clear();
+  dr04HcalTowerSumEt       ->clear();
+  scBasedEcalSum03         ->clear();
   scBasedEcalSum04         ->clear();
-  scBasedEcalSum05         ->clear();
+  scHaloBasedEcalSum03     ->clear();
   scHaloBasedEcalSum04     ->clear();
-  scHaloBasedEcalSum05     ->clear();
-  eleIdCutsLoose           ->clear();
+  eleIdCuts                ->clear();
   eleLik                   ->clear();
-  eleIdStandardCutsRobust  ->clear();
-  eleIdStandardCutsLoose   ->clear();
-  eleIdStandardCutsTight   ->clear();
-  eleTip                   ->clear();
+  pflowMVA                 ->clear();
 }
 
 int CmsEleIDTreeFiller::stdEleIdClassify(const GsfElectron* electron) {

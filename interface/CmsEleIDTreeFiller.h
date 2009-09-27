@@ -17,21 +17,16 @@
 
 #include <vector>
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/ESHandle.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-#include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
+#include "DataFormats/EcalRecHit/interface/EcalRecHit.h"
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
-#include "DataFormats/Candidate/interface/CandAssociation.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
@@ -42,30 +37,21 @@
 
 #include "DataFormats/Common/interface/ValueMap.h"
 
-#include "DataFormats/RecoCandidate/interface/IsoDeposit.h"
-#include "DataFormats/RecoCandidate/interface/IsoDepositFwd.h"
-#include "DataFormats/Common/interface/ValueMap.h"
-
 struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
 
-  vector<int>   *eleClass, *eleStandardClass;
-  vector<float> *eleHoE;
-  vector<float> *eleNotCorrEoP,    *eleCorrEoP;
-  vector<float> *eleNotCorrEoPout, *eleCorrEoPout;
-  vector<float> *eleDeltaEtaAtVtx, *eleDeltaEtaAtCalo;
-  vector<float> *eleDeltaPhiAtVtx, *eleDeltaPhiAtCalo;
-  vector<float> *eleTrackerP;
-  vector<float> *minDR03, *minDRveto03, *sumPt03, *sumPtSquared03, *sumN03;
-  vector<float> *sumPt04, *sumPt05;
-  vector<float> *sumPtPreselection;
-  vector<float> *sumHadEt04, *sumEmEt04, *sumHadEt05, *sumEmEt05;
-  vector<float> *isoFromDepsTk, *isoFromDepsEcal, *isoFromDepsHcal;
-  vector<float> *scBasedEcalSum04, *scBasedEcalSum05, *scHaloBasedEcalSum04, *scHaloBasedEcalSum05;
-  vector<float> *eleFullCorrE,     *eleCaloCorrE;
-  vector<float> *eleNxtalCorrE,    *eleRawE;
+  vector<int>   *classification, *standardClassification;
+  vector<float> *fbrem;
+  vector<int>   *nbrems;
+  vector<float> *hOverE, *eSuperClusterOverP, *eSeedOverPout;
+  vector<float> *deltaEtaAtVtx, *deltaEtaAtCalo, *deltaPhiAtVtx, *deltaPhiAtCalo;
+  vector<float> *tip;
+  vector<float> *dr03TkSumPt, *dr03EcalRecHitSumEt, *dr03HcalTowerSumEt;
+  vector<float> *dr04TkSumPt, *dr04EcalRecHitSumEt, *dr04HcalTowerSumEt;
+  vector<float> *scBasedEcalSum03, *scBasedEcalSum04, *scHaloBasedEcalSum03, *scHaloBasedEcalSum04;
+
   vector<float> *eleLik;
-  vector<bool> *eleIdCutsLoose, *eleIdStandardCutsRobust, *eleIdStandardCutsLoose, *eleIdStandardCutsTight;
-  vector<float> *eleTip;
+  vector<int> *eleIdCuts;
+  vector<bool> *pflowMVA;
 
 public:
   void initialise();
@@ -109,12 +95,12 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
 
  private:
 
-  void writeEleInfo(const GsfElectronRef, const edm::Event&, const edm::EventSetup&,
+  void writeEleInfo(const reco::GsfElectronRef, const edm::Event&, const edm::EventSetup&,
 		    const EcalRecHitCollection *EBRecHits,
 		    const EcalRecHitCollection *EERecHits);
   void treeEleInfo(const std::string &colPrefix, const std::string &colSuffix);
 
-  int stdEleIdClassify(const GsfElectron* electron);
+  int stdEleIdClassify(const reco::GsfElectron* electron);
 
   int maxTracks_;
   std::string *trkIndexName_;
@@ -137,10 +123,6 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   typedef edm::ValueMap<float> eleIdMap;
   typedef std::vector< edm::Handle<eleIdMap> > eleIdContainer;
   eleIdContainer *eleIdResults_;
-
-  typedef edm::ValueMap<double> isoFromDepositsMap;
-  typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
-  isoContainer *eIsoFromDepsValueMap_;
 
   edm::Handle<CaloTowerCollection> m_calotowers;
   edm::Handle<reco::TrackCollection> m_tracks;

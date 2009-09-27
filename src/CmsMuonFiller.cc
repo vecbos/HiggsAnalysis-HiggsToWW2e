@@ -30,6 +30,7 @@
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
+#include "DataFormats/MuonReco/interface/MuonSelectors.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -41,7 +42,7 @@
 
 using namespace edm;
 using namespace reco;
-
+using namespace muon;
 
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
@@ -132,10 +133,6 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->muTrackVy;
   delete privateData_->muTrackVz;
 
-  delete privateData_->isGlobal;
-  delete privateData_->isTracker;
-  delete privateData_->isStandAlone;
-  delete privateData_->isCalo;
   delete privateData_->muonId;
   
   delete privateData_->  sumPt03;
@@ -402,27 +399,29 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
 				  const edm::EventSetup& iSetup, const Muon *muon) {
   if(&muon) {
 
-    privateData_->isGlobal->push_back(muon->isGlobalMuon());
-    privateData_->isTracker->push_back(muon->isTrackerMuon());
-    privateData_->isStandAlone->push_back(muon->isStandAloneMuon());
-    privateData_->isCalo->push_back(muon->isCaloMuon());
-    
     // now put muon ID codified:
-    int TrackerMuonArbitrated = (muon->isGood( Muon::TrackerMuonArbitrated )) ? 1 : 0;
-    int AllArbitrated = (muon->isGood( Muon::AllArbitrated )) ? 1 : 0;
-    int GlobalMuonPromptTight = (muon->isGood( Muon::GlobalMuonPromptTight )) ? 1 : 0;
-    int TMLastStationLoose = (muon->isGood( Muon::TMLastStationLoose )) ? 1 : 0;
-    int TMLastStationTight = (muon->isGood( Muon::TMLastStationTight )) ? 1 : 0;
-    int TM2DCompatibilityLoose = (muon->isGood( Muon::TM2DCompatibilityLoose )) ? 1 : 0;
-    int TM2DCompatibilityTight = (muon->isGood( Muon::TM2DCompatibilityTight )) ? 1 : 0;
+    int AllGlobalMuons = ( muon::isGoodMuon( *muon, muon::AllGlobalMuons ) ) ? 1 : 0; 
+    int AllStandAloneMuons = ( muon::isGoodMuon( *muon, muon::AllStandAloneMuons ) ) ? 1 : 0;
+    int AllTrackerMuons = ( muon::isGoodMuon( *muon, muon::AllTrackerMuons ) ) ? 1 : 0;
+    int TrackerMuonArbitrated = ( muon::isGoodMuon( *muon, muon::TrackerMuonArbitrated ) ) ? 1 : 0;
+    int AllArbitrated = ( muon::isGoodMuon( *muon, muon::AllArbitrated ) ) ? 1 : 0;
+    int GlobalMuonPromptTight = ( muon::isGoodMuon( *muon, muon::GlobalMuonPromptTight ) ) ? 1 : 0;
+    int TMLastStationLoose = ( muon::isGoodMuon( *muon, muon::TMLastStationLoose ) ) ? 1 : 0;
+    int TMLastStationTight = ( muon::isGoodMuon( *muon, muon::TMLastStationTight ) ) ? 1 : 0;
+    int TM2DCompatibilityLoose = ( muon::isGoodMuon( *muon, muon::TM2DCompatibilityLoose ) ) ? 1 : 0;
+    int TM2DCompatibilityTight = ( muon::isGoodMuon( *muon, muon::TM2DCompatibilityTight ) ) ? 1 : 0;
+    int TMOneStationLoose = ( muon::isGoodMuon( *muon, muon::TMOneStationLoose ) ) ? 1 : 0;
+    int TMOneStationTight = ( muon::isGoodMuon( *muon, muon::TMOneStationTight ) ) ? 1 : 0;
+    int TMLastStationOptimizedLowPtLoose = ( muon::isGoodMuon( *muon, muon::TMLastStationOptimizedLowPtLoose ) ) ? 1 : 0;
+    int TMLastStationOptimizedLowPtTight = ( muon::isGoodMuon( *muon, muon::TMLastStationOptimizedLowPtTight ) ) ? 1 : 0;
 
-    int packed_sel = (TrackerMuonArbitrated << 6) | 
-      (AllArbitrated << 5) |
-      (GlobalMuonPromptTight << 4) |
-      (TMLastStationLoose << 3) |
-      (TMLastStationTight << 2) |
-      (TM2DCompatibilityLoose << 1) |
-      TM2DCompatibilityTight;
+    int packed_sel = ( AllGlobalMuons << 13 ) | ( AllStandAloneMuons << 12 ) | ( AllTrackerMuons << 11 ) |
+      ( TrackerMuonArbitrated << 10 ) | ( AllArbitrated << 9 ) | 
+      ( GlobalMuonPromptTight << 8 ) | 
+      ( TMLastStationLoose << 7 ) | ( TMLastStationTight << 6 ) |
+      ( TM2DCompatibilityLoose << 5 ) | ( TM2DCompatibilityTight << 4 ) |
+      ( TMOneStationLoose << 3 ) || ( TMOneStationTight << 2 ) |
+      ( TMLastStationOptimizedLowPtLoose << 1 ) | TMLastStationOptimizedLowPtTight;
 
     privateData_->muonId->push_back(packed_sel);
 
@@ -486,12 +485,6 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
 void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
    
-  // type of muon
-  cmstree->column((colPrefix+"isGlobal"+colSuffix).c_str(), *privateData_->isGlobal, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"isTracker"+colSuffix).c_str(), *privateData_->isTracker, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"isStandAlone"+colSuffix).c_str(), *privateData_->isStandAlone, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"isCalo"+colSuffix).c_str(), *privateData_->isCalo, nCandString.c_str(), 0, "Reco");
-
   // muon id 
   cmstree->column((colPrefix+"muonId"+colSuffix).c_str(), *privateData_->muonId, nCandString.c_str(), 0, "Reco");
 
@@ -552,11 +545,6 @@ void CmsMuonFillerData::initialise() {
   muTrackVy = new vector<float>;
   muTrackVz = new vector<float>;
 
-  isGlobal = new vector<int>;
-  isTracker = new vector<int>;
-  isStandAlone = new vector<int>;
-  isCalo = new vector<int>;
-  
   muonId = new vector<int>;
 
   sumPt03 = new vector<float>;
@@ -614,11 +602,6 @@ void CmsMuonFillerData::clearTrkVectors() {
   muTrackVy->clear();
   muTrackVz->clear();
  
-  isGlobal->clear();
-  isTracker->clear();
-  isStandAlone->clear();
-  isCalo->clear();
-
   muonId->clear();
 
   sumPt03->clear();

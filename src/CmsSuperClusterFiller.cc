@@ -156,7 +156,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
 				       const edm::EventSetup& iSetup) 
 {
   privateData_->nBC->push_back((int)cand->clustersSize());
-  privateData_->nCrystals->push_back((int)cand->getHitsByDetId().size());
+  privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
   privateData_->iAlgo->push_back((int)cand->seed()->algo());
   privateData_->rawEnergy->push_back((float)cand->rawEnergy());
   privateData_->energy->push_back((float)cand->energy());

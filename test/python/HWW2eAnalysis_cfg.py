@@ -7,13 +7,13 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'IDEAL_V9::All'
-
-# --- common preselection code ---
-process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWPreselectionSequence_cff")
+process.GlobalTag.globaltag = 'MC_31X_V8::All'
 
 # --- common code to comput gg fusion signal k factor
 process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWKFactorProducer_cfi")
+
+# --- apply the muon correction from the common code
+process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWMetCorrector_cfi")
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
@@ -22,8 +22,6 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 # --- electron sequences ---
 process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
-process.ambiguityResolvedElectrons.reducedElectronsRefCollectionLabel = "isolatedElectronsRef"
-process.ambiguityResolvedElectrons.doRefCheck = True # i.e. take only the isolated electrons and resolve them
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
 # --- track sequences ---
@@ -33,10 +31,8 @@ process.load("HiggsAnalysis.HiggsToWW2e.trackCandidates_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default.root'
 process.treeDumper.dumpTriggerResults = True
-process.treeDumper.dumpPreselInfo = True
 process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpSignalKfactor = True
-process.treeDumper.dumpGenInfoMcAtNlo = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpParticleFlowObjects = True
@@ -48,14 +44,15 @@ process.treeDumper.dumpTree = True
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
+                            noEventSort = cms.untracked.bool(True),
+                            duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc16/emanuele/data/Pool/H160_WW_2l_Summer08_v11redigi.root')
-#                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/Higgs22X/test_1.root')
+#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc21/emanuele/data/Pool/step2_RAW2DIGI_RECO_169.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc18/crovelli/JPsiEE_reco_200eve.root')
                             )
 
-process.p = cms.Path ( process.KFactorProducer *
-                       process.higgsToWW2LeptonsPreselectionSequence *
+process.p = cms.Path ( process.KFactorProducer * process.muonCorrectedMET *
                        process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *

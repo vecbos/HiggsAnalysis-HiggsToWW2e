@@ -22,14 +22,22 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/Common/interface/Handle.h"
-#include "SimDataFormats/HepMCProduct/interface/GenInfoProduct.h"
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenRunInfoProduct.h"
+#include "SimDataFormats/GeneratorProducts/interface/GenEventInfoProduct.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 
 #include <TTree.h>
 
-class CmsGenInfoFillerData;
+struct CmsGenInfoFillerData {
+  
+  float *ptHat, *processID, *weight;
+  float *alphaQCD, *alphaQED;
+
+public:
+  void initialise();
+
+};
 
 class CmsGenInfoFiller {
 
@@ -41,15 +49,11 @@ class CmsGenInfoFiller {
   //! Destructor
   virtual ~CmsGenInfoFiller();
 
-  // to be used also in AODSIM 
-  void
-  writeGenInfoToTree (double processID, double ptHat, double genFilterEff,  double genXsec,  double weight, double AlpgenID=0);
-
-  void 
-  writeGenInfoToTree (edm::Handle<GenInfoProduct> & gi, edm::Handle<HepMCProduct>& mc, double weight );
+  void writeGenInfoToTree ( edm::Handle<GenEventInfoProduct> & gei);
 
  private:
   
+  CmsTree *cmstree;
   CmsGenInfoFillerData *privateData_;
 
 };

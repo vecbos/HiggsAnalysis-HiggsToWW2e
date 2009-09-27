@@ -28,13 +28,10 @@
 
 #include "DataFormats/EgammaCandidates/interface/ElectronFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Electron.h"
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 
 #include "DataFormats/JetReco/interface/CaloJet.h"
 #include "DataFormats/JetReco/interface/CaloJetCollection.h"
 #include "DataFormats/JetReco/interface/GenJet.h"
-
-#include "RecoBTag/MCTools/interface/JetFlavourIdentifier.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
@@ -49,8 +46,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleTrackerIsolation.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/hwwEleCaloIsolation.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
@@ -78,7 +73,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveFatCSC_     = iConfig.getUntrackedParameter<bool>("saveFatCSC", false);
   saveFatRPC_     = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
   saveJetAlpha_   = iConfig.getUntrackedParameter<bool>("saveJetAlpha", false);
-  saveJetFlavour_ = iConfig.getUntrackedParameter<bool>("saveJetFlavour", false);
   saveJet1BTag_    = iConfig.getUntrackedParameter<bool>("saveJet1BTag", false);
   saveJet2BTag_    = iConfig.getUntrackedParameter<bool>("saveJet2BTag", false);
 
@@ -91,7 +85,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // Candidate Collections
   dumpPreselInfo_     = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
   dumpSignalKfactor_  = iConfig.getUntrackedParameter<bool>("dumpSignalKfactor", false);
-  dumpGenInfoMcAtNlo_ = iConfig.getUntrackedParameter<bool>("dumpGenInfoMcAtNlo", false);
   dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
@@ -112,7 +105,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // jet vertex collections
   jetVertexAlphaCollection1_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection1");
   jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
-  jetMCFlavourIdentifier_    = iConfig.getParameter<edm::ParameterSet>("jetIdParameters");
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
@@ -212,17 +204,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     double theKfactor = *theFactor;
     tree_->column ("evtKfactor", theKfactor, 0., "kFac");
   } 
-
-  // dump infos on MC production in case of MC@NLO production
-  if (dumpGenInfoMcAtNlo_) {
-
-    Handle<HepMCProduct> theEvt;
-    iEvent.getByType(theEvt);
-    HepMC::GenEvent* thisEvt = new  HepMC::GenEvent(*(theEvt->GetEvent()));
-    HepMC::WeightContainer allWeights = thisEvt->weights();   
-    double theWeight = allWeights.front();
-    tree_->column ("evtMcAtNlo", theWeight, 0., "weight");
-  }
 
   // fill Electrons block
   if(dumpElectrons_) {
@@ -349,12 +330,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string suffix("SisConeCorrJet");
     treeRecoFill1.saveCand(saveCand_);
     treeRecoFill1.saveJetExtras(saveJetAlpha_);
-    treeRecoFill1.saveJetFlavour(saveJetFlavour_);
     treeRecoFill1.saveJetBTag(saveJet1BTag_);
-    if(saveJetFlavour_) { 
-      JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
-      treeRecoFill1.setJetFlavour(jetMCFlavourIdentifier);
-    }
     treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
 
@@ -362,12 +338,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     suffix = "SisConeJet";
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.saveJetExtras(saveJetAlpha_);
-    treeRecoFill2.saveJetFlavour(saveJetFlavour_);
     treeRecoFill2.saveJetBTag(saveJet2BTag_);
-    if(saveJetFlavour_) { 
-      JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
-      treeRecoFill2.setJetFlavour(jetMCFlavourIdentifier);
-    }
     treeRecoFill2.writeCollectionToTree(jetCollection2_, iEvent, iSetup, prefix, suffix, false);
 
 
@@ -390,12 +361,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsJetFiller treeGenFill(tree_, jetVertexAlphaCollection1_, true);
       suffix = "SisConeGenJet";
       treeGenFill.saveJetExtras(false);
-      treeGenFill.saveJetFlavour(saveJetFlavour_);
       treeGenFill.saveJetBTag(false);
-      if(saveJetFlavour_) { 
-	JetFlavourIdentifier jetMCFlavourIdentifier(jetMCFlavourIdentifier_);
-	treeGenFill.setJetFlavour(jetMCFlavourIdentifier);
-      }
       treeGenFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     }
@@ -407,16 +373,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // dump infos on MC production 
   if (dumpGenInfo_) {
 
-    Handle<double> genEventScale;
-    iEvent.getByLabel( "genEventScale", genEventScale );
-    double pthat = *genEventScale;
-
-    Handle<double> genEventWeight;
-    iEvent.getByLabel( "genEventWeight", genEventWeight );
-    double weight = *genEventWeight;
+    Handle<GenEventInfoProduct> gei;
+    iEvent.getByLabel( "generator", gei );
 
     CmsGenInfoFiller treeFill(tree_);
-    treeFill.writeGenInfoToTree(-1.0, pthat, -1.0, -1.0, weight);
+    treeFill.writeGenInfoToTree( gei );
 
   }
 

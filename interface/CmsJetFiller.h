@@ -15,37 +15,20 @@
 #ifndef CmsJetFiller_h
 #define CmsJetFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
-
-#include "RecoBTag/MCTools/interface/JetFlavourIdentifier.h"
-
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include <TTree.h>
-
-using namespace cms;
-using namespace edm;
-using namespace reco;
 
 struct CmsJetFillerData : public CmsCandidateFillerData {
 
   std::vector<float> *emFrac, *hadFrac;
   std::vector<float> *alpha;
-  std::vector<float> *flavourId;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *combinedSecondaryVertexMVABJetTags,
-    *impactParameterMVABJetTags,
     *jetBProbabilityBJetTags,
     *jetProbabilityBJetTags,
     *simpleSecondaryVertexBJetTags,
@@ -86,11 +69,7 @@ class CmsJetFiller : public CmsCandidateFiller {
   // Modifiers
   void saveJetExtras(bool );
 
-  void saveJetFlavour(bool );
-  
   void saveJetBTag(bool );
-
-  void setJetFlavour(JetFlavourIdentifier );
 
   // Operators
 
@@ -103,12 +82,11 @@ class CmsJetFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeJetInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&);
+  void writeJetInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&);
   void treeJetInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   // Friends
   bool saveJetExtras_;
-  bool saveJetFlavour_;
   bool saveJetBTag_;
 
   bool hitLimitsMeansNoOutput_;
@@ -119,7 +97,6 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   CmsJetFillerData *privateData_;
   edm::InputTag jetVertexAlphaCollection_;
-  JetFlavourIdentifier jetMCFlavourIdentifier_;
 
   CmsTree *cmstree;
 

@@ -22,8 +22,6 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 
 #include "DataFormats/Common/interface/Handle.h"
-#include "SimDataFormats/HepMCProduct/interface/GenInfoProduct.h"
-#include "SimDataFormats/HepMCProduct/interface/HepMCProduct.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include <TTree.h>

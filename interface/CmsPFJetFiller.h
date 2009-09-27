@@ -15,11 +15,7 @@
 #ifndef CmsPFJetFiller_h
 #define CmsPFJetFiller_h
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
-
 #include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
@@ -66,7 +62,7 @@ class CmsPFJetFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeJetInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&);
+  void writeJetInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&);
   void treeJetInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   // Friends
