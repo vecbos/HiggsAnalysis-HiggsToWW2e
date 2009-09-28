@@ -1,3 +1,23 @@
+--- Recipe to build and run the H->WW analysis in 3_X_Y ---
+
+scramv1 p CMSSW CMSSW_3_2_7
+cd CMSSW_3_2_7/src
+cmsenv
+
+cvs co -r V01-3_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V01-3_2_X HiggsAnalysis/HiggsToWW2Leptons
+cvs co RecoEgamma/ElectronIdentification/python/likelihoodPdfsDB_cfi.py
+cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+
+cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_2_1_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
+cd RecoEgamma/ElectronIdentification/python/
+rm likelihoodPdfsDB_cfi.py
+wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
+cd -
+
+scramv1 b
+
+
 --- Recipe to build and run the H->WW analysis in 2_2_X ---
 
 > scramv1 p CMSSW CMSSW_2_2_12
