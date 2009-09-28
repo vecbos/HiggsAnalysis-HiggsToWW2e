@@ -11,6 +11,8 @@
 
 #include "FWCore/Framework/interface/TriggerNames.h"
 
+#include <TTree.h>
+
 #include <string>
 #include <vector>
 
@@ -22,7 +24,7 @@ class CmsConditionsFiller {
  public:
 
   /// Constructor
-  CmsConditionsFiller(CmsTree *, int maxLenght=500, bool noOutputIfLimitsReached=false );
+  CmsConditionsFiller(TTree * );
 
   /// Destructor
   virtual ~CmsConditionsFiller();
@@ -44,15 +46,15 @@ class CmsConditionsFiller {
   CmsConditionsFillerData *privateData_;
   
   /// the physical tree
-  CmsTree *cmstree;
-
-  /// do not write array elements above this threshold
-  bool hitLimitsMeansNoOutput_;
-  int maxLenght_;
+  TTree *tree;
 
   /// the trigger names container
   edm::TriggerNames hltNames_;
-  
+  /// to be stored in the ROOT tree
+  int nHLT_;
+  std::vector< std::string > trgNames_;
+  std::vector<unsigned int> trgIndices_;
+
   /// used to initialize HLT only once if needed
   bool HLTinitialised_;
 

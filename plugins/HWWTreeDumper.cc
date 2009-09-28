@@ -395,7 +395,7 @@ void HWWTreeDumper::beginJob(const edm::EventSetup&) {
 
   tree_  = new  CmsTree(nameTree_.c_str(),nameTree_.c_str());
 
-  treeConditions_ = new CmsTree("Conditions","Conditions");
+  treeConditions_ = new TTree("Conditions","Conditions");
 
   jevt_ = 1;
 
@@ -411,8 +411,7 @@ void  HWWTreeDumper::endJob() {
   TTree* treeEventsOut = tree_->getTree();
   treeEventsOut->Write();
 
-  TTree* treeConditionsOut = treeConditions_->getTree();
-  treeConditionsOut->Write();
+  treeConditions_->Write();
 
   fileOut_->Close();
 

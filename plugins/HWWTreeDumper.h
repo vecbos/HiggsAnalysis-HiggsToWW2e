@@ -11,6 +11,8 @@
 
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
+
+#include <TTree.h>
 #include <TFile.h>
 
 class HWWTreeDumper : public edm::EDAnalyzer {
@@ -105,7 +107,7 @@ private:
   //! the tree with the events
   CmsTree *tree_;
   //! the tree with the run conditions (for now only the trigger words)
-  CmsTree *treeConditions_;
+  TTree *treeConditions_;
 
   //! number of the processed event
   int jevt_;
