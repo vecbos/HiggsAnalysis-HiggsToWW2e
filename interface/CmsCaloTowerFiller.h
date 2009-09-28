@@ -78,7 +78,7 @@ class CmsCaloTowerFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeCaloTowerInfo(const Candidate *cand, const edm::Event&, const edm::EventSetup&);
+  void writeCaloTowerInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&);
   void treeCaloTowerInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   // Friends
