@@ -5,7 +5,7 @@
 list updated: 28 / 09 / 2009
 
 --- Signal (private @ MIT) ---
-dbs_url = cms_dbs_prod_local_06
+dbs_url = http://cmsdbsprod.cern.ch/cms_dbs_prod_local_06/servlet/DBSServlet
 
 /H120_2W_2lnu_gluonfusion_10TeV/Summer09-MC_31X_V3-v1/GEN-SIM-RECO 
 /H130_2W_2lnu_gluonfusion_10TeV/Summer09-MC_31X_V3-v1/GEN-SIM-RECO 
