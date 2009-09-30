@@ -420,7 +420,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
       ( GlobalMuonPromptTight << 8 ) | 
       ( TMLastStationLoose << 7 ) | ( TMLastStationTight << 6 ) |
       ( TM2DCompatibilityLoose << 5 ) | ( TM2DCompatibilityTight << 4 ) |
-      ( TMOneStationLoose << 3 ) || ( TMOneStationTight << 2 ) |
+      ( TMOneStationLoose << 3 ) | ( TMOneStationTight << 2 ) |
       ( TMLastStationOptimizedLowPtLoose << 1 ) | TMLastStationOptimizedLowPtTight;
 
     privateData_->muonId->push_back(packed_sel);
