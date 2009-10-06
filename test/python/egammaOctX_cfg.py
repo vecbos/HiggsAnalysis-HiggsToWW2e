@@ -52,8 +52,8 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc17/emanuele/data/Pool/EGM2ELE15Skim_2.root')
-#                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/JpsiEE_31X.root')
+#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc17/emanuele/data/Pool/EGM2ELE15Skim_2.root')
+                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/EGMSEL_Oct09X/EGM2ELE15Skim_2.root')
                             )
 
 process.p = cms.Path ( process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
