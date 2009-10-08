@@ -77,19 +77,23 @@ CmsGenInfoFiller::~CmsGenInfoFiller() {
 
 void CmsGenInfoFiller::writeGenInfoToTree ( edm::Handle<GenEventInfoProduct> & gei )
 {
-    
-  *(privateData_->ptHat) = gei->qScale();
+  *(privateData_->ptHat)     = gei->qScale();
   *(privateData_->processID) = gei->signalProcessID();
-  *(privateData_->weight) = gei->weight();
-  *(privateData_->alphaQCD) = gei->alphaQCD();
-  *(privateData_->alphaQED) = gei->alphaQED();
+  *(privateData_->weight)    = gei->weight();
+  *(privateData_->alphaQCD)  = gei->alphaQCD();
+  *(privateData_->alphaQED)  = gei->alphaQED();
 
-  cmstree->column("genPtHat", privateData_->ptHat, 0, "Gen");
-  cmstree->column("genProcessId", privateData_->processID, 0, "Gen");
-  cmstree->column("genWeight", privateData_->weight, 0, "Gen");
-  cmstree->column("genAlphaQCD", privateData_->alphaQCD, 0, "Gen");
-  cmstree->column("genAlphaQED", privateData_->alphaQED, 0, "Gen");
+  double thePtHat     = gei->qScale();
+  double theProcessID = gei->signalProcessID();
+  double theWeight    = gei->weight();
+  double theAlphaQCD  = gei->alphaQCD();
+  double theAlphaQED  = gei->alphaQED();
 
+  cmstree->column("genPtHat",     thePtHat,     0., "Gen");
+  cmstree->column("genProcessId", theProcessID, 0., "Gen");
+  cmstree->column("genWeight",    theWeight,    0., "Gen");
+  cmstree->column("genAlphaQCD",  theAlphaQCD,  0., "Gen");
+  cmstree->column("genAlphaQED",  theAlphaQED,  0., "Gen");
 }
 
 void CmsGenInfoFillerData::initialise() {
