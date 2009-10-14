@@ -122,6 +122,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
   PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
+  TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
   PFmetCollection_         = iConfig.getParameter<edm::InputTag>("PFmetCollection");
   genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
   mcTruthCollection_       = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
@@ -295,11 +296,18 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill MET block
   if(dumpMet_) {
 
-    CmsCandidateFiller treeRecoFill(tree_, true);
+    // Calo MET
+    CmsCandidateFiller treeRecoFill1(tree_, true);
     std::string prefix("");
     std::string suffix("Met");
-    treeRecoFill.saveCand(saveCand_);
-    treeRecoFill.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
+    treeRecoFill1.saveCand(saveCand_);
+    treeRecoFill1.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
+
+    // Track-Corrected MET
+    CmsCandidateFiller treeRecoFill2(tree_, true);
+    suffix = "TCMet";
+    treeRecoFill2.saveCand(saveCand_);
+    treeRecoFill2.writeCollectionToTree(TCmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // particle flow met
     if ( dumpParticleFlowObjects_ ) {

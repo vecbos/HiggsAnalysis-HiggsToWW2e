@@ -20,6 +20,7 @@ treeDumper = cms.EDFilter("HWWTreeDumper",
                           PFjetCollection1 = cms.InputTag("L2L3CorJetSC5PF"),
                           PFjetCollection2 = cms.InputTag("sisCone5PFJets"),
                           metCollection = cms.InputTag("muonCorrectedMET"), # preselection
+                          TCmetCollection = cms.InputTag("tcMet"),
                           genMetCollection = cms.InputTag("genMetCalo"),
                           PFmetCollection = cms.InputTag("pfMet"),
                           hepMcCollection = cms.InputTag("source"),
