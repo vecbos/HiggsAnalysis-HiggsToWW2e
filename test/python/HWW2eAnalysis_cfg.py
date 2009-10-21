@@ -41,6 +41,10 @@ process.treeDumper.saveJet1BTag = True
 process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpTree = True
 
+process.options = cms.untracked.PSet(
+      fileMode =  cms.untracked.string('NOMERGE')
+      )
+
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
