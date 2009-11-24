@@ -1,11 +1,11 @@
 --- Recipe to build and run the H->WW analysis in 3_X_Y ---
 
-scramv1 p CMSSW CMSSW_3_2_7
-cd CMSSW_3_2_7/src
+scramv1 p CMSSW CMSSW_3_3_4
+cd CMSSW_3_3_4/src
 cmsenv
 
-cvs co -r V01-3_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V01-3_2_X HiggsAnalysis/HiggsToWW2Leptons
+cvs co -r V00-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V00-3_3_X HiggsAnalysis/HiggsToWW2Leptons
 addpkg RecoEgamma/ElectronIdentification
 cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
