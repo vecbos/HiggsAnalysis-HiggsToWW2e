@@ -37,6 +37,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsBasicClusterFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsConditionsFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTrackFiller.h"
@@ -88,6 +89,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
+  dumpBCs_            = iConfig.getUntrackedParameter<bool>("dumpBCs", false);
   dumpTracks_         = iConfig.getUntrackedParameter<bool>("dumpTracks", false);
   dumpMuons_          = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
   dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
@@ -110,6 +112,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
   ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
+  ecalBarrelBCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelBCCollection");
+  ecalEndcapBCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapBCCollection");
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
   tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
@@ -245,6 +249,24 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsSuperClusterFiller treeFillEndcap(tree_, 100);
       std::string endcapSuffix("SCEE");
       treeFillEndcap.writeCollectionToTree(ecalEndcapSCCollection_, iEvent, iSetup, prefix, endcapSuffix, false);
+
+  }
+
+  // fill BC block
+  if (dumpBCs_) {
+
+      CmsBasicClusterFiller treeFillBarrel(tree_, 100);
+      std::string prefix("");
+      std::string barrelSuffix("BCEB");
+      treeFillBarrel.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillBarrel.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillBarrel.writeCollectionToTree(ecalBarrelBCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
+
+      CmsBasicClusterFiller treeFillEndcap(tree_, 100);
+      std::string endcapSuffix("BCEE");
+      treeFillEndcap.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillEndcap.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillEndcap.writeCollectionToTree(ecalEndcapBCCollection_, iEvent, iSetup, prefix, endcapSuffix, false);
 
   }
 
