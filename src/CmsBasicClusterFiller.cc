@@ -68,12 +68,12 @@ using namespace reco;
 //----------------
 
 
-CmsBasicClusterFiller::CmsBasicClusterFiller(CmsTree *cmsTree, int maxSC):  privateData_(new CmsBasicClusterFillerData)
+CmsBasicClusterFiller::CmsBasicClusterFiller(CmsTree *cmsTree, int maxBC):  privateData_(new CmsBasicClusterFillerData)
 {
   cmstree=cmsTree;
 
   trkIndexName_ = new std::string("n");
-  maxSC_=maxSC;
+  maxBC_=maxBC;
   privateData_->initialiseCandidate();
 }
 
@@ -111,22 +111,22 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
   Handle<BasicClusterCollection> collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsBasicClusterFiller") << "Can't get SC Collection: " << collectionTag; }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsBasicClusterFiller") << "Can't get BC Collection: " << collectionTag; }
   const BasicClusterCollection *collection = collectionHandle.product();
 
   privateData_->clear();
   
   if(collection) 
     {
-      if((int)collection->size() > maxSC_)
+      if((int)collection->size() > maxBC_)
 	{
 	  edm::LogError("CmsBasicClusterFiller") << "Track length " << collection->size() 
 						 << " is too long for declared max length for tree "
-						 << maxSC_ 
+						 << maxBC_ 
 						 << ". Collection will be truncated ";
 	}
       
-      *(privateData_->nSC) = collection->size();
+      *(privateData_->nBC) = collection->size();
       
       // for cluster shape variables
       Handle< EcalRecHitCollection > EcalBarrelRecHits;
@@ -143,12 +143,12 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       for(cand=collection->begin(); cand!=collection->end(); cand++) 
 	{
 	  // fill basic kinematics
-	  writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
+	  writeBCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
 	}
     }
   else 
     {
-      *(privateData_->nSC) = 0;
+      *(privateData_->nBC) = 0;
     }
   
   // The class member vectors containing the relevant quantities 
@@ -162,7 +162,7 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
 //   if(collection) 
 //     {
-      treeSCInfo(columnPrefix,columnSuffix);
+      treeBCInfo(columnPrefix,columnSuffix);
 //     }
 
   if(dumpData) cmstree->dumpData();
@@ -174,7 +174,7 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 
 
-void CmsBasicClusterFiller::writeSCInfo(const BasicCluster *cand, 
+void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand, 
                                         const edm::Event& iEvent, 
                                         const edm::EventSetup& iSetup,
                                         const EcalRecHitCollection *EBRecHits,
@@ -184,22 +184,43 @@ void CmsBasicClusterFiller::writeSCInfo(const BasicCluster *cand,
   std::vector< std::pair<DetId, float> > ids = cand->hitsAndFractions();
   
   privateData_->nCrystals->push_back((int)ids.size());
-  privateData_->energy->push_back((float)cand->energy());
   privateData_->eta->push_back((float)cand->position().eta());
   privateData_->phi->push_back((float)cand->position().phi());
   
-  bool validTopologyAndGeometry = false;
-
   const EcalRecHitCollection *rechits = 0;
   float seedEta = cand->position().eta();
   if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
   else rechits = EERecHits; 
+
+  // find the seed energy
+  // find the eventual noisy channels inside the cluster and record their energy
+  double noisyChanEnergy = 0.0;
+  DetId seedId;
+  EcalRecHitCollection::const_iterator seedItr = rechits->begin();
+
+  for(std::vector< std::pair<DetId,float> >::const_iterator idItr = ids.begin(); idItr != ids.end(); ++idItr) {
+    DetId id = idItr->first;
+    if(id.det() != DetId::Ecal) { continue; }
+    EcalRecHitCollection::const_iterator hitItr = rechits->find(id);
+    if(hitItr == rechits->end()) { continue; }
+    if(hitItr->energy() > seedItr->energy()) {
+      seedItr = hitItr;
+      seedId = id;
+    }
+    
+    if( hitItr->recoFlag() == EcalRecHit::kDead || EcalRecHit::kFaultyHardware ) noisyChanEnergy += hitItr->energy();
+
+  }
+
+  double energyToBeRemoved = (removeBadChannels_) ? noisyChanEnergy : 0.0;
 
   edm::ESHandle<CaloTopology> pTopology;
   iSetup.get<CaloTopologyRecord>().get(pTopology);
   
   edm::ESHandle<CaloGeometry> pGeometry;
   iSetup.get<CaloGeometryRecord>().get(pGeometry);
+
+  bool validTopologyAndGeometry = false;
   
   if ( pTopology.isValid() && pGeometry.isValid() ) {
     
@@ -207,9 +228,9 @@ void CmsBasicClusterFiller::writeSCInfo(const BasicCluster *cand,
     
     const CaloTopology *topology = pTopology.product();
     
-    float eMax = EcalClusterTools::eMax( *cand, &(*rechits) );    
-    float e3x3 = EcalClusterTools::e3x3( *cand, &(*rechits), topology );
-    float e5x5 = EcalClusterTools::e5x5( *cand, &(*rechits), topology );
+    float eMax = EcalClusterTools::eMax( *cand, &(*rechits) ) - energyToBeRemoved;    
+    float e3x3 = EcalClusterTools::e3x3( *cand, &(*rechits), topology ) - energyToBeRemoved;
+    float e5x5 = EcalClusterTools::e5x5( *cand, &(*rechits), topology ) - energyToBeRemoved;
 
     privateData_->e3x3->push_back(e3x3);
     privateData_->e5x5->push_back(e5x5);
@@ -221,20 +242,8 @@ void CmsBasicClusterFiller::writeSCInfo(const BasicCluster *cand,
     privateData_->eMax->push_back(-1.0);
   }
 
-  // find the seed energy
-  DetId seedId;
-  EcalRecHitCollection::const_iterator seedItr = rechits->begin();
-  for(std::vector< std::pair<DetId,float> >::const_iterator idItr = ids.begin(); idItr != ids.end(); ++idItr) {
-    DetId id = idItr->first;
-    if(id.det() != DetId::Ecal) { continue; }
-    EcalRecHitCollection::const_iterator hitItr = rechits->find(id);
-    if(hitItr == rechits->end()) { continue; }
-    if(hitItr->energy() > seedItr->energy()) {
-      seedItr = hitItr;
-      seedId = id;
-    }
-  }
-  privateData_->seedEnergy->push_back(seedItr->energy());
+  privateData_->energy->push_back((float)cand->energy() - energyToBeRemoved);
+  privateData_->seedEnergy->push_back(seedItr->energy() - energyToBeRemoved);
 
   //  DetId seedId = cand->seed(); // it seems it doesn't work
   
@@ -290,7 +299,7 @@ void CmsBasicClusterFiller::writeSCInfo(const BasicCluster *cand,
 
 
 
-void CmsBasicClusterFiller::treeSCInfo(const std::string colPrefix, const std::string colSuffix) 
+void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::string colSuffix) 
 {
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"nCrystals"+colSuffix).c_str(), *privateData_->nCrystals, nCandString.c_str(), 0, "Reco");
@@ -317,7 +326,7 @@ void CmsBasicClusterFillerData::initialiseCandidate()
   eMax = new vector<float>;
   e3x3 = new vector<float>;
   e5x5 = new vector<float>;
-  nSC =  new int;
+  nBC =  new int;
 }
 
 void CmsBasicClusterFillerData::clear() 

@@ -76,6 +76,8 @@ private:
   bool dumpParticleFlowObjects_;
   //! dump the run info informations
   bool dumpRunInfo_;
+  //! remove energy of bad crystals from basic clusters
+  bool removeBadCrystalsInBCs_;
 
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_;

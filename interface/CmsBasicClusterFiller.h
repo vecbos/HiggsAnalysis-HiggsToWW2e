@@ -32,7 +32,7 @@ struct CmsBasicClusterFillerData {
   vector<int> *nCrystals, *nOverlap3x3;
   vector<float> *energy, *eta, *phi;
   vector<float> *seedEnergy, *eMax, *e3x3, *e5x5;
-  int *nSC;
+  int *nBC;
 
 public:
   void initialiseCandidate();
@@ -47,7 +47,7 @@ public:
   // Constructors
 
   // Dump everything
-  CmsBasicClusterFiller(CmsTree *, int maxSC=500);
+  CmsBasicClusterFiller(CmsTree *, int maxBC=500);
 
 
   // Destructor
@@ -66,15 +66,16 @@ public:
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
   void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
-
+  //! remove the noisy / dead channels from cluster energy
+  void removeBadChannels( bool what ) { removeBadChannels_ = what; }
 
 protected:
   
 
-  virtual void writeSCInfo(const reco::BasicCluster *cand, 
+  virtual void writeBCInfo(const reco::BasicCluster *cand, 
 			   const edm::Event&, const edm::EventSetup&,
                            const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
-  virtual void treeSCInfo(const std::string colPrefix, const std::string colSuffix);
+  virtual void treeBCInfo(const std::string colPrefix, const std::string colSuffix);
   
 
   // Friends
@@ -83,10 +84,11 @@ protected:
 
   edm::InputTag EcalBarrelRecHits_;
   edm::InputTag EcalEndcapRecHits_;
+  bool removeBadChannels_;
 
   CmsTree *cmstree;
 
-  int maxSC_;
+  int maxBC_;
   std::string *trkIndexName_;
 };
 

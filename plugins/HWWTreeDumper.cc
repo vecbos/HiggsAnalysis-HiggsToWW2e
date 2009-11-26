@@ -104,6 +104,9 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // data run informations
   dumpRunInfo_ = iConfig.getUntrackedParameter<bool>("dumpRunInfo",false);
 
+  // remove energy of bad crystals from basic clusters
+  removeBadCrystalsInBCs_ = iConfig.getUntrackedParameter<bool>("removeBadCrystalsInBCs", false);
+
   // jet vertex collections
   jetVertexAlphaCollection1_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection1");
   jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
@@ -260,12 +263,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       std::string barrelSuffix("BCEB");
       treeFillBarrel.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFillBarrel.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillBarrel.removeBadChannels(removeBadCrystalsInBCs_);
       treeFillBarrel.writeCollectionToTree(ecalBarrelBCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
       CmsBasicClusterFiller treeFillEndcap(tree_, 100);
       std::string endcapSuffix("BCEE");
       treeFillEndcap.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFillEndcap.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillEndcap.removeBadChannels(removeBadCrystalsInBCs_);
       treeFillEndcap.writeCollectionToTree(ecalEndcapBCCollection_, iEvent, iSetup, prefix, endcapSuffix, false);
 
   }
