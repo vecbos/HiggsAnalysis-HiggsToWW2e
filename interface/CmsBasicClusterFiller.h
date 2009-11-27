@@ -30,7 +30,7 @@ struct CmsBasicClusterFillerData {
   // All the vectors that will store the stuff
   // going into the tree.
   vector<int> *nCrystals, *nOverlap3x3;
-  vector<float> *energy, *eta, *phi;
+  vector<float> *energy, *eta, *phi, *theta;
   vector<float> *seedEnergy, *eMax, *e3x3, *e5x5;
   int *nBC;
 

@@ -88,6 +88,7 @@ CmsBasicClusterFiller::~CmsBasicClusterFiller()
   delete privateData_->nOverlap3x3;
   delete privateData_->energy;
   delete privateData_->eta;
+  delete privateData_->theta;
   delete privateData_->phi;
   delete privateData_->seedEnergy;
   delete privateData_->eMax;
@@ -131,12 +132,12 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       // for cluster shape variables
       Handle< EcalRecHitCollection > EcalBarrelRecHits;
       try { iEvent.getByLabel(EcalBarrelRecHits_, EcalBarrelRecHits); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL barrel rec hits Collection" << EcalBarrelRecHits_; }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsBasicClusterFiller") << "Can't get ECAL barrel rec hits Collection" << EcalBarrelRecHits_; }
       const EcalRecHitCollection *EBRecHits = EcalBarrelRecHits.product();
       
       Handle< EcalRecHitCollection > EcalEndcapRecHits;
       try { iEvent.getByLabel(EcalEndcapRecHits_, EcalEndcapRecHits); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsBasicClusterFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
       const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
       
       BasicClusterCollection::const_iterator cand;
@@ -185,6 +186,7 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
   
   privateData_->nCrystals->push_back((int)ids.size());
   privateData_->eta->push_back((float)cand->position().eta());
+  privateData_->theta->push_back((float)cand->position().theta());
   privateData_->phi->push_back((float)cand->position().phi());
   
   const EcalRecHitCollection *rechits = 0;
@@ -306,6 +308,7 @@ void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"nOverlap3x3"+colSuffix).c_str(), *privateData_->nOverlap3x3, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
@@ -321,6 +324,7 @@ void CmsBasicClusterFillerData::initialiseCandidate()
   nOverlap3x3 = new vector<int>;
   energy = new vector<float>; 
   eta = new vector<float>; 
+  theta = new vector<float>; 
   phi = new vector<float>;;
   seedEnergy = new vector<float>;
   eMax = new vector<float>;
@@ -335,6 +339,7 @@ void CmsBasicClusterFillerData::clear()
   nOverlap3x3->clear();
   energy->clear();
   eta->clear();
+  theta->clear();
   phi->clear();
   seedEnergy->clear();
   eMax->clear();
