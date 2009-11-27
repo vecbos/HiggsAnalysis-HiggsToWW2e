@@ -13,6 +13,10 @@ process.GlobalTag.globaltag = 'GR09_P_V6::All'
 # run a dedicated ECAL reco sequence
 process.load("RecoLocalCalo.Configuration.ecalLocalRecoSequenceCosmics_cff")
 process.load("RecoEcal.EgammaClusterProducers.islandClusteringSequence_cff")
+process.islandBasicClusters.IslandBarrelSeedThr = 0.2
+process.islandBasicClusters.IslandEndcapSeedThr = 0.18
+
+process.load("RecoEcal.Configuration.RecoEcal_cff")
 
 # not cosmics tracker reco
 process.load("RecoTracker.Configuration.RecoTracker_cff")
@@ -44,6 +48,7 @@ process.treeDumper.metCollection = 'met'
 process.treeDumper.nameFile = 'default.root'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpBCs = True
+process.treeDumper.dumpSCs = True
 process.treeDumper.removeBadCrystalsInBCs = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpElectrons = False
@@ -73,8 +78,8 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/m/meridian/firstCollSkims/firstColl_bscFilter_122294.root',
-                                                              #'rfio:/castor/cern.ch/user/m/meridian/firstCollSkims/firstColl_bscFilter_122314.root'
+                            fileNames = cms.untracked.vstring(#'rfio:/castor/cern.ch/user/m/meridian/firstCollSkims/firstColl_bscFilter_122294.root',
+                                                              'rfio:/castor/cern.ch/user/m/meridian/firstCollSkims/firstColl_bscFilter_122314.root'
                                                               #'rfio:/castor/cern.ch/user/m/meridian/firstCollSkims/firstColl_bscFilter_122318.root'
                                                               )
                             )
@@ -83,7 +88,7 @@ process.digisSequence = cms.Sequence ( process.RawToDigi )
 
 process.localrecoSequence = cms.Sequence ( process.trackerlocalreco * process.ecalLocalRecoSequence )
 
-process.globalrecoSequence = cms.Sequence ( process.offlineBeamSpot+process.recopixelvertexing*process.ckftracks+process.islandClusteringSequence*process.islandSuperClusters+process.vertexreco)
+process.globalrecoSequence = cms.Sequence ( process.offlineBeamSpot+process.recopixelvertexing*process.ckftracks+process.islandClusteringSequence*process.islandSuperClusters*process.ecalClusters+process.vertexreco)
 
 process.p = cms.Path ( process.digisSequence *
                        process.localrecoSequence *
