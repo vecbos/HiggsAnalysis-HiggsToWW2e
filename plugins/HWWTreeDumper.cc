@@ -247,10 +247,16 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsSuperClusterFiller treeFillBarrel(tree_, 100);
       std::string prefix("");
       std::string barrelSuffix("SCEB");
+      treeFillBarrel.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillBarrel.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillBarrel.setTracks(tracksForIsolationProducer_);
       treeFillBarrel.writeCollectionToTree(ecalBarrelSCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
       CmsSuperClusterFiller treeFillEndcap(tree_, 100);
       std::string endcapSuffix("SCEE");
+      treeFillEndcap.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillEndcap.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillEndcap.setTracks(tracksForIsolationProducer_);
       treeFillEndcap.writeCollectionToTree(ecalEndcapSCCollection_, iEvent, iSetup, prefix, endcapSuffix, false);
 
   }
