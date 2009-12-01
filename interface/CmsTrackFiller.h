@@ -2,7 +2,7 @@
 //-----------------------------------------------------------------------
 //
 // Package:    
-//      ZjetsAnalysis/ZllProducer
+//      HiggsAnalysis/HiggsToWW2e
 // Description:
 //      Class CsmTrackFiller
 //      Simple class for dumping RECO (or AOD) contents to a ROOT tree
@@ -19,6 +19,7 @@
 
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/TrackReco/interface/DeDxData.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
@@ -28,8 +29,9 @@
 #include "DataFormats/Math/interface/Point3D.h"
 #include <TTree.h>
 
-struct CmsTrackFillerData : public CmsCandidateFillerData {
+struct CmsTrackFillerData {
 
+  int *ncand;
   vector<int> *vtxIndex;
   vector<float> *vtxWeight;
 
@@ -45,13 +47,16 @@ struct CmsTrackFillerData : public CmsCandidateFillerData {
   vector<float> *trackDxyPV, *trackD0PV, *trackDszPV, *trackDzPV;
   vector<float> *trackDxyErrorPV, *trackD0ErrorPV, *trackDszErrorPV, *trackDzErrorPV;
 
+  vector<float> *truncatedDeDx, *truncatedDeDxError, *truncatedDeDxNoM;
+
+
 public:
   void initialise();
   void clearTrkVectors();
 
 };
 
-class CmsTrackFiller : public CmsCandidateFiller {
+class CmsTrackFiller {
 
  public:
 
@@ -73,6 +78,9 @@ class CmsTrackFiller : public CmsCandidateFiller {
   // Destructor
   virtual ~CmsTrackFiller();
 
+  //! set the tracker isolation producer
+  void setRefittedTracksForDeDxProducer( edm::InputTag tracksTag ) { refittedTracksForDeDxTag_ = tracksTag; }
+
   /// dump tracking related variables
   void saveTrk(bool );
   /// dump track-extras related variables
@@ -81,6 +89,8 @@ class CmsTrackFiller : public CmsCandidateFiller {
   void saveVtxTrk(bool );
   /// Find Primary Vertex
   void findPrimaryVertex(const edm::Event& iEvent);
+  /// Save the dEdX: needs the right sequence to be run in the cms path
+  void saveDeDx(bool );
 
   // Operators
 
@@ -94,12 +104,15 @@ class CmsTrackFiller : public CmsCandidateFiller {
 
  private:
   
-  void writeTrkInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, reco::TrackRef trkRef);
+  void writeTrkInfo(edm::RefToBase<reco::Track> trackRef);
+  void writeDeDxInfo(edm::RefToBase<reco::Track> refittedTrack);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
+  void treeDeDxInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   bool saveTrk_;
   bool saveFatTrk_;
   bool saveVtxTrk_;
+  bool saveDeDx_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
@@ -113,6 +126,11 @@ class CmsTrackFiller : public CmsCandidateFiller {
   CmsTree *cmstree;
 
   edm::InputTag vertexCollection_;
+  edm::InputTag refittedTracksForDeDxTag_;
+
+  edm::Handle< edm::View<reco::Track> > refittedTracksForDeDx_;
+  edm::Handle< reco::DeDxDataValueMap >  energyLoss_ ;
+  edm::Handle<reco::VertexCollection> primaryVertex_;
 
   // Primary Vertex in point format
   float x0, y0, z0;

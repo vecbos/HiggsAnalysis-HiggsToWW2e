@@ -23,9 +23,6 @@
 
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -53,7 +50,6 @@ CmsTrackFiller::CmsTrackFiller(CmsTree *cmsTree,
 			       edm::InputTag vertexCollection,
 			       int maxTracks, int maxMCTracks,
 			       bool noOutputIfLimitsReached):
-  CmsCandidateFiller(cmsTree,maxTracks,maxMCTracks,noOutputIfLimitsReached),
   privateData_(new CmsTrackFillerData)
 {
   cmstree=cmsTree;
@@ -62,6 +58,8 @@ CmsTrackFiller::CmsTrackFiller(CmsTree *cmsTree,
   saveTrk_=true;
   saveFatTrk_=true;
   saveVtxTrk_=true; // to change when bug is fixed
+  saveDeDx_=false;
+
 
   trkIndexName_ = new std::string("n");
 
@@ -80,7 +78,6 @@ CmsTrackFiller::CmsTrackFiller(CmsTree *cmsTree,
 			       bool fatTree, 
 			       int maxTracks, int maxMCTracks,
 			       bool noOutputIfLimitsReached, bool vtxtrack):
-  CmsCandidateFiller(cmsTree,maxTracks,fatTree,maxMCTracks,noOutputIfLimitsReached),
   privateData_(new CmsTrackFillerData)
 {
   cmstree=cmsTree;
@@ -89,6 +86,7 @@ CmsTrackFiller::CmsTrackFiller(CmsTree *cmsTree,
   saveTrk_ = true;
   saveVtxTrk_ = vtxtrack; 
   saveFatTrk_ = fatTree;
+  saveDeDx_=false;
 
   trkIndexName_ = new std::string("n");
 
@@ -138,6 +136,10 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->trackVy;
   delete privateData_->trackVz;
 
+  delete privateData_->truncatedDeDx;
+  delete privateData_->truncatedDeDxError;
+  delete privateData_->truncatedDeDxNoM;
+
   delete privateData_->ncand;
 
 }
@@ -153,6 +155,8 @@ void CmsTrackFiller::saveTrk(bool what) { saveTrk_=what;}
 void CmsTrackFiller::saveFatTrk(bool what) { saveFatTrk_=what;}
 
 void CmsTrackFiller::saveVtxTrk(bool what) { saveVtxTrk_=what;}
+
+void CmsTrackFiller::saveDeDx(bool what ) { saveDeDx_=what; }
 
 void CmsTrackFiller::findPrimaryVertex(const edm::Event& iEvent) {
 
@@ -199,12 +203,19 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					   const std::string &columnPrefix, const std::string &columnSuffix,
 					   bool dumpData) {
 
-  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+//   edm::Handle< edm::View<reco::Candidate> > collectionHandle;
+//   try { iEvent.getByLabel(collectionTag, collectionHandle); }
+//   catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << collectionTag; }
+//   const edm::View<reco::Candidate> *collection = collectionHandle.product();
+
+  edm::Handle< edm::View<reco::Track> > collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << collectionTag; }
-  const edm::View<reco::Candidate> *collection = collectionHandle.product();
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get track collection: " << collectionTag; }
+  const edm::View<reco::Track> *collection = collectionHandle.product();
 
   privateData_->clearTrkVectors();
+
+  int blockSize;
 
   if(collection) {
     if(hitLimitsMeansNoOutput_ && 
@@ -222,60 +233,69 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 			       << maxTracks_ 
 			       << ". Collection will be truncated ";
     }
-  
-    *(privateData_->ncand) = collection->size();
 
-    edm::View<reco::Candidate>::const_iterator cand;
-    for(cand=collection->begin(); cand!=collection->end(); cand++) {
-      // fill basic kinematics
-      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
+    try { iEvent.getByLabel(vertexCollection_, primaryVertex_); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
 
-      // fill tracks extra informations
-      TrackRef trkRef = cand->get<TrackRef>();
-      if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,trkRef);
+    if ( saveDeDx_ ) {
+      iEvent.getByLabel( "dedxTruncated40", energyLoss_ );
+      iEvent.getByLabel(refittedTracksForDeDxTag_,refittedTracksForDeDx_);
+      *(privateData_->ncand) = refittedTracksForDeDx_->size();   
+      blockSize = (&(*refittedTracksForDeDx_)) ? refittedTracksForDeDx_->size() : 0;
+    } else {
+      blockSize = (collection) ? blockSize = collection->size() : 0;
+      *(privateData_->ncand) = collection->size();
+    }
 
-   }
-  }
-  else {
-  *(privateData_->ncand) = 0;
+    //    edm::View<reco::Track>::const_iterator cand;
+    //    int index=0;
+    //    for(cand=collection->begin(); cand!=collection->end(); cand++,index++) {
+    for(int i=0; i < (int)collection->size(); i++) {
+      if( saveDeDx_ ) {
+        if ( i != (int)refittedTracksForDeDx_->size() ) {
+          RefToBase<reco::Track> refittedTrack(refittedTracksForDeDx_, i);
+          if(saveTrk_) writeTrkInfo( refittedTrack );
+          writeDeDxInfo( refittedTrack );
+        }
+      } else {
+        // if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
+        //        TrackRef trkRef = cand->get<TrackRef>();
+        RefToBase<reco::Track> trkRef(collectionHandle, i);
+        if(saveTrk_) writeTrkInfo( trkRef );
+      }
+    }
+  } else {
+    *(privateData_->ncand) = 0;
   }
   
   // The class member vectors containing the relevant quantities 
   // have all been filled. Now transfer those we want into the 
   // tree 
-  int blockSize = (collection) ? collection->size() : 0;
+
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
-  
-  if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
+
   if(saveTrk_)  treeTrkInfo(columnPrefix,columnSuffix);
+  if(saveDeDx_) treeDeDxInfo(columnPrefix,columnSuffix);
 
   if(dumpData) cmstree->dumpData();
 	
 }
 
 
-void CmsTrackFiller::writeTrkInfo(const Candidate *cand, 
-				     const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-				     TrackRef trkRef) {
+void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
 
   if(&trkRef) {
     
     if ( saveVtxTrk_ ) { 
       
-      
-      // Find the vertex the track belongs to
-      Handle<reco::VertexCollection> primaryVertex;
-      try { iEvent.getByLabel(vertexCollection_, primaryVertex); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
-      
       int iVtx = -1;
       int counter = 0;
       double weight = 0.;
       if(saveVtxTrk_) {
-	if(primaryVertex->size() >0 ) { // there is at least one vertex in the event
-	  for(VertexCollection::const_iterator v = primaryVertex->begin();
-	      v != primaryVertex->end(); ++v){
+	if(primaryVertex_->size() >0 ) { // there is at least one vertex in the event
+	  for(VertexCollection::const_iterator v = primaryVertex_->begin();
+	      v != primaryVertex_->end(); ++v){
 	    double tmpw = v->trackWeight(trkRef);
 	    if(tmpw > weight) {
 	      if(weight >0) edm::LogWarning("CmsTrackFiller") << "I found this track in two vertices!!!!!!" ;
@@ -379,6 +399,7 @@ void CmsTrackFiller::writeTrkInfo(const Candidate *cand,
       privateData_->trackDszPV->push_back(-1.);
       privateData_->trackDzPV->push_back(-1.);
     }
+
   } else {
     
     // vertex information
@@ -438,7 +459,18 @@ void CmsTrackFiller::writeTrkInfo(const Candidate *cand,
 //     privateData_->trackDszErrorPV->push_back(-1.);
 //     privateData_->trackDzErrorPV->push_back(-1.);
 
-   }
+  }
+
+}
+
+void CmsTrackFiller::writeDeDxInfo( edm::RefToBase<reco::Track> refittedTrack ) {
+
+  const DeDxDataValueMap & dedxTruncated40Val = *energyLoss_;
+  
+  privateData_->truncatedDeDx->push_back( dedxTruncated40Val[refittedTrack].dEdx() );
+  privateData_->truncatedDeDxError->push_back( dedxTruncated40Val[refittedTrack].dEdxError() );
+  privateData_->truncatedDeDxNoM->push_back( dedxTruncated40Val[refittedTrack].numberOfMeasurements() );
+  
 }
 
 void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
@@ -446,7 +478,6 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
 
   cmstree->column((colPrefix+"vtxIndex"+colSuffix).c_str(), *privateData_->vtxIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"vtxWeight"+colSuffix).c_str(), *privateData_->vtxWeight, nCandString.c_str(), 0, "Reco");
-
 
   cmstree->column((colPrefix+"charge"+colSuffix).c_str(), *privateData_->charge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ptError"+colSuffix).c_str(), *privateData_->pterr, nCandString.c_str(), 0, "Reco");
@@ -493,9 +524,19 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
 
 }
 
-void CmsTrackFillerData::initialise() {
+void CmsTrackFiller::treeDeDxInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
-  initialiseCandidate();
+  std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
+
+  cmstree->column((colPrefix+"truncatedDeDx"+colSuffix).c_str(),  *privateData_->truncatedDeDx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"truncatedDeDxError"+colSuffix).c_str(),  *privateData_->truncatedDeDxError, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"truncatedDeDxNoM"+colSuffix).c_str(),  *privateData_->truncatedDeDxNoM, nCandString.c_str(), 0, "Reco");
+
+}
+
+void CmsTrackFillerData::initialise() {
+  
+  ncand = new int;
   vtxIndex  = new vector<int>;
   vtxWeight = new vector<float>;
   pxAtInner = new vector<float>;
@@ -530,12 +571,13 @@ void CmsTrackFillerData::initialise() {
   trackVx = new vector<float>;
   trackVy = new vector<float>;
   trackVz = new vector<float>;
+  truncatedDeDx = new vector<float>;
+  truncatedDeDxError = new vector<float>;
+  truncatedDeDxNoM = new vector<float>;
 
 }
 
 void CmsTrackFillerData::clearTrkVectors() {
-
-  clearTrkVectorsCandidate();
 
   vtxIndex->clear();
   vtxWeight->clear();
@@ -570,5 +612,8 @@ void CmsTrackFillerData::clearTrkVectors() {
   trackVx->clear();
   trackVy->clear();
   trackVz->clear();
+  truncatedDeDx->clear();
+  truncatedDeDxError->clear();
+  truncatedDeDxNoM->clear();
 
 }

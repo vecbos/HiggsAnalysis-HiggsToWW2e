@@ -78,6 +78,8 @@ private:
   bool dumpRunInfo_;
   //! remove energy of bad crystals from basic clusters
   bool removeBadCrystalsInBCs_;
+  //! save the dE/dx of the tracks (requires the right module to be run)
+  bool saveTrackDeDx_;
 
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_;
@@ -85,7 +87,7 @@ private:
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
   edm::InputTag vertexCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
-  edm::InputTag trackCollection_;
+  edm::InputTag trackCollection_, refittedForDeDxTrackCollection_;
   //! supercluster collections in input
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_;
   //! basiccluster collections in input

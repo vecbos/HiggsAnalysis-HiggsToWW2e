@@ -68,6 +68,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveCSC_        = iConfig.getUntrackedParameter<bool>("saveCSC", false);
   saveRPC_        = iConfig.getUntrackedParameter<bool>("saveRPC", false);
   saveFatTrk_     = iConfig.getUntrackedParameter<bool>("saveFatTrk", false);
+  saveTrackDeDx_  = iConfig.getUntrackedParameter<bool>("saveTrackDeDx", false);
   saveFatEcal_    = iConfig.getUntrackedParameter<bool>("saveFatEcal", false);
   saveFatHcal_    = iConfig.getUntrackedParameter<bool>("saveFatHcal", false);
   saveFatDT_      = iConfig.getUntrackedParameter<bool>("saveFatDT", false);
@@ -121,9 +122,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
   tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
-  trackCollection_    = iConfig.getParameter<edm::InputTag>("trackCollection");
+  trackCollection_         = iConfig.getParameter<edm::InputTag>("trackCollection");
+  refittedForDeDxTrackCollection_ = iConfig.getParameter<edm::InputTag>("refittedForDeDxTrackCollection");
   vertexCollection_        = iConfig.getParameter<edm::InputTag>("vertexCollection");
-  genJetCollection_       = iConfig.getParameter<edm::InputTag>("genJetCollection");
+  genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
   jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
@@ -286,13 +288,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     CmsTrackFiller treeFiller(tree_, vertexCollection_, true);
     treeFiller.saveFatTrk(saveFatTrk_);
+    treeFiller.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
+    treeFiller.saveDeDx(saveTrackDeDx_);
 
     treeFiller.findPrimaryVertex(iEvent);
     treeFiller.saveVtxTrk(true);
 
     std::string prefix("");
     std::string suffix("Track");
-    treeFiller.saveCand(saveCand_);
 
     treeFiller.writeCollectionToTree(trackCollection_, iEvent, iSetup, prefix, suffix, false);
 
