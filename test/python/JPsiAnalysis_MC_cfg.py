@@ -22,6 +22,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
 # --- track sequences ---
+process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.trackCandidates_cfi")
 
 # --- tree dumper ---
@@ -35,6 +36,7 @@ process.treeDumper.dumpTracks = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
+process.treeDumper.saveTrackDeDx = True
 process.treeDumper.saveJet1BTag = True
 process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpTree = True
@@ -50,15 +52,17 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-#                           fileNames = cms.untracked.vstring('file:/cmsrm/pc18/crovelli/JPsiEE_reco_200eve.root')
                             fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/JpsiEE_31X.root')
                             )
 
+process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
+
 process.p = cms.Path ( process.muonCorrectedMET *
                        process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
+#                       process.doAlldEdXEstimators *
+                       process.dedx *
                        process.eIdSequence *
                        process.eleIsolationSequence *
-                       process.ambiguityResolvedElectrons *
-                       process.trackCandidates)
+                       process.ambiguityResolvedElectrons )
                        
 process.q = cms.EndPath ( process.treeDumper )
