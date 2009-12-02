@@ -52,12 +52,17 @@ private:
   bool saveFatTrk_, saveFatEcal_, saveFatHcal_, saveFatDT_, saveFatCSC_, saveFatRPC_;
   //! dump electron ID variables
   bool saveEleID_;
+  //! dump the particle flow electron block
+  bool savePFEleBasic_; 
+  bool savePFEleGsfTrk_;
   //! dump the jet alpha parameter
   bool saveJetAlpha_;
   //! dump the jet b-tag output
   bool saveJet1BTag_, saveJet2BTag_;
   //! dump the electron block
   bool dumpElectrons_;
+  //! dump the particle flow electron block
+  bool dumpPFlowElectrons_;
   //! dump muon block
   bool dumpMuons_;
   //! dump reco / generated jets block
@@ -82,7 +87,7 @@ private:
   bool saveTrackDeDx_;
 
   //! candidate collections in input
-  edm::InputTag electronCollection_, muonCollection_;
+  edm::InputTag electronCollection_, muonCollection_,pflowElectronCollection_;
   edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
   edm::InputTag vertexCollection_;

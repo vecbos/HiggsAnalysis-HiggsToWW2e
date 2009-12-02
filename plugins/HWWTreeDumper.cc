@@ -36,6 +36,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsBasicClusterFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
@@ -78,6 +79,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveJet1BTag_    = iConfig.getUntrackedParameter<bool>("saveJet1BTag", false);
   saveJet2BTag_    = iConfig.getUntrackedParameter<bool>("saveJet2BTag", false);
 
+  //electron pflow
+  savePFEleGsfTrk_ = iConfig.getUntrackedParameter<bool>("savePFEleGsfTrk", false);
+  savePFEleBasic_ = iConfig.getUntrackedParameter<bool>("savePFEleBasic", false);
+
   // particle identification
   saveEleID_    = iConfig.getUntrackedParameter<bool>("saveEleID", false);
 
@@ -89,6 +94,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpSignalKfactor_  = iConfig.getUntrackedParameter<bool>("dumpSignalKfactor", false);
   dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
+  dumpPFlowElectrons_ = iConfig.getUntrackedParameter<bool>("dumpPFlowElectrons", false);
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
   dumpBCs_            = iConfig.getUntrackedParameter<bool>("dumpBCs", false);
   dumpTracks_         = iConfig.getUntrackedParameter<bool>("dumpTracks", false);
@@ -113,6 +119,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
+  pflowElectronCollection_ = iConfig.getParameter<edm::InputTag>("pflowElectronCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
   ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
@@ -241,6 +248,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   }
 
+  if(dumpPFlowElectrons_) {
+    CmsPFLowElectronFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("PFEle");
+    treeFill.saveCand(saveCand_);
+    treeFill.savePFEleBasic(savePFEleBasic_);
+    treeFill.savePFEleGsfTrk(savePFEleGsfTrk_);
+    treeFill.writeCollectionToTree(pflowElectronCollection_, iEvent, iSetup, prefix, suffix, false);
+  }
 
 
   // fill SC block
