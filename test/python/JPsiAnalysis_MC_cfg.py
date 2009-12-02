@@ -9,9 +9,6 @@ process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'MC_31X_V8::All'
 
-# --- apply the muon correction from the common code
-process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWMetCorrector_cfi")
-
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -23,7 +20,6 @@ process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
 # --- track sequences ---
 process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
-process.load("HiggsAnalysis.HiggsToWW2e.trackCandidates_cfi")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
@@ -57,10 +53,9 @@ process.source = cms.Source("PoolSource",
 
 #process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
 
-process.p = cms.Path ( process.muonCorrectedMET *
-                       process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
-#                       process.doAlldEdXEstimators *
-#                       process.dedx *
+process.p = cms.Path ( process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
+#                      process.doAlldEdXEstimators *
+#                      process.dedx *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
