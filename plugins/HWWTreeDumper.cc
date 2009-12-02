@@ -369,13 +369,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
+//     CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
     std::string prefix("");
     std::string suffix("SisConeCorrJet");
-    treeRecoFill1.saveCand(saveCand_);
-    treeRecoFill1.saveJetExtras(saveJetAlpha_);
-    treeRecoFill1.saveJetBTag(saveJet1BTag_);
-    treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
+//     treeRecoFill1.saveCand(saveCand_);
+//     treeRecoFill1.saveJetExtras(saveJetAlpha_);
+//     treeRecoFill1.saveJetBTag(saveJet1BTag_);
+//     treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
 
     CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, true);
@@ -388,10 +388,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     // particle flow jets
     if ( dumpParticleFlowObjects_ ) {  
-      CmsPFJetFiller pfJetFiller1(tree_, true);
-      suffix = "SisConePFCorrJet";
-      pfJetFiller1.saveCand(saveCand_);
-      pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
+//       CmsPFJetFiller pfJetFiller1(tree_, true);
+//       suffix = "SisConePFCorrJet";
+//       pfJetFiller1.saveCand(saveCand_);
+//       pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
       CmsPFJetFiller pfJetFiller2(tree_, true);
       suffix = "SisConePFJet";
