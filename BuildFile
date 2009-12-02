@@ -32,6 +32,9 @@
 <use name=RecoTracker/CkfPattern>
 <use name=RecoTracker/TrackProducer>
 <use name=SimDataFormats/JetMatching>
+<use name=DataFormats/L1GlobalTrigger>
+<use name=CondFormats/L1TObjects>
+<use name=RecoLocalCalo/EcalRecAlgos>
 
 <export>
    <lib name=HiggsAnalysisHiggsToWW2e>	
@@ -70,4 +73,7 @@
    <use name=RecoTracker/TrackProducer>
    <use name=SimDataFormats/JetMatching>
    <use name=DataFormats/BTauReco>
+   <use name=DataFormats/L1GlobalTrigger>
+   <use name=CondFormats/L1TObjects>
+   <use name=RecoLocalCalo/EcalRecAlgos>
 </export>
