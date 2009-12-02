@@ -27,7 +27,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.trackCandidates_cfi")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
-process.treeDumper.nameFile = 'default.root'
+process.treeDumper.nameFile = 'default_MC.root'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpSignalKfactor = False
@@ -55,12 +55,12 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/JpsiEE_31X.root')
                             )
 
-process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
+#process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
 
 process.p = cms.Path ( process.muonCorrectedMET *
                        process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
 #                       process.doAlldEdXEstimators *
-                       process.dedx *
+#                       process.dedx *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
