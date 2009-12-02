@@ -4,7 +4,7 @@ scramv1 p CMSSW CMSSW_3_3_4
 cd CMSSW_3_3_4/src
 cmsenv
 
-cvs co -r V00-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V05-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-3_3_X HiggsAnalysis/HiggsToWW2Leptons
 addpkg RecoEgamma/ElectronIdentification
 cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
@@ -19,6 +19,29 @@ scramv1 b
 
 cd HiggsAnalysis/HiggsToWW2e/test/python
 cmsRun HWW2eAnalysis_cfg.py
+
+--- Recipe to build the dumper for JPsi in 3_X_Y ---
+
+scramv1 p CMSSW CMSSW_3_3_4
+cd CMSSW_3_3_4/src
+cmsenv
+
+cvs co -r V05-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+addpkg RecoEgamma/ElectronIdentification
+cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+
+cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
+cd RecoEgamma/ElectronIdentification/python/
+rm likelihoodPdfsDB_cfi.py
+wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
+cd -
+
+scramv1 b
+
+cd HiggsAnalysis/HiggsToWW2e/test/python
+cmsRun JPsiAnalysis_MC_cfg.py   (Monte Carlo)
+cmsRun JPsiAnalysis_data_cfg.py (data)
+
 
 
 --- Recipe to build and run the H->WW analysis in 2_2_X ---
