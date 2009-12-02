@@ -21,6 +21,8 @@
 
 struct CmsRunInfoFillerData {
 
+  int *nl1Global, *nl1Technical;
+  vector<int> *l1Global, *l1Technical;
   int *run, *lumisection, *event, *bx, *orbit;
   
 public:
