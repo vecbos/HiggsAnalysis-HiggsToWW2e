@@ -40,9 +40,10 @@ struct CmsPFLowElectronFillerData : public CmsCandidateFillerData {
   vector<float> *gsf_TrackVx, *gsf_TrackVy, *gsf_TrackVz; 
   vector<float> *gsf_pxAtInnerMode, *gsf_pyAtInnerMode, *gsf_pzAtInnerMode;
   vector<float> *gsf_charge,*gsf_chargeMode;
+  vector<int> *gsf_EcalDriven,*gsf_TrackerDriven;
 
   // basic pf candidates info
-  vector<float> *MvaOuput;
+  vector<float> *MvaOutput;
   vector<float> *PS1Energy,*PS2Energy;
   vector<float> *EcalEnergy,*EcalElectronEnergy;
   

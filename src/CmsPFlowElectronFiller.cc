@@ -22,6 +22,8 @@
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
+#include "DataFormats/EgammaReco/interface/ElectronSeed.h"
+#include "DataFormats/EgammaReco/interface/ElectronSeedFwd.h"
 
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
@@ -104,6 +106,9 @@ CmsPFLowElectronFiller::~CmsPFLowElectronFiller() {
   delete privateData_->gsf_pxAtInner;
   delete privateData_->gsf_pyAtInner;
   delete privateData_->gsf_pzAtInner;
+  delete privateData_->gsf_pxAtInnerMode;
+  delete privateData_->gsf_pyAtInnerMode;
+  delete privateData_->gsf_pzAtInnerMode;
   delete privateData_->gsf_xAtInner;
   delete privateData_->gsf_yAtInner;
   delete privateData_->gsf_zAtInner;
@@ -127,9 +132,14 @@ CmsPFLowElectronFiller::~CmsPFLowElectronFiller() {
   delete privateData_->gsf_TrackVx;
   delete privateData_->gsf_TrackVy;
   delete privateData_->gsf_TrackVz;
+  delete privateData_->gsf_charge;
+  delete privateData_->gsf_chargeMode;
+  delete privateData_->gsf_EcalDriven;
+  delete privateData_->gsf_TrackerDriven; 
+
 
   // basic pf candidates info
-  delete privateData_->MvaOuput;
+  delete privateData_->MvaOutput;
   delete privateData_->PS1Energy;
   delete privateData_->PS2Energy;
   delete privateData_->EcalEnergy;
@@ -271,6 +281,28 @@ void CmsPFLowElectronFiller::writePFEleGsfTrkInfo(reco::GsfTrackRef gsfRef) {
     privateData_->gsf_yAtOuter->push_back(gsfRef->outerPosition().y());
     privateData_->gsf_zAtOuter->push_back(gsfRef->outerPosition().z());
     
+    //if (&(gsfRef.seedRef())) {
+    ElectronSeedRef seedRef= gsfRef->extra()->seedRef().castTo<ElectronSeedRef>();
+    if(seedRef.isNonnull()) {
+      if(seedRef->caloCluster().isNonnull()) {
+	privateData_->gsf_EcalDriven->push_back(1);
+      }
+      else {
+	privateData_->gsf_EcalDriven->push_back(0);
+      }
+      if(seedRef->ctfTrack().isNonnull()) {
+	privateData_->gsf_TrackerDriven->push_back(1);
+      }
+      else {
+	privateData_->gsf_TrackerDriven->push_back(0);
+      }
+    }
+    else {
+      privateData_->gsf_EcalDriven->push_back(-1);
+      privateData_->gsf_TrackerDriven->push_back(-1);
+    }
+
+    
   }
   else {
     
@@ -334,12 +366,16 @@ void CmsPFLowElectronFiller::writePFEleGsfTrkInfo(reco::GsfTrackRef gsfRef) {
     privateData_->gsf_yAtOuter->push_back(-1.);
     privateData_->gsf_zAtOuter->push_back(-1.);
 
+    
+    privateData_->gsf_EcalDriven->push_back(-1);
+    privateData_->gsf_TrackerDriven->push_back(-1);
+
   }
 }
 
 void CmsPFLowElectronFiller::writePFEleBasicInfo(const reco::PFCandidateRef pflowCandRef) {
   
-  privateData_->MvaOuput->push_back(pflowCandRef->mva_e_pi());
+  privateData_->MvaOutput->push_back(pflowCandRef->mva_e_pi());
   privateData_->PS1Energy->push_back(pflowCandRef->pS1Energy());
   privateData_->PS2Energy->push_back(pflowCandRef->pS2Energy());
   privateData_->EcalEnergy->push_back(pflowCandRef->ecalEnergy());
@@ -384,13 +420,16 @@ void CmsPFLowElectronFiller::treePFEleGsfTrkInfo(const std::string &colPrefix, c
   cmstree->column((colPrefix+"gsf_zAtOuter"+colSuffix).c_str(), *privateData_->gsf_zAtOuter, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"gsf_charge"+colSuffix).c_str(), *privateData_->gsf_charge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"gsf_chargeMode"+colSuffix).c_str(), *privateData_->gsf_chargeMode, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"gsf_EcalDriven"+colSuffix).c_str(), *privateData_->gsf_EcalDriven, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"gsf_TrackerDriven"+colSuffix).c_str(), *privateData_->gsf_TrackerDriven, nCandString.c_str(), 0, "Reco");
+  //  cmstree->column((colPrefix+""+colSuffix).c_str(), *privateData_->, nCandString.c_str(), 0, "Reco");
 
 }
 
 void CmsPFLowElectronFiller::treePFEleBasicInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
-  cmstree->column((colPrefix+"MvaOuput"+colSuffix).c_str(),  *privateData_->MvaOuput, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"MvaOutput"+colSuffix).c_str(),  *privateData_->MvaOutput, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PS1Energy"+colSuffix).c_str(),  *privateData_->PS1Energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PS2Energy"+colSuffix).c_str(),  *privateData_->PS2Energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"EcalEnergy"+colSuffix).c_str(),  *privateData_->EcalEnergy, nCandString.c_str(), 0, "Reco");
@@ -435,9 +474,12 @@ void CmsPFLowElectronFillerData::initialise() {
   gsf_TrackVz = new vector<float>;
   gsf_charge = new vector<float>;
   gsf_chargeMode = new vector<float>;
+  gsf_EcalDriven = new vector<int>;
+  gsf_TrackerDriven = new vector<int>;
+
 
   // basic pf candidates info
-  MvaOuput = new vector<float>;
+  MvaOutput = new vector<float>;
   PS1Energy = new vector<float>;
   PS2Energy = new vector<float>;
   EcalEnergy = new vector<float>;
@@ -480,10 +522,11 @@ void CmsPFLowElectronFillerData::clearTrkVectors() {
   gsf_TrackVz->clear();
   gsf_charge->clear();
   gsf_chargeMode->clear();
-  
+  gsf_EcalDriven->clear();
+  gsf_TrackerDriven->clear();
 
   // basic pf candidates info
-  MvaOuput->clear();
+  MvaOutput->clear();
   PS1Energy->clear();
   PS2Energy->clear();
   EcalEnergy->clear();
