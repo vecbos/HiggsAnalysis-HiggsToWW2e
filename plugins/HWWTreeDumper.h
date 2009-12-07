@@ -94,9 +94,9 @@ private:
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_;
   //! supercluster collections in input
-  edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_;
+  edm::InputTag ecalSCCollection_;
   //! basiccluster collections in input
-  edm::InputTag ecalBarrelBCCollection_, ecalEndcapBCCollection_;
+  edm::InputTag ecalBCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly
   edm::InputTag ecalBarrelRecHits_, ecalEndcapRecHits_;
   //! track and calotowers collection for isolation studies
