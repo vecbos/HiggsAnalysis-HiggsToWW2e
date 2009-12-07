@@ -139,6 +139,17 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->truncatedDeDx;
   delete privateData_->truncatedDeDxError;
   delete privateData_->truncatedDeDxNoM;
+  
+  delete privateData_->isPixB1;
+  delete privateData_->isPixB2;
+  delete privateData_->isPixE1;
+  delete privateData_->isPixE2;
+  delete privateData_->numberOfValidPixelBarrelHits;
+  delete privateData_->numberOfValidPixelEndcapHits;
+  delete privateData_->numberOfValidStripTIBHits;
+  delete privateData_->numberOfValidStripTIDHits;
+  delete privateData_->numberOfValidStripTOBHits;
+  delete privateData_->numberOfValidStripTECHits;
 
   delete privateData_->ncand;
 
@@ -335,6 +346,18 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
 
       privateData_->recHitsSize->push_back(trkRef->recHitsSize());
 
+      const HitPattern trackerPattern = trkRef->hitPattern();
+      privateData_->isPixB1->push_back(hasValidHitInNthPixelBarrel(1,trackerPattern));
+      privateData_->isPixB2->push_back(hasValidHitInNthPixelBarrel(2,trackerPattern));
+      privateData_->isPixE1->push_back(hasValidHitInNthPixelEndcap(1,trackerPattern));
+      privateData_->isPixE2->push_back(hasValidHitInNthPixelEndcap(2,trackerPattern));
+      privateData_->numberOfValidPixelBarrelHits->push_back(trackerPattern.numberOfValidPixelBarrelHits());
+      privateData_->numberOfValidPixelEndcapHits->push_back(trackerPattern.numberOfValidPixelEndcapHits());
+      privateData_->numberOfValidStripTIBHits->push_back(trackerPattern.numberOfValidStripTIBHits());
+      privateData_->numberOfValidStripTIDHits->push_back(trackerPattern.numberOfValidStripTIDHits());
+      privateData_->numberOfValidStripTOBHits->push_back(trackerPattern.numberOfValidStripTOBHits());
+      privateData_->numberOfValidStripTECHits->push_back(trackerPattern.numberOfValidStripTECHits());
+
     }
 
     else {
@@ -356,6 +379,17 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
       privateData_->zAtOuter->push_back( -1.0 );
 
       privateData_->recHitsSize->push_back( -1.0 );
+
+      privateData_->isPixB1->push_back(false);
+      privateData_->isPixB2->push_back(false);
+      privateData_->isPixE1->push_back(false);
+      privateData_->isPixE1->push_back(false);
+      privateData_->numberOfValidPixelBarrelHits->push_back(-1);
+      privateData_->numberOfValidPixelEndcapHits->push_back(-1);
+      privateData_->numberOfValidStripTIBHits->push_back(-1);
+      privateData_->numberOfValidStripTIDHits->push_back(-1);
+      privateData_->numberOfValidStripTOBHits->push_back(-1);
+      privateData_->numberOfValidStripTECHits->push_back(-1);
 
     }
 
@@ -520,6 +554,18 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
     
     cmstree->column((colPrefix+"recHitsSize"+colSuffix).c_str(), *privateData_->recHitsSize, nCandString.c_str(), 0, "Reco");
 
+    cmstree->column((colPrefix+"isPixB1"+colSuffix).c_str(), *privateData_->isPixB1, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"isPixB2"+colSuffix).c_str(), *privateData_->isPixB2, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"isPixE1"+colSuffix).c_str(), *privateData_->isPixE1, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"isPixE2"+colSuffix).c_str(), *privateData_->isPixE2, nCandString.c_str(), 0, "Reco");
+
+    cmstree->column((colPrefix+"numberOfValidPixelBarrelHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelBarrelHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"numberOfValidPixelEndcapHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelEndcapHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"numberOfValidStripTIBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIBHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"numberOfValidStripTIDHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIDHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"numberOfValidStripTOBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTOBHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"numberOfValidStripTECHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTECHits, nCandString.c_str(), 0, "Reco");
+
   }
 
 }
@@ -574,6 +620,16 @@ void CmsTrackFillerData::initialise() {
   truncatedDeDx = new vector<float>;
   truncatedDeDxError = new vector<float>;
   truncatedDeDxNoM = new vector<float>;
+  isPixB1 = new vector<bool>;
+  isPixB2 = new vector<bool>;
+  isPixE1 = new vector<bool>;
+  isPixE2 = new vector<bool>;
+  numberOfValidPixelBarrelHits = new vector<int>;
+  numberOfValidPixelEndcapHits = new vector<int>;
+  numberOfValidStripTIBHits = new vector<int>;
+  numberOfValidStripTIDHits = new vector<int>;
+  numberOfValidStripTOBHits = new vector<int>;
+  numberOfValidStripTECHits = new vector<int>;
 
 }
 
@@ -615,5 +671,43 @@ void CmsTrackFillerData::clearTrkVectors() {
   truncatedDeDx->clear();
   truncatedDeDxError->clear();
   truncatedDeDxNoM->clear();
+  isPixB1->clear();
+  isPixB2->clear();
+  isPixE1->clear();
+  isPixE2->clear();
+  numberOfValidPixelBarrelHits->clear();
+  numberOfValidPixelEndcapHits->clear();
+  numberOfValidStripTIBHits->clear();
+  numberOfValidStripTIDHits->clear();
+  numberOfValidStripTOBHits->clear();
+  numberOfValidStripTECHits->clear();
 
+}
+
+bool CmsTrackFiller::hasValidHitInNthPixelBarrel(uint32_t nlayer, HitPattern hitpattern) {
+  for (int i=0; i<(PatternSize * 32) / HitSize; i++) {
+    uint32_t pattern = hitpattern.getHitPattern(i);
+    if (hitpattern.pixelBarrelHitFilter(pattern)) {
+      if (hitpattern.getLayer(pattern) == nlayer) {
+        if (hitpattern.validHitFilter(pattern)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+}
+
+bool CmsTrackFiller::hasValidHitInNthPixelEndcap(uint32_t nlayer, HitPattern hitpattern) {
+  for (int i=0; i<(PatternSize * 32) / HitSize; i++) {
+    uint32_t pattern = hitpattern.getHitPattern(i);
+    if (hitpattern.pixelEndcapHitFilter(pattern)) {
+      if (hitpattern.getLayer(pattern) == nlayer) {
+        if (hitpattern.validHitFilter(pattern)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
 }

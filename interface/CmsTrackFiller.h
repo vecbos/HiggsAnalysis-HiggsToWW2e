@@ -23,6 +23,7 @@
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
+#include "DataFormats/TrackReco/interface/HitPattern.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -48,7 +49,9 @@ struct CmsTrackFillerData {
   vector<float> *trackDxyErrorPV, *trackD0ErrorPV, *trackDszErrorPV, *trackDzErrorPV;
 
   vector<float> *truncatedDeDx, *truncatedDeDxError, *truncatedDeDxNoM;
-
+  vector<bool> *isPixB1, *isPixB2, *isPixE1, *isPixE2;
+  vector<int> *numberOfValidPixelBarrelHits, *numberOfValidPixelEndcapHits;
+  vector<int> *numberOfValidStripTIBHits, *numberOfValidStripTIDHits, *numberOfValidStripTOBHits, *numberOfValidStripTECHits;
 
 public:
   void initialise();
@@ -108,6 +111,8 @@ class CmsTrackFiller {
   void writeDeDxInfo(edm::RefToBase<reco::Track> refittedTrack);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
   void treeDeDxInfo(const std::string &colPrefix, const std::string &colSuffix);
+  bool hasValidHitInNthPixelBarrel(uint32_t nlayer, reco::HitPattern pattern);
+  bool hasValidHitInNthPixelEndcap(uint32_t nlayer, reco::HitPattern pattern);
 
   bool saveTrk_;
   bool saveFatTrk_;
@@ -131,6 +136,12 @@ class CmsTrackFiller {
   edm::Handle< edm::View<reco::Track> > refittedTracksForDeDx_;
   edm::Handle< reco::DeDxDataValueMap >  energyLoss_ ;
   edm::Handle<reco::VertexCollection> primaryVertex_;
+
+  // number of 32 bit integers to store the full pattern
+  const static unsigned short PatternSize = 25;
+
+  // number of bits used for each hit
+  const static unsigned short HitSize = 11;    
 
   // Primary Vertex in point format
   float x0, y0, z0;
