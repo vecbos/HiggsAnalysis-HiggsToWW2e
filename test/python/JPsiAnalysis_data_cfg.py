@@ -34,6 +34,7 @@ process.treeDumper.dumpGenMet = False
 process.treeDumper.dumpGenJets = False
 process.treeDumper.dumpSCs = True
 process.treeDumper.dumpTracks = True
+process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
