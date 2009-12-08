@@ -100,7 +100,7 @@ private:
   //! ECAL rechits to compute the cluster shapes on the fly
   edm::InputTag ecalBarrelRecHits_, ecalEndcapRecHits_;
   //! track and calotowers collection for isolation studies
-  edm::InputTag tracksForIsolationProducer_, calotowersForIsolationProducer_;
+  edm::InputTag calotowersForIsolationProducer_;
   //! collection of jet vertices for alpha evaluation
   edm::InputTag jetVertexAlphaCollection1_, jetVertexAlphaCollection2_;
   //! generator-level particle collection in input

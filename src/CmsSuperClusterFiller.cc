@@ -18,12 +18,10 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DataFormats/BeamSpot/interface/BeamSpot.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
-#include "DataFormats/VertexReco/interface/Vertex.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
+#include "RecoEgamma/EgammaIsolationAlgos/interface/EgammaTowerIsolation.h"
 #include "RecoEgamma/EgammaTools/interface/ECALPositionCalculator.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
 
@@ -58,6 +56,7 @@ CmsSuperClusterFiller::CmsSuperClusterFiller(CmsTree *cmsTree, int maxSC):  priv
   privateData_->initialiseCandidate();
   closestProb_ = DetId(0);
   severityClosestProb_ = -1;
+
 }
 
 //--------------
@@ -81,13 +80,18 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->eMax;
   delete privateData_->e2x2;
   delete privateData_->e2nd;
+  delete privateData_->hOverE;
   delete privateData_->covIEtaIEta;
   delete privateData_->covIEtaIPhi;
   delete privateData_->covIPhiIPhi;
   delete privateData_->trackIndex;
-  delete privateData_->deltaR;
-  delete privateData_->deltaPhi;
-  delete privateData_->deltaEta;
+  delete privateData_->trackDeltaR;
+  delete privateData_->trackDeltaPhi;
+  delete privateData_->trackDeltaEta;
+  delete privateData_->gsfTrackIndex;
+  delete privateData_->gsfTrackDeltaR;
+  delete privateData_->gsfTrackDeltaPhi;
+  delete privateData_->gsfTrackDeltaEta;
   delete privateData_->time;
   delete privateData_->chi2Prob;
   delete privateData_->recoFlag;
@@ -130,10 +134,20 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       *(privateData_->nSC) = collection->size();
   
       // to match track-SC
-      Handle<TrackCollection> tracks;
-      try { iEvent.getByLabel(Tracks_, tracks); }
+      try { iEvent.getByLabel(Tracks_, tracks_); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get track collection" << Tracks_; }
-      const TrackCollection *Tracks = tracks.product();
+
+      try { iEvent.getByLabel(GsfTracks_, gsfTracks_); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get GSF track collection" << GsfTracks_; }
+
+      try { iEvent.getByType(theBeamSpot_); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get beam spot "; }
+
+      try { iEvent.getByLabel("offlinePrimaryVertices", hVtx_); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary vertex collection: offlinePrimaryVertices"; }
+
+      try { iEvent.getByLabel(Calotowers_, calotowers_); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary calotowers collection" << Calotowers_; }
 
       // for cluster shape variables
       Handle< EcalRecHitCollection > EcalBarrelRecHits;
@@ -150,7 +164,11 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       for(cand=collection->begin(); cand!=collection->end(); cand++) 
 	{
 	  // fill basic kinematics
-	  writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits,Tracks);
+	  writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
+          // fill CTF track - SC match
+          writeTrackInfo(&(*cand),iEvent,iSetup,&(*tracks_),track);
+          // fill GSF track - SC match
+          writeTrackInfo(&(*cand),iEvent,iSetup,&(*gsfTracks_),gsftrack);
 	}
     }
   else 
@@ -167,10 +185,8 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
-//   if(collection) 
-//     {
-      treeSCInfo(columnPrefix,columnSuffix);
-//     }
+  treeSCInfo(columnPrefix,columnSuffix);
+  treeTrackInfo(columnPrefix,columnSuffix);  
 
   if(dumpData) cmstree->dumpData();
 
@@ -183,8 +199,7 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand, 
                                         const edm::Event& iEvent, const edm::EventSetup& iSetup,
-                                        const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits,
-                                        const TrackCollection *theTracks) {
+                                        const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits) {
 
   // fill the SC infos
   privateData_->nBC->push_back((int)cand->clustersSize());
@@ -290,22 +305,34 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->sevClosProbl->push_back(-1);
   }
 
-
-  // find the PV. If found, set the origin to that, otherwise sdet it to BS.
-  // origin is always the BS.
-  edm::Handle<reco::BeamSpot> theBeamSpot;
-  iEvent.getByType(theBeamSpot);
-  edm::Handle<reco::VertexCollection> hVtx;
-  iEvent.getByLabel("offlinePrimaryVertices", hVtx);
+  // calculate H/E
+  float hOverEConeSize = 0.15;
+  float hOverEPtMin = 0.;
+  EgammaTowerIsolation *towerIso1 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,1,calotowers_.product()) ;
+  EgammaTowerIsolation *towerIso2 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,2,calotowers_.product()) ;
   
+  float TowerHcalESum1 = towerIso1->getTowerESum(cand);
+  float TowerHcalESum2 = towerIso2->getTowerESum(cand);
+  float hcalESum = TowerHcalESum1 + TowerHcalESum2;
+  
+  privateData_->hOverE->push_back(hcalESum);
+
+  delete towerIso1;
+  delete towerIso2;
+
+}
+
+void CmsSuperClusterFiller::writeTrackInfo(const reco::SuperCluster *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup,
+                                           const reco::TrackCollection *theTracks, int trackType) {
+
   math::XYZPoint xyzVertexPos;
   GlobalPoint gpVertexPos;
   GlobalPoint origin;
 
-  if ( hVtx->size()>0 ){ 
+  if ( hVtx_->size()>0 ){ 
     float theMaxPt  = -999.;
     VertexCollection::const_iterator thisVertex;
-    for(thisVertex = hVtx->begin(); thisVertex != hVtx->end(); ++thisVertex){      
+    for(thisVertex = hVtx_->begin(); thisVertex != hVtx_->end(); ++thisVertex){      
       float SumPt = 0.0;
       if((*thisVertex).tracksSize() > 0){
         std::vector<TrackBaseRef >::const_iterator thisTrack;
@@ -320,10 +347,10 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       }}
   }
   else{
-    gpVertexPos  = GlobalPoint(theBeamSpot->position().x(),theBeamSpot->position().y(),theBeamSpot->position().z());
-    xyzVertexPos = math::XYZVector(theBeamSpot->position().x(),theBeamSpot->position().y(),theBeamSpot->position().z());
+    gpVertexPos  = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
+    xyzVertexPos = math::XYZVector(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
   }  
-  origin = GlobalPoint(theBeamSpot->position().x(),theBeamSpot->position().y(),theBeamSpot->position().z());
+  origin = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
 
   // magnetic field
   edm::ESHandle<MagneticField> theMagField;
@@ -366,19 +393,106 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     }
     trackIndex++;
   }
-  
-  privateData_->trackIndex->push_back(bestTrack);
-  privateData_->deltaR->push_back(bestDeltaR);
-  privateData_->deltaPhi->push_back(bestDeltaPhi);
-  privateData_->deltaEta->push_back(bestDeltaEta);
 
+  if ( trackType == track ) {
+    privateData_->trackIndex->push_back(bestTrack);
+    privateData_->trackDeltaR->push_back(bestDeltaR);
+    privateData_->trackDeltaPhi->push_back(bestDeltaPhi);
+    privateData_->trackDeltaEta->push_back(bestDeltaEta);
+  } else if ( trackType == gsftrack ) {
+    privateData_->gsfTrackIndex->push_back(bestTrack);
+    privateData_->gsfTrackDeltaR->push_back(bestDeltaR);
+    privateData_->gsfTrackDeltaPhi->push_back(bestDeltaPhi);
+    privateData_->gsfTrackDeltaEta->push_back(bestDeltaEta);
+  }
 
 }
 
+void CmsSuperClusterFiller::writeTrackInfo(const reco::SuperCluster *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup,
+                                           const reco::GsfTrackCollection *theTracks, int trackType) {
 
+  math::XYZPoint xyzVertexPos;
+  GlobalPoint gpVertexPos;
+  GlobalPoint origin;
 
+  if ( hVtx_->size()>0 ){ 
+    float theMaxPt  = -999.;
+    VertexCollection::const_iterator thisVertex;
+    for(thisVertex = hVtx_->begin(); thisVertex != hVtx_->end(); ++thisVertex){      
+      float SumPt = 0.0;
+      if((*thisVertex).tracksSize() > 0){
+        std::vector<TrackBaseRef >::const_iterator thisTrack;
+        for( thisTrack=(*thisVertex).tracks_begin(); thisTrack!=(*thisVertex).tracks_end(); thisTrack++){
+          // if((**thisTrack).charge()==-1 || (**thisTrack).charge()==1) SumPt += (**thisTrack).pt();
+          SumPt += (**thisTrack).pt();
+        }}
+      if (SumPt>theMaxPt){ 
+        theMaxPt = SumPt; 
+        gpVertexPos  = GlobalPoint((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
+        xyzVertexPos = math::XYZVector((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
+      }}
+  }
+  else{
+    gpVertexPos  = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
+    xyzVertexPos = math::XYZVector(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
+  }  
+  origin = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
 
+  // magnetic field
+  edm::ESHandle<MagneticField> theMagField;
+  iSetup.get<IdealMagneticFieldRecord>().get(theMagField);
+  
+  float bestDeltaR = 999.;
+  float bestDeltaPhi = 999.;
+  float bestDeltaEta = 999.;
+  int bestTrack = -1;
 
+  int trackIndex=0;
+  GsfTrackCollection::const_iterator trIter;      
+  for (trIter=theTracks->begin(); trIter!=theTracks->end(); trIter++) {
+    
+    int trackQ          = trIter->charge();
+    float trackPt       = trIter->p()*sin(trIter->theta());
+    
+    if (trackPt > 1) {
+
+      // preso da HLTrigger/Egamma/src/HLTElectronDetaDphiFilter.cc
+      const math::XYZVector trackMom = trIter->momentum();
+      math::XYZPoint SCcorrPosition(cand->x()-gpVertexPos.x(), cand->y()-gpVertexPos.y(), cand->z()-gpVertexPos.z());
+      float etaScCorr = SCcorrPosition.eta();                                                            // eta sc va corretto per il beam spot / vertex
+      float deltaEta  = fabs(etaScCorr - trIter->eta());                                           // eta traccia al vtx non va corretto x beam spot (gia' incluso nel fit)
+      // eta traccia non va propagato al calorimetro tanto non curva 
+      ECALPositionCalculator posCalc;
+      float phiTrCorr = posCalc.ecalPhi(&(*theMagField), trackMom, xyzVertexPos, trackQ);          // phi traccia al vtx non va corretto x beam spot (gia' incluso nel fit)
+      // ma phi traccia va propagato al calo e qui serve il constraint del vtx 
+      float deltaPhi  = fabs(cand->phi() - phiTrCorr);
+      if(deltaPhi>6.283185308) deltaPhi -= 6.283185308;
+      if(deltaPhi>3.141592654) deltaPhi = 6.283185308-deltaPhi;
+      float deltaR = sqrt (deltaEta*deltaEta + deltaPhi*deltaPhi);
+
+      if (deltaR < bestDeltaR){
+        bestDeltaPhi    = deltaPhi;
+        bestDeltaEta    = deltaEta;
+        bestDeltaR      = deltaR;
+        bestTrack = trackIndex;
+      }
+    }
+    trackIndex++;
+  }
+
+  if ( trackType == track ) {
+    privateData_->trackIndex->push_back(bestTrack);
+    privateData_->trackDeltaR->push_back(bestDeltaR);
+    privateData_->trackDeltaPhi->push_back(bestDeltaPhi);
+    privateData_->trackDeltaEta->push_back(bestDeltaEta);
+  } else if ( trackType == gsftrack ) {
+    privateData_->gsfTrackIndex->push_back(bestTrack);
+    privateData_->gsfTrackDeltaR->push_back(bestDeltaR);
+    privateData_->gsfTrackDeltaPhi->push_back(bestDeltaPhi);
+    privateData_->gsfTrackDeltaEta->push_back(bestDeltaEta);
+  }
+
+}
 
 
 void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::string colSuffix) 
@@ -400,10 +514,7 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackIndex"+colSuffix).c_str(), *privateData_->trackIndex, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"deltaR"+colSuffix).c_str(), *privateData_->deltaR, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"deltaPhi"+colSuffix).c_str(), *privateData_->deltaPhi, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"deltaEta"+colSuffix).c_str(), *privateData_->deltaEta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hOverE"+colSuffix).c_str(), *privateData_->hOverE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlag"+colSuffix).c_str(), *privateData_->recoFlag, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chi2Prob"+colSuffix).c_str(), *privateData_->chi2Prob, nCandString.c_str(), 0, "Reco");
@@ -412,6 +523,21 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"fracClosProbl"+colSuffix).c_str(), *privateData_->fracClosProbl, nCandString.c_str(), 0, "Reco");
 }
+
+
+void CmsSuperClusterFiller::treeTrackInfo(const std::string colPrefix, const std::string colSuffix)
+{
+  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
+  cmstree->column((colPrefix+"trackIndex"+colSuffix).c_str(), *privateData_->trackIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trackDeltaR"+colSuffix).c_str(), *privateData_->trackDeltaR, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trackDeltaPhi"+colSuffix).c_str(), *privateData_->trackDeltaPhi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trackDeltaEta"+colSuffix).c_str(), *privateData_->trackDeltaEta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"gsfTrackIndex"+colSuffix).c_str(), *privateData_->gsfTrackIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"gsfTrackDeltaR"+colSuffix).c_str(), *privateData_->gsfTrackDeltaR, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"gsfTrackDeltaPhi"+colSuffix).c_str(), *privateData_->gsfTrackDeltaPhi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"gsfTrackDeltaEta"+colSuffix).c_str(), *privateData_->gsfTrackDeltaEta, nCandString.c_str(), 0, "Reco");
+}
+
 
 // copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
 float CmsSuperClusterFiller::fractionAroundClosestProblematic( const reco::CaloCluster & cluster,
@@ -529,13 +655,18 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   eMax = new vector<float>;
   e2x2 = new vector<float>;
   e2nd = new vector<float>;
+  hOverE = new vector<float>;
   covIEtaIEta = new vector<float>;
   covIEtaIPhi = new vector<float>;
   covIPhiIPhi = new vector<float>;
   trackIndex = new vector<int>;
-  deltaR = new vector<float>;
-  deltaPhi = new vector<float>;
-  deltaEta = new vector<float>;
+  trackDeltaR = new vector<float>;
+  trackDeltaPhi = new vector<float>;
+  trackDeltaEta = new vector<float>;
+  gsfTrackIndex = new vector<int>;
+  gsfTrackDeltaR = new vector<float>;
+  gsfTrackDeltaPhi = new vector<float>;
+  gsfTrackDeltaEta = new vector<float>;
   recoFlag = new vector<int>;
   time = new vector<float>;
   chi2Prob = new vector<float>;
@@ -561,13 +692,18 @@ void CmsSuperClusterFillerData::clear()
   eMax->clear();
   e2x2->clear();
   e2nd->clear();
+  hOverE->clear();
   covIEtaIEta->clear();
   covIEtaIPhi->clear();
   covIPhiIPhi->clear();
   trackIndex->clear();
-  deltaR->clear();
-  deltaPhi->clear();
-  deltaEta->clear();
+  trackDeltaR->clear();
+  trackDeltaPhi->clear();
+  trackDeltaEta->clear();
+  gsfTrackIndex->clear();
+  gsfTrackDeltaR->clear();
+  gsfTrackDeltaPhi->clear();
+  gsfTrackDeltaEta->clear();
   recoFlag->clear();
   time->clear();
   chi2Prob->clear();

@@ -29,6 +29,12 @@
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/CaloTowers/interface/CaloTowerCollection.h"
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/CaloTopology/interface/CaloTopology.h"
@@ -48,8 +54,9 @@ struct CmsSuperClusterFillerData {
   vector<int>  *nBC, *nCrystals, *iAlgo, *recoFlag, *sevClosProbl, *idClosProbl;
   vector<float> *rawEnergy, *energy, *seedEnergy, *eta, *theta, *phi, *time, *chi2Prob, *fracClosProbl;
   vector<float> *e3x3, * e5x5, *eMax, *e2x2, *e2nd, *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi;
-  vector<int> *trackIndex;
-  vector<float> *deltaR, *deltaPhi, *deltaEta;
+  vector<float> *hOverE;
+  vector<int> *trackIndex, *gsfTrackIndex;
+  vector<float> *trackDeltaR, *trackDeltaPhi, *trackDeltaEta, *gsfTrackDeltaR, *gsfTrackDeltaPhi, *gsfTrackDeltaEta;
   int *nSC;
 
 public:
@@ -82,6 +89,10 @@ public:
 
   //! set the track collection (to match the superclusters as hand-made electrons)
   void setTracks( edm::InputTag Tracks ) { Tracks_ = Tracks; }
+  //! set the GSF track collection (to match the superclusters as hand-made electrons)
+  void setGsfTracks( edm::InputTag GsfTracks ) { GsfTracks_ = GsfTracks; }
+  //! set the calotowers collection (to calculate H/E)
+  void setCalotowers( edm::InputTag Calotowers ) { Calotowers_ = Calotowers; }
   //! set the rechits for ECAL barrel (needed for cluster shapes)
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
@@ -103,9 +114,18 @@ protected:
 
   virtual void writeSCInfo(const reco::SuperCluster *cand, 
 			   const edm::Event&, const edm::EventSetup&,
-                           const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits, 
-                           const reco::TrackCollection *Tracks);
+                           const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
+
+  virtual void writeTrackInfo(const reco::SuperCluster *cand,
+                              const edm::Event&, const edm::EventSetup&,
+                              const reco::TrackCollection *theTracks, int trackType);
+
+  virtual void writeTrackInfo(const reco::SuperCluster *cand,
+                              const edm::Event&, const edm::EventSetup&,
+                              const reco::GsfTrackCollection *theTracks, int trackType);
+
   virtual void treeSCInfo(const std::string colPrefix, const std::string colSuffix);
+  virtual void treeTrackInfo(const std::string colPrefix, const std::string colSuffix);
   
   // Friends
 
@@ -114,8 +134,20 @@ protected:
   CmsTree *cmstree;
 
   edm::InputTag Tracks_;
+  edm::InputTag GsfTracks_;
   edm::InputTag EcalBarrelRecHits_;
   edm::InputTag EcalEndcapRecHits_;
+  edm::InputTag Calotowers_;
+
+  edm::Handle<reco::BeamSpot> theBeamSpot_;
+  edm::Handle<reco::VertexCollection> hVtx_;
+
+  edm::Handle<reco::TrackCollection> tracks_;
+  edm::Handle<reco::GsfTrackCollection> gsfTracks_;
+
+  edm::Handle<CaloTowerCollection> calotowers_;
+
+  enum tracktype { track, gsftrack };
 
   DetId closestProb_;
   int severityClosestProb_;

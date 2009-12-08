@@ -127,7 +127,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalBCCollection_        = iConfig.getParameter<edm::InputTag>("ecalBCCollection");
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
-  tracksForIsolationProducer_     = iConfig.getParameter<edm::InputTag>("tracksForIsolationProducer");
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
   trackCollection_         = iConfig.getParameter<edm::InputTag>("trackCollection");
   refittedForDeDxTrackCollection_ = iConfig.getParameter<edm::InputTag>("refittedForDeDxTrackCollection");
@@ -237,7 +236,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
     treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
     // for custom isolation
-    treeFill.setTracksProducer(tracksForIsolationProducer_);
+    treeFill.setTracksProducer(trackCollection_);
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
@@ -268,7 +267,9 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       std::string barrelSuffix("SC");
       treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
-      treeFill.setTracks(tracksForIsolationProducer_);
+      treeFill.setTracks(trackCollection_);
+      treeFill.setGsfTracks(gsfTrackCollection_);
+      treeFill.setCalotowers(calotowersForIsolationProducer_);
       treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
   }
