@@ -81,8 +81,6 @@ private:
   bool dumpParticleFlowObjects_;
   //! dump the run info informations
   bool dumpRunInfo_;
-  //! remove energy of bad crystals from basic clusters
-  bool removeBadCrystalsInBCs_;
   //! save the dE/dx of the tracks (requires the right module to be run)
   bool saveTrackDeDx_;
 

@@ -41,7 +41,6 @@ treeDumper = cms.EDFilter("HWWTreeDumper",
                           dumpVertices = cms.untracked.bool(False),
                           dumpSCs = cms.untracked.bool(False),
                           dumpBCs = cms.untracked.bool(False),
-                          removeBadCrystalsInBCs = cms.untracked.bool(False),
                           dumpJets = cms.untracked.bool(True),
                           dumpMet = cms.untracked.bool(True),
                           # switch ON/OFF the particle flow objects to dump

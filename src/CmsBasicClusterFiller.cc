@@ -75,6 +75,9 @@ CmsBasicClusterFiller::CmsBasicClusterFiller(CmsTree *cmsTree, int maxBC):  priv
   trkIndexName_ = new std::string("n");
   maxBC_=maxBC;
   privateData_->initialiseCandidate();
+  closestProb_ = DetId(0);
+  severityClosestProb_ = -1;
+
 }
 
 //--------------
@@ -83,17 +86,28 @@ CmsBasicClusterFiller::CmsBasicClusterFiller(CmsTree *cmsTree, int maxBC):  priv
 
 CmsBasicClusterFiller::~CmsBasicClusterFiller() 
 {
-  // delete here the vector ptr's
+  // delete here the vector ptr's  delete privateData_->nBC;
   delete privateData_->nCrystals;
-  delete privateData_->nOverlap3x3;
+  delete privateData_->iAlgo;
   delete privateData_->energy;
+  delete privateData_->seedEnergy;
   delete privateData_->eta;
   delete privateData_->theta;
   delete privateData_->phi;
-  delete privateData_->seedEnergy;
-  delete privateData_->eMax;
   delete privateData_->e3x3;
   delete privateData_->e5x5;
+  delete privateData_->eMax;
+  delete privateData_->e2x2;
+  delete privateData_->e2nd;
+  delete privateData_->covIEtaIEta;
+  delete privateData_->covIEtaIPhi;
+  delete privateData_->covIPhiIPhi;
+  delete privateData_->time;
+  delete privateData_->chi2Prob;
+  delete privateData_->recoFlag;
+  delete privateData_->sevClosProbl;
+  delete privateData_->idClosProbl;
+  delete privateData_->fracClosProbl;
 }
 
 
@@ -139,6 +153,9 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       try { iEvent.getByLabel(EcalEndcapRecHits_, EcalEndcapRecHits); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsBasicClusterFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
       const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
+
+      try { iEvent.getByLabel(Calotowers_, calotowers_); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary calotowers collection" << Calotowers_; }
       
       BasicClusterCollection::const_iterator cand;
       for(cand=collection->begin(); cand!=collection->end(); cand++) 
@@ -184,165 +201,280 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
 
   std::vector< std::pair<DetId, float> > ids = cand->hitsAndFractions();
   
-  privateData_->nCrystals->push_back((int)ids.size());
+  privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
+  privateData_->iAlgo->push_back((int)cand->algo());
+  privateData_->energy->push_back((float)cand->energy());
   privateData_->eta->push_back((float)cand->position().eta());
   privateData_->theta->push_back((float)cand->position().theta());
   privateData_->phi->push_back((float)cand->position().phi());
-  
-  const EcalRecHitCollection *rechits = 0;
-  float seedEta = cand->position().eta();
-  if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
-  else rechits = EERecHits; 
 
-  // find the seed energy
-  // find the eventual noisy channels inside the cluster and record their energy
-  double noisyChanEnergy = 0.0;
-  DetId seedId;
-  EcalRecHitCollection::const_iterator seedItr = rechits->begin();
-
-  for(std::vector< std::pair<DetId,float> >::const_iterator idItr = ids.begin(); idItr != ids.end(); ++idItr) {
-    DetId id = idItr->first;
-    if(id.det() != DetId::Ecal) { continue; }
-    EcalRecHitCollection::const_iterator hitItr = rechits->find(id);
-    if(hitItr == rechits->end()) { continue; }
-    if(hitItr->energy() > seedItr->energy()) {
-      seedItr = hitItr;
-      seedId = id;
-    }
-    
-    if( hitItr->recoFlag() == EcalRecHit::kDead || EcalRecHit::kFaultyHardware ) noisyChanEnergy += hitItr->energy();
-
-  }
-
-  double energyToBeRemoved = (removeBadChannels_) ? noisyChanEnergy : 0.0;
-
+  // fill the seed basic cluster shapes
   edm::ESHandle<CaloTopology> pTopology;
   iSetup.get<CaloTopologyRecord>().get(pTopology);
   
   edm::ESHandle<CaloGeometry> pGeometry;
   iSetup.get<CaloGeometryRecord>().get(pGeometry);
 
-  bool validTopologyAndGeometry = false;
-  
   if ( pTopology.isValid() && pGeometry.isValid() ) {
     
-    validTopologyAndGeometry = true;
-    
     const CaloTopology *topology = pTopology.product();
-    
-    float eMax = EcalClusterTools::eMax( *cand, &(*rechits) ) - energyToBeRemoved;    
-    float e3x3 = EcalClusterTools::e3x3( *cand, &(*rechits), topology ) - energyToBeRemoved;
-    float e5x5 = EcalClusterTools::e5x5( *cand, &(*rechits), topology ) - energyToBeRemoved;
 
-    privateData_->e3x3->push_back(e3x3);
-    privateData_->e5x5->push_back(e5x5);
-    privateData_->eMax->push_back(eMax);
-    
+    const EcalRecHitCollection *rechits = 0;
+
+    float seedEta = cand->position().eta();
+
+    if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
+    else rechits = EERecHits; 
+
+      float eMax = EcalClusterTools::eMax( *cand, &(*rechits) );
+      float e3x3 = EcalClusterTools::e3x3( *cand, &(*rechits), topology );
+      float e5x5 = EcalClusterTools::e5x5( *cand, &(*rechits), topology );
+      float e2x2 = EcalClusterTools::e2x2( *cand, &(*rechits), topology );
+      float e2nd = EcalClusterTools::e2nd( *cand, &(*rechits) );
+
+      privateData_->e3x3->push_back(e3x3);
+      privateData_->e5x5->push_back(e5x5);
+      privateData_->eMax->push_back(eMax);
+      privateData_->e2x2->push_back(e2x2);
+      privateData_->e2nd->push_back(e2nd);
+
+      // local covariances: instead of using absolute eta/phi it counts crystals normalised
+      std::vector<float> vLocCov = EcalClusterTools::localCovariances( *cand, &(*rechits), topology );
+      
+      float covIEtaIEta = vLocCov[0];
+      float covIEtaIPhi = vLocCov[1];
+      float covIPhiIPhi = vLocCov[2];
+      
+      privateData_->covIEtaIEta->push_back(covIEtaIEta);
+      privateData_->covIEtaIPhi->push_back(covIEtaIPhi);
+      privateData_->covIPhiIPhi->push_back(covIPhiIPhi);
+
+      std::pair<DetId, float> maxRH = EcalClusterTools::getMaximum( *cand, &(*rechits) );
+      DetId seedCrystalId = maxRH.first;
+      EcalRecHitCollection::const_iterator seedRH = rechits->find(seedCrystalId);
+      
+      privateData_->time->push_back((float)seedRH->time());
+      privateData_->chi2Prob->push_back((float)seedRH->chi2Prob());
+      privateData_->recoFlag->push_back((int)seedRH->recoFlag());
+      privateData_->seedEnergy->push_back((float)maxRH.second);
+
+      // channel status
+      edm::ESHandle<EcalChannelStatus> pChannelStatus;
+      iSetup.get<EcalChannelStatusRcd>().get(pChannelStatus);
+      const EcalChannelStatus *ch_status = pChannelStatus.product();
+
+      if( fabs(seedEta) < 1.479 ) {
+        float frac = fractionAroundClosestProblematic( *cand, *rechits, *ch_status, topology);
+        privateData_->fracClosProbl->push_back(frac);
+        if( closestProb_.null() ) {
+          privateData_->idClosProbl->push_back(-1);
+          privateData_->sevClosProbl->push_back(-1);
+        } else {
+          privateData_->idClosProbl->push_back(closestProb_.rawId());
+          privateData_->sevClosProbl->push_back(severityClosestProb_);
+        }
+      } else {
+        privateData_->fracClosProbl->push_back(-1);
+        privateData_->idClosProbl->push_back(-1);
+        privateData_->idClosProbl->push_back(-1);
+        privateData_->sevClosProbl->push_back(-1);
+      }
+
   } else {
-    privateData_->e3x3->push_back(-1.0);
-    privateData_->e5x5->push_back(-1.0);
-    privateData_->eMax->push_back(-1.0);
+    privateData_->e3x3->push_back(-1.);
+    privateData_->e5x5->push_back(-1.);
+    privateData_->eMax->push_back(-1.);
+    privateData_->e2x2->push_back(-1.);
+    privateData_->e2nd->push_back(-1.);
+    privateData_->covIEtaIEta->push_back(-1.);
+    privateData_->covIEtaIPhi->push_back(-1.);
+    privateData_->covIPhiIPhi->push_back(-1.);
+    privateData_->time->push_back(-999.);
+    privateData_->chi2Prob->push_back(-999.);
+    privateData_->recoFlag->push_back(-1);
+    privateData_->seedEnergy->push_back(-1.);
+    privateData_->fracClosProbl->push_back(-1);
+    privateData_->idClosProbl->push_back(-1);
+    privateData_->idClosProbl->push_back(-1);
+    privateData_->sevClosProbl->push_back(-1);
   }
-
-  privateData_->energy->push_back((float)cand->energy() - energyToBeRemoved);
-  privateData_->seedEnergy->push_back(seedItr->energy() - energyToBeRemoved);
-
-  //  DetId seedId = cand->seed(); // it seems it doesn't work
-  
-  int nCry3x3=0;
-
-  std::vector< std::pair<DetId, float> >::const_iterator clusItr = ids.begin();
-  
-  if(seedId.subdetId() == EcalBarrel) {
-    EBDetId ebId = (EBDetId)seedId;
-    for(int icry=0; icry<9; ++icry) {
-      unsigned int row    = icry/3;
-      unsigned int column = icry%3;
-      int icryEta = ebId.ieta()+column-1;
-      int icryPhi = ebId.iphi()+row-1;
-      if ( EBDetId::validDetId(icryEta, icryPhi) ) {
-        EBDetId id3x3 = EBDetId(icryEta, icryPhi, EBDetId::ETAPHIMODE);
-        for( clusItr=ids.begin(); clusItr!=ids.end(); ++clusItr ) {
-          EBDetId idInCluster = (EBDetId)clusItr->first;
-          if ( idInCluster == id3x3 ) {
-            nCry3x3++;
-            break;
-          }
-        }
-      }
-    }
-  } else if(seedId.subdetId() == EcalEndcap) {
-    EEDetId eeId = (EEDetId)seedId;
-    for(int icry=0; icry<9; ++icry) {
-      unsigned int row    = icry/3;
-      unsigned int column = icry%3;
-      int icryX = eeId.ix()+column-1;
-      int icryY = eeId.iy()+row-1;
-      int iz = (eeId.positiveZ()) ? 1 : -1;
-      if ( EEDetId::validDetId(icryX, icryY, iz) ) {
-        EEDetId id3x3 = EEDetId(icryX, icryY, iz, EEDetId::XYMODE);
-        for( clusItr=ids.begin(); clusItr!=ids.end(); ++clusItr ) {
-          if ( clusItr->first == id3x3 ) {
-            nCry3x3++;
-            break;
-          }
-        }
-      }
-    }
-  }
-
-  privateData_->nOverlap3x3->push_back(nCry3x3);
 
 }
-
-
-
-
-
 
 
 void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::string colSuffix) 
 {
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"nCrystals"+colSuffix).c_str(), *privateData_->nCrystals, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"nOverlap3x3"+colSuffix).c_str(), *privateData_->nOverlap3x3, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"iAlgo"+colSuffix).c_str(), *privateData_->iAlgo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x2"+colSuffix).c_str(), *privateData_->e2x2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2nd"+colSuffix).c_str(), *privateData_->e2nd, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"recoFlag"+colSuffix).c_str(), *privateData_->recoFlag, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"chi2Prob"+colSuffix).c_str(), *privateData_->chi2Prob, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"fracClosProbl"+colSuffix).c_str(), *privateData_->fracClosProbl, nCandString.c_str(), 0, "Reco");
 }
 
+// copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
+float CmsBasicClusterFiller::fractionAroundClosestProblematic( const reco::CaloCluster & cluster,
+                                                               const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus, const CaloTopology* topology )
+{ 
+  DetId closestProb = closestProblematic(cluster , recHits, chStatus, topology).first;
+  //  std::cout << "%%%%%%%%%%% Closest prob is " << EBDetId(closestProb) << std::endl;
+  if (closestProb.null())
+    return 0.;
+
+  std::vector<DetId> neighbours = topology->getWindow(closestProb,3,3);
+  std::vector<DetId>::const_iterator itn;
+
+  std::vector< std::pair<DetId, float> > hitsAndFracs = cluster.hitsAndFractions();
+  std::vector< std::pair<DetId, float> >::const_iterator it;
+
+  float fraction = 0.;
+
+  for ( itn = neighbours.begin(); itn != neighbours.end(); ++itn )
+    { 
+      //      std::cout << "Checking detId " << EBDetId((*itn)) << std::endl;
+      for ( it = hitsAndFracs.begin(); it != hitsAndFracs.end(); ++it )
+        { 
+          DetId id = (*it).first;
+          if ( id != (*itn) )
+            continue;
+          //      std::cout << "Is in cluster detId " << EBDetId(id) << std::endl;
+          EcalRecHitCollection::const_iterator jrh = recHits.find( id );
+          if ( jrh == recHits.end() )
+            { 
+              edm::LogError("EcalClusterSeverityLevelAlgo") << "The cluster DetId " << id.rawId() << " is not in the recHit collection!!";
+              return -1;
+            }
+
+          fraction += (*jrh).energy() * (*it).second  / cluster.energy();
+        }
+    }
+  //  std::cout << "%%%%%%%%%%% Fraction is " << fraction << std::endl;
+  return fraction;
+}
+
+std::pair <DetId,int> CmsBasicClusterFiller::closestProblematic(const reco::CaloCluster & cluster, 
+                                                                const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus , 
+                                                                const CaloTopology* topology )
+{
+  DetId seed=EcalClusterTools::getMaximum(cluster,&recHits).first;
+  if ( (seed.det() != DetId::Ecal) || 
+       (EcalSubdetector(seed.subdetId()) != EcalBarrel) )
+    {
+      //method not supported if not in Barrel
+      edm::LogError("EcalClusterSeverityLevelAlgo") << "The cluster seed is not in the BARREL";
+      return std::make_pair<DetId,int>(DetId(0),-1);
+    }
+
+  int minDist=9999; DetId closestProb(0);   
+  int severityClosestProb=-1;
+  //Get a window of DetId around the seed crystal
+  std::vector<DetId> neighbours = topology->getWindow(seed,51,11);
+
+  for ( std::vector<DetId>::const_iterator it = neighbours.begin(); it != neighbours.end(); ++it ) 
+    {
+      EcalRecHitCollection::const_iterator jrh = recHits.find(*it);
+      if ( jrh == recHits.end() ) 
+        continue;
+      //Now checking rh flag
+      uint32_t sev = EcalSeverityLevelAlgo::severityLevel( (*jrh), chStatus );
+      if (sev == EcalSeverityLevelAlgo::kGood)
+        continue;
+      //      std::cout << "[closestProblematic] Found a problematic channel " << EBDetId(*it) << " " << flag << std::endl;
+      //Find the closest DetId in eta,phi space (distance defined by deta^2 + dphi^2)
+      int deta=distanceEta(EBDetId(seed),EBDetId(*it));
+      int dphi=distancePhi(EBDetId(seed),EBDetId(*it));
+      if (sqrt(deta*deta + dphi*dphi) < minDist) {
+        closestProb = *it;
+        severityClosestProb = sev;
+      }
+    }
+  
+  closestProb_ = closestProb;
+  severityClosestProb_ = severityClosestProb;
+  
+  return std::make_pair<DetId,int>(closestProb,severityClosestProb);
+}
+
+int CmsBasicClusterFiller::distanceEta(const EBDetId& a,const EBDetId& b)
+{
+  if (a.ieta() * b.ieta() > 0)
+    return abs(a.ieta()-b.ieta());
+  else
+    return abs(a.ieta()-b.ieta())-1;
+}
+
+int CmsBasicClusterFiller::distancePhi(const EBDetId& a,const EBDetId& b)
+{
+  if (abs(a.iphi() -b.iphi()) > 180)
+    return abs(a.iphi() - b.iphi()) - 180;
+  else
+    return abs(a.iphi()-b.iphi());
+}
 
 
 void CmsBasicClusterFillerData::initialiseCandidate() 
 {
   nCrystals = new vector<int>; 
-  nOverlap3x3 = new vector<int>;
+  iAlgo = new vector<int>;
   energy = new vector<float>; 
   eta = new vector<float>; 
   theta = new vector<float>; 
-  phi = new vector<float>;;
-  seedEnergy = new vector<float>;
-  eMax = new vector<float>;
+  phi = new vector<float>;
   e3x3 = new vector<float>;
   e5x5 = new vector<float>;
+  eMax = new vector<float>;
+  e2x2 = new vector<float>;
+  e2nd = new vector<float>;
+  covIEtaIEta = new vector<float>;
+  covIEtaIPhi = new vector<float>;
+  covIPhiIPhi = new vector<float>;
+  recoFlag = new vector<int>;
+  time = new vector<float>;
+  chi2Prob = new vector<float>;
+  seedEnergy = new vector<float>;
+  idClosProbl = new vector<int>;
+  sevClosProbl = new vector<int>;
+  fracClosProbl = new vector<float>;
   nBC =  new int;
 }
 
 void CmsBasicClusterFillerData::clear() 
 {
   nCrystals->clear();
-  nOverlap3x3->clear();
+  iAlgo->clear();
   energy->clear();
-  eta->clear();
+  eta->clear(); 
   theta->clear();
   phi->clear();
-  seedEnergy->clear();
-  eMax->clear();
   e3x3->clear();
   e5x5->clear();
+  eMax->clear();
+  e2x2->clear();
+  e2nd->clear();
+  covIEtaIEta->clear();
+  covIEtaIPhi->clear();
+  covIPhiIPhi->clear();
+  recoFlag->clear();
+  time->clear();
+  chi2Prob->clear();
+  seedEnergy->clear();
+  idClosProbl->clear();
+  sevClosProbl->clear();
+  fracClosProbl->clear();
 }
