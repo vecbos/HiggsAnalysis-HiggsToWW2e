@@ -72,7 +72,7 @@ private:
   //! dump Super/Basic Clusters block
   bool dumpSCs_, dumpBCs_;
   //! dump tracks
-  bool dumpTracks_;
+  bool dumpTracks_, dumpGsfTracks_;
   //! dump the primary vertices of the event
   bool dumpVertices_;
   //! dump trigger results
@@ -92,7 +92,7 @@ private:
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
   edm::InputTag vertexCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
-  edm::InputTag trackCollection_, refittedForDeDxTrackCollection_;
+  edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_;
   //! basiccluster collections in input

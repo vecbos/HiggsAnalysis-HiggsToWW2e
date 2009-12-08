@@ -42,6 +42,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsConditionsFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTrackFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsGsfTrackFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsVertexFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
@@ -98,6 +99,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
   dumpBCs_            = iConfig.getUntrackedParameter<bool>("dumpBCs", false);
   dumpTracks_         = iConfig.getUntrackedParameter<bool>("dumpTracks", false);
+  dumpGsfTracks_      = iConfig.getUntrackedParameter<bool>("dumpGsfTracks", false);
   dumpMuons_          = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
   dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
   dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
@@ -129,6 +131,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
   trackCollection_         = iConfig.getParameter<edm::InputTag>("trackCollection");
   refittedForDeDxTrackCollection_ = iConfig.getParameter<edm::InputTag>("refittedForDeDxTrackCollection");
+  gsfTrackCollection_      = iConfig.getParameter<edm::InputTag>("gsfTrackCollection");
   vertexCollection_        = iConfig.getParameter<edm::InputTag>("vertexCollection");
   genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
   jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
@@ -298,6 +301,21 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string suffix("Track");
 
     treeFiller.writeCollectionToTree(trackCollection_, iEvent, iSetup, prefix, suffix, false);
+
+  }
+
+  if(dumpGsfTracks_) {
+
+    CmsGsfTrackFiller treeFiller(tree_, vertexCollection_, true);
+    treeFiller.saveFatTrk(saveFatTrk_);
+    treeFiller.setRefittedTracksForDeDxProducer(gsfTrackCollection_);
+    treeFiller.saveDeDx(false);
+    treeFiller.saveVtxTrk(false);
+
+    std::string prefix("");
+    std::string suffix("GsfTrack");
+
+    treeFiller.writeCollectionToTree(gsfTrackCollection_, iEvent, iSetup, prefix, suffix, false);
 
   }
 
