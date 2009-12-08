@@ -226,7 +226,7 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
   privateData_->clearTrkVectors();
 
-  int blockSize;
+  int blockSize=0;
 
   if(collection) {
     if(hitLimitsMeansNoOutput_ && 
