@@ -105,7 +105,7 @@ class CmsTrackFiller {
 
   
 
- private:
+ protected:
   
   void writeTrkInfo(edm::RefToBase<reco::Track> trackRef);
   void writeDeDxInfo(edm::RefToBase<reco::Track> refittedTrack);
