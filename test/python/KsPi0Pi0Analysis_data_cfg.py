@@ -14,7 +14,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
-process.treeDumper.nameFile = 'default_data.root'
+process.treeDumper.nameFile = 'default_pi0pi0_data1.root'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpMCTruth = False
@@ -27,7 +27,7 @@ process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = False
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpParticleFlowObjects = False
-process.treeDumper.saveFatTrk = False
+process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
 process.treeDumper.saveJet1BTag = False
 process.treeDumper.saveJet2BTag = False
@@ -42,7 +42,7 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
@@ -50,8 +50,13 @@ process.source = cms.Source("PoolSource",
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
                             fileNames = cms.untracked.vstring(
-'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_7.root'    
-                            )
+'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123591_1.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_2.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_36.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123615_2.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_19.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_6.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_22.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_39.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_9.root',
+'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123591_2.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_20.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_37.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123615_3.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_2.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_7.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_23.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_4.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123778_3.root',
+'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123592_1.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_21.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_38.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123615_4.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_20.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_8.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_24.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_40.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123791_2.root',
+'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123592_2.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_22.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_39.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123615_5.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_21.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_9.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_25.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_41.root',
+'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123592_3.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_23.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_4.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123615_6.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_22.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_1.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_26.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_42.root',
+'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123592_4.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_24.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123596_40.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123615_7.root',   'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123732_23.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_10.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_27.root',  'file:/cmsrm/pc21_2/meridian/data/BeamCommissioning09_BSCFilter_v3/bscFilter_123734_43.root'
+)
                             )
 
 process.p = cms.Path ( process.mergedBasicClusters )                       
