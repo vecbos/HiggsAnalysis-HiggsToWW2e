@@ -122,6 +122,7 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->yAtOuter;
   delete privateData_->zAtOuter;
   delete privateData_->trackNormalizedChi2;
+  delete privateData_->qualityMask;
   delete privateData_->trackDxy;
   delete privateData_->trackD0;
   delete privateData_->trackDsz;
@@ -399,6 +400,7 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->trackValidHits->push_back(trkRef->numberOfValidHits());
     privateData_->trackLostHits ->push_back(trkRef->numberOfLostHits());
     privateData_->trackNormalizedChi2->push_back(trkRef->normalizedChi2());
+    privateData_->qualityMask->push_back(trkRef->qualityMask());
 
     /// vtx position
     privateData_->trackVx ->push_back(trkRef->vx());
@@ -465,6 +467,7 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->trackValidHits->push_back(-1.);
     privateData_->trackLostHits ->push_back(-1.);
     privateData_->trackNormalizedChi2->push_back(-1.);
+    privateData_->qualityMask->push_back(-1);
 
     /// vtx position
     privateData_->trackVx ->push_back(-1.);
@@ -518,6 +521,7 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"trackValidHits"+colSuffix).c_str(),  *privateData_->trackValidHits, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackLostHits"+colSuffix).c_str(),   *privateData_->trackLostHits, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackNormalizedChi2"+colSuffix).c_str(), *privateData_->trackNormalizedChi2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"qualityMask"+colSuffix).c_str(), *privateData_->qualityMask, nCandString.c_str(), 0, "Reco");
 
   cmstree->column((colPrefix+"trackDxy"+colSuffix).c_str(), *privateData_->trackDxy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackD0"+colSuffix).c_str(),  *privateData_->trackD0, nCandString.c_str(), 0, "Reco");
@@ -603,6 +607,7 @@ void CmsTrackFillerData::initialise() {
   trackValidHits  = new vector<float>;
   trackLostHits  = new vector<float>;
   trackNormalizedChi2 = new vector<float>;
+  qualityMask = new vector<int>;
   trackDxy = new vector<float>;
   trackD0 = new vector<float>;
   trackDsz = new vector<float>;
@@ -655,6 +660,7 @@ void CmsTrackFillerData::clearTrkVectors() {
   trackValidHits->clear();
   trackLostHits->clear();
   trackNormalizedChi2->clear();
+  qualityMask->clear();
   trackDxy->clear();
   trackD0 ->clear();
   trackDsz->clear();

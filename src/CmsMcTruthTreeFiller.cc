@@ -82,14 +82,14 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
     int idx=0;
     reco::GenParticleCollection::const_iterator candIter;
     for(candIter=genParticleCollection->begin(); candIter!=genParticleCollection->end(); candIter++) {
-      if(cand.status() == 1 || cand.status() == 3) {
-        const reco::Candidate *mom = cand.mother();
-        if(&(*candIter)==&(*mom)) {
-          indMom=idx;
-          break;
-        }
-        idx++;
+      // if(cand.status() == 1 || cand.status() == 3) {
+      const reco::Candidate *mom = cand.mother();
+      if(&(*candIter)==&(*mom)) {
+	indMom=idx;
+	break;
       }
+      idx++;
+      //}
     }
     mothMC.push_back(indMom);
     
