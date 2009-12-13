@@ -513,8 +513,10 @@ void CmsTrackFiller::writeDeDxInfo( edm::RefToBase<reco::Track> refittedTrack ) 
 void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
 
-  cmstree->column((colPrefix+"vtxIndex"+colSuffix).c_str(), *privateData_->vtxIndex, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"vtxWeight"+colSuffix).c_str(), *privateData_->vtxWeight, nCandString.c_str(), 0, "Reco");
+  if ( saveVtxTrk_ ) {
+    cmstree->column((colPrefix+"vtxIndex"+colSuffix).c_str(), *privateData_->vtxIndex, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"vtxWeight"+colSuffix).c_str(), *privateData_->vtxWeight, nCandString.c_str(), 0, "Reco");
+  }
 
   cmstree->column((colPrefix+"charge"+colSuffix).c_str(), *privateData_->charge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ptError"+colSuffix).c_str(), *privateData_->pterr, nCandString.c_str(), 0, "Reco");
