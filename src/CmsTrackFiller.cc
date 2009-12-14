@@ -332,75 +332,38 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->py->push_back(trkRef->py());
     privateData_->pz->push_back(trkRef->pz());
 
-    if ( saveFatTrk_ ) { 
-
-      // Inner Tracker information
-      privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
-      privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
-      privateData_->pzAtInner->push_back(trkRef->innerMomentum().z());
-      
-      privateData_->xAtInner->push_back(trkRef->innerPosition().x());
-      privateData_->yAtInner->push_back(trkRef->innerPosition().y());
-      privateData_->zAtInner->push_back(trkRef->innerPosition().z());
-      
-      // Outer Tracker information
-      privateData_->pxAtOuter->push_back(trkRef->outerMomentum().x());
-      privateData_->pyAtOuter->push_back(trkRef->outerMomentum().y());
-      privateData_->pzAtOuter->push_back(trkRef->outerMomentum().z());
-      
-      privateData_->xAtOuter->push_back(trkRef->outerPosition().x());
-      privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
-      privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
-
-      privateData_->recHitsSize->push_back(trkRef->recHitsSize());
-
-      const HitPattern trackerPattern = trkRef->hitPattern();
-      privateData_->isPixB1->push_back(hasValidHitInNthPixelBarrel(1,trackerPattern));
-      privateData_->isPixB2->push_back(hasValidHitInNthPixelBarrel(2,trackerPattern));
-      privateData_->isPixE1->push_back(hasValidHitInNthPixelEndcap(1,trackerPattern));
-      privateData_->isPixE2->push_back(hasValidHitInNthPixelEndcap(2,trackerPattern));
-      privateData_->numberOfValidPixelBarrelHits->push_back(trackerPattern.numberOfValidPixelBarrelHits());
-      privateData_->numberOfValidPixelEndcapHits->push_back(trackerPattern.numberOfValidPixelEndcapHits());
-      privateData_->numberOfValidStripTIBHits->push_back(trackerPattern.numberOfValidStripTIBHits());
-      privateData_->numberOfValidStripTIDHits->push_back(trackerPattern.numberOfValidStripTIDHits());
-      privateData_->numberOfValidStripTOBHits->push_back(trackerPattern.numberOfValidStripTOBHits());
-      privateData_->numberOfValidStripTECHits->push_back(trackerPattern.numberOfValidStripTECHits());
-
-    }
-
-    else {
-
-      privateData_->pxAtInner->push_back( -1.0 );
-      privateData_->pyAtInner->push_back( -1.0 );
-      privateData_->pzAtInner->push_back( -1.0 );
-      
-      privateData_->xAtInner->push_back( -1.0 );
-      privateData_->yAtInner->push_back( -1.0 );
-      privateData_->zAtInner->push_back( -1.0 );
-      
-      privateData_->pxAtOuter->push_back( -1.0 );
-      privateData_->pyAtOuter->push_back( -1.0 );
-      privateData_->pzAtOuter->push_back( -1.0 );
-      
-      privateData_->xAtOuter->push_back( -1.0 );
-      privateData_->yAtOuter->push_back( -1.0 );
-      privateData_->zAtOuter->push_back( -1.0 );
-
-      privateData_->recHitsSize->push_back( -1.0 );
-
-      privateData_->isPixB1->push_back(false);
-      privateData_->isPixB2->push_back(false);
-      privateData_->isPixE1->push_back(false);
-      privateData_->isPixE1->push_back(false);
-      privateData_->numberOfValidPixelBarrelHits->push_back(-1);
-      privateData_->numberOfValidPixelEndcapHits->push_back(-1);
-      privateData_->numberOfValidStripTIBHits->push_back(-1);
-      privateData_->numberOfValidStripTIDHits->push_back(-1);
-      privateData_->numberOfValidStripTOBHits->push_back(-1);
-      privateData_->numberOfValidStripTECHits->push_back(-1);
-
-    }
-
+    // Inner Tracker information
+    privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
+    privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
+    privateData_->pzAtInner->push_back(trkRef->innerMomentum().z());
+    
+    privateData_->xAtInner->push_back(trkRef->innerPosition().x());
+    privateData_->yAtInner->push_back(trkRef->innerPosition().y());
+    privateData_->zAtInner->push_back(trkRef->innerPosition().z());
+    
+    // Outer Tracker information
+    privateData_->pxAtOuter->push_back(trkRef->outerMomentum().x());
+    privateData_->pyAtOuter->push_back(trkRef->outerMomentum().y());
+    privateData_->pzAtOuter->push_back(trkRef->outerMomentum().z());
+    
+    privateData_->xAtOuter->push_back(trkRef->outerPosition().x());
+    privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
+    privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
+    
+    privateData_->recHitsSize->push_back(trkRef->recHitsSize());
+    
+    const HitPattern trackerPattern = trkRef->hitPattern();
+    privateData_->isPixB1->push_back(hasValidHitInNthPixelBarrel(1,trackerPattern));
+    privateData_->isPixB2->push_back(hasValidHitInNthPixelBarrel(2,trackerPattern));
+    privateData_->isPixE1->push_back(hasValidHitInNthPixelEndcap(1,trackerPattern));
+    privateData_->isPixE2->push_back(hasValidHitInNthPixelEndcap(2,trackerPattern));
+    privateData_->numberOfValidPixelBarrelHits->push_back(trackerPattern.numberOfValidPixelBarrelHits());
+    privateData_->numberOfValidPixelEndcapHits->push_back(trackerPattern.numberOfValidPixelEndcapHits());
+    privateData_->numberOfValidStripTIBHits->push_back(trackerPattern.numberOfValidStripTIBHits());
+    privateData_->numberOfValidStripTIDHits->push_back(trackerPattern.numberOfValidStripTIDHits());
+    privateData_->numberOfValidStripTOBHits->push_back(trackerPattern.numberOfValidStripTOBHits());
+    privateData_->numberOfValidStripTECHits->push_back(trackerPattern.numberOfValidStripTECHits());
+    
     // track quality
     privateData_->charge->push_back(trkRef->charge());
     privateData_->pterr->push_back(trkRef->ptError());
@@ -553,37 +516,33 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"trackVy"+colSuffix).c_str(),  *privateData_->trackVy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackVz"+colSuffix).c_str(),  *privateData_->trackVz, nCandString.c_str(), 0, "Reco");
 
-  if ( saveFatTrk_ ) {
-
-    cmstree->column((colPrefix+"pxAtOuter"+colSuffix).c_str(), *privateData_->pxAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyAtOuter"+colSuffix).c_str(), *privateData_->pyAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzAtOuter"+colSuffix).c_str(), *privateData_->pzAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"xAtOuter"+colSuffix).c_str(), *privateData_->xAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"yAtOuter"+colSuffix).c_str(), *privateData_->yAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"zAtOuter"+colSuffix).c_str(), *privateData_->zAtOuter, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pxAtOuter"+colSuffix).c_str(), *privateData_->pxAtOuter, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pyAtOuter"+colSuffix).c_str(), *privateData_->pyAtOuter, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pzAtOuter"+colSuffix).c_str(), *privateData_->pzAtOuter, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"xAtOuter"+colSuffix).c_str(), *privateData_->xAtOuter, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"yAtOuter"+colSuffix).c_str(), *privateData_->yAtOuter, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"zAtOuter"+colSuffix).c_str(), *privateData_->zAtOuter, nCandString.c_str(), 0, "Reco");
     
-    cmstree->column((colPrefix+"pxAtInner"+colSuffix).c_str(), *privateData_->pxAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyAtInner"+colSuffix).c_str(), *privateData_->pyAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzAtInner"+colSuffix).c_str(), *privateData_->pzAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"xAtInner"+colSuffix).c_str(), *privateData_->xAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"yAtInner"+colSuffix).c_str(), *privateData_->yAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"zAtInner"+colSuffix).c_str(), *privateData_->zAtInner, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pxAtInner"+colSuffix).c_str(), *privateData_->pxAtInner, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pyAtInner"+colSuffix).c_str(), *privateData_->pyAtInner, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pzAtInner"+colSuffix).c_str(), *privateData_->pzAtInner, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"xAtInner"+colSuffix).c_str(), *privateData_->xAtInner, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"yAtInner"+colSuffix).c_str(), *privateData_->yAtInner, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"zAtInner"+colSuffix).c_str(), *privateData_->zAtInner, nCandString.c_str(), 0, "Reco");
     
-    cmstree->column((colPrefix+"recHitsSize"+colSuffix).c_str(), *privateData_->recHitsSize, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"recHitsSize"+colSuffix).c_str(), *privateData_->recHitsSize, nCandString.c_str(), 0, "Reco");
 
-    cmstree->column((colPrefix+"isPixB1"+colSuffix).c_str(), *privateData_->isPixB1, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"isPixB2"+colSuffix).c_str(), *privateData_->isPixB2, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"isPixE1"+colSuffix).c_str(), *privateData_->isPixE1, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"isPixE2"+colSuffix).c_str(), *privateData_->isPixE2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"isPixB1"+colSuffix).c_str(), *privateData_->isPixB1, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"isPixB2"+colSuffix).c_str(), *privateData_->isPixB2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"isPixE1"+colSuffix).c_str(), *privateData_->isPixE1, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"isPixE2"+colSuffix).c_str(), *privateData_->isPixE2, nCandString.c_str(), 0, "Reco");
 
-    cmstree->column((colPrefix+"numberOfValidPixelBarrelHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelBarrelHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidPixelEndcapHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelEndcapHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTIBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIBHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTIDHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIDHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTOBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTOBHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTECHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTECHits, nCandString.c_str(), 0, "Reco");
-
-  }
+  cmstree->column((colPrefix+"numberOfValidPixelBarrelHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelBarrelHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidPixelEndcapHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelEndcapHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTIBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIBHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTIDHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIDHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTOBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTOBHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTECHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTECHits, nCandString.c_str(), 0, "Reco");
 
 }
 
