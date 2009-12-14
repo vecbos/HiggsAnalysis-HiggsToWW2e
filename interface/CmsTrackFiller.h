@@ -38,6 +38,7 @@ struct CmsTrackFillerData {
 
   vector<float> *pxAtInner, *pyAtInner, *pzAtInner, *xAtInner, *yAtInner, *zAtInner;
   vector<float> *pxAtOuter, *pyAtOuter, *pzAtOuter, *xAtOuter, *yAtOuter, *zAtOuter;
+  vector<float> *px, *py, *pz;
   vector<float> *trackNormalizedChi2;
   vector<int> *qualityMask;
   vector<float> *trackDxy, *trackD0, *trackDsz, *trackDz;

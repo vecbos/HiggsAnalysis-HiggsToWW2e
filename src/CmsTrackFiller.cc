@@ -121,6 +121,9 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->xAtOuter;
   delete privateData_->yAtOuter;
   delete privateData_->zAtOuter;
+  delete privateData_->px;
+  delete privateData_->py;
+  delete privateData_->pz;
   delete privateData_->trackNormalizedChi2;
   delete privateData_->qualityMask;
   delete privateData_->trackDxy;
@@ -325,6 +328,10 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
       
     }
 
+    privateData_->px->push_back(trkRef->px());
+    privateData_->py->push_back(trkRef->py());
+    privateData_->pz->push_back(trkRef->pz());
+
     if ( saveFatTrk_ ) { 
 
       // Inner Tracker information
@@ -513,6 +520,10 @@ void CmsTrackFiller::writeDeDxInfo( edm::RefToBase<reco::Track> refittedTrack ) 
 void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
 
+  cmstree->column((colPrefix+"px"+colSuffix).c_str(), *privateData_->px, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"py"+colSuffix).c_str(), *privateData_->py, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pz"+colSuffix).c_str(), *privateData_->pz, nCandString.c_str(), 0, "Reco");
+
   if ( saveVtxTrk_ ) {
     cmstree->column((colPrefix+"vtxIndex"+colSuffix).c_str(), *privateData_->vtxIndex, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"vtxWeight"+colSuffix).c_str(), *privateData_->vtxWeight, nCandString.c_str(), 0, "Reco");
@@ -603,6 +614,9 @@ void CmsTrackFillerData::initialise() {
   xAtOuter = new vector<float>;
   yAtOuter = new vector<float>;
   zAtOuter = new vector<float>;
+  px = new vector<float>;
+  py = new vector<float>;
+  pz = new vector<float>;
   charge = new vector<float>;
   pterr = new vector<float>;
   recHitsSize  = new vector<float>;
@@ -656,6 +670,9 @@ void CmsTrackFillerData::clearTrkVectors() {
   xAtInner->clear();
   yAtInner->clear();
   zAtInner->clear();
+  px->clear();
+  py->clear();
+  pz->clear();
   charge->clear();
   pterr->clear();
   recHitsSize->clear();

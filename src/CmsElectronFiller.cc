@@ -134,6 +134,9 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->xAtOuter;
   delete privateData_->yAtOuter;
   delete privateData_->zAtOuter;
+  delete privateData_->modePx;
+  delete privateData_->modePy;
+  delete privateData_->modePz;
   delete privateData_->eleTrackNormalizedChi2;
   delete privateData_->eleTrackDxy;
   delete privateData_->eleTrackD0;
@@ -179,6 +182,9 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->etaLat;
   delete privateData_->a20;
   delete privateData_->a42;
+  
+  delete privateData_->trackIndex;
+  delete privateData_->gsfTrackIndex;
 
   delete privateData_->ncand;
 
@@ -311,26 +317,35 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
 				     GsfTrackRef trkRef) {
   if(&trkRef) {
 
-    privateData_->eleTrackNormalizedChi2->push_back(trkRef->normalizedChi2());
-    
-    privateData_->eleTrackDxy->push_back(trkRef->dxy());
-    privateData_->eleTrackD0 ->push_back(trkRef->d0());
-    privateData_->eleTrackDsz->push_back(trkRef->dsz());
-    privateData_->eleTrackDz ->push_back(trkRef->dz());
-    
-    privateData_->eleTrackDxyError->push_back(trkRef->dxyError());
-    privateData_->eleTrackD0Error ->push_back(trkRef->d0Error());
-    privateData_->eleTrackDszError->push_back(trkRef->dszError());
-    privateData_->eleTrackDzError ->push_back(trkRef->dzError());
-    
-    privateData_->eleTrackValidHits->push_back(trkRef->numberOfValidHits());
-    privateData_->eleTrackLostHits ->push_back(trkRef->numberOfLostHits());
-    
-    privateData_->eleTrackVx ->push_back(trkRef->vx());
-    privateData_->eleTrackVy ->push_back(trkRef->vy());
-    privateData_->eleTrackVz ->push_back(trkRef->vz());
-    
+    privateData_->gsfTrackIndex->push_back(trkRef.key());
+
+    reco::TrackRef closeCtfTrack = electronRef->closestCtfTrackRef();
+    privateData_->trackIndex->push_back(closeCtfTrack.key());
+
+    privateData_->modePx->push_back(electronRef->trackMomentumAtVtx().x());
+    privateData_->modePy->push_back(electronRef->trackMomentumAtVtx().y());
+    privateData_->modePz->push_back(electronRef->trackMomentumAtVtx().z());
+
     if ( saveFatTrk_ ) {
+
+      privateData_->eleTrackNormalizedChi2->push_back(trkRef->normalizedChi2());
+      
+      privateData_->eleTrackDxy->push_back(trkRef->dxy());
+      privateData_->eleTrackD0 ->push_back(trkRef->d0());
+      privateData_->eleTrackDsz->push_back(trkRef->dsz());
+      privateData_->eleTrackDz ->push_back(trkRef->dz());
+      
+      privateData_->eleTrackDxyError->push_back(trkRef->dxyError());
+      privateData_->eleTrackD0Error ->push_back(trkRef->d0Error());
+      privateData_->eleTrackDszError->push_back(trkRef->dszError());
+      privateData_->eleTrackDzError ->push_back(trkRef->dzError());
+      
+      privateData_->eleTrackValidHits->push_back(trkRef->numberOfValidHits());
+      privateData_->eleTrackLostHits ->push_back(trkRef->numberOfLostHits());
+      
+      privateData_->eleTrackVx ->push_back(trkRef->vx());
+      privateData_->eleTrackVy ->push_back(trkRef->vy());
+      privateData_->eleTrackVz ->push_back(trkRef->vz());
       
       privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
       privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
@@ -351,6 +366,41 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
     }
     
     else {
+
+      privateData_->eleTrackNormalizedChi2->push_back(-1.);
+
+      privateData_->eleTrackDxy->push_back(-1.);
+      privateData_->eleTrackD0 ->push_back(-1.);
+      privateData_->eleTrackDsz->push_back(-1.);
+      privateData_->eleTrackDz ->push_back(-1.);
+
+      privateData_->eleTrackDxyError->push_back(-1.);
+      privateData_->eleTrackD0Error ->push_back(-1.);
+      privateData_->eleTrackDszError->push_back(-1.);
+      privateData_->eleTrackDzError ->push_back(-1.);
+
+      privateData_->eleTrackValidHits->push_back(-1.);					       
+      privateData_->eleTrackLostHits ->push_back(-1.);
+
+      privateData_->eleTrackVx ->push_back(-1.);
+      privateData_->eleTrackVy ->push_back(-1.);
+      privateData_->eleTrackVz ->push_back(-1.);
+
+      privateData_->pxAtInner->push_back(-1.);
+      privateData_->pyAtInner->push_back(-1.);
+      privateData_->pzAtInner->push_back(-1.);
+
+      privateData_->xAtInner->push_back(-1.);
+      privateData_->yAtInner->push_back(-1.);
+      privateData_->zAtInner->push_back(-1.);
+
+      privateData_->pxAtOuter->push_back(-1.);
+      privateData_->pyAtOuter->push_back(-1.);
+      privateData_->pzAtOuter->push_back(-1.);
+
+      privateData_->xAtOuter->push_back(-1.);
+      privateData_->yAtOuter->push_back(-1.);
+      privateData_->zAtOuter->push_back(-1.);
       
       privateData_->pxAtInner->push_back( -1.0 );
       privateData_->pyAtInner->push_back( -1.0 );
@@ -373,40 +423,6 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
   }
   else {
 
-    privateData_->eleTrackNormalizedChi2->push_back(-1.);
-
-    privateData_->eleTrackDxy->push_back(-1.);
-    privateData_->eleTrackD0 ->push_back(-1.);
-    privateData_->eleTrackDsz->push_back(-1.);
-    privateData_->eleTrackDz ->push_back(-1.);
-
-    privateData_->eleTrackDxyError->push_back(-1.);
-    privateData_->eleTrackD0Error ->push_back(-1.);
-    privateData_->eleTrackDszError->push_back(-1.);
-    privateData_->eleTrackDzError ->push_back(-1.);
-
-    privateData_->eleTrackValidHits->push_back(-1.);					       
-    privateData_->eleTrackLostHits ->push_back(-1.);
-
-    privateData_->eleTrackVx ->push_back(-1.);
-    privateData_->eleTrackVy ->push_back(-1.);
-    privateData_->eleTrackVz ->push_back(-1.);
-
-    privateData_->pxAtInner->push_back(-1.);
-    privateData_->pyAtInner->push_back(-1.);
-    privateData_->pzAtInner->push_back(-1.);
-
-    privateData_->xAtInner->push_back(-1.);
-    privateData_->yAtInner->push_back(-1.);
-    privateData_->zAtInner->push_back(-1.);
-
-    privateData_->pxAtOuter->push_back(-1.);
-    privateData_->pyAtOuter->push_back(-1.);
-    privateData_->pzAtOuter->push_back(-1.);
-
-    privateData_->xAtOuter->push_back(-1.);
-    privateData_->yAtOuter->push_back(-1.);
-    privateData_->zAtOuter->push_back(-1.);
 
   }
 }
@@ -417,22 +433,27 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
 void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
 
-  cmstree->column((colPrefix+"eleTrackNormalizedChi2"+colSuffix).c_str(), *privateData_->eleTrackNormalizedChi2, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackDxy"+colSuffix).c_str(), *privateData_->eleTrackDxy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackD0"+colSuffix).c_str(),  *privateData_->eleTrackD0, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackDsz"+colSuffix).c_str(), *privateData_->eleTrackDsz, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackDz"+colSuffix).c_str(),  *privateData_->eleTrackDz, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackDxyError"+colSuffix).c_str(), *privateData_->eleTrackDxyError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackD0Error"+colSuffix).c_str(),  *privateData_->eleTrackD0Error, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackDszError"+colSuffix).c_str(), *privateData_->eleTrackDszError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackDzError"+colSuffix).c_str(),  *privateData_->eleTrackDzError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackValidHits"+colSuffix).c_str(),  *privateData_->eleTrackValidHits, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackLostHits"+colSuffix).c_str(),   *privateData_->eleTrackLostHits, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackVx"+colSuffix).c_str(),  *privateData_->eleTrackVx, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackVy"+colSuffix).c_str(),  *privateData_->eleTrackVy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleTrackVz"+colSuffix).c_str(),  *privateData_->eleTrackVz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"modePx"+colSuffix).c_str(),  *privateData_->modePx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"modePy"+colSuffix).c_str(),  *privateData_->modePy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"modePz"+colSuffix).c_str(),  *privateData_->modePz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trackIndex"+colSuffix).c_str(),  *privateData_->trackIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"gsfTrackIndex"+colSuffix).c_str(),  *privateData_->gsfTrackIndex, nCandString.c_str(), 0, "Reco");
 
   if(saveFatTrk_) {
+    cmstree->column((colPrefix+"trackNormalizedChi2"+colSuffix).c_str(), *privateData_->eleTrackNormalizedChi2, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDxy"+colSuffix).c_str(), *privateData_->eleTrackDxy, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackD0"+colSuffix).c_str(),  *privateData_->eleTrackD0, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDsz"+colSuffix).c_str(), *privateData_->eleTrackDsz, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDz"+colSuffix).c_str(),  *privateData_->eleTrackDz, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDxyError"+colSuffix).c_str(), *privateData_->eleTrackDxyError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackD0Error"+colSuffix).c_str(),  *privateData_->eleTrackD0Error, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDszError"+colSuffix).c_str(), *privateData_->eleTrackDszError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDzError"+colSuffix).c_str(),  *privateData_->eleTrackDzError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackValidHits"+colSuffix).c_str(),  *privateData_->eleTrackValidHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackLostHits"+colSuffix).c_str(),   *privateData_->eleTrackLostHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackVx"+colSuffix).c_str(),  *privateData_->eleTrackVx, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackVy"+colSuffix).c_str(),  *privateData_->eleTrackVy, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackVz"+colSuffix).c_str(),  *privateData_->eleTrackVz, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pxAtInner"+colSuffix).c_str(), *privateData_->pxAtInner, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pyAtInner"+colSuffix).c_str(), *privateData_->pyAtInner, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pzAtInner"+colSuffix).c_str(), *privateData_->pzAtInner, nCandString.c_str(), 0, "Reco");
@@ -509,52 +530,51 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     }
     privateData_->nCry->push_back(ncry);
     
-    if(saveFatEcal_) {
-      privateData_->eraw->push_back(sclusRef->rawEnergy());
-      privateData_->caloEta->push_back(sclusRef->eta());
-      privateData_->caloPhi->push_back(sclusRef->phi());
-    }
+    privateData_->eraw->push_back(sclusRef->rawEnergy());
+    privateData_->caloEta->push_back(sclusRef->eta());
+    privateData_->caloPhi->push_back(sclusRef->phi());
 
-    edm::ESHandle<CaloTopology> pTopology;
-    iSetup.get<CaloTopologyRecord>().get(pTopology);
 
-    edm::ESHandle<CaloGeometry> pGeometry;
-    iSetup.get<CaloGeometryRecord>().get(pGeometry);
+    if ( saveFatEcal_ ) { 
 
-    if ( pTopology.isValid() && pGeometry.isValid() ) {
+      edm::ESHandle<CaloTopology> pTopology;
+      iSetup.get<CaloTopologyRecord>().get(pTopology);
+      
+      edm::ESHandle<CaloGeometry> pGeometry;
+      iSetup.get<CaloGeometryRecord>().get(pGeometry);
+      
+      if ( pTopology.isValid() && pGeometry.isValid() ) {
+        
+        validTopologyAndGeometry = true;
+        
+        const CaloTopology *topology = pTopology.product();
+        const CaloGeometry *geometry = pGeometry.product();
 
-      validTopologyAndGeometry = true;
+        const Ptr<CaloCluster> theSeed = sclusRef->seed();
 
-      const CaloTopology *topology = pTopology.product();
-      const CaloGeometry *geometry = pGeometry.product();
+        const EcalRecHitCollection *rechits = 0;
 
-      const Ptr<CaloCluster> theSeed = sclusRef->seed();
+        float seedEta = theSeed->position().eta();
 
-      const EcalRecHitCollection *rechits = 0;
+        if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
+        else rechits = EERecHits; 
 
-      float seedEta = theSeed->position().eta();
+        float eMax = EcalClusterTools::eMax( *theSeed, &(*rechits) );
+        float e3x3 = EcalClusterTools::e3x3( *theSeed, &(*rechits), topology );
+        float e5x5 = EcalClusterTools::e5x5( *theSeed, &(*rechits), topology );
 
-      if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
-      else rechits = EERecHits; 
+        privateData_->e3x3->push_back(e3x3);
+        privateData_->e5x5->push_back(e5x5);
+        privateData_->eMax->push_back(eMax);
 
-      float eMax = EcalClusterTools::eMax( *theSeed, &(*rechits) );
-      float e3x3 = EcalClusterTools::e3x3( *theSeed, &(*rechits), topology );
-      float e5x5 = EcalClusterTools::e5x5( *theSeed, &(*rechits), topology );
+        std::vector<float> vLat = EcalClusterTools::lat( *theSeed, &(*rechits), geometry );
+        float etaLat = vLat[0];
+        float phiLat = vLat[1];
+        float lat = vLat[2];
 
-      privateData_->e3x3->push_back(e3x3);
-      privateData_->e5x5->push_back(e5x5);
-      privateData_->eMax->push_back(eMax);
-
-      std::vector<float> vLat = EcalClusterTools::lat( *theSeed, &(*rechits), geometry );
-      float etaLat = vLat[0];
-      float phiLat = vLat[1];
-      float lat = vLat[2];
-
-      privateData_->lat->push_back(lat);
-      privateData_->phiLat->push_back(phiLat);
-      privateData_->etaLat->push_back(etaLat);
-
-      if(saveFatEcal_) {
+        privateData_->lat->push_back(lat);
+        privateData_->phiLat->push_back(phiLat);
+        privateData_->etaLat->push_back(etaLat);
 
 	float e2x2 = EcalClusterTools::e2x2( *theSeed, &(*rechits), topology );
 	float e2nd = EcalClusterTools::e2nd( *theSeed, &(*rechits) );
@@ -602,16 +622,17 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     privateData_->recoFlags->push_back(-1);
     privateData_->nClu->push_back(-1);
     privateData_->nCry->push_back(-1);
-    privateData_->e3x3->push_back(-1.);
-    privateData_->e5x5->push_back(-1.);
-    privateData_->eMax->push_back(-1.);
-    privateData_->lat->push_back(-1.);
-    privateData_->phiLat->push_back(-1.);
-    privateData_->etaLat->push_back(-1.);
+    privateData_->eraw->push_back(-1.);
+    privateData_->caloEta->push_back(-1.);
+    privateData_->caloPhi->push_back(-1.);
+
     if(saveFatEcal_) {
-      privateData_->eraw->push_back(-1.);
-      privateData_->caloEta->push_back(-1.);
-      privateData_->caloPhi->push_back(-1.);
+      privateData_->e3x3->push_back(-1.);
+      privateData_->e5x5->push_back(-1.);
+      privateData_->eMax->push_back(-1.);
+      privateData_->lat->push_back(-1.);
+      privateData_->phiLat->push_back(-1.);
+      privateData_->etaLat->push_back(-1.);
       privateData_->e2x2->push_back(-1.);
       privateData_->e2nd->push_back(-1.);
       privateData_->s1s9->push_back(-1.);
@@ -628,10 +649,6 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
   }
 }
 
-
-
-
-
 void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
@@ -642,17 +659,17 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"energyCorrections"+colSuffix).c_str(), *privateData_->energyCorrections, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nClu"+colSuffix).c_str(), *privateData_->nClu, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nCry"+colSuffix).c_str(), *privateData_->nCry, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eraw"+colSuffix).c_str(), *privateData_->eraw, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"caloEta"+colSuffix).c_str(), *privateData_->caloEta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"caloPhi"+colSuffix).c_str(), *privateData_->caloPhi, nCandString.c_str(), 0, "Reco");
   
   if(saveFatEcal_) {
-    cmstree->column((colPrefix+"eraw"+colSuffix).c_str(), *privateData_->eraw, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"caloEta"+colSuffix).c_str(), *privateData_->caloEta, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"caloPhi"+colSuffix).c_str(), *privateData_->caloPhi, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"e2x2"+colSuffix).c_str(), *privateData_->e2x2, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"e2nd"+colSuffix).c_str(), *privateData_->e2nd, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"s1s9"+colSuffix).c_str(), *privateData_->s1s9, nCandString.c_str(), 0, "Reco");
@@ -686,6 +703,9 @@ void CmsElectronFillerData::initialise() {
   xAtOuter = new vector<float>;
   yAtOuter = new vector<float>;
   zAtOuter = new vector<float>;
+  modePx = new vector<float>;
+  modePy = new vector<float>;
+  modePz = new vector<float>;
   eleTrackNormalizedChi2 = new vector<float>;
   eleTrackDxy = new vector<float>;
   eleTrackD0 = new vector<float>;
@@ -730,6 +750,8 @@ void CmsElectronFillerData::initialise() {
   etaLat = new vector<float>;
   a20 = new vector<float>;
   a42 = new vector<float>;
+  trackIndex = new vector<int>;
+  gsfTrackIndex = new vector<int>;
 
 }
 
@@ -749,7 +771,9 @@ void CmsElectronFillerData::clearTrkVectors() {
   xAtInner->clear();
   yAtInner->clear();
   zAtInner->clear();
-
+  modePx->clear();
+  modePy->clear();
+  modePz->clear();  
   eleTrackNormalizedChi2->clear();
   eleTrackDxy->clear();
   eleTrackD0 ->clear();
@@ -793,5 +817,8 @@ void CmsElectronFillerData::clearTrkVectors() {
   covIEtaIEta->clear();
   covIEtaIPhi->clear();
   covIPhiIPhi->clear();
+
+  trackIndex->clear();
+  gsfTrackIndex->clear();
 
 }
