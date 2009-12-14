@@ -95,6 +95,7 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->time;
   delete privateData_->chi2Prob;
   delete privateData_->recoFlag;
+  delete privateData_->channelStatus;
   delete privateData_->sevClosProbl;
   delete privateData_->idClosProbl;
   delete privateData_->fracClosProbl;
@@ -269,6 +270,17 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       iSetup.get<EcalChannelStatusRcd>().get(pChannelStatus);
       const EcalChannelStatus *ch_status = pChannelStatus.product();
 
+      EcalChannelStatusMap::const_iterator chit = pChannelStatus->find( seedCrystalId );
+      EcalChannelStatusCode chStatusCode = 1;
+      if ( chit != pChannelStatus->end() ) {
+	chStatusCode = *chit;
+      } else {
+	edm::LogError("EcalRecHitProducerError") << "No channel status found for xtal "
+						 << "! something wrong with EcalChannelStatus in your DB? ";
+      }
+      int cStatusFlag = (int)(chStatusCode.getStatusCode() & 0x001F);
+      privateData_->channelStatus->push_back(cStatusFlag);
+
       if( fabs(seedEta) < 1.479 ) {
         float frac = fractionAroundClosestProblematic( *cand, *rechits, *ch_status, topology);
         privateData_->fracClosProbl->push_back(frac);
@@ -298,6 +310,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->time->push_back(-999.);
     privateData_->chi2Prob->push_back(-999.);
     privateData_->recoFlag->push_back(-1);
+    privateData_->channelStatus->push_back(-1);
     privateData_->seedEnergy->push_back(-1.);
     privateData_->fracClosProbl->push_back(-1);
     privateData_->idClosProbl->push_back(-1);
@@ -516,6 +529,7 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hOverE"+colSuffix).c_str(), *privateData_->hOverE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlag"+colSuffix).c_str(), *privateData_->recoFlag, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"channelStatus"+colSuffix).c_str(), *privateData_->channelStatus, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chi2Prob"+colSuffix).c_str(), *privateData_->chi2Prob, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
@@ -668,6 +682,7 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   gsfTrackDeltaPhi = new vector<float>;
   gsfTrackDeltaEta = new vector<float>;
   recoFlag = new vector<int>;
+  channelStatus = new vector<int>;
   time = new vector<float>;
   chi2Prob = new vector<float>;
   seedEnergy = new vector<float>;
@@ -705,6 +720,7 @@ void CmsSuperClusterFillerData::clear()
   gsfTrackDeltaPhi->clear();
   gsfTrackDeltaEta->clear();
   recoFlag->clear();
+  channelStatus->clear();
   time->clear();
   chi2Prob->clear();
   seedEnergy->clear();
