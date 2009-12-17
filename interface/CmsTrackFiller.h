@@ -51,6 +51,8 @@ struct CmsTrackFillerData {
   vector<float> *trackDxyErrorPV, *trackD0ErrorPV, *trackDszErrorPV, *trackDzErrorPV;
 
   vector<float> *truncatedDeDx, *truncatedDeDxError, *truncatedDeDxNoM;
+  vector<float> *medianDeDx, *medianDeDxError, *medianDeDxNoM;
+  vector<float> *harmonic2DeDx, *harmonic2DeDxError, *harmonic2DeDxNoM;
   vector<bool> *isPixB1, *isPixB2, *isPixE1, *isPixE2;
   vector<int> *numberOfValidPixelBarrelHits, *numberOfValidPixelEndcapHits;
   vector<int> *numberOfValidStripTIBHits, *numberOfValidStripTIDHits, *numberOfValidStripTOBHits, *numberOfValidStripTECHits;
@@ -136,7 +138,7 @@ class CmsTrackFiller {
   edm::InputTag refittedTracksForDeDxTag_;
 
   edm::Handle< edm::View<reco::Track> > refittedTracksForDeDx_;
-  edm::Handle< reco::DeDxDataValueMap >  energyLoss_ ;
+  edm::Handle< reco::DeDxDataValueMap >  truncatedEnergyLoss_,  medianEnergyLoss_, harmonic2EnergyLoss_;
   edm::Handle<reco::VertexCollection> primaryVertex_;
 
   // number of 32 bit integers to store the full pattern

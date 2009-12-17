@@ -117,7 +117,9 @@ void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsGsfTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
 
     if ( saveDeDx_ ) {
-      iEvent.getByLabel( "dedxTruncated40", energyLoss_ );
+      iEvent.getByLabel( "dedxTruncated40", truncatedEnergyLoss_ );
+      iEvent.getByLabel( "dedxMedian", medianEnergyLoss_ );
+      iEvent.getByLabel( "dedxHarmonic2", harmonic2EnergyLoss_ );
       iEvent.getByLabel(refittedTracksForDeDxTag_,refittedTracksForDeDx_);
       *(privateData_->ncand) = refittedTracksForDeDx_->size();   
       blockSize = (&(*refittedTracksForDeDx_)) ? refittedTracksForDeDx_->size() : 0;

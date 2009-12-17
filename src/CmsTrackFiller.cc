@@ -143,7 +143,13 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->truncatedDeDx;
   delete privateData_->truncatedDeDxError;
   delete privateData_->truncatedDeDxNoM;
-  
+  delete privateData_->medianDeDx;
+  delete privateData_->medianDeDxError;
+  delete privateData_->medianDeDxNoM;
+  delete privateData_->harmonic2DeDx;
+  delete privateData_->harmonic2DeDxError;
+  delete privateData_->harmonic2DeDxNoM;
+
   delete privateData_->isPixB1;
   delete privateData_->isPixB2;
   delete privateData_->isPixE1;
@@ -253,7 +259,9 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
 
     if ( saveDeDx_ ) {
-      iEvent.getByLabel( "dedxTruncated40", energyLoss_ );
+      iEvent.getByLabel( "dedxTruncated40", truncatedEnergyLoss_ );
+      iEvent.getByLabel( "dedxMedian", medianEnergyLoss_ );
+      iEvent.getByLabel( "dedxHarmonic2", harmonic2EnergyLoss_ );
       iEvent.getByLabel(refittedTracksForDeDxTag_,refittedTracksForDeDx_);
       *(privateData_->ncand) = refittedTracksForDeDx_->size();   
       blockSize = (&(*refittedTracksForDeDx_)) ? refittedTracksForDeDx_->size() : 0;
@@ -472,12 +480,24 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
 
 void CmsTrackFiller::writeDeDxInfo( edm::RefToBase<reco::Track> refittedTrack ) {
 
-  const DeDxDataValueMap & dedxTruncated40Val = *energyLoss_;
+  const DeDxDataValueMap & dedxTruncated40Val = *truncatedEnergyLoss_;
   
   privateData_->truncatedDeDx->push_back( dedxTruncated40Val[refittedTrack].dEdx() );
   privateData_->truncatedDeDxError->push_back( dedxTruncated40Val[refittedTrack].dEdxError() );
   privateData_->truncatedDeDxNoM->push_back( dedxTruncated40Val[refittedTrack].numberOfMeasurements() );
+
+  const DeDxDataValueMap & dedxMedianVal = *medianEnergyLoss_;
   
+  privateData_->medianDeDx->push_back( dedxMedianVal[refittedTrack].dEdx() );
+  privateData_->medianDeDxError->push_back( dedxMedianVal[refittedTrack].dEdxError() );
+  privateData_->medianDeDxNoM->push_back( dedxMedianVal[refittedTrack].numberOfMeasurements() );
+  
+  const DeDxDataValueMap & dedxHarmonic2Val = *harmonic2EnergyLoss_;
+  
+  privateData_->harmonic2DeDx->push_back( dedxHarmonic2Val[refittedTrack].dEdx() );
+  privateData_->harmonic2DeDxError->push_back( dedxHarmonic2Val[refittedTrack].dEdxError() );
+  privateData_->harmonic2DeDxNoM->push_back( dedxHarmonic2Val[refittedTrack].numberOfMeasurements() );
+
 }
 
 void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
@@ -554,6 +574,14 @@ void CmsTrackFiller::treeDeDxInfo(const std::string &colPrefix, const std::strin
   cmstree->column((colPrefix+"truncatedDeDxError"+colSuffix).c_str(),  *privateData_->truncatedDeDxError, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"truncatedDeDxNoM"+colSuffix).c_str(),  *privateData_->truncatedDeDxNoM, nCandString.c_str(), 0, "Reco");
 
+  cmstree->column((colPrefix+"medianDeDx"+colSuffix).c_str(),  *privateData_->medianDeDx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"medianDeDxError"+colSuffix).c_str(),  *privateData_->medianDeDxError, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"medianDeDxNoM"+colSuffix).c_str(),  *privateData_->medianDeDxNoM, nCandString.c_str(), 0, "Reco");
+
+  cmstree->column((colPrefix+"harmonic2DeDx"+colSuffix).c_str(),  *privateData_->harmonic2DeDx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"harmonic2DeDxError"+colSuffix).c_str(),  *privateData_->harmonic2DeDxError, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"harmonic2DeDxNoM"+colSuffix).c_str(),  *privateData_->harmonic2DeDxNoM, nCandString.c_str(), 0, "Reco");
+
 }
 
 void CmsTrackFillerData::initialise() {
@@ -600,6 +628,12 @@ void CmsTrackFillerData::initialise() {
   truncatedDeDx = new vector<float>;
   truncatedDeDxError = new vector<float>;
   truncatedDeDxNoM = new vector<float>;
+  medianDeDx = new vector<float>;
+  medianDeDxError = new vector<float>;
+  medianDeDxNoM = new vector<float>;
+  harmonic2DeDx = new vector<float>;
+  harmonic2DeDxError = new vector<float>;
+  harmonic2DeDxNoM = new vector<float>;
   isPixB1 = new vector<bool>;
   isPixB2 = new vector<bool>;
   isPixE1 = new vector<bool>;
@@ -655,6 +689,12 @@ void CmsTrackFillerData::clearTrkVectors() {
   truncatedDeDx->clear();
   truncatedDeDxError->clear();
   truncatedDeDxNoM->clear();
+  medianDeDx->clear();
+  medianDeDxError->clear();
+  medianDeDxNoM->clear();
+  harmonic2DeDx->clear();
+  harmonic2DeDxError->clear();
+  harmonic2DeDxNoM->clear();
   isPixB1->clear();
   isPixB2->clear();
   isPixE1->clear();
