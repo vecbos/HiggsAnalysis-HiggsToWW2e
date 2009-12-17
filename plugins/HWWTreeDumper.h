@@ -75,6 +75,8 @@ private:
   bool dumpTracks_, dumpGsfTracks_;
   //! dump the primary vertices of the event
   bool dumpVertices_;
+  //! bool dump the block of the V0 candidates (as K0s)
+  bool dumpK0s_;
   //! dump trigger results
   bool dumpTriggerResults_;
   //! dump the Particle Flow objects
@@ -89,6 +91,7 @@ private:
   edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
   edm::InputTag vertexCollection_;
+  edm::InputTag K0sCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   //! supercluster collections in input

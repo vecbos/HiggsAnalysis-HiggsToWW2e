@@ -46,6 +46,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsVertexFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsV0CandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
@@ -106,6 +107,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpMet_            = iConfig.getUntrackedParameter<bool>("dumpMet", false);
   dumpGenMet_         = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
   dumpVertices_       = iConfig.getUntrackedParameter<bool>("dumpVertices", false);
+  dumpK0s_            = iConfig.getUntrackedParameter<bool>("dumpK0s", false);
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
@@ -129,6 +131,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   refittedForDeDxTrackCollection_ = iConfig.getParameter<edm::InputTag>("refittedForDeDxTrackCollection");
   gsfTrackCollection_      = iConfig.getParameter<edm::InputTag>("gsfTrackCollection");
   vertexCollection_        = iConfig.getParameter<edm::InputTag>("vertexCollection");
+  K0sCollection_           = iConfig.getParameter<edm::InputTag>("K0sCollection");
   genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
   jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
@@ -322,6 +325,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string prefix("");
     std::string suffix("PV");
     treeFill.writeCollectionToTree(vertexCollection_, iEvent, iSetup, prefix, suffix);
+  }
+
+  //fill V0 candidates and associated daughter tracks indices
+  if(dumpK0s_){
+    CmsV0CandidateFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("K0s");
+    treeFill.saveCand(saveCand_);
+    treeFill.writeCollectionToTree(K0sCollection_, iEvent, iSetup, prefix, suffix);
   }
 
   // fill muons block
