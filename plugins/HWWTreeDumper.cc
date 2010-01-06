@@ -46,6 +46,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsVertexFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsCaloTowerFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsV0CandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
@@ -108,6 +109,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpGenMet_         = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
   dumpVertices_       = iConfig.getUntrackedParameter<bool>("dumpVertices", false);
   dumpK0s_            = iConfig.getUntrackedParameter<bool>("dumpK0s", false);
+  dumpCaloTowers_     = iConfig.getUntrackedParameter<bool>("dumpCaloTowers", false);
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
@@ -147,6 +149,13 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hepMcCollection_         = iConfig.getParameter<edm::InputTag>("hepMcCollection");
   genInfoCollection_       = iConfig.getParameter<edm::InputTag>("genInfoCollection");
   genWeightCollection_     = iConfig.getUntrackedParameter<std::string>("genWeightCollection");
+
+  // calotowers collections
+  calotowerCollection_ = iConfig.getParameter<edm::InputTag>("calotowerCollection");
+  hbheLabel_  = iConfig.getParameter<edm::InputTag>("hbheInput");
+  hoLabel_    = iConfig.getParameter<edm::InputTag>("hoInput");
+  hfLabel_    = iConfig.getParameter<edm::InputTag>("hfInput");
+  ecalLabels_ = iConfig.getParameter<std::vector<edm::InputTag> >("ecalInputs");
 
   // trigger Collections
   triggerInputTag_     = iConfig.getParameter<edm::InputTag>("TriggerResultsTag") ;
@@ -354,7 +363,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   }
 
-
+  // fill CaloTower block
+  if(dumpCaloTowers_){
+    CmsCaloTowerFiller treeFill(tree_, hbheLabel_, hoLabel_, hfLabel_, ecalLabels_, true);
+    std::string prefix("");
+    std::string suffix("CaloTowers");
+    treeFill.saveCand(dumpCaloTowers_);
+    treeFill.saveCaloTowerExtras(dumpCaloTowers_);
+    treeFill.writeCollectionToTree(calotowerCollection_, iEvent, iSetup, prefix, suffix, false);
+  }
 
   // fill MET block
   if(dumpMet_) {

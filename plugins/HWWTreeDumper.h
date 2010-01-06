@@ -85,6 +85,8 @@ private:
   bool dumpRunInfo_;
   //! save the dE/dx of the tracks (requires the right module to be run)
   bool saveTrackDeDx_;
+  //! save the calotowers
+  bool dumpCaloTowers_;
 
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_,pflowElectronCollection_;
@@ -104,6 +106,9 @@ private:
   edm::InputTag calotowersForIsolationProducer_;
   //! collection of jet vertices for alpha evaluation
   edm::InputTag jetVertexAlphaCollection1_, jetVertexAlphaCollection2_;
+  //! calotowers collections
+  edm::InputTag calotowerCollection_, hbheLabel_, hoLabel_, hfLabel_;
+  std::vector<edm::InputTag> ecalLabels_;
   //! generator-level particle collection in input
   edm::InputTag mcTruthCollection_;
   //! association map between reco and generated particles
