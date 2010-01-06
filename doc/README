@@ -1,10 +1,10 @@
---- Recipe to build and run the H->WW analysis in 3_X_Y ---
+--- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_X_Y ---
 
-scramv1 p CMSSW CMSSW_3_3_4
-cd CMSSW_3_3_4/src
+scramv1 p CMSSW CMSSW_3_3_6
+cd CMSSW_3_3_6/src
 cmsenv
 
-cvs co -r V05-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V10-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-3_3_X HiggsAnalysis/HiggsToWW2Leptons
 addpkg RecoEgamma/ElectronIdentification
 cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
@@ -18,29 +18,14 @@ cd -
 scramv1 b
 
 cd HiggsAnalysis/HiggsToWW2e/test/python
+(1) H->WW trees:
 cmsRun HWW2eAnalysis_cfg.py
-
---- Recipe to build the dumper for JPsi in 3_X_Y ---
-
-scramv1 p CMSSW CMSSW_3_3_4
-cd CMSSW_3_3_4/src
-cmsenv
-
-cvs co -r V05-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-addpkg RecoEgamma/ElectronIdentification
-cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-
-cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
-cd RecoEgamma/ElectronIdentification/python/
-rm likelihoodPdfsDB_cfi.py
-wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
-cd -
-
-scramv1 b
-
-cd HiggsAnalysis/HiggsToWW2e/test/python
-cmsRun JPsiAnalysis_MC_cfg.py   (Monte Carlo)
-cmsRun JPsiAnalysis_data_cfg.py (data)
+(2) V+jets trees:
+cmsRun VecBosAnalysis_data_cfg.py
+cmsRun VecBosAnalysis_MC_cfg.py
+(3) J/Psi trees:
+cmsRun JPsiAnalysis_data_cfg.py
+cmsRun JPsiAnalysis_MC_cfg.py
 
 
 
