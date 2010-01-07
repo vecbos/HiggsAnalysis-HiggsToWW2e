@@ -24,6 +24,9 @@ process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
 # --- calotowers sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
+# --- ECAL clusters merging in a unique collection ---
+process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
@@ -32,6 +35,7 @@ process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = True
+process.treeDumper.dumpSCs = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = True
 process.treeDumper.dumpParticleFlowObjects = True
@@ -57,7 +61,7 @@ process.source = cms.Source("PoolSource",
 
 #process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
 
-process.p = cms.Path ( process.lowThrCaloTowers *
+process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters *
                        process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
 #                      process.doAlldEdXEstimators *
 #                      process.dedx *

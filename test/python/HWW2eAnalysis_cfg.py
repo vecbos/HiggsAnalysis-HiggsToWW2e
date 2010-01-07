@@ -25,7 +25,10 @@ process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
 # --- track sequences ---
-process.load("HiggsAnalysis.HiggsToWW2e.trackCandidates_cfi")
+process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
+
+# --- ECAL clusters merging in a unique collection ---
+process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
@@ -34,8 +37,10 @@ process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpSignalKfactor = True
 process.treeDumper.dumpTracks = True
+process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpParticleFlowObjects = True
+process.treeDumper.dumpSCs = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveJet1BTag = True
 process.treeDumper.saveJet2BTag = False
@@ -57,10 +62,10 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.p = cms.Path ( process.KFactorProducer * process.muonCorrectedMET *
+                       process.mergedSuperClusters *
                        process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
-                       process.ambiguityResolvedElectrons *
-                       process.trackCandidates)
+                       process.ambiguityResolvedElectrons)
                        
 process.q = cms.EndPath ( process.treeDumper )
