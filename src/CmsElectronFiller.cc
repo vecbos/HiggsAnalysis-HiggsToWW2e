@@ -154,35 +154,11 @@ CmsElectronFiller::~CmsElectronFiller() {
 
   delete privateData_->fiducialFlags;
   delete privateData_->recoFlags;
-
-  delete privateData_->ecal;
-  delete privateData_->eraw;
   delete privateData_->esEnergy;
   delete privateData_->energyCorrections;
 
-  delete privateData_->caloEta;
-  delete privateData_->caloPhi;
-  delete privateData_->nClu;
-  delete privateData_->nCry;
-  delete privateData_->e2x2;
-  delete privateData_->e3x3;
-  delete privateData_->e5x5;
-  delete privateData_->eMax;
-  delete privateData_->e2nd;
-  delete privateData_->s1s9;
-  delete privateData_->s9s25;
-  delete privateData_->covEtaEta;
-  delete privateData_->covEtaPhi;
-  delete privateData_->covPhiPhi;
-  delete privateData_->covIEtaIEta;
-  delete privateData_->covIEtaIPhi;
-  delete privateData_->covIPhiIPhi;
-  delete privateData_->lat;
-  delete privateData_->phiLat;
-  delete privateData_->etaLat;
-  delete privateData_->a20;
-  delete privateData_->a42;
-  
+  delete privateData_->superClusterIndex;
+  delete privateData_->PFsuperClusterIndex;
   delete privateData_->trackIndex;
   delete privateData_->gsfTrackIndex;
 
@@ -240,6 +216,17 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     *(privateData_->ncand) = collection->size();
 
+    // superclusters
+    Handle<SuperClusterCollection> EcalBarrelSuperClusters;
+    try { iEvent.getByLabel(EcalBarrelSuperClusters_, EcalBarrelSuperClusters); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL barrel supercluster Collection" << EcalBarrelSuperClusters_; }
+    
+    Handle<SuperClusterCollection> EcalEndcapSuperClusters;
+    try { iEvent.getByLabel(EcalEndcapSuperClusters_, EcalEndcapSuperClusters); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap supercluster Collection" << EcalEndcapSuperClusters_; }
+    
+    barrelSuperClustersSize = EcalBarrelSuperClusters->size();
+
     // for cluster shape variables
     Handle< EcalRecHitCollection > EcalBarrelRecHits;
     try { iEvent.getByLabel(EcalBarrelRecHits_, EcalBarrelRecHits); }
@@ -262,8 +249,9 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
       if ( !(electronRef.isNull()) ) {
 
         // fill Cluster Adapter
-        SuperClusterRef sclusRef = cand->get<SuperClusterRef>();
-        if(saveEcal_) writeEcalInfo(electronRef,iEvent,iSetup,sclusRef,EBRecHits,EERecHits );
+        SuperClusterRef sclusRef = electronRef->superCluster();
+        SuperClusterRef pfclusRef = electronRef->pflowSuperCluster();
+        if(saveEcal_) writeEcalInfo(electronRef,iEvent,iSetup,sclusRef,pfclusRef,EBRecHits,EERecHits );
         // fill (GSF) Track Adapter
         GsfTrackRef trkRef = cand->get<GsfTrackRef>();
         if(saveTrk_) writeTrkInfo(electronRef,iEvent,iSetup,trkRef);
@@ -475,13 +463,13 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
 
 void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef, 
 				      const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-				      SuperClusterRef sclusRef,
+				      SuperClusterRef sclusRef, SuperClusterRef pfclusRef,
 				      const EcalRecHitCollection *EBRecHits,
 				      const EcalRecHitCollection *EERecHits) {
 
 
   bool validTopologyAndGeometry = false;
-  if(&sclusRef) {
+  if(&electronRef) {
 
     // fiducial flags in ECAL
     int packed_sel = -1;
@@ -508,181 +496,50 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     packed_reco = ( isEcalDriven << 1 ) | isTrackerDriven;
     privateData_->recoFlags->push_back( packed_reco );
 
-    int packed_corr;
-    // ecal corrected energy
-    privateData_->ecal->push_back(electronRef->ecalEnergy());
+    // link to the supercluster (collections are merged: barrel + endcap in this order)
+    if ( isEcalDriven && sclusRef.isNonnull() ) {
+      int offset = ( fabs(sclusRef->eta() ) < 1.479 ) ? 0 : barrelSuperClustersSize;
+      privateData_->superClusterIndex->push_back( sclusRef.key() + offset );
+    } else {
+      privateData_->superClusterIndex->push_back( -1 );
+    }
+
+    if ( isTrackerDriven && pfclusRef.isNonnull() ) {
+      privateData_->PFsuperClusterIndex->push_back( pfclusRef.key() );
+    } else {
+      privateData_->PFsuperClusterIndex->push_back( -1 );
+    }
     
+    int packed_corr;
     int isEcalEnergyCorrected = ( electronRef->isEcalEnergyCorrected() ) ? 1 : 0;
     int isMomentumCorrected = ( electronRef->isMomentumCorrected() ) ? 1 : 0;
-    
     packed_corr = ( isEcalEnergyCorrected << 1 ) | isMomentumCorrected;
-    
     privateData_->energyCorrections->push_back( packed_corr );
 
-    // Cluster related variables
+    // preshower energy
     privateData_->esEnergy->push_back(sclusRef->preshowerEnergy());
-    privateData_->nClu->push_back(sclusRef->clustersSize());
 
-    int ncry=0;
-    for(CaloCluster_iterator bcItr=sclusRef->clustersBegin(); bcItr!=sclusRef->clustersEnd(); bcItr++){
-      const Ptr<CaloCluster> basicCluster = *bcItr;
-      ncry += basicCluster->size();
-    }
-    privateData_->nCry->push_back(ncry);
-    
-    privateData_->eraw->push_back(sclusRef->rawEnergy());
-    privateData_->caloEta->push_back(sclusRef->eta());
-    privateData_->caloPhi->push_back(sclusRef->phi());
-
-
-    if ( saveFatEcal_ ) { 
-
-      edm::ESHandle<CaloTopology> pTopology;
-      iSetup.get<CaloTopologyRecord>().get(pTopology);
-      
-      edm::ESHandle<CaloGeometry> pGeometry;
-      iSetup.get<CaloGeometryRecord>().get(pGeometry);
-      
-      if ( pTopology.isValid() && pGeometry.isValid() ) {
-        
-        validTopologyAndGeometry = true;
-        
-        const CaloTopology *topology = pTopology.product();
-        const CaloGeometry *geometry = pGeometry.product();
-
-        const Ptr<CaloCluster> theSeed = sclusRef->seed();
-
-        const EcalRecHitCollection *rechits = 0;
-
-        float seedEta = theSeed->position().eta();
-
-        if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
-        else rechits = EERecHits; 
-
-        float eMax = EcalClusterTools::eMax( *theSeed, &(*rechits) );
-        float e3x3 = EcalClusterTools::e3x3( *theSeed, &(*rechits), topology );
-        float e5x5 = EcalClusterTools::e5x5( *theSeed, &(*rechits), topology );
-
-        privateData_->e3x3->push_back(e3x3);
-        privateData_->e5x5->push_back(e5x5);
-        privateData_->eMax->push_back(eMax);
-
-        std::vector<float> vLat = EcalClusterTools::lat( *theSeed, &(*rechits), geometry );
-        float etaLat = vLat[0];
-        float phiLat = vLat[1];
-        float lat = vLat[2];
-
-        privateData_->lat->push_back(lat);
-        privateData_->phiLat->push_back(phiLat);
-        privateData_->etaLat->push_back(etaLat);
-
-	float e2x2 = EcalClusterTools::e2x2( *theSeed, &(*rechits), topology );
-	float e2nd = EcalClusterTools::e2nd( *theSeed, &(*rechits) );
-	float s1s9 = eMax/e3x3;
-	float s9s25 = e3x3/e5x5;
-	std::vector<float> vCov = EcalClusterTools::covariances( *theSeed, &(*rechits), topology, geometry );
-
-	float covEtaEta = vCov[0];
-	float covEtaPhi = vCov[1];
-	float covPhiPhi = vCov[2];
-
-	privateData_->e2x2->push_back(e2x2);
-	privateData_->e2nd->push_back(e2nd);
-	privateData_->s1s9->push_back(s1s9);
-	privateData_->s9s25->push_back(s9s25);
-	privateData_->covEtaEta->push_back(covEtaEta);
-	privateData_->covEtaPhi->push_back(covEtaPhi);
-	privateData_->covPhiPhi->push_back(covPhiPhi);
-
-	float zernike20 = EcalClusterTools::zernike20( *theSeed, &(*rechits), geometry );
-	float zernike42 = EcalClusterTools::zernike42( *theSeed, &(*rechits), geometry );
-
- 	privateData_->a20->push_back(zernike20);
- 	privateData_->a42->push_back(zernike42);
-
-        // local covariances: instead of using absolute eta/phi it counts crystals normalised
-        std::vector<float> vLocCov = EcalClusterTools::localCovariances( *theSeed, &(*rechits), topology );
-
-        float covIEtaIEta = vLocCov[0];
-        float covIEtaIPhi = vLocCov[1];
-        float covIPhiIPhi = vLocCov[2];
-
-        privateData_->covIEtaIEta->push_back(covIEtaIEta);
-        privateData_->covIEtaIPhi->push_back(covIEtaIPhi);
-        privateData_->covIPhiIPhi->push_back(covIPhiIPhi);
-
-      }
-    }
-    else { edm::LogWarning("CmsElectronFiller") << "ECAL topology or geometry not valid, not filling the ECAL cluster shapes"; }
-  }
-  if(!(&sclusRef) || ((&sclusRef) && (!validTopologyAndGeometry)) ) {
-    privateData_->ecal->push_back(-1.);
-    privateData_->esEnergy->push_back(-1.);
+  } else {
     privateData_->fiducialFlags->push_back(-1);
     privateData_->recoFlags->push_back(-1);
-    privateData_->nClu->push_back(-1);
-    privateData_->nCry->push_back(-1);
-    privateData_->eraw->push_back(-1.);
-    privateData_->caloEta->push_back(-1.);
-    privateData_->caloPhi->push_back(-1.);
-
-    if(saveFatEcal_) {
-      privateData_->e3x3->push_back(-1.);
-      privateData_->e5x5->push_back(-1.);
-      privateData_->eMax->push_back(-1.);
-      privateData_->lat->push_back(-1.);
-      privateData_->phiLat->push_back(-1.);
-      privateData_->etaLat->push_back(-1.);
-      privateData_->e2x2->push_back(-1.);
-      privateData_->e2nd->push_back(-1.);
-      privateData_->s1s9->push_back(-1.);
-      privateData_->s9s25->push_back(-1.);
-      privateData_->covEtaEta->push_back(-1.);
-      privateData_->covEtaPhi->push_back(-1.);
-      privateData_->covPhiPhi->push_back(-1.);
-      privateData_->a20->push_back(-1.);
-      privateData_->a42->push_back(-1.);
-      privateData_->covIEtaIEta->push_back(-1.);
-      privateData_->covIEtaIPhi->push_back(-1.);
-      privateData_->covIPhiIPhi->push_back(-1.);
-    }
+    privateData_->superClusterIndex->push_back( -1 );
+    privateData_->PFsuperClusterIndex->push_back( -1 );
+    privateData_->energyCorrections->push_back( -1 );
+    privateData_->esEnergy->push_back(-1.);
   }
+
 }
 
 void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
-  cmstree->column((colPrefix+"ecal"+colSuffix).c_str(), *privateData_->ecal, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"esEnergy"+colSuffix).c_str(), *privateData_->esEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"fiducialFlags"+colSuffix).c_str(), *privateData_->fiducialFlags, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlags"+colSuffix).c_str(), *privateData_->recoFlags, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energyCorrections"+colSuffix).c_str(), *privateData_->energyCorrections, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"nClu"+colSuffix).c_str(), *privateData_->nClu, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"nCry"+colSuffix).c_str(), *privateData_->nCry, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eraw"+colSuffix).c_str(), *privateData_->eraw, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"caloEta"+colSuffix).c_str(), *privateData_->caloEta, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"caloPhi"+colSuffix).c_str(), *privateData_->caloPhi, nCandString.c_str(), 0, "Reco");
-  
-  if(saveFatEcal_) {
-    cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"lat"+colSuffix).c_str(), *privateData_->lat, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"phiLat"+colSuffix).c_str(), *privateData_->phiLat, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"etaLat"+colSuffix).c_str(), *privateData_->etaLat, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"e2x2"+colSuffix).c_str(), *privateData_->e2x2, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"e2nd"+colSuffix).c_str(), *privateData_->e2nd, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"s1s9"+colSuffix).c_str(), *privateData_->s1s9, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"s9s25"+colSuffix).c_str(), *privateData_->s9s25, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"covEtaEta"+colSuffix).c_str(), *privateData_->covEtaEta, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"covEtaPhi"+colSuffix).c_str(), *privateData_->covEtaPhi, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"covPhiPhi"+colSuffix).c_str(), *privateData_->covPhiPhi, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"a20"+colSuffix).c_str(), *privateData_->a20, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"a42"+colSuffix).c_str(), *privateData_->a42, nCandString.c_str(), 0, "Reco");
-  }
+  cmstree->column((colPrefix+"esEnergy"+colSuffix).c_str(), *privateData_->esEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"superClusterIndex"+colSuffix).c_str(), *privateData_->superClusterIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"PFsuperClusterIndex"+colSuffix).c_str(), *privateData_->PFsuperClusterIndex, nCandString.c_str(), 0, "Reco");
+
 }
 
 
@@ -723,33 +580,11 @@ void CmsElectronFillerData::initialise() {
 
   fiducialFlags = new vector<int>;
   recoFlags = new vector<int>;
-
-  ecal = new vector<float>;
   esEnergy = new vector<float>;
   energyCorrections = new vector<int>;
-  nClu = new vector<int>;
-  nCry = new vector<int>;
-  eraw = new vector<float>;
-  caloEta = new vector<float>;
-  caloPhi = new vector<float>;
-  eMax = new vector<float>;
-  e2nd = new vector<float>;
-  s1s9 = new vector<float>;
-  s9s25 = new vector<float>;
-  e2x2 = new vector<float>;
-  e3x3 = new vector<float>;
-  e5x5 = new vector<float>;
-  covEtaEta = new vector<float>;
-  covEtaPhi = new vector<float>;
-  covPhiPhi = new vector<float>;
-  covIEtaIEta = new vector<float>;
-  covIEtaIPhi = new vector<float>;
-  covIPhiIPhi = new vector<float>;
-  lat = new vector<float>;
-  phiLat = new vector<float>;
-  etaLat = new vector<float>;
-  a20 = new vector<float>;
-  a42 = new vector<float>;
+
+  superClusterIndex = new vector<int>;
+  PFsuperClusterIndex = new vector<int>;
   trackIndex = new vector<int>;
   gsfTrackIndex = new vector<int>;
 
@@ -789,35 +624,13 @@ void CmsElectronFillerData::clearTrkVectors() {
   eleTrackVy->clear();
   eleTrackVz->clear();
 
-  ecal->clear();
-  esEnergy->clear();
-  energyCorrections->clear();
-  nClu->clear();
-  nCry->clear();
-  e3x3->clear();
-  e5x5->clear();
-  eMax->clear();
-  lat->clear();
-  phiLat->clear();
-  etaLat->clear();
-  eraw->clear();
-  caloEta->clear();
-  caloPhi->clear();
   fiducialFlags->clear();
   recoFlags->clear();
-  e2x2->clear();
-  e2nd->clear();
-  s1s9->clear();
-  s9s25->clear();
-  covEtaEta->clear();
-  covEtaPhi->clear();
-  covPhiPhi->clear();
-  a20->clear();
-  a42->clear();
-  covIEtaIEta->clear();
-  covIEtaIPhi->clear();
-  covIPhiIPhi->clear();
+  esEnergy->clear();
+  energyCorrections->clear();
 
+  superClusterIndex->clear();
+  PFsuperClusterIndex->clear();
   trackIndex->clear();
   gsfTrackIndex->clear();
 

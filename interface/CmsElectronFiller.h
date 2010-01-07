@@ -20,6 +20,8 @@
 #include "FWCore/Framework/interface/EventSetup.h"
 
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
+#include "DataFormats/EgammaReco/interface/SuperCluster.h"
+#include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
@@ -45,17 +47,10 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<int> *fiducialFlags;
   vector<int> *recoFlags;
 
+  vector<int> *superClusterIndex, *PFsuperClusterIndex;
   vector<float> *ecal, *eraw, *esEnergy, *caloEta, *caloPhi;
   vector<int> *energyCorrections;
 
-  vector<int> *nClu, *nCry;
-  vector<float> *e2x2, *e3x3, *e5x5;
-  vector<float> *eMax, *e2nd;
-  vector<float> *s1s9, *s9s25;
-  vector<float> *covEtaEta, *covEtaPhi, *covPhiPhi;
-  vector<float> *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi;
-  vector<float> *lat, *phiLat, *etaLat, *a20, *a42;
-  
 public:
   void initialise();
   void clearTrkVectors();
@@ -96,6 +91,10 @@ class CmsElectronFiller : public CmsCandidateFiller {
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
 
+  //! set the superclusters for ECAL barrel
+  void setEcalBarrelSuperClusters( edm::InputTag EcalBarrelSuperClusters) { EcalBarrelSuperClusters_ = EcalBarrelSuperClusters; }
+  //! set the superclusters for ECAL endcap
+  void setEcalEndcapSuperClusters( edm::InputTag EcalEndcapSuperClusters) { EcalEndcapSuperClusters_ = EcalEndcapSuperClusters; }
   //! set the rechits for ECAL barrel (needed for cluster shapes)
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
@@ -115,7 +114,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void writeTrkInfo(const reco::GsfElectronRef, const edm::Event&, const edm::EventSetup&, reco::GsfTrackRef trkRef);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
-  void writeEcalInfo(const reco::GsfElectronRef, const edm::Event&, const edm::EventSetup&, reco::SuperClusterRef sclusRef,
+  void writeEcalInfo(const reco::GsfElectronRef, const edm::Event&, const edm::EventSetup&, 
+                     reco::SuperClusterRef sclusRef, reco::SuperClusterRef pfclusRef,
 		     const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
   void treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix);
 
@@ -135,6 +135,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
   CmsElectronFillerData *privateData_;
   edm::InputTag matchMap_;
 
+  edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;
+
   edm::InputTag EcalBarrelRecHits_;
   edm::InputTag EcalEndcapRecHits_;
 
@@ -145,6 +147,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
   edm::InputTag tracksProducer_;
   edm::InputTag calotowersProducer_;
+
+  int barrelSuperClustersSize;
 
   CmsTree *cmstree;
 
