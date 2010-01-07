@@ -33,15 +33,6 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
 
   // All the vectors that will store the stuff
   // going into the tree.
-
-  vector<float> *pxAtInner, *pyAtInner, *pzAtInner, *xAtInner, *yAtInner, *zAtInner;
-  vector<float> *pxAtOuter, *pyAtOuter, *pzAtOuter, *xAtOuter, *yAtOuter, *zAtOuter;
-  vector<float> *modePx, *modePy, *modePz;
-  vector<float> *eleTrackNormalizedChi2;
-  vector<float> *eleTrackDxy, *eleTrackD0, *eleTrackDsz, *eleTrackDz;
-  vector<float> *eleTrackDxyError, *eleTrackD0Error, *eleTrackDszError, *eleTrackDzError;
-  vector<float> *eleTrackValidHits, *eleTrackLostHits;
-  vector<float> *eleTrackVx, *eleTrackVy, *eleTrackVz; 
   vector<int> *trackIndex, *gsfTrackIndex;
 
   vector<int> *fiducialFlags;
