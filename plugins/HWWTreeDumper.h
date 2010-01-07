@@ -97,7 +97,8 @@ private:
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   //! supercluster collections in input
-  edm::InputTag ecalSCCollection_;
+  edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
+  edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalPFClusterCollection_;
   //! basiccluster collections in input
   edm::InputTag ecalBCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly

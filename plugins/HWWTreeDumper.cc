@@ -125,6 +125,9 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   pflowElectronCollection_ = iConfig.getParameter<edm::InputTag>("pflowElectronCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
+  ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
+  ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
+  ecalPFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalPFClusterCollection");
   ecalBCCollection_        = iConfig.getParameter<edm::InputTag>("ecalBCCollection");
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
@@ -242,6 +245,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveEcal(saveEcal_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.saveFatEcal(saveFatEcal_);
+    treeFill.setEcalBarrelSuperClusters(ecalBarrelSCCollection_);
+    treeFill.setEcalEndcapSuperClusters(ecalEndcapSCCollection_);
     treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
     treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
     // for custom isolation
@@ -271,15 +276,26 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill SC block
   if (dumpSCs_) {
 
-      CmsSuperClusterFiller treeFill(tree_, 100);
+      CmsSuperClusterFiller treeFill(tree_, 1000);
       std::string prefix("");
-      std::string barrelSuffix("SC");
+      std::string suffix("SC");
       treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
       treeFill.setTracks(trackCollection_);
       treeFill.setGsfTracks(gsfTrackCollection_);
       treeFill.setCalotowers(calotowersForIsolationProducer_);
-      treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
+      treeFill.doTrackBwdPropagation(true);
+      treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, suffix, false);
+
+      CmsSuperClusterFiller treeFillPF(tree_, 1000);
+      suffix = "PFSC";
+      treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPF.setTracks(trackCollection_);
+      treeFillPF.setGsfTracks(gsfTrackCollection_);
+      treeFillPF.setCalotowers(calotowersForIsolationProducer_);
+      treeFillPF.doTrackBwdPropagation(false);
+      treeFillPF.writeCollectionToTree(ecalPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
 
   }
 
