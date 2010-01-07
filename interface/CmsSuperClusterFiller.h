@@ -97,7 +97,8 @@ public:
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
   void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
-
+  //! turn the track backward propagation ON/OFF
+  void doTrackBwdPropagation( bool what ) { doTrackProp_ = what; }
 
 protected:
   
@@ -148,6 +149,8 @@ protected:
   edm::Handle<CaloTowerCollection> calotowers_;
 
   enum tracktype { track, gsftrack };
+
+  bool doTrackProp_;
 
   DetId closestProb_;
   int severityClosestProb_;

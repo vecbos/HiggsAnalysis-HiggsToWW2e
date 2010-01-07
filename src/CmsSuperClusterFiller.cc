@@ -56,6 +56,7 @@ CmsSuperClusterFiller::CmsSuperClusterFiller(CmsTree *cmsTree, int maxSC):  priv
   privateData_->initialiseCandidate();
   closestProb_ = DetId(0);
   severityClosestProb_ = -1;
+  doTrackProp_ = false;
 
 }
 
@@ -166,10 +167,12 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	{
 	  // fill basic kinematics
 	  writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
-          // fill CTF track - SC match
-          writeTrackInfo(&(*cand),iEvent,iSetup,&(*tracks_),track);
-          // fill GSF track - SC match
-          writeTrackInfo(&(*cand),iEvent,iSetup,&(*gsfTracks_),gsftrack);
+          if ( doTrackProp_ ) {
+            // fill CTF track - SC match
+            writeTrackInfo(&(*cand),iEvent,iSetup,&(*tracks_),track);
+            // fill GSF track - SC match
+            writeTrackInfo(&(*cand),iEvent,iSetup,&(*gsfTracks_),gsftrack);
+          }
 	}
     }
   else 
@@ -187,7 +190,7 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
   treeSCInfo(columnPrefix,columnSuffix);
-  treeTrackInfo(columnPrefix,columnSuffix);  
+  if ( doTrackProp_ ) treeTrackInfo(columnPrefix,columnSuffix);  
 
   if(dumpData) cmstree->dumpData();
 
