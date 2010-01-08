@@ -295,7 +295,7 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
 
       if(true) { // if SC collection exists
 
-	int limit_to_print=1;
+	// int limit_to_print=1;
 
 	float cand_en=cand->energy();
 	float cand_eta=cand->eta();
