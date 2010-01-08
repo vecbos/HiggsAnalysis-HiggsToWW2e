@@ -36,6 +36,8 @@
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/DetId/interface/DetId.h"
+// FC: added SC 
+#include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/EcalDetId/interface/EBDetId.h"
 #include "DataFormats/EcalDetId/interface/EEDetId.h"
 #include "DataFormats/EcalDetId/interface/EcalSubdetector.h"
@@ -108,6 +110,7 @@ CmsBasicClusterFiller::~CmsBasicClusterFiller()
   delete privateData_->sevClosProbl;
   delete privateData_->idClosProbl;
   delete privateData_->fracClosProbl;
+  delete privateData_->indexSC;
 }
 
 
@@ -142,6 +145,14 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	}
       
       *(privateData_->nBC) = collection->size();
+
+      
+      // for super cluster link 
+      Handle<SuperClusterCollection> EcalSC;
+      try { iEvent.getByLabel(EcalSC_, EcalSC); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsBasicClusterFiller") << "Can't get SC Collection: " << EcalSC_; }
+      const SuperClusterCollection *ESCCollection = EcalSC.product();
+      
       
       // for cluster shape variables
       Handle< EcalRecHitCollection > EcalBarrelRecHits;
@@ -161,7 +172,7 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       for(cand=collection->begin(); cand!=collection->end(); cand++) 
 	{
 	  // fill basic kinematics
-	  writeBCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
+	  writeBCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits,ESCCollection);
 	}
     }
   else 
@@ -196,7 +207,9 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
                                         const edm::Event& iEvent, 
                                         const edm::EventSetup& iSetup,
                                         const EcalRecHitCollection *EBRecHits,
-                                        const EcalRecHitCollection *EERecHits) 
+                                        const EcalRecHitCollection *EERecHits,
+					const SuperClusterCollection *ESCCollection )
+
 {
 
   std::vector< std::pair<DetId, float> > ids = cand->hitsAndFractions();
@@ -280,6 +293,44 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
         privateData_->sevClosProbl->push_back(-1);
       }
 
+      if(true) { // if SC collection exists
+
+	int limit_to_print=1;
+
+	float cand_en=cand->energy();
+	float cand_eta=cand->eta();
+	float cand_phi=cand->phi();
+	int index_SC=-1; 
+	int index_SC_ref=-1; 
+	
+	std::cout<<"BC: en="<< cand_en<< " eta="<<cand_eta<< " phi="<<cand_phi<<std::endl;
+	SuperClusterCollection::const_iterator iSC;
+	for(iSC=ESCCollection->begin(); iSC!=ESCCollection->end(); iSC++)
+	  {
+	    index_SC++;
+	    // find SC constituents 
+	    for(CaloClusterPtrVector::const_iterator bcItr = iSC->clustersBegin(); bcItr != iSC->clustersEnd(); bcItr++)
+	      {
+
+		if(    cand->energy()== (*bcItr)->energy() 
+		    && cand->eta()== (*bcItr)->eta() 
+		    && cand->phi()== (*bcItr)->phi()  ) {
+		  index_SC_ref=index_SC;
+		  std::cout<<"*** en="<< (*bcItr)->energy()<< " eta="<<(*bcItr)->eta()<< " phi="<<(*bcItr)->phi()<<std::endl;
+		}else {
+		  std::cout<<"    en="<< (*bcItr)->energy()<< " eta="<<(*bcItr)->eta()<< " phi="<<(*bcItr)->phi()<<std::endl;
+		}  
+	      }
+	  }
+
+	privateData_->indexSC->push_back(index_SC_ref);
+
+      }
+      
+
+
+
+
   } else {
     privateData_->e3x3->push_back(-1.);
     privateData_->e5x5->push_back(-1.);
@@ -297,6 +348,7 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
     privateData_->idClosProbl->push_back(-1);
     privateData_->idClosProbl->push_back(-1);
     privateData_->sevClosProbl->push_back(-1);
+    privateData_->indexSC->push_back(-1);
   }
 
 }
@@ -326,6 +378,7 @@ void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"fracClosProbl"+colSuffix).c_str(), *privateData_->fracClosProbl, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"indexSC"+colSuffix).c_str(), *privateData_->indexSC, nCandString.c_str(), 0, "Reco");
 }
 
 // copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
@@ -451,6 +504,7 @@ void CmsBasicClusterFillerData::initialiseCandidate()
   idClosProbl = new vector<int>;
   sevClosProbl = new vector<int>;
   fracClosProbl = new vector<float>;
+  indexSC = new vector<int>;
   nBC =  new int;
 }
 
@@ -477,4 +531,5 @@ void CmsBasicClusterFillerData::clear()
   idClosProbl->clear();
   sevClosProbl->clear();
   fracClosProbl->clear();
+  indexSC->clear();
 }

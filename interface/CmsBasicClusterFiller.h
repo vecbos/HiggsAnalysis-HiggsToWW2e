@@ -40,7 +40,7 @@
 struct CmsBasicClusterFillerData {
   // All the vectors that will store the stuff
   // going into the tree.
-  vector<int>  *nCrystals, *iAlgo, *recoFlag, *sevClosProbl, *idClosProbl;
+  vector<int>  *nCrystals, *iAlgo, *recoFlag, *sevClosProbl, *idClosProbl, *indexSC;
   vector<float> *energy, *seedEnergy, *eta, *theta, *phi, *time, *chi2Prob, *fracClosProbl;
   vector<float> *e3x3, * e5x5, *eMax, *e2x2, *e2nd, *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi;
   int *nBC;
@@ -79,6 +79,10 @@ public:
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
   void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
+  //! set SC  
+  void setEcalSuperClusters( edm::InputTag a_tag ) { EcalSC_ = a_tag; }
+
+
 
 protected:
   
@@ -95,7 +99,8 @@ protected:
 
   virtual void writeBCInfo(const reco::BasicCluster *cand, 
 			   const edm::Event&, const edm::EventSetup&,
-                           const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
+                           const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits, 
+			   const reco::SuperClusterCollection *ESCCollectionEB );
   virtual void treeBCInfo(const std::string colPrefix, const std::string colSuffix);
   
 
@@ -103,6 +108,10 @@ protected:
   CmsTree *cmstree;
 
   CmsBasicClusterFillerData *privateData_;
+
+  // FC added SC link 
+  edm::InputTag EcalSC_; // not mandatory 
+
 
   edm::InputTag EcalBarrelRecHits_;
   edm::InputTag EcalEndcapRecHits_;

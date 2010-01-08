@@ -41,6 +41,7 @@ process.treeDumper.dumpGenJets = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
+process.treeDumper.dumpBCs = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = True
 process.treeDumper.dumpParticleFlowObjects = True
@@ -68,7 +69,7 @@ process.source = cms.Source("PoolSource",
 
 #process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
 
-process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters *
+process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
                        process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
 #                      process.doAlldEdXEstimators *
 #                      process.dedx *

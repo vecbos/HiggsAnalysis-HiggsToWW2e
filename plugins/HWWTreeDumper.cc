@@ -307,6 +307,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       std::string barrelSuffix("BC");
       treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFill.setEcalSuperClusters(ecalSCCollection_);
       treeFill.writeCollectionToTree(ecalBCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
   }

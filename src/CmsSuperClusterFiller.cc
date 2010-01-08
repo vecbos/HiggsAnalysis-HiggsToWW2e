@@ -268,6 +268,8 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->recoFlag->push_back((int)seedRH->recoFlag());
       privateData_->seedEnergy->push_back((float)maxRH.second);
 
+      
+
       // channel status
       edm::ESHandle<EcalChannelStatus> pChannelStatus;
       iSetup.get<EcalChannelStatusRcd>().get(pChannelStatus);
