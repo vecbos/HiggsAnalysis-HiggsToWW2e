@@ -83,7 +83,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveJet2BTag_    = iConfig.getUntrackedParameter<bool>("saveJet2BTag", false);
 
   //electron pflow
-  savePFEleGsfTrk_ = iConfig.getUntrackedParameter<bool>("savePFEleGsfTrk", false);
+  savePFEleTrk_   = iConfig.getUntrackedParameter<bool>("savePFEleGsfTrk", false);
   savePFEleBasic_ = iConfig.getUntrackedParameter<bool>("savePFEleBasic", false);
 
   // particle identification
@@ -263,12 +263,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   }
 
   if(dumpPFlowElectrons_) {
-    CmsPFLowElectronFiller treeFill(tree_, true);
+    CmsPFlowElectronFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("PFEle");
     treeFill.saveCand(saveCand_);
     treeFill.savePFEleBasic(savePFEleBasic_);
-    treeFill.savePFEleGsfTrk(savePFEleGsfTrk_);
+    treeFill.savePFEleTrk(savePFEleTrk_);
     treeFill.writeCollectionToTree(pflowElectronCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 

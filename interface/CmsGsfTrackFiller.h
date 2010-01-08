@@ -15,11 +15,14 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTrackFiller.h"
+#include "DataFormats/EgammaReco/interface/ElectronSeed.h"
+#include "DataFormats/EgammaReco/interface/ElectronSeedFwd.h"
 
 struct CmsGsfTrackFillerData : public CmsTrackFillerData {
-
+  
   vector<int> *chargeMode;
   vector<float> *pxMode, *pyMode, *pzMode;
+  vector<int> *recoFlags;
 
 public:
   void initialiseGsf();

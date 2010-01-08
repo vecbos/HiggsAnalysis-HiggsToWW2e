@@ -30,14 +30,13 @@ CmsGsfTrackFiller::CmsGsfTrackFiller(CmsTree *cmsTree,
   saveFatTrk_=true;
   saveVtxTrk_=true; // to change when bug is fixed
   saveDeDx_=false;
-
-
+  
   trkIndexName_ = new std::string("n");
-
+  
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
-
+  
   privateData_->initialiseGsf();
   x0 = 0.;
   y0 = 0.;
@@ -54,7 +53,7 @@ CmsGsfTrackFiller::CmsGsfTrackFiller(CmsTree *cmsTree,
 {
   cmstree=cmsTree;
   vertexCollection_=vertexCollection;
-
+  
   saveTrk_ = true;
   saveVtxTrk_ = vtxtrack; 
   saveFatTrk_ = fatTree;
@@ -79,7 +78,7 @@ CmsGsfTrackFiller::~CmsGsfTrackFiller() {
   delete privateData_->pxMode;
   delete privateData_->pyMode;
   delete privateData_->pzMode;
-
+  delete privateData_->recoFlags;
 }
 
 void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
@@ -172,6 +171,32 @@ void CmsGsfTrackFiller::writeGsfTrkInfo(GsfTrackRef trkRef) {
   privateData_->pyMode->push_back(trkRef->pyMode());
   privateData_->pzMode->push_back(trkRef->pzMode());
 
+  ElectronSeedRef seedRef= trkRef->extra()->seedRef().castTo<ElectronSeedRef>();
+  bool isEcalDriven    = false;
+  bool isTrackerDriven = false;
+  if(seedRef.isNonnull()) {
+    if(seedRef->caloCluster().isNonnull()) { 
+      isEcalDriven = true; 
+    }
+    else { 
+      isEcalDriven = false; 
+    }
+    if(seedRef->ctfTrack().isNonnull()) {
+      isTrackerDriven = true;
+    }
+    else {
+      isTrackerDriven = false;
+    }
+  
+    int packed_reco;
+    int ecaldriven = ( isEcalDriven ) ? 1 : 0;
+    int trackerdriven = ( isTrackerDriven ) ? 1 : 0;
+    packed_reco = ( ecaldriven << 1 ) | trackerdriven;
+    privateData_->recoFlags->push_back( packed_reco );
+  }
+  else {
+    privateData_->recoFlags->push_back(-1);
+  }
 }
 
 void CmsGsfTrackFiller::treeGsfTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
@@ -181,7 +206,7 @@ void CmsGsfTrackFiller::treeGsfTrkInfo(const std::string &colPrefix, const std::
     cmstree->column((colPrefix+"pxMode"+colSuffix).c_str(), *privateData_->pxMode, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pyMode"+colSuffix).c_str(), *privateData_->pyMode, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pzMode"+colSuffix).c_str(), *privateData_->pzMode, nCandString.c_str(), 0, "Reco");
-
+    cmstree->column((colPrefix+"recoFlags"+colSuffix).c_str(), *privateData_->recoFlags, nCandString.c_str(), 0, "Reco");
 }
 
 void CmsGsfTrackFillerData::initialiseGsf() {
@@ -191,7 +216,7 @@ void CmsGsfTrackFillerData::initialiseGsf() {
   pxMode = new vector<float>;
   pyMode = new vector<float>;
   pzMode = new vector<float>;
- 
+  recoFlags = new vector<int>;
 }
 
 void CmsGsfTrackFillerData::clearTrkVectorsGsf() {
@@ -202,5 +227,5 @@ void CmsGsfTrackFillerData::clearTrkVectorsGsf() {
   pxMode->clear();
   pyMode->clear();
   pzMode->clear();
-
+  recoFlags->clear();
 }
