@@ -41,6 +41,7 @@
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
 
+#include "RecoEgamma/EgammaElectronAlgos/interface/FTSFromVertexToPointFactory.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
 #include "CondFormats/EcalObjects/interface/EcalChannelStatus.h"
 #include "CondFormats/DataRecord/interface/EcalChannelStatusRcd.h"
@@ -57,6 +58,7 @@ struct CmsSuperClusterFillerData {
   vector<float> *hOverE;
   vector<int> *trackIndex, *gsfTrackIndex;
   vector<float> *trackDeltaR, *trackDeltaPhi, *trackDeltaEta, *gsfTrackDeltaR, *gsfTrackDeltaPhi, *gsfTrackDeltaEta;
+  vector<float> *pxVtxPropagatedNegCharge, *pyVtxPropagatedNegCharge, *pzVtxPropagatedNegCharge, *pxVtxPropagatedPosCharge, *pyVtxPropagatedPosCharge, *pzVtxPropagatedPosCharge;
   int *nSC;
 
 public:
@@ -117,6 +119,9 @@ protected:
 			   const edm::Event&, const edm::EventSetup&,
                            const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
 
+  virtual void writeSCVtxPropagationInfo(const reco::SuperCluster *cand,
+                                         const edm::Event&, const edm::EventSetup& );
+
   virtual void writeTrackInfo(const reco::SuperCluster *cand,
                               const edm::Event&, const edm::EventSetup&,
                               const reco::TrackCollection *theTracks, int trackType);
@@ -127,7 +132,8 @@ protected:
 
   virtual void treeSCInfo(const std::string colPrefix, const std::string colSuffix);
   virtual void treeTrackInfo(const std::string colPrefix, const std::string colSuffix);
-  
+  virtual void treeSCVtxPropagationInfo(const std::string colPrefix, const std::string colSuffix);
+
   // Friends
 
   CmsSuperClusterFillerData *privateData_;
@@ -151,6 +157,7 @@ protected:
   enum tracktype { track, gsftrack };
 
   bool doTrackProp_;
+  FTSFromVertexToPointFactory myFTS;
 
   DetId closestProb_;
   int severityClosestProb_;

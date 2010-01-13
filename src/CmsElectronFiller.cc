@@ -41,6 +41,12 @@
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
 
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
+#include "Geometry/CaloTopology/interface/CaloTopology.h"
+#include "Geometry/Records/interface/CaloGeometryRecord.h"
+#include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -116,6 +122,36 @@ CmsElectronFiller::CmsElectronFiller(CmsTree *cmsTree, bool fatTree,
 CmsElectronFiller::~CmsElectronFiller() {
 
   // delete here the vector ptr's
+  delete privateData_->pxAtInner;
+  delete privateData_->pyAtInner;
+  delete privateData_->pzAtInner;
+  delete privateData_->xAtInner;
+  delete privateData_->yAtInner;
+  delete privateData_->zAtInner;
+  delete privateData_->pxAtOuter;
+  delete privateData_->pyAtOuter;
+  delete privateData_->pzAtOuter;
+  delete privateData_->xAtOuter;
+  delete privateData_->yAtOuter;
+  delete privateData_->zAtOuter;
+  delete privateData_->modePx;
+  delete privateData_->modePy;
+  delete privateData_->modePz;
+  delete privateData_->eleTrackNormalizedChi2;
+  delete privateData_->eleTrackDxy;
+  delete privateData_->eleTrackD0;
+  delete privateData_->eleTrackDsz;
+  delete privateData_->eleTrackDz;
+  delete privateData_->eleTrackDxyError;
+  delete privateData_->eleTrackD0Error;
+  delete privateData_->eleTrackDszError;
+  delete privateData_->eleTrackDzError;
+  delete privateData_->eleTrackValidHits;
+  delete privateData_->eleTrackLostHits;
+  delete privateData_->eleTrackVx;
+  delete privateData_->eleTrackVy;
+  delete privateData_->eleTrackVz;
+
   delete privateData_->fiducialFlags;
   delete privateData_->recoFlags;
   delete privateData_->esEnergy;
@@ -267,22 +303,116 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef, 
 				     const edm::Event& iEvent, const edm::EventSetup& iSetup, 
 				     GsfTrackRef trkRef) {
-  if( trkRef.isNonnull() ) {
+  if(&trkRef) {
 
     privateData_->gsfTrackIndex->push_back(trkRef.key());
 
     reco::TrackRef closeCtfTrack = electronRef->closestCtfTrackRef();
-    if ( closeCtfTrack.isNonnull() ) {
-      privateData_->trackIndex->push_back(closeCtfTrack.key());
-    } else {
-      privateData_->trackIndex->push_back( -1 );
-    }
+    privateData_->trackIndex->push_back(closeCtfTrack.key());
 
-  } else {
-    privateData_->gsfTrackIndex->push_back( -1 );
-    privateData_->trackIndex->push_back( -1 );
-  }
+    privateData_->modePx->push_back(electronRef->trackMomentumAtVtx().x());
+    privateData_->modePy->push_back(electronRef->trackMomentumAtVtx().y());
+    privateData_->modePz->push_back(electronRef->trackMomentumAtVtx().z());
+
+    if ( saveFatTrk_ ) {
+
+      privateData_->eleTrackNormalizedChi2->push_back(trkRef->normalizedChi2());
+      
+      privateData_->eleTrackDxy->push_back(trkRef->dxy());
+      privateData_->eleTrackD0 ->push_back(trkRef->d0());
+      privateData_->eleTrackDsz->push_back(trkRef->dsz());
+      privateData_->eleTrackDz ->push_back(trkRef->dz());
+      
+      privateData_->eleTrackDxyError->push_back(trkRef->dxyError());
+      privateData_->eleTrackD0Error ->push_back(trkRef->d0Error());
+      privateData_->eleTrackDszError->push_back(trkRef->dszError());
+      privateData_->eleTrackDzError ->push_back(trkRef->dzError());
+      
+      privateData_->eleTrackValidHits->push_back(trkRef->numberOfValidHits());
+      privateData_->eleTrackLostHits ->push_back(trkRef->numberOfLostHits());
+      
+      privateData_->eleTrackVx ->push_back(trkRef->vx());
+      privateData_->eleTrackVy ->push_back(trkRef->vy());
+      privateData_->eleTrackVz ->push_back(trkRef->vz());
+      
+      privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
+      privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
+      privateData_->pzAtInner->push_back(trkRef->innerMomentum().z());
+      
+      privateData_->xAtInner->push_back(trkRef->innerPosition().x());
+      privateData_->yAtInner->push_back(trkRef->innerPosition().y());
+      privateData_->zAtInner->push_back(trkRef->innerPosition().z());
+
+      privateData_->pxAtOuter->push_back(trkRef->outerMomentum().x());
+      privateData_->pyAtOuter->push_back(trkRef->outerMomentum().y());
+      privateData_->pzAtOuter->push_back(trkRef->outerMomentum().z());
+
+      privateData_->xAtOuter->push_back(trkRef->outerPosition().x());
+      privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
+      privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
+
+    }
     
+    else {
+
+      privateData_->eleTrackNormalizedChi2->push_back(-1.);
+
+      privateData_->eleTrackDxy->push_back(-1.);
+      privateData_->eleTrackD0 ->push_back(-1.);
+      privateData_->eleTrackDsz->push_back(-1.);
+      privateData_->eleTrackDz ->push_back(-1.);
+
+      privateData_->eleTrackDxyError->push_back(-1.);
+      privateData_->eleTrackD0Error ->push_back(-1.);
+      privateData_->eleTrackDszError->push_back(-1.);
+      privateData_->eleTrackDzError ->push_back(-1.);
+
+      privateData_->eleTrackValidHits->push_back(-1.);					       
+      privateData_->eleTrackLostHits ->push_back(-1.);
+
+      privateData_->eleTrackVx ->push_back(-1.);
+      privateData_->eleTrackVy ->push_back(-1.);
+      privateData_->eleTrackVz ->push_back(-1.);
+
+      privateData_->pxAtInner->push_back(-1.);
+      privateData_->pyAtInner->push_back(-1.);
+      privateData_->pzAtInner->push_back(-1.);
+
+      privateData_->xAtInner->push_back(-1.);
+      privateData_->yAtInner->push_back(-1.);
+      privateData_->zAtInner->push_back(-1.);
+
+      privateData_->pxAtOuter->push_back(-1.);
+      privateData_->pyAtOuter->push_back(-1.);
+      privateData_->pzAtOuter->push_back(-1.);
+
+      privateData_->xAtOuter->push_back(-1.);
+      privateData_->yAtOuter->push_back(-1.);
+      privateData_->zAtOuter->push_back(-1.);
+      
+      privateData_->pxAtInner->push_back( -1.0 );
+      privateData_->pyAtInner->push_back( -1.0 );
+      privateData_->pzAtInner->push_back( -1.0 );
+
+      privateData_->xAtInner->push_back( -1.0 );
+      privateData_->yAtInner->push_back( -1.0 );
+      privateData_->zAtInner->push_back( -1.0 );
+
+      privateData_->pxAtOuter->push_back( -1.0 );
+      privateData_->pyAtOuter->push_back( -1.0 );
+      privateData_->pzAtOuter->push_back( -1.0 );
+
+      privateData_->xAtOuter->push_back( -1.0 );
+      privateData_->yAtOuter->push_back( -1.0 );
+      privateData_->zAtOuter->push_back( -1.0 );
+
+    }
+    
+  }
+  else {
+
+
+  }
 }
 
 
@@ -291,9 +421,40 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
 void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
 
+  cmstree->column((colPrefix+"modePx"+colSuffix).c_str(),  *privateData_->modePx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"modePy"+colSuffix).c_str(),  *privateData_->modePy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"modePz"+colSuffix).c_str(),  *privateData_->modePz, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackIndex"+colSuffix).c_str(),  *privateData_->trackIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"gsfTrackIndex"+colSuffix).c_str(),  *privateData_->gsfTrackIndex, nCandString.c_str(), 0, "Reco");
 
+  if(saveFatTrk_) {
+    cmstree->column((colPrefix+"trackNormalizedChi2"+colSuffix).c_str(), *privateData_->eleTrackNormalizedChi2, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDxy"+colSuffix).c_str(), *privateData_->eleTrackDxy, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackD0"+colSuffix).c_str(),  *privateData_->eleTrackD0, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDsz"+colSuffix).c_str(), *privateData_->eleTrackDsz, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDz"+colSuffix).c_str(),  *privateData_->eleTrackDz, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDxyError"+colSuffix).c_str(), *privateData_->eleTrackDxyError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackD0Error"+colSuffix).c_str(),  *privateData_->eleTrackD0Error, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDszError"+colSuffix).c_str(), *privateData_->eleTrackDszError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackDzError"+colSuffix).c_str(),  *privateData_->eleTrackDzError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackValidHits"+colSuffix).c_str(),  *privateData_->eleTrackValidHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackLostHits"+colSuffix).c_str(),   *privateData_->eleTrackLostHits, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackVx"+colSuffix).c_str(),  *privateData_->eleTrackVx, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackVy"+colSuffix).c_str(),  *privateData_->eleTrackVy, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackVz"+colSuffix).c_str(),  *privateData_->eleTrackVz, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pxAtInner"+colSuffix).c_str(), *privateData_->pxAtInner, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pyAtInner"+colSuffix).c_str(), *privateData_->pyAtInner, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pzAtInner"+colSuffix).c_str(), *privateData_->pzAtInner, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"xAtInner"+colSuffix).c_str(), *privateData_->xAtInner, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"yAtInner"+colSuffix).c_str(), *privateData_->yAtInner, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"zAtInner"+colSuffix).c_str(), *privateData_->zAtInner, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pxAtOuter"+colSuffix).c_str(), *privateData_->pxAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pyAtOuter"+colSuffix).c_str(), *privateData_->pyAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pzAtOuter"+colSuffix).c_str(), *privateData_->pzAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"xAtOuter"+colSuffix).c_str(), *privateData_->xAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"yAtOuter"+colSuffix).c_str(), *privateData_->yAtOuter, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"zAtOuter"+colSuffix).c_str(), *privateData_->zAtOuter, nCandString.c_str(), 0, "Reco");
+  }
 }
 
 
@@ -306,6 +467,8 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
 				      const EcalRecHitCollection *EBRecHits,
 				      const EcalRecHitCollection *EERecHits) {
 
+
+  bool validTopologyAndGeometry = false;
   if(&electronRef) {
 
     // fiducial flags in ECAL
@@ -385,6 +548,35 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
 void CmsElectronFillerData::initialise() {
   
   initialiseCandidate();
+  pxAtInner = new vector<float>;
+  pyAtInner = new vector<float>;
+  pzAtInner = new vector<float>;
+  xAtInner = new vector<float>;
+  yAtInner = new vector<float>;
+  zAtInner = new vector<float>;
+  pxAtOuter = new vector<float>;
+  pyAtOuter = new vector<float>;
+  pzAtOuter = new vector<float>;
+  xAtOuter = new vector<float>;
+  yAtOuter = new vector<float>;
+  zAtOuter = new vector<float>;
+  modePx = new vector<float>;
+  modePy = new vector<float>;
+  modePz = new vector<float>;
+  eleTrackNormalizedChi2 = new vector<float>;
+  eleTrackDxy = new vector<float>;
+  eleTrackD0 = new vector<float>;
+  eleTrackDsz = new vector<float>;
+  eleTrackDz = new vector<float>;
+  eleTrackDxyError = new vector<float>;
+  eleTrackD0Error = new vector<float>;
+  eleTrackDszError = new vector<float>;
+  eleTrackDzError = new vector<float>;
+  eleTrackValidHits = new vector<float>;
+  eleTrackLostHits = new vector<float>;
+  eleTrackVx = new vector<float>;
+  eleTrackVy = new vector<float>;
+  eleTrackVz = new vector<float>;
 
   fiducialFlags = new vector<int>;
   recoFlags = new vector<int>;
@@ -401,6 +593,36 @@ void CmsElectronFillerData::initialise() {
 void CmsElectronFillerData::clearTrkVectors() {
 
   clearTrkVectorsCandidate();
+
+  pxAtOuter->clear();
+  pyAtOuter->clear();
+  pzAtOuter->clear();
+  xAtOuter->clear();
+  yAtOuter->clear();
+  zAtOuter->clear();
+  pxAtInner->clear();
+  pyAtInner->clear();
+  pzAtInner->clear();
+  xAtInner->clear();
+  yAtInner->clear();
+  zAtInner->clear();
+  modePx->clear();
+  modePy->clear();
+  modePz->clear();  
+  eleTrackNormalizedChi2->clear();
+  eleTrackDxy->clear();
+  eleTrackD0 ->clear();
+  eleTrackDsz->clear();
+  eleTrackDz ->clear();
+  eleTrackDxyError->clear();
+  eleTrackD0Error ->clear();
+  eleTrackDszError->clear();
+  eleTrackDzError ->clear();
+  eleTrackValidHits->clear();
+  eleTrackLostHits ->clear();
+  eleTrackVx->clear();
+  eleTrackVy->clear();
+  eleTrackVz->clear();
 
   fiducialFlags->clear();
   recoFlags->clear();
