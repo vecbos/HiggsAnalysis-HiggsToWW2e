@@ -25,9 +25,16 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
+#include "RecoParticleFlow/PFClusterTools/interface/PFResolutionMap.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include <TTree.h>
+#include "TMath.h"
+#include "Math/VectorUtil.h"
+#include "DataFormats/Math/interface/LorentzVector.h"
+
+class TrackerGeometry;
 
 struct CmsElectronFillerData : public CmsCandidateFillerData {
 
@@ -41,6 +48,8 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<int> *superClusterIndex, *PFsuperClusterIndex;
   vector<float> *ecal, *eraw, *esEnergy, *caloEta, *caloPhi;
   vector<int> *energyCorrections;
+  
+  vector<float> *PFChi2EcalTrack, *PFesEneL1, *PFesEneL2, *PFesChi2L1, *PFesChi2L2;
 
 public:
   void initialise();
@@ -75,6 +84,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void saveFatEcal(bool );
   //! dump electron ID variables
   void saveEleID(bool );
+  //! dump tracking variables
+  void savePFextra(bool ); 
 
   //! write the electron related informations for the given collection
   void writeCollectionToTree(edm::InputTag collectionTag,
@@ -110,12 +121,17 @@ class CmsElectronFiller : public CmsCandidateFiller {
 		     const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
   void treeEcalInfo(const std::string &colPrefix, const std::string &colSuffix);
 
+  void writePFextraInfo(const reco::GsfElectronRef,reco::SuperClusterRef pfclusRef);
+  void treePFextraInfo(const std::string &colPrefix, const std::string &colSuffix);
+
+  void PSforTMVA(math::XYZTLorentzVector mom, math::XYZTLorentzVector pos, reco::SuperClusterRef pfclusRef );
 
   bool saveTrk_;
   bool saveEcal_;
   bool saveFatTrk_;
   bool saveFatEcal_;
   bool saveEleID_;
+  bool savePFextra_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
@@ -143,7 +159,15 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
   CmsTree *cmstree;
 
+  ///B field
+  math::XYZVector B_;
 
+  // ES quantities for PF tracking
+  float ps1En,ps2En,ps1chi,ps2chi;
+
+  // for PF tracking
+  PFResolutionMap* resMapEtaECAL_;
+  PFResolutionMap* resMapPhiECAL_;
 };
 
 #endif // CmsElectronFiller_h

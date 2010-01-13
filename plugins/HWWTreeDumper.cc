@@ -254,6 +254,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
+    treeFill.savePFextra(savePFEleTrk_);
 
     treeFill.writeCollectionToTree(electronCollection_, iEvent, iSetup, prefix, suffix, false);
     if(doMCEleMatch_) {
