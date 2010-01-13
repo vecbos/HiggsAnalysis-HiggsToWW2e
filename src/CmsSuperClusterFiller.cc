@@ -93,6 +93,12 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->gsfTrackDeltaR;
   delete privateData_->gsfTrackDeltaPhi;
   delete privateData_->gsfTrackDeltaEta;
+  delete privateData_->pxVtxPropagatedNegCharge;
+  delete privateData_->pyVtxPropagatedNegCharge;
+  delete privateData_->pzVtxPropagatedNegCharge;
+  delete privateData_->pxVtxPropagatedPosCharge;
+  delete privateData_->pyVtxPropagatedPosCharge;
+  delete privateData_->pzVtxPropagatedPosCharge;
   delete privateData_->time;
   delete privateData_->chi2Prob;
   delete privateData_->recoFlag;
@@ -163,22 +169,22 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
       
       SuperClusterCollection::const_iterator cand;
-      for(cand=collection->begin(); cand!=collection->end(); cand++) 
-	{
-	  // fill basic kinematics
-	  writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
-          if ( doTrackProp_ ) {
-            // fill CTF track - SC match
-            writeTrackInfo(&(*cand),iEvent,iSetup,&(*tracks_),track);
-            // fill GSF track - SC match
-            writeTrackInfo(&(*cand),iEvent,iSetup,&(*gsfTracks_),gsftrack);
-          }
-	}
+      for(cand=collection->begin(); cand!=collection->end(); cand++) {
+        // fill basic kinematics
+        writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
+        if ( doTrackProp_ ) {
+          // fill CTF track - SC match
+          writeTrackInfo(&(*cand),iEvent,iSetup,&(*tracks_),track);
+          // fill GSF track - SC match
+          writeTrackInfo(&(*cand),iEvent,iSetup,&(*gsfTracks_),gsftrack);
+        }
+        // fill trajectory propagation at vertex
+        writeSCVtxPropagationInfo(&(*cand),iEvent,iSetup);
+      }
     }
-  else 
-    {
-      *(privateData_->nSC) = 0;
-    }
+  else {
+    *(privateData_->nSC) = 0;
+  }
   
   // The class member vectors containing the relevant quantities 
   // have all been filled. Now transfer those we want into the 
@@ -190,7 +196,8 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
   treeSCInfo(columnPrefix,columnSuffix);
-  if ( doTrackProp_ ) treeTrackInfo(columnPrefix,columnSuffix);  
+  if ( doTrackProp_ ) treeTrackInfo(columnPrefix,columnSuffix);
+  treeSCVtxPropagationInfo(columnPrefix,columnSuffix);
 
   if(dumpData) cmstree->dumpData();
 
@@ -512,6 +519,52 @@ void CmsSuperClusterFiller::writeTrackInfo(const reco::SuperCluster *cand, const
 
 }
 
+void CmsSuperClusterFiller::writeSCVtxPropagationInfo(const reco::SuperCluster *cand,
+                                                      const edm::Event& iEvent, const edm::EventSetup& iSetup) {
+
+  GlobalPoint vertexPos;
+
+  // choose the Highest pT primary vertex
+  if ( hVtx_->size()>0 ){ 
+    float theMaxPt  = -999.;
+    VertexCollection::const_iterator thisVertex;
+    for(thisVertex = hVtx_->begin(); thisVertex != hVtx_->end(); ++thisVertex){      
+      float SumPt = 0.0;
+      if((*thisVertex).tracksSize() > 0){
+        std::vector<TrackBaseRef >::const_iterator thisTrack;
+        for( thisTrack=(*thisVertex).tracks_begin(); thisTrack!=(*thisVertex).tracks_end(); thisTrack++){
+          SumPt += (**thisTrack).pt();
+        }}
+      if (SumPt>theMaxPt){ 
+        theMaxPt = SumPt; 
+        vertexPos  = GlobalPoint((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
+      }
+    }
+  } else {
+    vertexPos  = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
+  }
+
+  // magnetic field
+  edm::ESHandle<MagneticField> theMagField;
+  iSetup.get<IdealMagneticFieldRecord>().get(theMagField);
+
+  // propagate the SC to the primary vertex
+  const GlobalPoint clusterPos(cand->position().x(), cand->position().y(), cand->position().z());    
+
+  float clusterEnergy = cand->energy();
+  // electron hypothesis
+  FreeTrajectoryState ftsElectron = myFTS(&(*theMagField), clusterPos, vertexPos, clusterEnergy, 1);    
+  // positron hypothesis
+  FreeTrajectoryState ftsPositron = myFTS(&(*theMagField), clusterPos, vertexPos, clusterEnergy, -1);    
+  
+  privateData_->pxVtxPropagatedNegCharge->push_back(ftsElectron.momentum().x());
+  privateData_->pyVtxPropagatedNegCharge->push_back(ftsElectron.momentum().y());
+  privateData_->pzVtxPropagatedNegCharge->push_back(ftsElectron.momentum().z());
+  privateData_->pxVtxPropagatedPosCharge->push_back(ftsPositron.momentum().x());
+  privateData_->pyVtxPropagatedPosCharge->push_back(ftsPositron.momentum().y());
+  privateData_->pzVtxPropagatedPosCharge->push_back(ftsPositron.momentum().z());
+
+}
 
 void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::string colSuffix) 
 {
@@ -557,6 +610,16 @@ void CmsSuperClusterFiller::treeTrackInfo(const std::string colPrefix, const std
   cmstree->column((colPrefix+"gsfTrackDeltaEta"+colSuffix).c_str(), *privateData_->gsfTrackDeltaEta, nCandString.c_str(), 0, "Reco");
 }
 
+void CmsSuperClusterFiller::treeSCVtxPropagationInfo(const std::string colPrefix, const std::string colSuffix) 
+{
+  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
+  cmstree->column((colPrefix+"pxVtxPropagatedNegCharge"+colSuffix).c_str(), *privateData_->pxVtxPropagatedNegCharge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pyVtxPropagatedNegCharge"+colSuffix).c_str(), *privateData_->pyVtxPropagatedNegCharge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pzVtxPropagatedNegCharge"+colSuffix).c_str(), *privateData_->pzVtxPropagatedNegCharge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pxVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pxVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pyVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pyVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pzVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pzVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
+}
 
 // copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
 float CmsSuperClusterFiller::fractionAroundClosestProblematic( const reco::CaloCluster & cluster,
@@ -686,6 +749,12 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   gsfTrackDeltaR = new vector<float>;
   gsfTrackDeltaPhi = new vector<float>;
   gsfTrackDeltaEta = new vector<float>;
+  pxVtxPropagatedNegCharge = new vector<float>;
+  pyVtxPropagatedNegCharge = new vector<float>;
+  pzVtxPropagatedNegCharge = new vector<float>;
+  pxVtxPropagatedPosCharge = new vector<float>;
+  pyVtxPropagatedPosCharge = new vector<float>;
+  pzVtxPropagatedPosCharge = new vector<float>;
   recoFlag = new vector<int>;
   channelStatus = new vector<int>;
   time = new vector<float>;
@@ -724,6 +793,12 @@ void CmsSuperClusterFillerData::clear()
   gsfTrackDeltaR->clear();
   gsfTrackDeltaPhi->clear();
   gsfTrackDeltaEta->clear();
+  pxVtxPropagatedNegCharge->clear();
+  pyVtxPropagatedNegCharge->clear();
+  pzVtxPropagatedNegCharge->clear();
+  pxVtxPropagatedPosCharge->clear();
+  pyVtxPropagatedPosCharge->clear();
+  pzVtxPropagatedPosCharge->clear();
   recoFlag->clear();
   channelStatus->clear();
   time->clear();
