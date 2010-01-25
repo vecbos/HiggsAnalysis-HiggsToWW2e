@@ -1,3 +1,40 @@
+--- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_3_6_pre3 (PFlow) ---
+scram project CMSSW CMSSW_3_3_6_patch3
+cd CMSSW_3_3_6_patch3/src
+cmsenv
+cat > pack <<END
+V00-01-02      DQMOffline/PFTau                                 
+V11-00-05      DataFormats/ParticleFlowCandidate                
+V12-02-06      DataFormats/ParticleFlowReco                     
+V11-01-00      RecoParticleFlow/Benchmark                       
+V11-02-03      RecoParticleFlow/Configuration                   
+V11-02-00      RecoParticleFlow/PFClusterProducer               
+V11-02-00      RecoParticleFlow/PFClusterTools                  
+V11-02-01      RecoParticleFlow/PFProducer                      
+V11-04-03      RecoParticleFlow/PFRootEvent                     
+V11-03-01      RecoParticleFlow/PFTracking                      
+V03-02-01      Validation/RecoParticleFlow  
+END
+addpkg -f pack
+checkdeps -a 
+rm -rf VisReco
+rm -rf ISpy
+
+cvs co -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V00-3_3_X HiggsAnalysis/HiggsToWW2Leptons
+addpkg RecoEgamma/ElectronIdentification
+cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
+cd RecoEgamma/ElectronIdentification/python/
+rm likelihoodPdfsDB_cfi.py
+wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
+cd -
+
+
+scram b -j 4  
+
+
+
 --- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_X_Y ---
 
 scramv1 p CMSSW CMSSW_3_3_6
