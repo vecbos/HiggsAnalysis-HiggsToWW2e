@@ -24,10 +24,18 @@
 #include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/EgammaReco/interface/ElectronSeed.h"
 #include "DataFormats/EgammaReco/interface/ElectronSeedFwd.h"
+#include "DataFormats/ParticleFlowReco/interface/PFBlock.h"
+#include "DataFormats/ParticleFlowReco/interface/PFBlockElement.h"
+#include "DataFormats/ParticleFlowReco/interface/PFBlockElementGsfTrack.h"
+#include "DataFormats/ParticleFlowReco/interface/PFCluster.h"
+#include "DataFormats/ParticleFlowReco/interface/PFClusterFwd.h"
+
 
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
+
+#include "RecoParticleFlow/PFClusterTools/interface/PFClusterWidthAlgo.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -105,6 +113,15 @@ CmsPFlowElectronFiller::~CmsPFlowElectronFiller() {
   delete privateData_->PS2Energy;
   delete privateData_->EcalEnergy;  
   delete privateData_->EcalElectronEnergy;
+
+  delete privateData_->EoPMode;
+  delete privateData_->EoPoutMode;
+  delete privateData_->EBremoDeltaP;
+  delete privateData_->deltaEtaAtCalo;
+  delete privateData_->deltaPhiAtCalo;
+  delete privateData_->hOverHE;
+  delete privateData_->hOverP;
+
 }
 
 
@@ -156,7 +173,7 @@ void CmsPFlowElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
       if ( !(pflowCandRef.isNull()) ) {
 	
 	// basic PF infos
-	if(savePFEleBasic_) writePFEleBasicInfo(pflowCandRef);
+        if(savePFEleBasic_) writePFEleBasicInfo(pflowCandRef);
 	
 	// tracker based infos
 	GsfTrackRef gsfRef  = pflowCandRef->gsfTrackRef();
@@ -206,6 +223,18 @@ void CmsPFlowElectronFiller::writePFEleTrkInfo(reco::GsfTrackRef gsfRef, reco::T
 
 void CmsPFlowElectronFiller::writePFEleBasicInfo(const reco::PFCandidateRef pflowCandRef) {
 
+  float DEtaGsfEcalClust, DPhiGsfEcalClust, sigmaEtaEta, HOverHE, HOverPin;
+  DEtaGsfEcalClust = DPhiGsfEcalClust = sigmaEtaEta = HOverHE = HOverPin = -999;
+  
+  float deta_gsfecal, dphi_gsfecal;
+  deta_gsfecal = dphi_gsfecal = -999;
+
+  float Ene_ecalgsf, Ene_ecalbrem, Ene_tot, Eout_gsf;
+  Ene_ecalgsf = Ene_ecalbrem = Ene_tot = Eout_gsf = 0.;
+
+  float EtotPinMode, EGsfPoutMode, EtotBremPinPoutMode;
+  EtotPinMode = EGsfPoutMode = EtotBremPinPoutMode = -1;
+
   if (&pflowCandRef) {
     
     privateData_->MvaOutput->push_back(pflowCandRef->mva_e_pi());
@@ -214,6 +243,84 @@ void CmsPFlowElectronFiller::writePFEleBasicInfo(const reco::PFCandidateRef pflo
     privateData_->EcalEnergy->push_back(pflowCandRef->ecalEnergy());
     privateData_->EcalElectronEnergy->push_back(pflowCandRef->rawEcalEnergy());
 
+    // the electron ID variables like dEta/dPhi are done with the PF-linked cluster,
+    // not the seed. So we need to loop over the elements and find the linked cluster
+    const PFCandidate::ElementsInBlocks& theElements = pflowCandRef->elementsInBlocks();
+    typedef PFCandidate::ElementsInBlocks::const_iterator IEB; 
+
+    int firstEcal = 0;
+
+    // the closest PF cluster is attached as the first cluster to the PF electron
+    for (IEB ieb=theElements.begin(); ieb<theElements.end(); ++ieb) {
+
+      const PFBlock& block = *(ieb->first);
+      const PFBlockElement& pfbe = block.elements()[ieb->second];
+
+      PFBlockElement::Type typeassoc = pfbe.type();
+
+      if(typeassoc == reco::PFBlockElement::ECAL) {
+        PFClusterRef clusterRef = pfbe.clusterRef();
+
+        if(firstEcal == 0) {
+          GsfTrackRef gsfRef  = pflowCandRef->gsfTrackRef();
+
+          deta_gsfecal = clusterRef->position().eta() - pflowCandRef->positionAtECALEntrance().eta();
+          dphi_gsfecal = clusterRef->position().phi() - pflowCandRef->positionAtECALEntrance().phi();
+          
+          vector< const reco::PFCluster * > pfClust_vec(0);
+          pfClust_vec.clear();
+          pfClust_vec.push_back(&(*clusterRef));
+
+//           PFClusterWidthAlgo pfwidth(pfClust_vec);
+//           sigmaEtaEta = pfwidth.pflowSigmaEtaEta();
+
+        } 
+
+        firstEcal++;
+       }
+
+      if(typeassoc == reco::PFBlockElement::GSF) {
+
+        // take the mode pout from the PFBlockElement
+        const reco::PFBlockElementGsfTrack *  GsfEl =  dynamic_cast<const reco::PFBlockElementGsfTrack*>(&pfbe); 
+        Eout_gsf = GsfEl->Pout().t();
+
+      }
+
+    }
+    
+    // Eraw = energy of cluster associated to GSF track
+    // E = all the supercluster energy
+    Ene_ecalgsf = pflowCandRef->rawEcalEnergy();
+    Ene_tot = pflowCandRef->ecalEnergy();
+    Ene_ecalbrem = Ene_tot - Ene_ecalgsf;
+
+    float Ein_gsf   = 0.;
+    GsfTrackRef gsfRef  = pflowCandRef->gsfTrackRef();
+    if (gsfRef.isNonnull()) {
+      float m_el=0.00051;
+      Ein_gsf =sqrt(gsfRef->pMode()*
+                    gsfRef->pMode()+m_el*m_el);
+    }
+
+    float Ene_hcalgsf = pflowCandRef->hcalEnergy();
+
+    EtotPinMode        =  Ene_tot / Ein_gsf; 
+    EGsfPoutMode       =  Ene_ecalgsf/Eout_gsf;
+    EtotBremPinPoutMode = Ene_ecalbrem /(Ein_gsf - Eout_gsf);
+    DEtaGsfEcalClust  = deta_gsfecal;
+    DPhiGsfEcalClust = dphi_gsfecal;
+    HOverHE = Ene_hcalgsf/(Ene_hcalgsf + Ene_ecalgsf);
+    HOverPin = Ene_hcalgsf / Ein_gsf;
+  
+    privateData_->EoPMode->push_back(EtotPinMode);
+    privateData_->EoPoutMode->push_back(EGsfPoutMode);
+    privateData_->EBremoDeltaP->push_back(EtotBremPinPoutMode);
+    privateData_->deltaEtaAtCalo->push_back(DEtaGsfEcalClust);
+    privateData_->deltaPhiAtCalo->push_back(DPhiGsfEcalClust);
+    privateData_->hOverHE->push_back(HOverHE);
+    privateData_->hOverP->push_back(HOverPin);
+    
   } else {  
     
     privateData_->MvaOutput->push_back(-1.);
@@ -241,6 +348,14 @@ void CmsPFlowElectronFiller::treePFEleBasicInfo(const std::string &colPrefix, co
   cmstree->column((colPrefix+"PS2Energy"+colSuffix).c_str(),  *privateData_->PS2Energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"EcalEnergy"+colSuffix).c_str(),  *privateData_->EcalEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"EcalElectronEnergy"+colSuffix).c_str(),  *privateData_->EcalElectronEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"EoPMode"+colSuffix).c_str(),  *privateData_->EoPMode, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"EoPoutMode"+colSuffix).c_str(),  *privateData_->EoPoutMode, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"EBremoDeltaP"+colSuffix).c_str(),  *privateData_->EBremoDeltaP, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"deltaEtaAtCalo"+colSuffix).c_str(),  *privateData_->deltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"deltaPhiAtCalo"+colSuffix).c_str(),  *privateData_->deltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hOverHE"+colSuffix).c_str(),  *privateData_->hOverHE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hOverP"+colSuffix).c_str(),  *privateData_->hOverP, nCandString.c_str(), 0, "Reco");
+
 }
 
 
@@ -258,6 +373,14 @@ void CmsPFlowElectronFillerData::initialise() {
   PS2Energy = new vector<float>;
   EcalEnergy = new vector<float>;
   EcalElectronEnergy = new vector<float>;
+  EoPMode = new vector<float>;  
+  EoPoutMode = new vector<float>;
+  EBremoDeltaP = new vector<float>;
+  deltaEtaAtCalo = new vector<float>;
+  deltaPhiAtCalo = new vector<float>;
+  hOverHE = new vector<float>;
+  hOverP = new vector<float>;
+
 }
 void CmsPFlowElectronFillerData::clearTrkVectors() {
 
@@ -272,4 +395,12 @@ void CmsPFlowElectronFillerData::clearTrkVectors() {
   PS2Energy->clear();
   EcalEnergy->clear();
   EcalElectronEnergy->clear();
+  EoPMode->clear();
+  EoPoutMode->clear();
+  EBremoDeltaP->clear();
+  deltaEtaAtCalo->clear();
+  deltaPhiAtCalo->clear();
+  hOverHE->clear();
+  hOverP->clear();
+
 }
