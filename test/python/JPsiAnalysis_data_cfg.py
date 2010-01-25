@@ -29,10 +29,11 @@ process.treeDumper.nameFile = 'default_runs123592_to_123615-BSC-rereco.root'
 process.treeDumper.dumpTriggerResults = False
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpMCTruth = False
-process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpGenMet = False
 process.treeDumper.dumpGenJets = False
+process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpSCs = True
+process.treeDumper.dumpBCs = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpVertices = True
@@ -41,6 +42,12 @@ process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
 process.treeDumper.saveJet1BTag = False
 process.treeDumper.saveJet2BTag = False
+process.treeDumper.dumpElectrons = True
+process.treeDumper.dumpPFlowElectrons = True
+process.treeDumper.dumpPFpreId = False
+process.treeDumper.dumpMuons = False
+process.treeDumper.dumpJets = False
+process.treeDumper.dumpMet = False
 process.treeDumper.dumpTree = True
 
 process.options = cms.untracked.PSet(
@@ -61,12 +68,7 @@ process.source = cms.Source("PoolSource",
                             )
                             )
 
-process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
-
-process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
-                       process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
-#                      process.doAlldEdXEstimators *
-#                      process.dedx *
+process.p = cms.Path ( process.mergedSuperClusters *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
