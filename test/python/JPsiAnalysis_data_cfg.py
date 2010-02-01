@@ -20,13 +20,10 @@ process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
-# --- track sequences ---
-process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
-
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_runs123592_to_123615-BSC-rereco.root'
-process.treeDumper.dumpTriggerResults = False
+process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpMCTruth = False
 process.treeDumper.dumpGenMet = False
@@ -45,9 +42,9 @@ process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpPFlowElectrons = True
 process.treeDumper.dumpPFpreId = False
-process.treeDumper.dumpMuons = False
-process.treeDumper.dumpJets = False
-process.treeDumper.dumpMet = False
+process.treeDumper.dumpMuons = True
+process.treeDumper.dumpJets = True
+process.treeDumper.dumpMet = True
 process.treeDumper.dumpTree = True
 
 process.options = cms.untracked.PSet(
@@ -71,6 +68,7 @@ process.source = cms.Source("PoolSource",
 process.p = cms.Path ( process.mergedSuperClusters *
                        process.eIdSequence *
                        process.eleIsolationSequence *
-                       process.ambiguityResolvedElectrons )
+                       process.ambiguityResolvedElectrons *
+                       process.jetSequence * process.pfjetSCSequence )
                        
 process.q = cms.EndPath ( process.treeDumper )
