@@ -190,7 +190,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   if(dumpMCTruth_) {
 
-    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent );
+    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent, 1000 );
 
   }
 
