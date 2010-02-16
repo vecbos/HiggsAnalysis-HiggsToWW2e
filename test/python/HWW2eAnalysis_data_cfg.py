@@ -65,7 +65,7 @@ process.source = cms.Source("PoolSource",
 
 process.p = cms.Path ( process.muonCorrectedMET *
                        process.mergedSuperClusters *
-                       process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
+                       process.jetSequence * process.pfjetAK5Sequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons)

@@ -32,9 +32,7 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
     *jetBProbabilityBJetTags,
     *jetProbabilityBJetTags,
     *simpleSecondaryVertexBJetTags,
-    *softElectronBJetTags,
     *softMuonBJetTags,
-    *softMuonNoIPBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags;
 

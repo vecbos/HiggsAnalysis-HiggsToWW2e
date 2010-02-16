@@ -49,20 +49,20 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/JpsiEE_31X.root')
+                            fileNames = cms.untracked.vstring('file:pippo.root')
                             )
 
 #process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters *
-                       process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
+                       process.jetSequence * process.pfjetAK5Sequence *
 #                      process.doAlldEdXEstimators *
 #                      process.dedx *
                        process.eIdSequence *

@@ -70,7 +70,7 @@ process.source = cms.Source("PoolSource",
 #process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
-                       process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
+                       process.jetSequence * process.pfjetAK5Sequence *
 #                      process.doAlldEdXEstimators *
 #                      process.dedx *
                        process.eIdSequence *
