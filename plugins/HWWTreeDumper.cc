@@ -48,7 +48,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCaloTowerFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsV0CandidateFiller.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowPreIdFiller.h"
+//#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowPreIdFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
@@ -103,6 +103,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpBCs_            = iConfig.getUntrackedParameter<bool>("dumpBCs", false);
   dumpTracks_         = iConfig.getUntrackedParameter<bool>("dumpTracks", false);
   dumpGsfTracks_      = iConfig.getUntrackedParameter<bool>("dumpGsfTracks", false);
+  dumpMuonTracks_     = iConfig.getUntrackedParameter<bool>("dumpMuonTracks", false);
   dumpMuons_          = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
   dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
   dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
@@ -114,7 +115,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
-  dumpPFpreId_             = iConfig.getUntrackedParameter<bool>("dumpPFpreId", false);  
+  //  dumpPFpreId_             = iConfig.getUntrackedParameter<bool>("dumpPFpreId", false);  
 
   // data run informations
   dumpRunInfo_ = iConfig.getUntrackedParameter<bool>("dumpRunInfo",false);
@@ -137,6 +138,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   trackCollection_         = iConfig.getParameter<edm::InputTag>("trackCollection");
   refittedForDeDxTrackCollection_ = iConfig.getParameter<edm::InputTag>("refittedForDeDxTrackCollection");
   gsfTrackCollection_      = iConfig.getParameter<edm::InputTag>("gsfTrackCollection");
+  globalMuonTrackCollection_ = iConfig.getParameter<edm::InputTag>("globalMuonTrackCollection");
+  standAloneMuonTrackCollection_ = iConfig.getParameter<edm::InputTag>("standAloneMuonTrackCollection");
   vertexCollection_        = iConfig.getParameter<edm::InputTag>("vertexCollection");
   K0sCollection_           = iConfig.getParameter<edm::InputTag>("K0sCollection");
   genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
@@ -154,7 +157,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hepMcCollection_         = iConfig.getParameter<edm::InputTag>("hepMcCollection");
   genInfoCollection_       = iConfig.getParameter<edm::InputTag>("genInfoCollection");
   genWeightCollection_     = iConfig.getUntrackedParameter<std::string>("genWeightCollection");
-  PFpreIdCollection_       = iConfig.getParameter<edm::InputTag>("PFpreIdCollection"); 
+  //  PFpreIdCollection_       = iConfig.getParameter<edm::InputTag>("PFpreIdCollection"); 
 
   // calotowers collections
   calotowerCollection_ = iConfig.getParameter<edm::InputTag>("calotowerCollection");
@@ -257,7 +260,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
-    treeFill.savePFextra(savePFEleTrk_);
+    // treeFill.savePFextra(savePFEleTrk_);
 
     treeFill.writeCollectionToTree(electronCollection_, iEvent, iSetup, prefix, suffix, false);
     if(doMCEleMatch_) {
@@ -276,12 +279,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeCollectionToTree(pflowElectronCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 
-  if(dumpPFpreId_) {
-    CmsPFlowPreIdFiller treeFill(tree_, true);
-    std::string prefix("");
-    std::string suffix("PFpreId");
-    treeFill.writeCollectionToTree(PFpreIdCollection_, iEvent, iSetup, prefix, suffix, false);
-  }
+//   if(dumpPFpreId_) {
+//     CmsPFlowPreIdFiller treeFill(tree_, true);
+//     std::string prefix("");
+//     std::string suffix("PFpreId");
+//     treeFill.writeCollectionToTree(PFpreIdCollection_, iEvent, iSetup, prefix, suffix, false);
+//   }
 
   // fill SC block
   if (dumpSCs_) {
@@ -353,6 +356,35 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     treeFiller.writeCollectionToTree(gsfTrackCollection_, iEvent, iSetup, prefix, suffix, false);
 
+  }
+
+  if(dumpMuonTracks_) {
+
+    // dump tracks reconstructed in both tracked and muon detector
+    CmsTrackFiller treeFillerGlobalMuonTrack(tree_, vertexCollection_, true);
+    treeFillerGlobalMuonTrack.saveFatTrk(saveFatTrk_);
+    treeFillerGlobalMuonTrack.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
+    treeFillerGlobalMuonTrack.saveDeDx(false);
+
+    treeFillerGlobalMuonTrack.findPrimaryVertex(iEvent);
+    treeFillerGlobalMuonTrack.saveVtxTrk(false);
+
+    std::string prefix("");
+    std::string suffix1("GlobalMuonTrack");
+    treeFillerGlobalMuonTrack.writeCollectionToTree(globalMuonTrackCollection_, iEvent, iSetup, prefix, suffix1, false);
+
+    // dump tracks reconstructed in the muon detector only
+    CmsTrackFiller treeFillerSTAMuonTrack(tree_, vertexCollection_, true);
+    treeFillerSTAMuonTrack.saveFatTrk(saveFatTrk_);
+    treeFillerSTAMuonTrack.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
+    treeFillerSTAMuonTrack.saveDeDx(false);
+
+    treeFillerSTAMuonTrack.findPrimaryVertex(iEvent);
+    treeFillerSTAMuonTrack.saveVtxTrk(false);
+
+    std::string suffix2("STAMuonTrack");
+    treeFillerSTAMuonTrack.writeCollectionToTree(standAloneMuonTrackCollection_, iEvent, iSetup, prefix, suffix2, false);
+    
   }
 
   //fill Primary Vertex and associated tracks
@@ -440,17 +472,17 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-//     CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
+    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
     std::string prefix("");
-    std::string suffix("SisConeCorrJet");
-//     treeRecoFill1.saveCand(saveCand_);
-//     treeRecoFill1.saveJetExtras(saveJetAlpha_);
-//     treeRecoFill1.saveJetBTag(saveJet1BTag_);
-//     treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
+    std::string suffix("AK5CorrJet");
+    treeRecoFill1.saveCand(saveCand_);
+    treeRecoFill1.saveJetExtras(saveJetAlpha_);
+    treeRecoFill1.saveJetBTag(saveJet1BTag_);
+    treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
 
     CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, true);
-    suffix = "SisConeJet";
+    suffix = "AK5Jet";
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.saveJetExtras(saveJetAlpha_);
     treeRecoFill2.saveJetBTag(saveJet2BTag_);
@@ -459,13 +491,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     // particle flow jets
     if ( dumpParticleFlowObjects_ ) {  
-//       CmsPFJetFiller pfJetFiller1(tree_, true);
-//       suffix = "SisConePFCorrJet";
-//       pfJetFiller1.saveCand(saveCand_);
-//       pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
+      CmsPFJetFiller pfJetFiller1(tree_, true);
+      suffix = "AK5PFCorrJet";
+      pfJetFiller1.saveCand(saveCand_);
+      pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
 
       CmsPFJetFiller pfJetFiller2(tree_, true);
-      suffix = "SisConePFJet";
+      suffix = "AK5PFJet";
       pfJetFiller2.saveCand(saveCand_);
       pfJetFiller2.writeCollectionToTree(PFjetCollection2_, iEvent, iSetup, prefix, suffix, false);
     }
@@ -474,7 +506,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     if(dumpGenJets_) {
 
       CmsJetFiller treeGenFill(tree_, jetVertexAlphaCollection1_, true);
-      suffix = "SisConeGenJet";
+      suffix = "AK5GenJet";
       treeGenFill.saveJetExtras(false);
       treeGenFill.saveJetBTag(false);
       treeGenFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);

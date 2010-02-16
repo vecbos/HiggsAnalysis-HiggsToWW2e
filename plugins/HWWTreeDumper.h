@@ -64,7 +64,7 @@ private:
   //! dump the particle flow electron block
   bool dumpPFlowElectrons_;
   //! dump the particle flow electron pre-identification block
-  bool dumpPFpreId_; 
+  //  bool dumpPFpreId_; 
   //! dump muon block
   bool dumpMuons_;
   //! dump reco / generated jets block
@@ -74,7 +74,7 @@ private:
   //! dump Super/Basic Clusters block
   bool dumpSCs_, dumpBCs_;
   //! dump tracks
-  bool dumpTracks_, dumpGsfTracks_;
+  bool dumpTracks_, dumpGsfTracks_, dumpMuonTracks_;
   //! dump the primary vertices of the event
   bool dumpVertices_;
   //! bool dump the block of the V0 candidates (as K0s)
@@ -98,6 +98,7 @@ private:
   edm::InputTag K0sCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
+  edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalPFClusterCollection_;
@@ -113,7 +114,7 @@ private:
   edm::InputTag calotowerCollection_, hbheLabel_, hoLabel_, hfLabel_;
   std::vector<edm::InputTag> ecalLabels_;
   //! PF electrons pre-identification
-  edm::InputTag PFpreIdCollection_;
+  //  edm::InputTag PFpreIdCollection_;
   //! generator-level particle collection in input
   edm::InputTag mcTruthCollection_;
   //! association map between reco and generated particles

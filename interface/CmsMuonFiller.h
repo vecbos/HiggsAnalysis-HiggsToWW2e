@@ -41,13 +41,7 @@
 
 struct CmsMuonFillerData : public CmsCandidateFillerData {
 
-  vector<float> *pxAtInner, *pyAtInner, *pzAtInner, *xAtInner, *yAtInner, *zAtInner;
-  vector<float> *pxAtOuter, *pyAtOuter, *pzAtOuter, *xAtOuter, *yAtOuter, *zAtOuter;
-  vector<float> *muTrackNormalizedChi2;
-  vector<float> *muTrackDxy, *muTrackD0, *muTrackDsz, *muTrackDz;
-  vector<float> *muTrackDxyError, *muTrackD0Error, *muTrackDszError, *muTrackDzError;
-  vector<float> *muTrackValidHits, *muTrackLostHits;
-  vector<float> *muTrackVx, *muTrackVy, *muTrackVz; 
+  vector<int> *trackIndex, *standAloneTrackIndex, *combinedTrackIndex;
 
   vector<float> *sumPt03, *emEt03, *hadEt03, *hoEt03, *nTrk03, *nJets03;
   vector<float> *sumPt05, *emEt05, *hadEt05, *hoEt05, *nTrk05, *nJets05;

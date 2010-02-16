@@ -106,32 +106,9 @@ CmsMuonFiller::CmsMuonFiller(CmsTree *cmsTree,
 CmsMuonFiller::~CmsMuonFiller() { 
   
   // Track information
-  delete privateData_->pxAtInner;
-  delete privateData_->pyAtInner;
-  delete privateData_->pzAtInner;
-  delete privateData_->xAtInner;
-  delete privateData_->yAtInner;
-  delete privateData_->zAtInner;
-  delete privateData_->pxAtOuter;
-  delete privateData_->pyAtOuter;
-  delete privateData_->pzAtOuter;
-  delete privateData_->xAtOuter;
-  delete privateData_->yAtOuter;
-  delete privateData_->zAtOuter;
-  delete privateData_->muTrackNormalizedChi2;
-  delete privateData_->muTrackDxy;
-  delete privateData_->muTrackD0;
-  delete privateData_->muTrackDsz;
-  delete privateData_->muTrackDz;
-  delete privateData_->muTrackDxyError;
-  delete privateData_->muTrackD0Error;
-  delete privateData_->muTrackDszError;
-  delete privateData_->muTrackDzError;
-  delete privateData_->muTrackValidHits;
-  delete privateData_->muTrackLostHits;
-  delete privateData_->muTrackVx;
-  delete privateData_->muTrackVy;
-  delete privateData_->muTrackVz;
+  delete privateData_->trackIndex;
+  delete privateData_->standAloneTrackIndex;
+  delete privateData_->combinedTrackIndex;
 
   delete privateData_->muonId;
   
@@ -157,7 +134,6 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->hoS9;
   delete privateData_->CaloComp;
 
-  
   delete privateData_->ncand;
 
 }
@@ -244,155 +220,26 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
 				 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 				 const Muon *muon) {
 
-  
-  TrackRef trkRef;
-  bool hasTrackerTrack = false;
-
-  if( & muon ) {  
-    if ( muon->track().isNonnull() ) {
-      hasTrackerTrack = true;
-      trkRef = cand->get<TrackRef>();
-    }
-  }
-
-  if( hasTrackerTrack && &trkRef!=0 ) {
-
-    if ( saveFatTrk_ ) { 
-      
-      privateData_->pxAtInner->push_back(trkRef->innerMomentum().x());
-      privateData_->pyAtInner->push_back(trkRef->innerMomentum().y());
-      privateData_->pzAtInner->push_back(trkRef->innerMomentum().z());
-      
-      privateData_->xAtInner->push_back(trkRef->innerPosition().x());
-      privateData_->yAtInner->push_back(trkRef->innerPosition().y());
-      privateData_->zAtInner->push_back(trkRef->innerPosition().z());
-      
-      privateData_->pxAtOuter->push_back(trkRef->outerMomentum().x());
-      privateData_->pyAtOuter->push_back(trkRef->outerMomentum().y());
-      privateData_->pzAtOuter->push_back(trkRef->outerMomentum().z());
-      
-      privateData_->xAtOuter->push_back(trkRef->outerPosition().x());
-      privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
-      privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
-      
-    }
+  if( & muon ) {
+    TrackRef track = muon->track();
+    TrackRef standAloneTrack = muon->standAloneMuon();
+    TrackRef combinedTrack = muon->combinedMuon();
     
-    else {
-      
-      privateData_->pxAtInner->push_back( -1.0 );
-      privateData_->pyAtInner->push_back( -1.0 );
-      privateData_->pzAtInner->push_back( -1.0 );
-      
-      privateData_->xAtInner->push_back( -1.0 );
-      privateData_->yAtInner->push_back( -1.0 );
-      privateData_->zAtInner->push_back( -1.0 );
-      
-      privateData_->pxAtOuter->push_back( -1.0 );
-      privateData_->pyAtOuter->push_back( -1.0 );
-      privateData_->pzAtOuter->push_back( -1.0 );
-      
-      privateData_->xAtOuter->push_back( -1.0 );
-      privateData_->yAtOuter->push_back( -1.0 );
-      privateData_->zAtOuter->push_back( -1.0 );
-
-    }
-
-    privateData_->muTrackNormalizedChi2->push_back(trkRef->normalizedChi2());
-    
-    privateData_->muTrackDxy->push_back(trkRef->dxy());
-    privateData_->muTrackD0 ->push_back(trkRef->d0());
-    privateData_->muTrackDsz->push_back(trkRef->dsz());
-    privateData_->muTrackDz ->push_back(trkRef->dz());
-
-    privateData_->muTrackDxyError->push_back(trkRef->dxyError());
-    privateData_->muTrackD0Error ->push_back(trkRef->d0Error());
-    privateData_->muTrackDszError->push_back(trkRef->dszError());
-    privateData_->muTrackDzError ->push_back(trkRef->dzError());
-
-    privateData_->muTrackValidHits->push_back(trkRef->numberOfValidHits());
-    privateData_->muTrackLostHits ->push_back(trkRef->numberOfLostHits());
-
-    privateData_->muTrackVx ->push_back(trkRef->vx());
-    privateData_->muTrackVy ->push_back(trkRef->vy());
-    privateData_->muTrackVz ->push_back(trkRef->vz());
-
+    privateData_->trackIndex->push_back(track.key());
+    privateData_->standAloneTrackIndex->push_back(standAloneTrack.key());
+    privateData_->combinedTrackIndex->push_back(combinedTrack.key());
   }
 
-  else {
-    privateData_->pxAtInner->push_back(-1.);
-    privateData_->pyAtInner->push_back(-1.);
-    privateData_->pzAtInner->push_back(-1.);
-
-    privateData_->xAtInner->push_back(-1.);
-    privateData_->yAtInner->push_back(-1.);
-    privateData_->zAtInner->push_back(-1.);
-
-    privateData_->pxAtOuter->push_back(-1.);
-    privateData_->pyAtOuter->push_back(-1.);
-    privateData_->pzAtOuter->push_back(-1.);
-
-    privateData_->xAtOuter->push_back(-1.);
-    privateData_->yAtOuter->push_back(-1.);
-    privateData_->zAtOuter->push_back(-1.);
-
-    privateData_->muTrackNormalizedChi2->push_back(-1.);
-
-    privateData_->muTrackDxy->push_back(-1.);
-    privateData_->muTrackD0 ->push_back(-1.);
-    privateData_->muTrackDsz->push_back(-1.);
-    privateData_->muTrackDz ->push_back(-1.);
-
-    privateData_->muTrackDxyError->push_back(-1.);
-    privateData_->muTrackD0Error ->push_back(-1.);
-    privateData_->muTrackDszError->push_back(-1.);
-    privateData_->muTrackDzError ->push_back(-1.);
-
-    privateData_->muTrackValidHits->push_back(-1.);					       
-    privateData_->muTrackLostHits ->push_back(-1.);
-
-    privateData_->muTrackVx ->push_back(-1.);
-    privateData_->muTrackVy ->push_back(-1.);
-    privateData_->muTrackVz ->push_back(-1.);
-
-  }
 }
 
 void CmsMuonFiller::treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
   
-  cmstree->column((colPrefix+"muTrackNormalizedChi2"+colSuffix).c_str(), *privateData_->muTrackNormalizedChi2, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackDxy"+colSuffix).c_str(), *privateData_->muTrackDxy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackD0"+colSuffix).c_str(),  *privateData_->muTrackD0, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackDsz"+colSuffix).c_str(), *privateData_->muTrackDsz, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackDz"+colSuffix).c_str(),  *privateData_->muTrackDz, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackDxyError"+colSuffix).c_str(), *privateData_->muTrackDxyError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackD0Error"+colSuffix).c_str(),  *privateData_->muTrackD0Error, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackDszError"+colSuffix).c_str(), *privateData_->muTrackDszError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackDzError"+colSuffix).c_str(),  *privateData_->muTrackDzError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackValidHits"+colSuffix).c_str(),  *privateData_->muTrackValidHits, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackLostHits"+colSuffix).c_str(),   *privateData_->muTrackLostHits, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackVx"+colSuffix).c_str(),  *privateData_->muTrackVx, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackVy"+colSuffix).c_str(),  *privateData_->muTrackVy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"muTrackVz"+colSuffix).c_str(),  *privateData_->muTrackVz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trackIndex"+colSuffix).c_str(), *privateData_->trackIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"standAloneTrackIndex"+colSuffix).c_str(), *privateData_->standAloneTrackIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"combinedTrackIndex"+colSuffix).c_str(), *privateData_->combinedTrackIndex, nCandString.c_str(), 0, "Reco");
 
-  if(saveFatTrk_) {
-
-    cmstree->column((colPrefix+"pxAtOuter"+colSuffix).c_str(), *privateData_->pxAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyAtOuter"+colSuffix).c_str(), *privateData_->pyAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzAtOuter"+colSuffix).c_str(), *privateData_->pzAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"xAtOuter"+colSuffix).c_str(), *privateData_->xAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"yAtOuter"+colSuffix).c_str(), *privateData_->yAtOuter, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"zAtOuter"+colSuffix).c_str(), *privateData_->zAtOuter, nCandString.c_str(), 0, "Reco");
-    
-    cmstree->column((colPrefix+"pxAtInner"+colSuffix).c_str(), *privateData_->pxAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyAtInner"+colSuffix).c_str(), *privateData_->pyAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzAtInner"+colSuffix).c_str(), *privateData_->pzAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"xAtInner"+colSuffix).c_str(), *privateData_->xAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"yAtInner"+colSuffix).c_str(), *privateData_->yAtInner, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"zAtInner"+colSuffix).c_str(), *privateData_->zAtInner, nCandString.c_str(), 0, "Reco");
-
-  }
 }
 
 void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEvent, 
@@ -518,32 +365,10 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
 void CmsMuonFillerData::initialise() {
 
   initialiseCandidate();
-  pxAtInner = new vector<float>;
-  pyAtInner = new vector<float>;
-  pzAtInner = new vector<float>;
-  xAtInner = new vector<float>;
-  yAtInner = new vector<float>;
-  zAtInner = new vector<float>;
-  pxAtOuter = new vector<float>;
-  pyAtOuter = new vector<float>;
-  pzAtOuter = new vector<float>;
-  xAtOuter = new vector<float>;
-  yAtOuter = new vector<float>;
-  zAtOuter = new vector<float>;
-  muTrackNormalizedChi2 = new vector<float>;
-  muTrackDxy = new vector<float>;
-  muTrackD0 = new vector<float>;
-  muTrackDsz = new vector<float>;
-  muTrackDz = new vector<float>;
-  muTrackDxyError = new vector<float>;
-  muTrackD0Error = new vector<float>;
-  muTrackDszError = new vector<float>;
-  muTrackDzError = new vector<float>;
-  muTrackValidHits = new vector<float>;
-  muTrackLostHits = new vector<float>;
-  muTrackVx = new vector<float>;
-  muTrackVy = new vector<float>;
-  muTrackVz = new vector<float>;
+
+  trackIndex = new vector<int>;
+  standAloneTrackIndex = new vector<int>;
+  combinedTrackIndex = new vector<int>;
 
   muonId = new vector<int>;
 
@@ -574,33 +399,9 @@ void CmsMuonFillerData::clearTrkVectors() {
 
   clearTrkVectorsCandidate();
 
-  pxAtOuter->clear();
-  pyAtOuter->clear();
-  pzAtOuter->clear();
-  xAtOuter->clear();
-  yAtOuter->clear();
-  zAtOuter->clear();
-  pxAtInner->clear();
-  pyAtInner->clear();
-  pzAtInner->clear();
-  xAtInner->clear();
-  yAtInner->clear();
-  zAtInner->clear();
-
-  muTrackNormalizedChi2->clear();
-  muTrackDxy->clear();
-  muTrackD0 ->clear();
-  muTrackDsz->clear();
-  muTrackDz ->clear();
-  muTrackDxyError->clear();
-  muTrackD0Error ->clear();
-  muTrackDszError->clear();
-  muTrackDzError ->clear();
-  muTrackValidHits->clear();
-  muTrackLostHits ->clear();
-  muTrackVx->clear();
-  muTrackVy->clear();
-  muTrackVz->clear();
+  trackIndex->clear();
+  standAloneTrackIndex->clear();
+  combinedTrackIndex->clear();
  
   muonId->clear();
 
