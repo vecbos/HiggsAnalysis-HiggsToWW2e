@@ -20,17 +20,19 @@ process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
+# --- track sequences ---
+process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_runs123592_to_123615-BSC-rereco.root'
-process.treeDumper.dumpTriggerResults = True
+process.treeDumper.dumpTriggerResults = False
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpMCTruth = False
+process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpGenMet = False
 process.treeDumper.dumpGenJets = False
-process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpVertices = True
@@ -39,12 +41,6 @@ process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
 process.treeDumper.saveJet1BTag = False
 process.treeDumper.saveJet2BTag = False
-process.treeDumper.dumpElectrons = True
-process.treeDumper.dumpPFlowElectrons = True
-process.treeDumper.dumpPFpreId = False
-process.treeDumper.dumpMuons = True
-process.treeDumper.dumpJets = True
-process.treeDumper.dumpMet = True
 process.treeDumper.dumpTree = True
 
 process.options = cms.untracked.PSet(
@@ -65,10 +61,14 @@ process.source = cms.Source("PoolSource",
                             )
                             )
 
-process.p = cms.Path ( process.mergedSuperClusters *
+process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
+
+process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
+                       process.jetSequence * process.pfjetSCSequence * process.newBtaggingSequence *
+#                      process.doAlldEdXEstimators *
+#                      process.dedx *
                        process.eIdSequence *
                        process.eleIsolationSequence *
-                       process.ambiguityResolvedElectrons *
-                       process.jetSequence * process.pfjetSCSequence )
+                       process.ambiguityResolvedElectrons )
                        
 process.q = cms.EndPath ( process.treeDumper )
