@@ -63,8 +63,6 @@ private:
   bool dumpElectrons_;
   //! dump the particle flow electron block
   bool dumpPFlowElectrons_;
-  //! dump the particle flow electron pre-identification block
-  //  bool dumpPFpreId_; 
   //! dump muon block
   bool dumpMuons_;
   //! dump reco / generated jets block
@@ -113,8 +111,6 @@ private:
   //! calotowers collections
   edm::InputTag calotowerCollection_, hbheLabel_, hoLabel_, hfLabel_;
   std::vector<edm::InputTag> ecalLabels_;
-  //! PF electrons pre-identification
-  //  edm::InputTag PFpreIdCollection_;
   //! generator-level particle collection in input
   edm::InputTag mcTruthCollection_;
   //! association map between reco and generated particles
