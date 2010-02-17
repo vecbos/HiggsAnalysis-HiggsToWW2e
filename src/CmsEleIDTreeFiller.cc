@@ -73,7 +73,7 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->scHaloBasedEcalSum03;
   delete privateData_->scHaloBasedEcalSum04;
   delete privateData_->eleIdCuts;
-  delete privateData_->eleLik;
+  //  delete privateData_->eleLik;
   delete privateData_->pflowMVA;
 }
 
@@ -118,7 +118,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     iEvent.getByLabel( "eidRobustLoose", (*eleIdResults_)[2] );
     iEvent.getByLabel( "eidRobustTight", (*eleIdResults_)[3] );
     iEvent.getByLabel( "eidRobustHighEnergy", (*eleIdResults_)[4] );
-    iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[5] );
+    //    iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[5] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -186,7 +186,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   const eleIdMap & eleIdRobustLooseVal = *( (*eleIdResults_)[2] );
   const eleIdMap & eleIdRobustTightVal = *( (*eleIdResults_)[3] );
   const eleIdMap & eleIdRobustHighEnergyVal = *( (*eleIdResults_)[4] );
-  const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[5] );
+  //  const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[5] );
 
   int packed_sel = -1;
   int eleIdLoose = ( eleIdLooseVal[electronRef] ) ? 1 : 0;
@@ -199,7 +199,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
     ( eleIdRobustLoose << 2 ) | ( eleIdRobustTight << 1 ) | eleIdRobustHighEnergy;
 
   privateData_->eleIdCuts->push_back( packed_sel );
-  privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
+  //  privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
   privateData_->pflowMVA->push_back( electronRef->mva() );
 
   // --- isolations ---
@@ -262,7 +262,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"scHaloBasedEcalSum03"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum03, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scHaloBasedEcalSum04"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCuts"+colSuffix).c_str(), *privateData_->eleIdCuts, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
+  //  cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
 }
 
@@ -294,7 +294,7 @@ void CmsEleIDTreeFillerData::initialise() {
   scHaloBasedEcalSum03     = new vector<float>;
   scHaloBasedEcalSum04     = new vector<float>;
   eleIdCuts                = new vector<int>;
-  eleLik                   = new vector<float>;
+  //  eleLik                   = new vector<float>;
   pflowMVA                 = new vector<bool>;
 }
 
@@ -323,7 +323,7 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   scHaloBasedEcalSum03     ->clear();
   scHaloBasedEcalSum04     ->clear();
   eleIdCuts                ->clear();
-  eleLik                   ->clear();
+  //  eleLik                   ->clear();
   pflowMVA                 ->clear();
 }
 
