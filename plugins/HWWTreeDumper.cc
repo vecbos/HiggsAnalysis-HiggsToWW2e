@@ -48,7 +48,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCaloTowerFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsV0CandidateFiller.h"
-//#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowPreIdFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowPreIdFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
@@ -115,7 +115,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
-  //  dumpPFpreId_             = iConfig.getUntrackedParameter<bool>("dumpPFpreId", false);  
+  dumpPFpreId_             = iConfig.getUntrackedParameter<bool>("dumpPFpreId", false);  
 
   // data run informations
   dumpRunInfo_ = iConfig.getUntrackedParameter<bool>("dumpRunInfo",false);
@@ -157,7 +157,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hepMcCollection_         = iConfig.getParameter<edm::InputTag>("hepMcCollection");
   genInfoCollection_       = iConfig.getParameter<edm::InputTag>("genInfoCollection");
   genWeightCollection_     = iConfig.getUntrackedParameter<std::string>("genWeightCollection");
-  //  PFpreIdCollection_       = iConfig.getParameter<edm::InputTag>("PFpreIdCollection"); 
+  PFpreIdCollection_       = iConfig.getParameter<edm::InputTag>("PFpreIdCollection"); 
 
   // calotowers collections
   calotowerCollection_ = iConfig.getParameter<edm::InputTag>("calotowerCollection");
@@ -279,12 +279,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeCollectionToTree(pflowElectronCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 
-//   if(dumpPFpreId_) {
-//     CmsPFlowPreIdFiller treeFill(tree_, true);
-//     std::string prefix("");
-//     std::string suffix("PFpreId");
-//     treeFill.writeCollectionToTree(PFpreIdCollection_, iEvent, iSetup, prefix, suffix, false);
-//   }
+  if(dumpPFpreId_) {
+    CmsPFlowPreIdFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("PFpreId");
+    treeFill.writeCollectionToTree(PFpreIdCollection_, iEvent, iSetup, prefix, suffix, false);
+  }
 
   // fill SC block
   if (dumpSCs_) {
