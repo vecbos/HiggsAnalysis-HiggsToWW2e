@@ -38,6 +38,7 @@ process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = True
+process.treeDumper.dumpGenJets = False # temporary: Summer09 production seems not to have ak5GenJets in RECO...
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
@@ -56,7 +57,7 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('file:pippo.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc21/emanuele/data/Pool/ZmumuJet_Pt20to30_Summer09_100ev.root')
                             )
 
 #process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
