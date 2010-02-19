@@ -330,7 +330,7 @@ void CmsElectronFiller::writePFextraInfo(const GsfElectronRef electronRef, Super
 
   if( electronRef.isNonnull() ) {
 
-    bool isTrackerDriven = electronRef->isTrackerDriven();
+    bool isTrackerDriven = electronRef->trackerDrivenSeed();
     if (isTrackerDriven) {
       
       reco::TrackRef closeCtfTrack = electronRef->closestCtfTrackRef();
@@ -438,7 +438,7 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
 				      const EcalRecHitCollection *EBRecHits,
 				      const EcalRecHitCollection *EERecHits) {
 
-  if(&electronRef) {
+  if(electronRef.isNonnull()) {
 
     // fiducial flags in ECAL
     int packed_sel = -1;
@@ -460,8 +460,8 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     privateData_->fiducialFlags->push_back(packed_sel);
 
     int packed_reco;
-    int isEcalDriven = ( electronRef->isEcalDriven() ) ? 1 : 0;
-    int isTrackerDriven = ( electronRef->isTrackerDriven() ) ? 1 : 0;
+    int isEcalDriven = ( electronRef->ecalDrivenSeed() ) ? 1 : 0;
+    int isTrackerDriven = ( electronRef->trackerDrivenSeed() ) ? 1 : 0;
     packed_reco = ( isEcalDriven << 1 ) | isTrackerDriven;
     privateData_->recoFlags->push_back( packed_reco );
 

@@ -29,6 +29,7 @@
 <use name=RecoBTau/JetTagComputer>
 <use name=RecoEcal/EgammaCoreTools>
 <use name=RecoEgamma/EgammaElectronAlgos>
+<use name=RecoEgamma/EgammaTools>
 <use name=RecoTracker/CkfPattern>
 <use name=RecoTracker/TrackProducer>
 <use name=SimDataFormats/JetMatching>
@@ -73,6 +74,7 @@
    <use name=RecoBTau/JetTagComputer>
    <use name=RecoEcal/EgammaCoreTools>
    <use name=RecoEgamma/EgammaElectronAlgos>
+   <use name=RecoEgamma/EgammaTools>
    <use name=RecoTracker/CkfPattern>
    <use name=RecoTracker/TrackProducer>
    <use name=SimDataFormats/JetMatching>

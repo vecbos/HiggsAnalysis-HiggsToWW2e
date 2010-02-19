@@ -266,7 +266,7 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
       *(privateData_->ncand) = refittedTracksForDeDx_->size();   
       blockSize = (&(*refittedTracksForDeDx_)) ? refittedTracksForDeDx_->size() : 0;
     } else {
-      blockSize = (collection) ? blockSize = collection->size() : 0;
+      blockSize = (collection) ? collection->size() : 0;
       *(privateData_->ncand) = collection->size();
     }
 
@@ -308,7 +308,7 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
 
-  if(&trkRef) {
+  if(trkRef.isNonnull()) {
     
     if ( saveVtxTrk_ ) { 
       

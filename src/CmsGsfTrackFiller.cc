@@ -123,7 +123,7 @@ void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
       *(privateData_->ncand) = refittedTracksForDeDx_->size();   
       blockSize = (&(*refittedTracksForDeDx_)) ? refittedTracksForDeDx_->size() : 0;
     } else {
-      blockSize = (collection) ? blockSize = collection->size() : 0;
+      blockSize = (collection) ? collection->size() : 0;
       *(privateData_->ncand) = collection->size();
     }
 

@@ -220,7 +220,7 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
 				 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 				 const Muon *muon) {
 
-  if( & muon ) {
+  if( muon ) {
     TrackRef track = muon->track();
     TrackRef standAloneTrack = muon->standAloneMuon();
     TrackRef combinedTrack = muon->combinedMuon();
@@ -244,7 +244,7 @@ void CmsMuonFiller::treeTrkInfo(const std::string &colPrefix, const std::string 
 
 void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEvent, 
 				  const edm::EventSetup& iSetup, const Muon *muon) {
-  if(&muon) {
+  if( muon ) {
 
     // now put muon ID codified:
     int AllGlobalMuons = ( muon::isGoodMuon( *muon, muon::AllGlobalMuons ) ) ? 1 : 0; 
