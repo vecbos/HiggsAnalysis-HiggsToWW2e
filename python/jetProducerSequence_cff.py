@@ -28,3 +28,4 @@ jetVertexAlpha2 = cms.EDProducer("JetVertexAssociation",
 jetSequence = cms.Sequence( L2L3CorJetAK5Calo + jetVertexAlpha1 + jetVertexAlpha2 )
 pfjetAK5Sequence = cms.Sequence( L2L3CorJetAK5PF )
 
+ourJetSequence = cms.Sequence( jetSequence * pfjetAK5Sequence )
