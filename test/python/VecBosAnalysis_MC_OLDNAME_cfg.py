@@ -35,7 +35,7 @@ process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = True
-process.treeDumper.dumpGenJets = False # temporary: Summer09 production seems not to have ak5GenJets in RECO...
+process.treeDumper.dumpGenJets = True
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
@@ -43,7 +43,7 @@ process.treeDumper.saveJet1BTag = True
 process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpTree = True
 
-#old aK naming, che dio li impali
+# old ak5 naming
 ######################################################
 process.treeDumper.genJetCollection = "antikt5GenJets"
 process.treeDumper.jetCollection2 = "antikt5CaloJets"
