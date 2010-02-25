@@ -18,9 +18,6 @@ process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
-# --- track sequences ---
-process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
-
 # --- calotowers sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
@@ -54,29 +51,24 @@ process.treeDumper.PFjetCollection2 = "antikt5PFJets"
 process.jetVertexAlpha2.JET_ALGO = "antikt5CaloJets"
 process.L2L3CorJetAK5Calo.src = "antikt5CaloJets"
 process.L2L3CorJetAK5PF.src = "antikt5PFJets"
-
 ######################################################
 
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(10) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('file:/data/mpierini/VECBOS/CMSSW_3_3_6/src/HiggsAnalysis/HiggsToWW2e/test/crab_SUSY/default_MC_1.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/9AC9CBF4-DB97-DE11-AAD4-001E0B5A645A.root')
                             )
 
-#process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
-
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters *
-                       process.jetSequence * process.pfjetAK5Sequence *
-#                      process.doAlldEdXEstimators *
-#                      process.dedx *
+                       process.ourJetSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )

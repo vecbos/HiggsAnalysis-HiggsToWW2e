@@ -18,9 +18,6 @@ process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
-# --- track sequences ---
-process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
-
 # --- calotowers sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
@@ -57,15 +54,11 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc21/emanuele/data/Pool/ZmumuJet_Pt20to30_Summer09_100ev.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/9AC9CBF4-DB97-DE11-AAD4-001E0B5A645A.root')
                             )
 
-#process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
-
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters *
-                       process.jetSequence * process.pfjetAK5Sequence *
-#                      process.doAlldEdXEstimators *
-#                      process.dedx *
+                       rocess.ourJetSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )

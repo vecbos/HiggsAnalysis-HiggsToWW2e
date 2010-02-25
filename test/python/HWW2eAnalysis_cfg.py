@@ -24,9 +24,6 @@ process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
-# --- track sequences ---
-process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
-
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
@@ -57,13 +54,12 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-#                           fileNames = cms.untracked.vstring('file:/cmsrm/pc18/crovelli/JPsiEE_reco_200eve.root')
-                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/RECO/JpsiEE_31X.root')
+                            fileNames = cms.untracked.vstring('rfio:/cmsrm/pc23_2/emanuele/Pool/9AC9CBF4-DB97-DE11-AAD4-001E0B5A645A.root')
                             )
 
 process.p = cms.Path ( process.KFactorProducer * process.muonCorrectedMET *
                        process.mergedSuperClusters *
-                       process.jetSequence * process.pfjetAK5Sequence *
+                       process.ourJetSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons)

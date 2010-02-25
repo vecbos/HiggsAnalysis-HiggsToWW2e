@@ -24,9 +24,6 @@ process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
-# --- track sequences ---
-process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
-
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
@@ -65,7 +62,7 @@ process.source = cms.Source("PoolSource",
 
 process.p = cms.Path ( process.muonCorrectedMET *
                        process.mergedSuperClusters *
-                       process.jetSequence * process.pfjetAK5Sequence *
+                       process.ourJetSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons)

@@ -20,9 +20,6 @@ process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
-# --- track sequences ---
-process.load("RecoTracker.DeDx.dedxEstimatorsFromRefitter_cff")
-
 # --- calotowers sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
@@ -67,12 +64,8 @@ process.source = cms.Source("PoolSource",
                             )
                             )
 
-#process.dedx = cms.Sequence (process.RefitterForDeDx * process.dedxTruncated40)
-
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
-                       process.jetSequence * process.pfjetAK5Sequence *
-#                      process.doAlldEdXEstimators *
-#                      process.dedx *
+                       process.ourJetSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
