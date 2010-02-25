@@ -195,14 +195,14 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       trackCountingHighEffBJetTags;
 
     if(saveJetBTag_) {
-      iEvent.getByLabel("combinedSecondaryVertexBJetTags", combinedSecondaryVertexBJetTags);
-      iEvent.getByLabel("combinedSecondaryVertexMVABJetTags", combinedSecondaryVertexMVABJetTags);
-      iEvent.getByLabel("jetBProbabilityBJetTags", jetBProbabilityBJetTags);
-      iEvent.getByLabel("jetProbabilityBJetTags", jetProbabilityBJetTags);
-      iEvent.getByLabel("simpleSecondaryVertexBJetTags", simpleSecondaryVertexBJetTags);
-      iEvent.getByLabel("softMuonBJetTags", softMuonBJetTags);
-      iEvent.getByLabel("trackCountingHighPurBJetTags", trackCountingHighPurBJetTags);
-      iEvent.getByLabel("trackCountingHighEffBJetTags", trackCountingHighEffBJetTags);
+      iEvent.getByLabel("newCombinedSecondaryVertexBJetTags", combinedSecondaryVertexBJetTags);
+      iEvent.getByLabel("newCombinedSecondaryVertexMVABJetTags", combinedSecondaryVertexMVABJetTags);
+      iEvent.getByLabel("newJetBProbabilityBJetTags", jetBProbabilityBJetTags);
+      iEvent.getByLabel("newJetProbabilityBJetTags", jetProbabilityBJetTags);
+      iEvent.getByLabel("newSimpleSecondaryVertexBJetTags", simpleSecondaryVertexBJetTags);
+      iEvent.getByLabel("newSoftMuonBJetTags", softMuonBJetTags);
+      iEvent.getByLabel("newTrackCountingHighPurBJetTags", trackCountingHighPurBJetTags);
+      iEvent.getByLabel("newTrackCountingHighEffBJetTags", trackCountingHighEffBJetTags);
     }
 
     int index = 0;
