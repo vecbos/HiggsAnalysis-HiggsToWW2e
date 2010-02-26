@@ -24,6 +24,10 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
+# --- to recover the ak5 GenJets that are not re-recoed in 33X samples ---
+process.load('RecoJets.Configuration.GenJetParticles_cff')
+process.load("RecoJets.Configuration.RecoGenJets_cff")
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
@@ -54,10 +58,11 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             debugFlag = cms.untracked.bool(True),
                             debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/9AC9CBF4-DB97-DE11-AAD4-001E0B5A645A.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc21/emanuele/data/Pool/ZmumuJet_Pt20to30_Summer09_100ev.root')
                             )
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters *
+                       process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.ourJetSequence * process.newBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
