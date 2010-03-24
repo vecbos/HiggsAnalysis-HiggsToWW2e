@@ -295,7 +295,7 @@ void CmsEleIDTreeFillerData::initialise() {
   scHaloBasedEcalSum04     = new vector<float>;
   eleIdCuts                = new vector<int>;
   eleLik                   = new vector<float>;
-  pflowMVA                 = new vector<bool>;
+  pflowMVA                 = new vector<float>;
 }
 
 void CmsEleIDTreeFillerData::clearTrkVectors() {
