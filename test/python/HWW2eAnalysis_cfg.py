@@ -7,7 +7,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'MC_31X_V8::All'
+process.GlobalTag.globaltag = 'MC_3XY_V25::All'
 
 # --- common code to comput gg fusion signal k factor
 process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWKFactorProducer_cfi")
@@ -52,9 +52,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            debugFlag = cms.untracked.bool(True),
-                            debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring('rfio:/cmsrm/pc23_2/emanuele/Pool/9AC9CBF4-DB97-DE11-AAD4-001E0B5A645A.root')
+                            fileNames = cms.untracked.vstring('/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V25_356ReReco-v2/0123/007E1F58-AC3B-DF11-A68B-0026189438C4.root')
                             )
 
 process.p = cms.Path ( process.KFactorProducer * process.muonCorrectedMET *

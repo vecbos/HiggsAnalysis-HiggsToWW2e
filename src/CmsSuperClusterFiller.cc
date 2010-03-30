@@ -100,7 +100,7 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->pyVtxPropagatedPosCharge;
   delete privateData_->pzVtxPropagatedPosCharge;
   delete privateData_->time;
-  delete privateData_->chi2Prob;
+  delete privateData_->chi2;
   delete privateData_->recoFlag;
   delete privateData_->channelStatus;
   delete privateData_->sevClosProbl;
@@ -271,7 +271,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       EcalRecHitCollection::const_iterator seedRH = rechits->find(seedCrystalId);
       
       privateData_->time->push_back((float)seedRH->time());
-      privateData_->chi2Prob->push_back((float)seedRH->chi2Prob());
+      privateData_->chi2->push_back((float)seedRH->chi2());
       privateData_->recoFlag->push_back((int)seedRH->recoFlag());
       privateData_->seedEnergy->push_back((float)maxRH.second);
 
@@ -320,7 +320,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->covIEtaIPhi->push_back(-1.);
     privateData_->covIPhiIPhi->push_back(-1.);
     privateData_->time->push_back(-999.);
-    privateData_->chi2Prob->push_back(-999.);
+    privateData_->chi2->push_back(-999.);
     privateData_->recoFlag->push_back(-1);
     privateData_->channelStatus->push_back(-1);
     privateData_->seedEnergy->push_back(-1.);
@@ -589,7 +589,7 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"recoFlag"+colSuffix).c_str(), *privateData_->recoFlag, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"channelStatus"+colSuffix).c_str(), *privateData_->channelStatus, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"chi2Prob"+colSuffix).c_str(), *privateData_->chi2Prob, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
@@ -685,7 +685,7 @@ std::pair <DetId,int> CmsSuperClusterFiller::closestProblematic(const reco::Calo
       if ( jrh == recHits.end() ) 
         continue;
       //Now checking rh flag
-      uint32_t sev = EcalSeverityLevelAlgo::severityLevel( (*jrh), chStatus );
+      uint32_t sev = EcalSeverityLevelAlgo::severityLevel( jrh->id(), recHits, chStatus );
       if (sev == EcalSeverityLevelAlgo::kGood)
         continue;
       //      std::cout << "[closestProblematic] Found a problematic channel " << EBDetId(*it) << " " << flag << std::endl;
@@ -758,7 +758,7 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   recoFlag = new vector<int>;
   channelStatus = new vector<int>;
   time = new vector<float>;
-  chi2Prob = new vector<float>;
+  chi2 = new vector<float>;
   seedEnergy = new vector<float>;
   idClosProbl = new vector<int>;
   sevClosProbl = new vector<int>;
@@ -802,7 +802,7 @@ void CmsSuperClusterFillerData::clear()
   recoFlag->clear();
   channelStatus->clear();
   time->clear();
-  chi2Prob->clear();
+  chi2->clear();
   seedEnergy->clear();
   idClosProbl->clear();
   sevClosProbl->clear();

@@ -190,14 +190,14 @@ void CmsPFlowElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 void CmsPFlowElectronFiller::writePFEleTrkInfo(reco::GsfTrackRef gsfRef, reco::TrackRef kfTrackRef ) {
   
-  if(&gsfRef) {
+  if(gsfRef.isNonnull()) {
     privateData_->gsfTrackIndex->push_back(gsfRef.key());
   }
   else {
     privateData_->gsfTrackIndex->push_back( -1 );
   }
   
-  if(&kfTrackRef) {
+  if(kfTrackRef.isNonnull()) {
     privateData_->trackIndex->push_back(kfTrackRef.key());
   } else {
     privateData_->trackIndex->push_back( -1 );
@@ -206,7 +206,7 @@ void CmsPFlowElectronFiller::writePFEleTrkInfo(reco::GsfTrackRef gsfRef, reco::T
 
 void CmsPFlowElectronFiller::writePFEleBasicInfo(const reco::PFCandidateRef pflowCandRef) {
 
-  if (&pflowCandRef) {
+  if (pflowCandRef.isNonnull()) {
     
     privateData_->MvaOutput->push_back(pflowCandRef->mva_e_pi());
     privateData_->PS1Energy->push_back(pflowCandRef->pS1Energy());

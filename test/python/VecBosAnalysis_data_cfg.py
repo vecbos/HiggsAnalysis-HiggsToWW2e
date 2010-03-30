@@ -7,7 +7,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR09_P_V6::All'
+process.GlobalTag.globaltag = 'GR10_P_V4::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
@@ -57,10 +57,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            debugFlag = cms.untracked.bool(True),
-                            debugVebosity = cms.untracked.uint32(10),
                             fileNames = cms.untracked.vstring(
-    'rfio:/castor/cern.ch/cms/store/caf/user/meridian/MinimumBias/BeamCommissioning09_BSCFilter_v6/c32fbdf401a82bf088a335dc690defa6/bscFilter_124120_8.root'
+    '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/26C8DED9-0E3C-DF11-9D83-0030487CD7B4.root'
                             )
                             )
 

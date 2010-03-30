@@ -4,7 +4,7 @@
 #include "DataFormats/EgammaReco/interface/BasicClusterFwd.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
-#include "PhysicsTools/UtilAlgos/interface/ObjectSelector.h"
+#include "CommonTools/UtilAlgos/interface/ObjectSelector.h"
 #include "RecoMuon/TrackerSeedGenerator/plugins/CollectionCombiner.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWEleAmbiguityResolve.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"

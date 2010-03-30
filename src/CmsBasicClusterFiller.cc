@@ -105,7 +105,7 @@ CmsBasicClusterFiller::~CmsBasicClusterFiller()
   delete privateData_->covIEtaIPhi;
   delete privateData_->covIPhiIPhi;
   delete privateData_->time;
-  delete privateData_->chi2Prob;
+  delete privateData_->chi2;
   delete privateData_->recoFlag;
   delete privateData_->sevClosProbl;
   delete privateData_->idClosProbl;
@@ -267,7 +267,7 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       EcalRecHitCollection::const_iterator seedRH = rechits->find(seedCrystalId);
       
       privateData_->time->push_back((float)seedRH->time());
-      privateData_->chi2Prob->push_back((float)seedRH->chi2Prob());
+      privateData_->chi2->push_back((float)seedRH->chi2());
       privateData_->recoFlag->push_back((int)seedRH->recoFlag());
       privateData_->seedEnergy->push_back((float)maxRH.second);
 
@@ -297,13 +297,9 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
 
 	// int limit_to_print=1;
 
-	float cand_en=cand->energy();
-	float cand_eta=cand->eta();
-	float cand_phi=cand->phi();
 	int index_SC=-1; 
 	int index_SC_ref=-1; 
 	
-	std::cout<<"BC: en="<< cand_en<< " eta="<<cand_eta<< " phi="<<cand_phi<<std::endl;
 	SuperClusterCollection::const_iterator iSC;
 	for(iSC=ESCCollection->begin(); iSC!=ESCCollection->end(); iSC++)
 	  {
@@ -311,15 +307,11 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
 	    // find SC constituents 
 	    for(CaloClusterPtrVector::const_iterator bcItr = iSC->clustersBegin(); bcItr != iSC->clustersEnd(); bcItr++)
 	      {
-
-		if(    cand->energy()== (*bcItr)->energy() 
+		if( cand->energy()== (*bcItr)->energy() 
 		    && cand->eta()== (*bcItr)->eta() 
 		    && cand->phi()== (*bcItr)->phi()  ) {
 		  index_SC_ref=index_SC;
-		  std::cout<<"*** en="<< (*bcItr)->energy()<< " eta="<<(*bcItr)->eta()<< " phi="<<(*bcItr)->phi()<<std::endl;
-		}else {
-		  std::cout<<"    en="<< (*bcItr)->energy()<< " eta="<<(*bcItr)->eta()<< " phi="<<(*bcItr)->phi()<<std::endl;
-		}  
+		}
 	      }
 	  }
 
@@ -341,7 +333,7 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
     privateData_->covIEtaIPhi->push_back(-1.);
     privateData_->covIPhiIPhi->push_back(-1.);
     privateData_->time->push_back(-999.);
-    privateData_->chi2Prob->push_back(-999.);
+    privateData_->chi2->push_back(-999.);
     privateData_->recoFlag->push_back(-1);
     privateData_->seedEnergy->push_back(-1.);
     privateData_->fracClosProbl->push_back(-1);
@@ -373,7 +365,7 @@ void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlag"+colSuffix).c_str(), *privateData_->recoFlag, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"chi2Prob"+colSuffix).c_str(), *privateData_->chi2Prob, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
@@ -386,7 +378,6 @@ float CmsBasicClusterFiller::fractionAroundClosestProblematic( const reco::CaloC
                                                                const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus, const CaloTopology* topology )
 { 
   DetId closestProb = closestProblematic(cluster , recHits, chStatus, topology).first;
-  //  std::cout << "%%%%%%%%%%% Closest prob is " << EBDetId(closestProb) << std::endl;
   if (closestProb.null())
     return 0.;
 
@@ -400,13 +391,11 @@ float CmsBasicClusterFiller::fractionAroundClosestProblematic( const reco::CaloC
 
   for ( itn = neighbours.begin(); itn != neighbours.end(); ++itn )
     { 
-      //      std::cout << "Checking detId " << EBDetId((*itn)) << std::endl;
       for ( it = hitsAndFracs.begin(); it != hitsAndFracs.end(); ++it )
         { 
           DetId id = (*it).first;
           if ( id != (*itn) )
             continue;
-          //      std::cout << "Is in cluster detId " << EBDetId(id) << std::endl;
           EcalRecHitCollection::const_iterator jrh = recHits.find( id );
           if ( jrh == recHits.end() )
             { 
@@ -417,7 +406,6 @@ float CmsBasicClusterFiller::fractionAroundClosestProblematic( const reco::CaloC
           fraction += (*jrh).energy() * (*it).second  / cluster.energy();
         }
     }
-  //  std::cout << "%%%%%%%%%%% Fraction is " << fraction << std::endl;
   return fraction;
 }
 
@@ -445,10 +433,9 @@ std::pair <DetId,int> CmsBasicClusterFiller::closestProblematic(const reco::Calo
       if ( jrh == recHits.end() ) 
         continue;
       //Now checking rh flag
-      uint32_t sev = EcalSeverityLevelAlgo::severityLevel( (*jrh), chStatus );
+      uint32_t sev = EcalSeverityLevelAlgo::severityLevel( jrh->id(), recHits, chStatus );
       if (sev == EcalSeverityLevelAlgo::kGood)
         continue;
-      //      std::cout << "[closestProblematic] Found a problematic channel " << EBDetId(*it) << " " << flag << std::endl;
       //Find the closest DetId in eta,phi space (distance defined by deta^2 + dphi^2)
       int deta=distanceEta(EBDetId(seed),EBDetId(*it));
       int dphi=distancePhi(EBDetId(seed),EBDetId(*it));
@@ -499,7 +486,7 @@ void CmsBasicClusterFillerData::initialiseCandidate()
   covIPhiIPhi = new vector<float>;
   recoFlag = new vector<int>;
   time = new vector<float>;
-  chi2Prob = new vector<float>;
+  chi2 = new vector<float>;
   seedEnergy = new vector<float>;
   idClosProbl = new vector<int>;
   sevClosProbl = new vector<int>;
@@ -526,7 +513,7 @@ void CmsBasicClusterFillerData::clear()
   covIPhiIPhi->clear();
   recoFlag->clear();
   time->clear();
-  chi2Prob->clear();
+  chi2->clear();
   seedEnergy->clear();
   idClosProbl->clear();
   sevClosProbl->clear();

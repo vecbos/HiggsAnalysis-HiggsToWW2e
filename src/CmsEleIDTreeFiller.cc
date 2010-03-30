@@ -160,7 +160,7 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
 
   SuperClusterRef sclusRef = electronRef->superCluster();
   float mySeedE         = 0.;
-  if(&sclusRef) mySeedE = sclusRef->seed()->energy();
+  if(sclusRef.isNonnull()) mySeedE = sclusRef->seed()->energy();
   
   // transverse impact parameter
   GsfTrackRef trRef = electronRef->gsfTrack();

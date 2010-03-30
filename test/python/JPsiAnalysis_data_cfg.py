@@ -7,7 +7,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR09_P_V6::All'
+process.GlobalTag.globaltag = 'GR10_P_V4::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
@@ -56,13 +56,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            debugFlag = cms.untracked.bool(True),
-                            debugVebosity = cms.untracked.uint32(10),
-                            fileNames = cms.untracked.vstring(
-'rfio:/castor/cern.ch/user/g/gpetrucc/900GeV/DATA/bit40-123596-stdReco-fitBS123592v2-lumi1-68.root',
-'rfio:/castor/cern.ch/user/g/gpetrucc/900GeV/DATA/bit40-123596-stdReco-fitBS123592v2-lumi69-129.root',
-'rfio:/castor/cern.ch/user/g/gpetrucc/900GeV/DATA/bit40-123596-stdReco-fitBS123592v2-lumi130-143.root'
-                            )
+                            fileNames = cms.untracked.vstring('/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/26C8DED9-0E3C-DF11-9D83-0030487CD7B4.root')
                             )
 
 process.p = cms.Path ( process.mergedSuperClusters *

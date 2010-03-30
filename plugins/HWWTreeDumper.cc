@@ -526,7 +526,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
 
 // ------------ method called once each job just before starting event loop  ------------
-void HWWTreeDumper::beginJob(const edm::EventSetup&) {
+void HWWTreeDumper::beginJob() {
   
   fileOut_ = TFile::Open(nameFile_.c_str(), "RECREATE");
 
