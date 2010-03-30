@@ -1,7 +1,7 @@
 --- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_5_X ---
 
-scramv1 p CMSSW CMSSW_3_3_6
-cd CMSSW_3_3_6/src
+scramv1 p CMSSW CMSSW_3_5_6
+cd CMSSW_3_5_6/src
 cmsenv
 
 cvs co -r V01-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
