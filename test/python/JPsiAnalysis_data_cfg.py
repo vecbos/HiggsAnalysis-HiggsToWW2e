@@ -2,12 +2,11 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("JPsiAnalysis")
 
-process.extend(cms.include("RecoEcal/EgammaClusterProducers/data/geometryForClustering.cff"))
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR10_P_V4::All'
+process.GlobalTag.globaltag = 'GR10_P_V5::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")

@@ -35,8 +35,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsGenInfoFiller.h"
 
-#include "FWCore/Framework/interface/TriggerNames.h"
-
 #include <TTree.h>
 #include <string>
 

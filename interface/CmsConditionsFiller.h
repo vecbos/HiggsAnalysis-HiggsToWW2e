@@ -9,7 +9,7 @@
 #include "DataFormats/Common/interface/Handle.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 
-#include "FWCore/Framework/interface/TriggerNames.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 
 #include <TTree.h>
 

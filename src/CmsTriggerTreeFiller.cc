@@ -37,14 +37,14 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 
-#include "FWCore/Framework/interface/TriggerNames.h"
+#include "FWCore/Common/interface/TriggerNames.h"
 
 #include <TTree.h>
 #include <string>
 
 using namespace edm;
-using namespace reco
-;
+using namespace reco;
+
 struct CmsTriggerTreeFillerData {
   CmsTree *cmstree;
 };
@@ -86,7 +86,7 @@ CmsTriggerTreeFiller::writeTriggerToTree (edm::InputTag triggerResultsTag,
 
   vector<bool> Trfired;
   edm::TriggerNames hltNam;
-  hltNam.init(*trh);
+  hltNam = iEvent.triggerNames(*trh);
   std::vector<std::string> hltNames;
   hltNames = hltNam.triggerNames();
   int TrSize = hltNames.size();

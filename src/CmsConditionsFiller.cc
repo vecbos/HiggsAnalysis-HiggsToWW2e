@@ -37,7 +37,7 @@ void CmsConditionsFiller::setHLTResults(edm::InputTag triggerTag,
   try {iEvent.getByLabel(triggerTag,trh);} 
   catch( cms::Exception& ex ) { std::cout << "Trigger results: " << triggerTag << " not found"; }
 
-  hltNames_.init(*trh);
+  hltNames_ = iEvent.triggerNames(*trh);
   HLTinitialised_ = true;
 
   tree->Branch("nHLT", &nHLT_, "nHLT/I");
