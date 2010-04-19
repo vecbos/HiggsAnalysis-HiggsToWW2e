@@ -4,7 +4,7 @@ scramv1 p CMSSW CMSSW_3_6_0
 cd CMSSW_3_6_0/src
 cmsenv
 
-cvs co -r V01-3_6_0 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V02-3_6_0 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 addpkg RecoEgamma/ElectronIdentification
 cvs co -r V01-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
@@ -14,7 +14,7 @@ rm likelihoodPdfsDB_cfi.py
 wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
 cd -
 
-scramv1 b
+scram b
 
 cd HiggsAnalysis/HiggsToWW2e/test/python
 (1) H->WW trees:
@@ -36,9 +36,11 @@ scramv1 p CMSSW CMSSW_3_5_6
 cd CMSSW_3_5_6/src
 cmsenv
 
-cvs co -r V01-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V02-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 addpkg RecoEgamma/ElectronIdentification
 cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+addpkg TrackingTools/IPTools V00-01-05
+checkdeps -a
 
 cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
 cd RecoEgamma/ElectronIdentification/python/
@@ -46,7 +48,7 @@ rm likelihoodPdfsDB_cfi.py
 wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
 cd -
 
-scramv1 b
+scram b
 
 cd HiggsAnalysis/HiggsToWW2e/test/python
 (1) H->WW trees:
