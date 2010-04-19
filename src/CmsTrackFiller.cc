@@ -23,6 +23,7 @@
 
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+#include "TrackingTools/IPTools/interface/IPTools.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -212,10 +213,10 @@ void CmsTrackFiller::findPrimaryVertex(const edm::Event& iEvent) {
 	vMax  = v;
       } 
     }
+    bestPrimaryVertex_ = *vMax;
     x0 = vMax->x();
     y0 = vMax->y();
     z0 = vMax->z();
-
   }
 }
 
@@ -233,6 +234,9 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get track collection: " << collectionTag; }
   const edm::View<reco::Track> *collection = collectionHandle.product();
+
+  try { iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilder_); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get TransientTrackBuilder from Event Setup."; }
 
   privateData_->clearTrkVectors();
 
@@ -397,21 +401,35 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->trackDzError ->push_back(trkRef->dzError());
 
     if ( saveVtxTrk_ ) { 
-      // distance w.r.t. primary vertex
-      privateData_->trackDxyPV->push_back(trkRef->dxy(math::XYZPoint(x0,y0,z0)));
-      //    privateData_->trackD0PV->push_back(trkRef->d0(math::XYZPoint(x0,y0,z0)));
-      privateData_->trackDszPV->push_back(trkRef->dsz(math::XYZPoint(x0,y0,z0)));
-      privateData_->trackDzPV->push_back(trkRef->dz(math::XYZPoint(x0,y0,z0)));
       
-      //    privateData_->trackDxyErrorPV->push_back(trkRef->dxyError(math::XYZPoint(x0,y0,z0)));
-      //    privateData_->trackD0ErrorPV->push_back(trkRef->d0Error(math::XYZPoint(x0,y0,z0)));
-      //    privateData_->trackDszErrorPV->push_back(trkRef->dszError(math::XYZPoint(x0,y0,z0)));
-      //    privateData_->trackDzErrorPV->push_back(trkRef->dzError(math::XYZPoint(x0,y0,z0)));
+      GlobalVector direction(trkRef->px(), trkRef->py(), trkRef->pz());
+      TransientTrack tt = trackBuilder_->build(&(*trkRef));
+
+      std::pair<bool,Measurement1D> sgnImpPar3D = IPTools::signedImpactParameter3D(tt,direction,bestPrimaryVertex_);
+
+      if( sgnImpPar3D.first ) {
+        privateData_->impactPar3D->push_back(sgnImpPar3D.second.value());
+        privateData_->impactPar3DError->push_back(sgnImpPar3D.second.error());
+      } else {
+        privateData_->impactPar3D->push_back(-1.);
+        privateData_->impactPar3DError->push_back(-1.);
+      }
+
+      std::pair<bool,Measurement1D> sgnTransvImpPar = IPTools::signedTransverseImpactParameter(tt,direction,bestPrimaryVertex_);
+
+      if( sgnTransvImpPar.first ) {
+        privateData_->transvImpactPar->push_back(sgnTransvImpPar.second.value());
+        privateData_->transvImpactParError->push_back(sgnTransvImpPar.second.error());
+      } else {
+        privateData_->transvImpactPar->push_back(-1.);
+        privateData_->transvImpactParError->push_back(-1.);
+      }
+
     } else {
-      privateData_->trackDxyPV->push_back(-1.);
-      //    privateData_->trackD0PV->push_back(-1.);
-      privateData_->trackDszPV->push_back(-1.);
-      privateData_->trackDzPV->push_back(-1.);
+      privateData_->impactPar3D->push_back(-1.);
+      privateData_->impactPar3DError->push_back(-1.);
+      privateData_->transvImpactPar->push_back(-1.);
+      privateData_->transvImpactParError->push_back(-1.);
     }
 
   } else {
@@ -464,16 +482,10 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->trackDzError ->push_back(-1.);
 
     // distance w.r.t. primary vertex
-    privateData_->trackDxyPV->push_back(-1.);
-    //    privateData_->trackD0PV->push_back(-1.);
-    privateData_->trackDszPV->push_back(-1.);
-    privateData_->trackDzPV->push_back(-1.);
-
-//     privateData_->trackDxyErrorPV->push_back(-1.);
-//     privateData_->trackD0ErrorPV->push_back(-1.);
-//     privateData_->trackDszErrorPV->push_back(-1.);
-//     privateData_->trackDzErrorPV->push_back(-1.);
-
+    privateData_->impactPar3D->push_back(-1.);
+    privateData_->impactPar3DError->push_back(-1.);
+    privateData_->transvImpactPar->push_back(-1.);
+    privateData_->transvImpactParError->push_back(-1.);
   }
 
 }
@@ -528,9 +540,10 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"trackDszError"+colSuffix).c_str(), *privateData_->trackDszError, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackDzError"+colSuffix).c_str(),  *privateData_->trackDzError, nCandString.c_str(), 0, "Reco");
 
-  cmstree->column((colPrefix+"trackDxyPV"+colSuffix).c_str(), *privateData_->trackDxyPV, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDszPV"+colSuffix).c_str(), *privateData_->trackDszPV, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDzPV"+colSuffix).c_str(),  *privateData_->trackDzPV, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"impactPar3D"+colSuffix).c_str(), *privateData_->impactPar3D, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"impactPar3DError"+colSuffix).c_str(), *privateData_->impactPar3DError, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"transvImpactPar"+colSuffix).c_str(), *privateData_->transvImpactPar, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"transvImpactParError"+colSuffix).c_str(), *privateData_->transvImpactParError, nCandString.c_str(), 0, "Reco");
 
   cmstree->column((colPrefix+"trackVx"+colSuffix).c_str(),  *privateData_->trackVx, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackVy"+colSuffix).c_str(),  *privateData_->trackVy, nCandString.c_str(), 0, "Reco");
@@ -619,9 +632,10 @@ void CmsTrackFillerData::initialise() {
   trackD0Error = new vector<float>;
   trackDszError = new vector<float>;
   trackDzError = new vector<float>;
-  trackDxyPV = new vector<float>;
-  trackDszPV = new vector<float>;
-  trackDzPV = new vector<float>;
+  impactPar3D = new vector<float>;
+  impactPar3DError = new vector<float>;
+  transvImpactPar = new vector<float>;
+  transvImpactParError = new vector<float>;
   trackVx = new vector<float>;
   trackVy = new vector<float>;
   trackVz = new vector<float>;
@@ -683,6 +697,10 @@ void CmsTrackFillerData::clearTrkVectors() {
   trackDzError ->clear();
   trackValidHits->clear();
   trackLostHits ->clear();
+  impactPar3D->clear();
+  impactPar3DError->clear();
+  transvImpactPar->clear();
+  transvImpactParError->clear();
   trackVx->clear();
   trackVy->clear();
   trackVz->clear();

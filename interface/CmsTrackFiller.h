@@ -22,6 +22,8 @@
 #include "DataFormats/TrackReco/interface/DeDxData.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include "DataFormats/TrackReco/interface/HitPattern.h"
 
@@ -47,8 +49,7 @@ struct CmsTrackFillerData {
   vector<float> *trackVx, *trackVy, *trackVz; 
 
   vector<float> *charge, *pterr, *recHitsSize;
-  vector<float> *trackDxyPV, *trackD0PV, *trackDszPV, *trackDzPV;
-  vector<float> *trackDxyErrorPV, *trackD0ErrorPV, *trackDszErrorPV, *trackDzErrorPV;
+  vector<float> *impactPar3D, *impactPar3DError, *transvImpactPar, *transvImpactParError;
 
   vector<float> *truncatedDeDx, *truncatedDeDxError, *truncatedDeDxNoM;
   vector<float> *medianDeDx, *medianDeDxError, *medianDeDxNoM;
@@ -140,6 +141,7 @@ class CmsTrackFiller {
   edm::Handle< edm::View<reco::Track> > refittedTracksForDeDx_;
   edm::Handle< reco::DeDxDataValueMap >  truncatedEnergyLoss_,  medianEnergyLoss_, harmonic2EnergyLoss_;
   edm::Handle<reco::VertexCollection> primaryVertex_;
+  edm::ESHandle<TransientTrackBuilder> trackBuilder_;
 
   // number of 32 bit integers to store the full pattern
   const static unsigned short PatternSize = 25;
@@ -148,6 +150,7 @@ class CmsTrackFiller {
   const static unsigned short HitSize = 11;    
 
   // Primary Vertex in point format
+  reco::Vertex bestPrimaryVertex_;
   float x0, y0, z0;
 };
 
