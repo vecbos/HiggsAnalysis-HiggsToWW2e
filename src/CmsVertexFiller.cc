@@ -112,7 +112,7 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 
   Handle<reco::VertexCollection> primaryVertex;
   try { iEvent.getByLabel(vtxcollectionTag, primaryVertex); }
-  catch(cms::Exception& ex ) {edm::LogWarning("CmsMuonFiller") << "Can't get candidate collection: " << vtxcollectionTag; }
+  catch(cms::Exception& ex ) {edm::LogWarning("CmsVertexFiller") << "Can't get candidate collection: " << vtxcollectionTag; }
 
   if(primaryVertex->size() > 0) {
     for(VertexCollection::const_iterator v = primaryVertex->begin();
