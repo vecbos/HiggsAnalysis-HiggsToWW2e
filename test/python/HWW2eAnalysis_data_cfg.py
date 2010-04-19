@@ -2,11 +2,12 @@ import FWCore.ParameterSet.Config as cms
 
 process = cms.Process("HiggsToWW2e")
 
+process.extend(cms.include("RecoEcal/EgammaClusterProducers/data/geometryForClustering.cff"))
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR10_P_V5::All'
+process.GlobalTag.globaltag = 'GR10_P_V4::All'
 
 # --- common code to comput gg fusion signal k factor
 process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWKFactorProducer_cfi")
