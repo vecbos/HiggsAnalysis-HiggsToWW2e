@@ -42,7 +42,6 @@ process.treeDumper.dumpVertices = True
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveJet1BTag = True
-process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpTree = True
 
 process.options = cms.untracked.PSet(

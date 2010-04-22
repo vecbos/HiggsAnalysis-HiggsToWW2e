@@ -6,7 +6,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.GeometryExtended_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'MC_36Y_V4::All'
+process.GlobalTag.globaltag = 'START3X_V26A::All'
 
 # --- common code to comput gg fusion signal k factor
 process.load("HiggsAnalysis.HiggsToWW2Leptons.HWWKFactorProducer_cfi")
@@ -39,7 +39,6 @@ process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.dumpSCs = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveJet1BTag = True
-process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpTree = True
 
 process.options = cms.untracked.PSet(

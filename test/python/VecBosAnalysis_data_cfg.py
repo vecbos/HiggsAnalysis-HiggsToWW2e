@@ -39,12 +39,11 @@ process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
 process.treeDumper.dumpBCs = True
 process.treeDumper.dumpVertices = True
-process.treeDumper.dumpCaloTowers = True
+process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
 process.treeDumper.saveJet1BTag = True
-process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpTree = True
 
 process.options = cms.untracked.PSet(

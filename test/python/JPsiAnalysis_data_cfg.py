@@ -37,7 +37,6 @@ process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
 process.treeDumper.saveJet1BTag = False
-process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpPFlowElectrons = True
 process.treeDumper.dumpPFpreId = False

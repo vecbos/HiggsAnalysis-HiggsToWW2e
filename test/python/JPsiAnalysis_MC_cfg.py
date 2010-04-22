@@ -6,7 +6,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.GeometryExtended_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'MC_36Y_V4::All'
+process.GlobalTag.globaltag = 'START3X_V26A::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
@@ -35,7 +35,6 @@ process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
 process.treeDumper.saveJet1BTag = False
-process.treeDumper.saveJet2BTag = False
 process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpPFlowElectrons = True
 process.treeDumper.dumpPFpreId = False
