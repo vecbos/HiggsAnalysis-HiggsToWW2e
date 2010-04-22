@@ -1,5 +1,5 @@
 import FWCore.ParameterSet.Config as cms
-from JetMETCorrections.Configuration.DefaultJEC_cff import *
+from JetMETCorrections.Configuration.L2L3Corrections_Summer09_7TeV_cff import *
 
 from HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff import *
 
