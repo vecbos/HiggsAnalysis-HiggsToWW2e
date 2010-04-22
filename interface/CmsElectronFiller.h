@@ -35,12 +35,14 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   // going into the tree.
   vector<int> *trackIndex, *gsfTrackIndex;
 
-  vector<int> *fiducialFlags;
-  vector<int> *recoFlags;
+  vector<int> *fiducialFlags, *recoFlags, *scPixCharge;
 
   vector<int> *superClusterIndex, *PFsuperClusterIndex;
   vector<float> *ecal, *eraw, *esEnergy, *caloEta, *caloPhi;
   vector<int> *energyCorrections;
+
+  vector<float> *convDist, *convDcot, *convRadius, *convX, *convY, *convZ, *convChi2Prob;
+  vector<int> *convTrackIndex;
 
 public:
   void initialise();
@@ -82,6 +84,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
 
+  //! set the general tracks
+  void setGeneralTracks( edm::InputTag generalTracks) { generalTracks_ = generalTracks; }
   //! set the superclusters for ECAL barrel
   void setEcalBarrelSuperClusters( edm::InputTag EcalBarrelSuperClusters) { EcalBarrelSuperClusters_ = EcalBarrelSuperClusters; }
   //! set the superclusters for ECAL endcap
@@ -126,6 +130,7 @@ class CmsElectronFiller : public CmsCandidateFiller {
   CmsElectronFillerData *privateData_;
   edm::InputTag matchMap_;
 
+  edm::InputTag generalTracks_;
   edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;
 
   edm::InputTag EcalBarrelRecHits_;
@@ -138,6 +143,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
   edm::InputTag tracksProducer_;
   edm::InputTag calotowersProducer_;
+
+  edm::Handle< reco::TrackCollection > h_tracks;
 
   int barrelSuperClustersSize;
 

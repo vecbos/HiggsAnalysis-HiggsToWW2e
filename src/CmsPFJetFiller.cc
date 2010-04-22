@@ -66,6 +66,7 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->neutralMultiplicity;
   delete privateData_->chargedMultiplicity;
   delete privateData_->muonMultiplicity;
+  delete privateData_->uncorrEnergy;
 
 }
 
@@ -77,14 +78,23 @@ CmsPFJetFiller::~CmsPFJetFiller() {
 // Set boolean control options for quantities that are written out
 
 void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
-					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					 const std::string &columnPrefix, const std::string &columnSuffix,
-					 bool dumpData) {
+                                           const edm::Event& iEvent, const edm::EventSetup& iSetup,
+                                           const std::string &columnPrefix, const std::string &columnSuffix,
+                                           bool dumpData,
+                                           edm::InputTag uncorrectedCollectionTag) {
 
   edm::Handle< edm::View<reco::Candidate> > collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
+
+  const edm::View<reco::Candidate> *uncorrectedCollection = 0;
+  if(uncorrectedCollectionTag.label() != std::string("")) {
+    edm::Handle< edm::View<reco::Candidate> > uncorrectedCollectionHandle;
+    try { iEvent.getByLabel(uncorrectedCollectionTag, uncorrectedCollectionHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << collectionTag; }
+    uncorrectedCollection = uncorrectedCollectionHandle.product();
+  }
 
   privateData_->clearTrkVectors();
 
@@ -115,29 +125,45 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
       // em, had fractions
       const PFJet *thisPFJet = dynamic_cast< const PFJet * > ( &(*cand) );
-	if( thisPFJet != 0 ) { 
-	  privateData_->chargedHadronEnergy->push_back( thisPFJet->chargedHadronEnergy() );
-	  privateData_->neutralHadronEnergy->push_back( thisPFJet->neutralHadronEnergy() );
-	  privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
-	  privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
-	  privateData_->neutralMultiplicity->push_back( thisPFJet->neutralMultiplicity() );
-	  privateData_->chargedMultiplicity->push_back( thisPFJet->chargedMultiplicity() );
-	  privateData_->muonMultiplicity->push_back( thisPFJet->muonMultiplicity() );
-	}
-	else {
-	  privateData_->chargedHadronEnergy->push_back( -1. );
-	  privateData_->neutralHadronEnergy->push_back( -1. );
-	  privateData_->chargedEmEnergy->push_back( -1. );
-	  privateData_->neutralEmEnergy->push_back( -1. );
-	  privateData_->neutralMultiplicity->push_back( -1. );
-	  privateData_->chargedMultiplicity->push_back( -1. );
-	  privateData_->muonMultiplicity->push_back( -1. );
-	}
+      if( thisPFJet != 0 ) { 
+        privateData_->chargedHadronEnergy->push_back( thisPFJet->chargedHadronEnergy() );
+        privateData_->neutralHadronEnergy->push_back( thisPFJet->neutralHadronEnergy() );
+        privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
+        privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
+        privateData_->neutralMultiplicity->push_back( thisPFJet->neutralMultiplicity() );
+        privateData_->chargedMultiplicity->push_back( thisPFJet->chargedMultiplicity() );
+        privateData_->muonMultiplicity->push_back( thisPFJet->muonMultiplicity() );
+      }
+      else {
+        privateData_->chargedHadronEnergy->push_back( -1. );
+        privateData_->neutralHadronEnergy->push_back( -1. );
+        privateData_->chargedEmEnergy->push_back( -1. );
+        privateData_->neutralEmEnergy->push_back( -1. );
+        privateData_->neutralMultiplicity->push_back( -1. );
+        privateData_->chargedMultiplicity->push_back( -1. );
+        privateData_->muonMultiplicity->push_back( -1. );
+      }
+
+      // if an uncorrected jet collection is provided, save also the uncorrected energy
+      if(uncorrectedCollection) {
+        dumpUncorrEnergy_ = true;
+        float rawEnergy = -1.;
+        edm::View<reco::Candidate>::const_iterator cand2;
+        for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
+          const PFJet *uncorrectedPFJet = dynamic_cast< const PFJet * > ( &(*cand2) );
+          // corrected and uncorrected jets differ only for jet PT 
+          if( thisPFJet->neutralEmEnergy() == uncorrectedPFJet->neutralEmEnergy() ) {
+            rawEnergy = uncorrectedPFJet->energy();
+            break;
+          }
+        }
+        privateData_->uncorrEnergy->push_back(rawEnergy);
+      } else dumpUncorrEnergy_ = false;
 
     }
   }
   else {
-  *(privateData_->ncand) = 0;
+    *(privateData_->ncand) = 0;
   }
   
   // The class member vectors containing the relevant quantities 
@@ -172,6 +198,9 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"neutralMultiplicity"+colSuffix).c_str(), *privateData_->neutralMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chargedMultiplicity"+colSuffix).c_str(), *privateData_->chargedMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"muonMultiplicity"+colSuffix).c_str(), *privateData_->muonMultiplicity, nCandString.c_str(), 0, "Reco");
+  if(dumpUncorrEnergy_) {
+    cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
+  }
 
 }
 
@@ -191,6 +220,7 @@ void CmsPFJetFillerData::initialise() {
   neutralMultiplicity = new vector<float>;
   chargedMultiplicity = new vector<float>;
   muonMultiplicity = new vector<float>;
+  uncorrEnergy = new vector<float>;
 
 }
 
@@ -204,5 +234,6 @@ void CmsPFJetFillerData::clearTrkVectors() {
   neutralMultiplicity->clear();
   chargedMultiplicity->clear();
   muonMultiplicity->clear();
+  uncorrEnergy->clear();
 
 }

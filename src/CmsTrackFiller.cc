@@ -16,11 +16,12 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
+#include "MagneticField/Engine/interface/MagneticField.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
-
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
-
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "TrackingTools/IPTools/interface/IPTools.h"
@@ -127,15 +128,6 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->pz;
   delete privateData_->trackNormalizedChi2;
   delete privateData_->qualityMask;
-  delete privateData_->trackDxy;
-  delete privateData_->trackD0;
-  delete privateData_->trackDsz;
-  delete privateData_->trackDz;
-  delete privateData_->trackDxyError;
-  delete privateData_->trackD0Error;
-  delete privateData_->trackDszError;
-  delete privateData_->trackDzError;
-  delete privateData_->trackValidHits;
   delete privateData_->trackLostHits;
   delete privateData_->trackVx;
   delete privateData_->trackVy;
@@ -151,10 +143,8 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->harmonic2DeDxError;
   delete privateData_->harmonic2DeDxNoM;
 
-  delete privateData_->isPixB1;
-  delete privateData_->isPixB2;
-  delete privateData_->isPixE1;
-  delete privateData_->isPixE2;
+  delete privateData_->pixelHits;
+  delete privateData_->expInnerLayers;
   delete privateData_->numberOfValidPixelBarrelHits;
   delete privateData_->numberOfValidPixelEndcapHits;
   delete privateData_->numberOfValidStripTIBHits;
@@ -364,11 +354,18 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     
     privateData_->recHitsSize->push_back(trkRef->recHitsSize());
     
+    // conversions rejection
     const HitPattern trackerPattern = trkRef->hitPattern();
-    privateData_->isPixB1->push_back(hasValidHitInNthPixelBarrel(1,trackerPattern));
-    privateData_->isPixB2->push_back(hasValidHitInNthPixelBarrel(2,trackerPattern));
-    privateData_->isPixE1->push_back(hasValidHitInNthPixelEndcap(1,trackerPattern));
-    privateData_->isPixE2->push_back(hasValidHitInNthPixelEndcap(2,trackerPattern));
+
+    int isPixB1 = (hasValidHitInNthPixelBarrel(1,trackerPattern)) ? 1 : 0;
+    int isPixB2 = (hasValidHitInNthPixelBarrel(2,trackerPattern)) ? 1 : 0;
+    int isPixE1 = (hasValidHitInNthPixelEndcap(1,trackerPattern)) ? 1 : 0;
+    int isPixE2 = (hasValidHitInNthPixelEndcap(2,trackerPattern)) ? 1 : 0;
+
+    int packed_sel = (isPixB1 << 3) | (isPixB2 << 2) | (isPixE1 << 1) | isPixE2;
+
+    privateData_->pixelHits->push_back(packed_sel);
+
     privateData_->numberOfValidPixelBarrelHits->push_back(trackerPattern.numberOfValidPixelBarrelHits());
     privateData_->numberOfValidPixelEndcapHits->push_back(trackerPattern.numberOfValidPixelEndcapHits());
     privateData_->numberOfValidStripTIBHits->push_back(trackerPattern.numberOfValidStripTIBHits());
@@ -376,6 +373,10 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->numberOfValidStripTOBHits->push_back(trackerPattern.numberOfValidStripTOBHits());
     privateData_->numberOfValidStripTECHits->push_back(trackerPattern.numberOfValidStripTECHits());
     
+    const HitPattern innerPattern = trkRef->trackerExpectedHitsInner();
+    int expInnerLayers = innerPattern.numberOfHits();
+    privateData_->expInnerLayers->push_back(expInnerLayers);
+
     // track quality
     privateData_->charge->push_back(trkRef->charge());
     privateData_->pterr->push_back(trkRef->ptError());
@@ -388,17 +389,6 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->trackVx ->push_back(trkRef->vx());
     privateData_->trackVy ->push_back(trkRef->vy());
     privateData_->trackVz ->push_back(trkRef->vz());
-
-    // distance w.r.t. (0,0,0)
-    privateData_->trackDxy->push_back(trkRef->dxy());
-    privateData_->trackD0 ->push_back(trkRef->d0());
-    privateData_->trackDsz->push_back(trkRef->dsz());
-    privateData_->trackDz->push_back(trkRef->dz());
-
-    privateData_->trackDxyError->push_back(trkRef->dxyError());
-    privateData_->trackD0Error ->push_back(trkRef->d0Error());
-    privateData_->trackDszError->push_back(trkRef->dszError());
-    privateData_->trackDzError ->push_back(trkRef->dzError());
 
     if ( saveVtxTrk_ ) { 
       
@@ -470,17 +460,6 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->trackVy ->push_back(-1.);
     privateData_->trackVz ->push_back(-1.);
 
-    // distance w.r.t. (0,0,0)
-    privateData_->trackDxy->push_back(-1.);
-    privateData_->trackD0 ->push_back(-1.);
-    privateData_->trackDsz->push_back(-1.);
-    privateData_->trackDz ->push_back(-1.);
-
-    privateData_->trackDxyError->push_back(-1.);
-    privateData_->trackD0Error ->push_back(-1.);
-    privateData_->trackDszError->push_back(-1.);
-    privateData_->trackDzError ->push_back(-1.);
-
     // distance w.r.t. primary vertex
     privateData_->impactPar3D->push_back(-1.);
     privateData_->impactPar3DError->push_back(-1.);
@@ -531,15 +510,6 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"trackNormalizedChi2"+colSuffix).c_str(), *privateData_->trackNormalizedChi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"qualityMask"+colSuffix).c_str(), *privateData_->qualityMask, nCandString.c_str(), 0, "Reco");
 
-  cmstree->column((colPrefix+"trackDxy"+colSuffix).c_str(), *privateData_->trackDxy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackD0"+colSuffix).c_str(),  *privateData_->trackD0, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDsz"+colSuffix).c_str(), *privateData_->trackDsz, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDz"+colSuffix).c_str(),  *privateData_->trackDz, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDxyError"+colSuffix).c_str(), *privateData_->trackDxyError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackD0Error"+colSuffix).c_str(),  *privateData_->trackD0Error, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDszError"+colSuffix).c_str(), *privateData_->trackDszError, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDzError"+colSuffix).c_str(),  *privateData_->trackDzError, nCandString.c_str(), 0, "Reco");
-
   cmstree->column((colPrefix+"impactPar3D"+colSuffix).c_str(), *privateData_->impactPar3D, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"impactPar3DError"+colSuffix).c_str(), *privateData_->impactPar3DError, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"transvImpactPar"+colSuffix).c_str(), *privateData_->transvImpactPar, nCandString.c_str(), 0, "Reco");
@@ -565,11 +535,8 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
     
   cmstree->column((colPrefix+"recHitsSize"+colSuffix).c_str(), *privateData_->recHitsSize, nCandString.c_str(), 0, "Reco");
 
-  cmstree->column((colPrefix+"isPixB1"+colSuffix).c_str(), *privateData_->isPixB1, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"isPixB2"+colSuffix).c_str(), *privateData_->isPixB2, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"isPixE1"+colSuffix).c_str(), *privateData_->isPixE1, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"isPixE2"+colSuffix).c_str(), *privateData_->isPixE2, nCandString.c_str(), 0, "Reco");
-
+  cmstree->column((colPrefix+"pixelHits"+colSuffix).c_str(), *privateData_->pixelHits, nCandString.c_str(), 0, "Reco");  
+  cmstree->column((colPrefix+"expInnerLayers"+colSuffix).c_str(), *privateData_->expInnerLayers, nCandString.c_str(), 0, "Reco");  
   cmstree->column((colPrefix+"numberOfValidPixelBarrelHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelBarrelHits, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"numberOfValidPixelEndcapHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelEndcapHits, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"numberOfValidStripTIBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIBHits, nCandString.c_str(), 0, "Reco");
@@ -624,14 +591,6 @@ void CmsTrackFillerData::initialise() {
   trackLostHits  = new vector<float>;
   trackNormalizedChi2 = new vector<float>;
   qualityMask = new vector<int>;
-  trackDxy = new vector<float>;
-  trackD0 = new vector<float>;
-  trackDsz = new vector<float>;
-  trackDz = new vector<float>;
-  trackDxyError = new vector<float>;
-  trackD0Error = new vector<float>;
-  trackDszError = new vector<float>;
-  trackDzError = new vector<float>;
   impactPar3D = new vector<float>;
   impactPar3DError = new vector<float>;
   transvImpactPar = new vector<float>;
@@ -648,10 +607,8 @@ void CmsTrackFillerData::initialise() {
   harmonic2DeDx = new vector<float>;
   harmonic2DeDxError = new vector<float>;
   harmonic2DeDxNoM = new vector<float>;
-  isPixB1 = new vector<bool>;
-  isPixB2 = new vector<bool>;
-  isPixE1 = new vector<bool>;
-  isPixE2 = new vector<bool>;
+  pixelHits = new vector<int>;
+  expInnerLayers = new vector<int>;
   numberOfValidPixelBarrelHits = new vector<int>;
   numberOfValidPixelEndcapHits = new vector<int>;
   numberOfValidStripTIBHits = new vector<int>;
@@ -687,14 +644,6 @@ void CmsTrackFillerData::clearTrkVectors() {
   trackLostHits->clear();
   trackNormalizedChi2->clear();
   qualityMask->clear();
-  trackDxy->clear();
-  trackD0 ->clear();
-  trackDsz->clear();
-  trackDz ->clear();
-  trackDxyError->clear();
-  trackD0Error ->clear();
-  trackDszError->clear();
-  trackDzError ->clear();
   trackValidHits->clear();
   trackLostHits ->clear();
   impactPar3D->clear();
@@ -713,10 +662,8 @@ void CmsTrackFillerData::clearTrkVectors() {
   harmonic2DeDx->clear();
   harmonic2DeDxError->clear();
   harmonic2DeDxNoM->clear();
-  isPixB1->clear();
-  isPixB2->clear();
-  isPixE1->clear();
-  isPixE2->clear();
+  pixelHits->clear();
+  expInnerLayers->clear();
   numberOfValidPixelBarrelHits->clear();
   numberOfValidPixelEndcapHits->clear();
   numberOfValidStripTIBHits->clear();

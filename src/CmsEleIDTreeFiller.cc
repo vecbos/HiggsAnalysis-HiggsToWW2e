@@ -70,8 +70,6 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->dr04HcalTowerSumEt;
   delete privateData_->scBasedEcalSum03;
   delete privateData_->scBasedEcalSum04;
-  delete privateData_->scHaloBasedEcalSum03;
-  delete privateData_->scHaloBasedEcalSum04;
   delete privateData_->eleIdCuts;
   delete privateData_->eleLik;
   delete privateData_->pflowMVA;
@@ -189,14 +187,14 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[5] );
 
   int packed_sel = -1;
-  int eleIdLoose = ( eleIdLooseVal[electronRef] ) ? 1 : 0;
-  int eleIdTight = ( eleIdTightVal[electronRef] ) ? 1 : 0;
-  int eleIdRobustLoose = ( eleIdRobustLooseVal[electronRef] ) ? 1 : 0;
-  int eleIdRobustTight = ( eleIdRobustTightVal[electronRef] ) ? 1 : 0;
-  int eleIdRobustHighEnergy = ( eleIdRobustHighEnergyVal[electronRef] ) ? 1 : 0;
+  int eleIdLoose = eleIdLooseVal[electronRef];
+  int eleIdTight = eleIdTightVal[electronRef];
+  int eleIdRobustLoose = eleIdRobustLooseVal[electronRef];
+  int eleIdRobustTight = eleIdRobustTightVal[electronRef];
+  int eleIdRobustHighEnergy = eleIdRobustHighEnergyVal[electronRef];
 
-  packed_sel = ( eleIdLoose << 4 ) | ( eleIdTight << 3 ) |
-    ( eleIdRobustLoose << 2 ) | ( eleIdRobustTight << 1 ) | eleIdRobustHighEnergy;
+  packed_sel = ( eleIdLoose << 12 ) | ( eleIdTight << 9 ) |
+    ( eleIdRobustLoose << 6 ) | ( eleIdRobustTight << 3 ) | eleIdRobustHighEnergy;
 
   privateData_->eleIdCuts->push_back( packed_sel );
   privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
@@ -221,18 +219,10 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   float scBasedEcalSum03 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scBasedEcalSum03->push_back(scBasedEcalSum03);
   
-  scBasedIsolation.excludeHalo(true);
-  float scHaloBasedEcalSum03 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
-  privateData_->scHaloBasedEcalSum03->push_back(scHaloBasedEcalSum03);
-
   scBasedIsolation.setExtRadius(0.4);
   scBasedIsolation.excludeHalo(false);
   float scBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scBasedEcalSum04->push_back(scBasedEcalSum04);
-
-  scBasedIsolation.excludeHalo(true);
-  float scHaloBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
-  privateData_->scHaloBasedEcalSum04->push_back(scHaloBasedEcalSum04);
 
 }
 
@@ -243,6 +233,8 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"classification"+colSuffix).c_str(), *privateData_->classification, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"standardClassification"+colSuffix).c_str(), *privateData_->standardClassification, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"fbrem"+colSuffix).c_str(), *privateData_->fbrem, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nbrems"+colSuffix).c_str(), *privateData_->nbrems, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hOverE"+colSuffix).c_str(), *privateData_->hOverE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eSuperClusterOverP"+colSuffix).c_str(), *privateData_->eSuperClusterOverP, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eSeedOverPout"+colSuffix).c_str(), *privateData_->eSeedOverPout, nCandString.c_str(), 0, "Reco");
@@ -259,8 +251,6 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"dr04HcalTowerSumEt"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scBasedEcalSum03"+colSuffix).c_str(), *privateData_->scBasedEcalSum03, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"scHaloBasedEcalSum03"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"scHaloBasedEcalSum04"+colSuffix).c_str(), *privateData_->scHaloBasedEcalSum04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCuts"+colSuffix).c_str(), *privateData_->eleIdCuts, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
@@ -291,8 +281,6 @@ void CmsEleIDTreeFillerData::initialise() {
   dr04HcalTowerSumEt       = new vector<float>;
   scBasedEcalSum03         = new vector<float>;
   scBasedEcalSum04         = new vector<float>;
-  scHaloBasedEcalSum03     = new vector<float>;
-  scHaloBasedEcalSum04     = new vector<float>;
   eleIdCuts                = new vector<int>;
   eleLik                   = new vector<float>;
   pflowMVA                 = new vector<float>;
@@ -320,8 +308,6 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   dr04HcalTowerSumEt       ->clear();
   scBasedEcalSum03         ->clear();
   scBasedEcalSum04         ->clear();
-  scHaloBasedEcalSum03     ->clear();
-  scHaloBasedEcalSum04     ->clear();
   eleIdCuts                ->clear();
   eleLik                   ->clear();
   pflowMVA                 ->clear();

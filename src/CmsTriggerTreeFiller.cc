@@ -84,21 +84,27 @@ CmsTriggerTreeFiller::writeTriggerToTree (edm::InputTag triggerResultsTag,
       throw cms::Exception("ProductNotValid") << "TriggerResults product not valid";
 
 
-  vector<bool> Trfired;
+  vector<int> Trfired;
   edm::TriggerNames hltNam;
   hltNam = iEvent.triggerNames(*trh);
   std::vector<std::string> hltNames;
   hltNames = hltNam.triggerNames();
   int TrSize = hltNames.size();
-  Trfired.resize(TrSize);
+
+  // use words in 32 bits: use 30/32 bits per word
+  int nWords = (TrSize-1)/30+1;
+  Trfired.resize(nWords);
+  for(int block=0; block<nWords; block++) Trfired[block]=0;
   
   for ( int tr=0; tr<TrSize; ++tr) {
-    Trfired[tr] = false;
-    if ( trh->accept(tr) ) Trfired[tr] = true ;
+    int block = tr/30;
+    int pos = tr%30;
+    int passed = ( trh->accept(tr) ) ? 1 : 0;
+    Trfired[block] = Trfired[block] | (passed << pos);
   }
-  
+
   std::string nTrgString = columnPrefix+"n"+columnSuffix;
-  cmstree->column(nTrgString.c_str(), TrSize, 0, "Reco" );
+  cmstree->column(nTrgString.c_str(), nWords, 0, "Reco" );
   cmstree->column((columnPrefix+"fired"+columnSuffix).c_str(), Trfired, nTrgString.c_str(), 0, "Reco");
 
   return ;

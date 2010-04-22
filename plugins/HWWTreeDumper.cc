@@ -80,7 +80,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveFatRPC_     = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
   saveJetAlpha_   = iConfig.getUntrackedParameter<bool>("saveJetAlpha", false);
   saveJet1BTag_    = iConfig.getUntrackedParameter<bool>("saveJet1BTag", false);
-  saveJet2BTag_    = iConfig.getUntrackedParameter<bool>("saveJet2BTag", false);
 
   //electron pflow
   savePFEleTrk_   = iConfig.getUntrackedParameter<bool>("savePFEleGsfTrk", false);
@@ -124,6 +123,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
   pflowElectronCollection_ = iConfig.getParameter<edm::InputTag>("pflowElectronCollection");
+  photonCollection_        = iConfig.getParameter<edm::InputTag>("photonCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
   ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
@@ -190,7 +190,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   if(dumpMCTruth_) {
 
-    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent, 1000 );
+    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent, 100 );
 
   }
 
@@ -248,6 +248,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveEcal(saveEcal_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.saveFatEcal(saveFatEcal_);
+    treeFill.setGeneralTracks(trackCollection_);
     treeFill.setEcalBarrelSuperClusters(ecalBarrelSCCollection_);
     treeFill.setEcalEndcapSuperClusters(ecalEndcapSCCollection_);
     treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
@@ -287,8 +288,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.setTracks(trackCollection_);
       treeFill.setGsfTracks(gsfTrackCollection_);
       treeFill.setCalotowers(calotowersForIsolationProducer_);
-      treeFill.doTrackBwdPropagation(true);
-      treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, suffix, false);
+      treeFill.doTrackBwdPropagation(false);
+      treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, suffix, false, photonCollection_);
 
       CmsSuperClusterFiller treeFillPF(tree_, 1000);
       suffix = "PFSC";
@@ -464,32 +465,20 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
     std::string prefix("");
-    std::string suffix("AK5CorrJet");
+    std::string suffix("AK5Jet");
     treeRecoFill1.saveCand(saveCand_);
     treeRecoFill1.saveJetExtras(saveJetAlpha_);
     treeRecoFill1.saveJetBTag(saveJet1BTag_);
-    treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false);
-
-
-    CmsJetFiller treeRecoFill2(tree_, jetVertexAlphaCollection2_, true);
-    suffix = "AK5Jet";
-    treeRecoFill2.saveCand(saveCand_);
-    treeRecoFill2.saveJetExtras(saveJetAlpha_);
-    treeRecoFill2.saveJetBTag(saveJet2BTag_);
-    treeRecoFill2.writeCollectionToTree(jetCollection2_, iEvent, iSetup, prefix, suffix, false);
+    treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_);
 
 
     // particle flow jets
     if ( dumpParticleFlowObjects_ ) {  
       CmsPFJetFiller pfJetFiller1(tree_, true);
-      suffix = "AK5PFCorrJet";
-      pfJetFiller1.saveCand(saveCand_);
-      pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
-
-      CmsPFJetFiller pfJetFiller2(tree_, true);
       suffix = "AK5PFJet";
-      pfJetFiller2.saveCand(saveCand_);
-      pfJetFiller2.writeCollectionToTree(PFjetCollection2_, iEvent, iSetup, prefix, suffix, false);
+      pfJetFiller1.saveCand(saveCand_);
+      pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
+
     }
 
     // dump generated JETs

@@ -35,6 +35,7 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
     *softMuonBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags;
+  std::vector<float> *uncorrEnergy;
 
 public:
   void initialise();
@@ -76,7 +77,8 @@ class CmsJetFiller : public CmsCandidateFiller {
   void writeCollectionToTree(edm::InputTag collectionTag,
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
-			     bool dumpData=false);
+			     bool dumpData=false,
+                             edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""));
 
  private:
   
@@ -90,6 +92,8 @@ class CmsJetFiller : public CmsCandidateFiller {
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
   int maxMCTracks_;
+
+  bool dumpUncorrEnergy_;
 
   std::string *trkIndexName_;
 

@@ -43,8 +43,6 @@ struct CmsTrackFillerData {
   vector<float> *px, *py, *pz;
   vector<float> *trackNormalizedChi2;
   vector<int> *qualityMask;
-  vector<float> *trackDxy, *trackD0, *trackDsz, *trackDz;
-  vector<float> *trackDxyError, *trackD0Error, *trackDszError, *trackDzError;
   vector<float> *trackValidHits, *trackLostHits;
   vector<float> *trackVx, *trackVy, *trackVz; 
 
@@ -54,7 +52,7 @@ struct CmsTrackFillerData {
   vector<float> *truncatedDeDx, *truncatedDeDxError, *truncatedDeDxNoM;
   vector<float> *medianDeDx, *medianDeDxError, *medianDeDxNoM;
   vector<float> *harmonic2DeDx, *harmonic2DeDxError, *harmonic2DeDxNoM;
-  vector<bool> *isPixB1, *isPixB2, *isPixE1, *isPixE2;
+  vector<int> *pixelHits, *expInnerLayers;
   vector<int> *numberOfValidPixelBarrelHits, *numberOfValidPixelEndcapHits;
   vector<int> *numberOfValidStripTIBHits, *numberOfValidStripTIDHits, *numberOfValidStripTOBHits, *numberOfValidStripTECHits;
 

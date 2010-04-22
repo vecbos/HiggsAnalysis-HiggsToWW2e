@@ -39,6 +39,8 @@
 <use name=DataFormats/L1GlobalTrigger>
 <use name=CondFormats/L1TObjects>
 <use name=RecoLocalCalo/EcalRecAlgos>
+<use name=RecoVertex/KinematicFitPrimitives>
+<use name=RecoVertex/KinematicFit>
 
 <export>
    <lib name=HiggsAnalysisHiggsToWW2e>	
@@ -84,4 +86,6 @@
    <use name=DataFormats/L1GlobalTrigger>
    <use name=CondFormats/L1TObjects>
    <use name=RecoLocalCalo/EcalRecAlgos>
+   <use name=RecoVertex/KinematicFitPrimitives>
+   <use name=RecoVertex/KinematicFit>
 </export>

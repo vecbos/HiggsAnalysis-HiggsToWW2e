@@ -105,18 +105,18 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
   
   privateData_->cmstree->column(indName.c_str(),pMC.size(),0,theName.c_str());
   privateData_->cmstree->column(("p"+theName).c_str(), pMC, indName.c_str(), 0, theName.c_str());
-  privateData_->cmstree->column(("mass"+theName).c_str(), massMC, indName.c_str(), 0, theName.c_str());
+  //  privateData_->cmstree->column(("mass"+theName).c_str(), massMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("theta"+theName).c_str(), thetaMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("eta"+theName).c_str(), etaMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("phi"+theName).c_str(), phiMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("energy"+theName).c_str(), energyMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("id"+theName).c_str(), idMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("moth"+theName).c_str(), mothMC, indName.c_str(), 0, theName.c_str());
-  privateData_->cmstree->column(("nDau"+theName).c_str(), nDauMC, indName.c_str(), 0, theName.c_str());
+  //  privateData_->cmstree->column(("nDau"+theName).c_str(), nDauMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("status"+theName).c_str(), statusMC, indName.c_str(), 0, theName.c_str());
-  privateData_->cmstree->column(("x"+theName).c_str(), xMC, indName.c_str(), 0, theName.c_str());
-  privateData_->cmstree->column(("y"+theName).c_str(), yMC, indName.c_str(), 0, theName.c_str());
-  privateData_->cmstree->column(("z"+theName).c_str(), zMC, indName.c_str(), 0, theName.c_str());
+  //  privateData_->cmstree->column(("x"+theName).c_str(), xMC, indName.c_str(), 0, theName.c_str());
+  //  privateData_->cmstree->column(("y"+theName).c_str(), yMC, indName.c_str(), 0, theName.c_str());
+  //  privateData_->cmstree->column(("z"+theName).c_str(), zMC, indName.c_str(), 0, theName.c_str());
     
 }
   

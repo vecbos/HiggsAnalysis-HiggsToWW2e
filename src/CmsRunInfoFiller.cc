@@ -46,26 +46,45 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
   Handle<L1GlobalTriggerReadoutRecord> gtReadoutRecord;
   iEvent.getByLabel( "gtDigis", gtReadoutRecord );
 
+  // Technical L1 trigger bits
   const std::vector<bool>& gtTechTrigWord = gtReadoutRecord->technicalTriggerWord();
 
   *(privateData_->nl1Technical) = gtTechTrigWord.size();
   int techBlockSize = gtTechTrigWord.size();
-  cmstree->column("nl1Technical",techBlockSize,0,"L1T");
+
+   // use words in 32 bits: use 30/32 bits per word
+  int nTechWords = (techBlockSize-1)/30+1;
+  privateData_->l1Technical->resize(nTechWords);
+  for(int block=0; block<nTechWords; block++) (*privateData_->l1Technical)[block]=0;
+  cmstree->column("nl1Technical",nTechWords,0,"L1T");
   
   for (unsigned int iBit=0;iBit<gtTechTrigWord.size();++iBit) {
-    privateData_->l1Technical->push_back(gtTechTrigWord[iBit]);
+    int block = iBit/30;
+    int pos = iBit%30;
+    int passed = ( gtTechTrigWord[iBit] ) ? 1 : 0;
+    (*privateData_->l1Technical)[block] |= (passed << pos);
   }
 
   cmstree->column("l1Technical", *privateData_->l1Technical, "nl1Technical", 0, "L1T");
   
+  // Physics L1 trigger bits
   const std::vector<bool>& gtDecisionTrigWord = gtReadoutRecord->decisionWord();
 
   *(privateData_->nl1Global) = gtDecisionTrigWord.size();
   int gtBlockSize = gtDecisionTrigWord.size();
-  cmstree->column("nl1Global",gtBlockSize,0,"L1T");
+
+  // use words in 32 bits: use 30/32 bits per word
+  int nGTWords = (gtBlockSize-1)/30+1;
+  privateData_->l1Global->resize(nGTWords);
+  for(int block=0; block<nGTWords; block++) (*privateData_->l1Global)[block]=0;
+
+  cmstree->column("nl1Global",nGTWords,0,"L1T");
 
   for (unsigned int iBit=0;iBit<gtDecisionTrigWord.size();++iBit) {
-    privateData_->l1Global->push_back(gtDecisionTrigWord[iBit]);
+    int block = iBit/30;
+    int pos = iBit%30;
+    int passed = ( gtDecisionTrigWord[iBit] ) ? 1 : 0;
+    (*privateData_->l1Global)[block] |= (passed << pos);
   }
 
   cmstree->column("l1Global", *privateData_->l1Global, "nl1Global", 0, "L1T");

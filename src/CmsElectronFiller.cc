@@ -31,6 +31,8 @@
 #include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 
 #include "DataFormats/TrackReco/interface/Track.h"
+#include "RecoEgamma/EgammaTools/interface/ConversionFinder.h"
+#include "RecoEgamma/EgammaTools/interface/ConversionInfo.h"
 
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
@@ -40,6 +42,23 @@
 #include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
 #include "DataFormats/DetId/interface/DetId.h"
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
+
+//Kinematic constraint vertex fitter
+#include "CommonTools/Statistics/interface/ChiSquaredProbability.h"
+
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrack.h"
+
+#include "RecoVertex/KinematicFitPrimitives/interface/ParticleMass.h"
+#include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
+#include "RecoVertex/KinematicFitPrimitives/interface/KinematicParticleFactoryFromTransientTrack.h"
+#include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
+#include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
+#include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
+#include "RecoVertex/KinematicFit/interface/KinematicParticleFitter.h"
+#include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
+#include "RecoVertex/KinematicFit/interface/ColinearityKinematicConstraint.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
@@ -120,11 +139,21 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->recoFlags;
   delete privateData_->esEnergy;
   delete privateData_->energyCorrections;
+  delete privateData_->scPixCharge;
 
   delete privateData_->superClusterIndex;
   delete privateData_->PFsuperClusterIndex;
   delete privateData_->trackIndex;
   delete privateData_->gsfTrackIndex;
+
+  delete privateData_->convDist;
+  delete privateData_->convDcot;
+  delete privateData_->convRadius;
+  delete privateData_->convTrackIndex;
+  delete privateData_->convX;
+  delete privateData_->convY;
+  delete privateData_->convZ;
+  delete privateData_->convChi2Prob;
 
   delete privateData_->ncand;
 
@@ -202,6 +231,10 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
+    // for conversions
+    try { iEvent.getByLabel(generalTracks_, h_tracks); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
+
     for(int index = 0; index < (int)collection->size(); index++) {
 
       // fill basic kinematics
@@ -274,13 +307,130 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
     reco::TrackRef closeCtfTrack = electronRef->closestCtfTrackRef();
     if ( closeCtfTrack.isNonnull() ) {
       privateData_->trackIndex->push_back(closeCtfTrack.key());
+      privateData_->scPixCharge->push_back(electronRef->scPixCharge());
     } else {
       privateData_->trackIndex->push_back( -1 );
+      privateData_->scPixCharge->push_back( -999. );
+    }
+
+
+    float convX, convY, convZ, convChi2Prob;
+    convX = convY = convZ = convChi2Prob = 999;
+
+    // for conversion rejection
+    if( h_tracks.isValid() ) {
+      edm::ESHandle<MagneticField> theMagField;
+      iSetup.get<IdealMagneticFieldRecord>().get(theMagField);
+      const MagneticField *magField=&(*theMagField);
+
+      GlobalPoint origin(0.,0.,0.);
+      ConversionFinder finder;
+      ConversionInfo convInfo = finder.getConversionInfo(*electronRef,
+                                                         h_tracks,
+                                                         (magField->inTesla(origin)).mag());
+      
+      privateData_->convDist->push_back(convInfo.dist());
+      privateData_->convDcot->push_back(convInfo.dcot());
+      privateData_->convRadius->push_back(convInfo.radiusOfConversion());
+
+      if( convInfo.conversionPartnerTk().isNonnull() )
+        privateData_->convTrackIndex->push_back(convInfo.conversionPartnerTk().key());
+      else privateData_->convTrackIndex->push_back(-1);
+      
+      if( closeCtfTrack.isNonnull() && convInfo.conversionPartnerTk().isNonnull() && 
+          closeCtfTrack->charge() * convInfo.conversionPartnerTk()->charge() != 1 ) {
+
+        // kinematic fit
+        TransientTrack ttk_l(closeCtfTrack, magField);
+        TransientTrack ttk_r(convInfo.conversionPartnerTk(), magField);
+
+        KinematicParticleFactoryFromTransientTrack pFactory;
+      
+        vector<RefCountedKinematicParticle> particles;
+      
+        float sigma = 0.00000000001;
+        float chi = 0.;
+        float ndf = 0.;
+        float mass = 0.000000511;
+
+        particles.push_back(pFactory.particle (ttk_l,mass,chi,ndf,sigma));
+        particles.push_back(pFactory.particle (ttk_r,mass,chi,ndf,sigma));
+      
+        MultiTrackKinematicConstraint * constr = new ColinearityKinematicConstraint(ColinearityKinematicConstraint::PhiTheta);
+
+        edm::ParameterSet pSet;
+        pSet.addParameter<double>("maxDistance", 0.001);
+        pSet.addParameter<double>("maxOfInitialValue",1.4) ;
+        pSet.addParameter<int>("maxNbrOfIterations", 40);
+
+        bool found = false;
+        float chi2Prob = 999;
+        reco::Vertex *the_vertex = 0;
+        KinematicConstrainedVertexFitter kcvFitter;
+        kcvFitter.setParameters(pSet);
+        RefCountedKinematicTree myTree = kcvFitter.fit(particles, constr);
+        if( myTree->isValid() ) {
+          myTree->movePointerToTheTop();                                                                                
+          RefCountedKinematicParticle the_photon = myTree->currentParticle();                                           
+          if (the_photon->currentState().isValid()){                                                                    
+            //const ParticleMass photon_mass = the_photon->currentState().mass();                                       
+            RefCountedKinematicVertex gamma_dec_vertex;                                                               
+            gamma_dec_vertex = myTree->currentDecayVertex();                                                          
+            if( gamma_dec_vertex->vertexIsValid() || myTree==0 || !myTree->findDecayVertex(gamma_dec_vertex)){                                                                  
+              chi2Prob = ChiSquaredProbability(gamma_dec_vertex->chiSquared(), gamma_dec_vertex->degreesOfFreedom());
+              if (chi2Prob>0.){ // no longer cut here, only ask positive probability here 
+                vector<RefCountedKinematicParticle> daughters = myTree->daughterParticles();
+              
+                the_vertex = new reco::Vertex(reco::Vertex::Point(gamma_dec_vertex->position()),
+                                              //  RecoVertex::convertError(theVertexState.error()), 
+                                              gamma_dec_vertex->error().matrix_new(), 
+                                              gamma_dec_vertex->chiSquared(), gamma_dec_vertex->degreesOfFreedom(), daughters.size() );
+              
+                //TODO should add refitted tracks
+                the_vertex->add(reco::TrackBaseRef(closeCtfTrack));
+                the_vertex->add(reco::TrackBaseRef(convInfo.conversionPartnerTk()));
+                found = true;
+              }
+            }
+          }
+        }
+
+        if(found && the_vertex) {
+          convX = the_vertex->x();
+          convY = the_vertex->y();
+          convZ = the_vertex->z();
+          convChi2Prob = chi2Prob;
+        } 
+      
+      }
+
+      privateData_->convX->push_back(convX);
+      privateData_->convY->push_back(convY);
+      privateData_->convZ->push_back(convZ);
+      privateData_->convChi2Prob->push_back(convChi2Prob);
+
+    } else {
+      privateData_->convDist->push_back(999);
+      privateData_->convDcot->push_back(999);
+      privateData_->convRadius->push_back(999);
+      privateData_->convTrackIndex->push_back(-1);
+      privateData_->convX->push_back(999.);
+      privateData_->convY->push_back(999.);
+      privateData_->convZ->push_back(999.);
+      privateData_->convChi2Prob->push_back(999.);
     }
 
   } else {
     privateData_->gsfTrackIndex->push_back( -1 );
     privateData_->trackIndex->push_back( -1 );
+    privateData_->convDist->push_back(999);
+    privateData_->convDcot->push_back(999);
+    privateData_->convRadius->push_back(999);
+    privateData_->convTrackIndex->push_back(-1);
+    privateData_->convX->push_back(999.);
+    privateData_->convY->push_back(999.);
+    privateData_->convZ->push_back(999.);
+    privateData_->convChi2Prob->push_back(999.);
   }
     
 }
@@ -293,6 +443,15 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
 
   cmstree->column((colPrefix+"trackIndex"+colSuffix).c_str(),  *privateData_->trackIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"gsfTrackIndex"+colSuffix).c_str(),  *privateData_->gsfTrackIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convDist"+colSuffix).c_str(),  *privateData_->convDist, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convDcot"+colSuffix).c_str(),  *privateData_->convDcot, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convRadius"+colSuffix).c_str(),  *privateData_->convRadius, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convTrackIndex"+colSuffix).c_str(),  *privateData_->convTrackIndex, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convX"+colSuffix).c_str(),  *privateData_->convX, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convY"+colSuffix).c_str(),  *privateData_->convY, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convZ"+colSuffix).c_str(),  *privateData_->convZ, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"convChi2Prob"+colSuffix).c_str(),  *privateData_->convChi2Prob, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"scPixCharge"+colSuffix).c_str(),  *privateData_->scPixCharge, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -395,6 +554,16 @@ void CmsElectronFillerData::initialise() {
   PFsuperClusterIndex = new vector<int>;
   trackIndex = new vector<int>;
   gsfTrackIndex = new vector<int>;
+  convDist = new vector<float>;
+  convDcot = new vector<float>;
+  convRadius = new vector<float>;
+  convTrackIndex = new vector<int>;
+  convX = new vector<float>;
+  convY = new vector<float>;
+  convZ = new vector<float>;
+  convChi2Prob = new vector<float>;
+
+  scPixCharge = new vector<int>;
 
 }
 
@@ -411,5 +580,15 @@ void CmsElectronFillerData::clearTrkVectors() {
   PFsuperClusterIndex->clear();
   trackIndex->clear();
   gsfTrackIndex->clear();
+  convDist->clear();
+  convDcot->clear();
+  convRadius->clear();
+  convTrackIndex->clear();
+  convX->clear();
+  convY->clear();
+  convZ->clear();
+  convChi2Prob->clear();
+  
+  scPixCharge->clear();
 
 }

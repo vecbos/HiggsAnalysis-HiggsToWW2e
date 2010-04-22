@@ -21,9 +21,12 @@
 #include "MagneticField/Engine/interface/MagneticField.h"
 #include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
 
+#include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "RecoEgamma/EgammaIsolationAlgos/interface/EgammaTowerIsolation.h"
 #include "RecoEgamma/EgammaTools/interface/ECALPositionCalculator.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+
+#include "MyAnalysis/IsolationTools/interface/SuperClusterHitsEcalIsolation.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
@@ -85,6 +88,9 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->covIEtaIEta;
   delete privateData_->covIEtaIPhi;
   delete privateData_->covIPhiIPhi;
+  delete privateData_->e1x5;
+  delete privateData_->e2x5Max;
+  delete privateData_->e4SwissCross;
   delete privateData_->trackIndex;
   delete privateData_->trackDeltaR;
   delete privateData_->trackDeltaPhi;
@@ -106,6 +112,14 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->sevClosProbl;
   delete privateData_->idClosProbl;
   delete privateData_->fracClosProbl;
+  delete privateData_->scBasedEcalSum03;
+  delete privateData_->scBasedEcalSum04;
+  delete privateData_->ecalRecHitSumEtConeDR03;
+  delete privateData_->hcalTowerSumEtConeDR03;
+  delete privateData_->trkSumPtSolidConeDR03;
+  delete privateData_->ecalRecHitSumEtConeDR04;
+  delete privateData_->hcalTowerSumEtConeDR04;
+  delete privateData_->trkSumPtSolidConeDR04;
 }
 
 
@@ -119,13 +133,22 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
 void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
 						  const edm::Event& iEvent, const edm::EventSetup& iSetup,
 						  const std::string &columnPrefix, const std::string &columnSuffix,
-						  bool dumpData) 
+						  bool dumpData,
+                                                  edm::InputTag photonCollectionTag) 
 {
   
   Handle<SuperClusterCollection> collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get SC Collection: " << collectionTag; }
   const SuperClusterCollection *collection = collectionHandle.product();
+
+  const edm::View<reco::Candidate> *photonCollection = 0;
+  if(photonCollectionTag.label() != std::string("")) {
+    edm::Handle< edm::View<reco::Candidate> > photonCollectionHandle;
+    try { iEvent.getByLabel(photonCollectionTag, photonCollectionHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get candidate collection: " << photonCollectionTag; }
+    photonCollection = photonCollectionHandle.product();
+  }
 
   privateData_->clear();
   
@@ -172,14 +195,17 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       for(cand=collection->begin(); cand!=collection->end(); cand++) {
         // fill basic kinematics
         writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
+        // fill track-match variables
         if ( doTrackProp_ ) {
           // fill CTF track - SC match
           writeTrackInfo(&(*cand),iEvent,iSetup,&(*tracks_),track);
           // fill GSF track - SC match
           writeTrackInfo(&(*cand),iEvent,iSetup,&(*gsfTracks_),gsftrack);
+          // fill trajectory propagation at vertex
+          writeSCVtxPropagationInfo(&(*cand),iEvent,iSetup);
         }
-        // fill trajectory propagation at vertex
-        writeSCVtxPropagationInfo(&(*cand),iEvent,iSetup);
+        // fill photon candidates variables
+        if(photonCollection) writePhotonInfo(&(*cand),photonCollection);
       }
     }
   else {
@@ -196,8 +222,11 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
   treeSCInfo(columnPrefix,columnSuffix);
-  if ( doTrackProp_ ) treeTrackInfo(columnPrefix,columnSuffix);
-  treeSCVtxPropagationInfo(columnPrefix,columnSuffix);
+  if ( doTrackProp_ ) {
+    treeTrackInfo(columnPrefix,columnSuffix);
+    treeSCVtxPropagationInfo(columnPrefix,columnSuffix);
+  }
+  if ( photonCollection ) treePhotonInfo(columnPrefix,columnSuffix);
 
   if(dumpData) cmstree->dumpData();
 
@@ -248,12 +277,21 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       float e5x5 = EcalClusterTools::e5x5( *theSeed, &(*rechits), topology );
       float e2x2 = EcalClusterTools::e2x2( *theSeed, &(*rechits), topology );
       float e2nd = EcalClusterTools::e2nd( *theSeed, &(*rechits) );
+      float e1x5 = EcalClusterTools::e1x5( *theSeed, &(*rechits), topology );
+      float e2x5Max = EcalClusterTools::e2x5Max( *theSeed, &(*rechits), topology );
+      float e4SwissCross = ( EcalClusterTools::eLeft( *theSeed, &(*rechits), topology ) +
+                             EcalClusterTools::eRight( *theSeed, &(*rechits), topology ) +
+                             EcalClusterTools::eTop( *theSeed, &(*rechits), topology ) +
+                             EcalClusterTools::eBottom( *theSeed, &(*rechits), topology ) );
 
       privateData_->e3x3->push_back(e3x3);
       privateData_->e5x5->push_back(e5x5);
       privateData_->eMax->push_back(eMax);
       privateData_->e2x2->push_back(e2x2);
       privateData_->e2nd->push_back(e2nd);
+      privateData_->e1x5->push_back(e1x5);
+      privateData_->e2x5Max->push_back(e2x5Max);
+      privateData_->e4SwissCross->push_back(e4SwissCross);
 
       // local covariances: instead of using absolute eta/phi it counts crystals normalised
       std::vector<float> vLocCov = EcalClusterTools::localCovariances( *theSeed, &(*rechits), topology );
@@ -274,8 +312,6 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->chi2->push_back((float)seedRH->chi2());
       privateData_->recoFlag->push_back((int)seedRH->recoFlag());
       privateData_->seedEnergy->push_back((float)maxRH.second);
-
-      
 
       // channel status
       edm::ESHandle<EcalChannelStatus> pChannelStatus;
@@ -319,6 +355,9 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->covIEtaIEta->push_back(-1.);
     privateData_->covIEtaIPhi->push_back(-1.);
     privateData_->covIPhiIPhi->push_back(-1.);
+    privateData_->e1x5->push_back(-1);
+    privateData_->e2x5Max->push_back(-1);
+    privateData_->e4SwissCross->push_back(-1);
     privateData_->time->push_back(-999.);
     privateData_->chi2->push_back(-999.);
     privateData_->recoFlag->push_back(-1);
@@ -344,6 +383,20 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
 
   delete towerIso1;
   delete towerIso2;
+
+  // calculate isolations
+
+  // ecal isolation with SC rechits removal
+  SuperClusterHitsEcalIsolation scBasedIsolation(EBRecHits,EERecHits);
+  scBasedIsolation.setExtRadius(0.3);
+  scBasedIsolation.excludeHalo(false);
+  float scBasedEcalSum03 = scBasedIsolation.getSum(iEvent,iSetup,&(*cand));
+  privateData_->scBasedEcalSum03->push_back(scBasedEcalSum03);
+  
+  scBasedIsolation.setExtRadius(0.4);
+  scBasedIsolation.excludeHalo(false);
+  float scBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*cand));
+  privateData_->scBasedEcalSum04->push_back(scBasedEcalSum04);
 
 }
 
@@ -566,6 +619,39 @@ void CmsSuperClusterFiller::writeSCVtxPropagationInfo(const reco::SuperCluster *
 
 }
 
+void CmsSuperClusterFiller::writePhotonInfo(const SuperCluster *cand, 
+                                            const edm::View<reco::Candidate> *photonCollection) {
+  float ecalIso03, hcalIso03, trkIso03; 
+  float ecalIso04, hcalIso04, trkIso04; 
+  ecalIso03 = hcalIso03 = trkIso03 = ecalIso04 = hcalIso04 = trkIso04 = -999.;
+  if(photonCollection) {
+    edm::View<reco::Candidate>::const_iterator cand2;
+    for(cand2=photonCollection->begin(); cand2!=photonCollection->end(); cand2++) {
+      const Photon *photon = dynamic_cast< const Photon * > ( &(*cand2) );
+      reco::SuperClusterRef photonCluRef = photon->superCluster();
+      if(photonCluRef->rawEnergy() == cand->rawEnergy()) {
+        ecalIso03 = photon->ecalRecHitSumEtConeDR03();
+        hcalIso03 = photon->hcalTowerSumEtConeDR03();
+        trkIso03 = photon->trkSumPtSolidConeDR03();
+
+        ecalIso04 = photon->ecalRecHitSumEtConeDR04();
+        hcalIso04 = photon->hcalTowerSumEtConeDR04();
+        trkIso04 = photon->trkSumPtSolidConeDR04();
+        break;
+      }
+    }
+  }
+  
+  privateData_->ecalRecHitSumEtConeDR03->push_back(ecalIso03);
+  privateData_->hcalTowerSumEtConeDR03->push_back(hcalIso03);
+  privateData_->trkSumPtSolidConeDR03->push_back(trkIso03);
+  privateData_->ecalRecHitSumEtConeDR04->push_back(ecalIso04);
+  privateData_->hcalTowerSumEtConeDR04->push_back(hcalIso04);
+  privateData_->trkSumPtSolidConeDR04->push_back(trkIso04);
+
+}
+
+
 void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::string colSuffix) 
 {
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
@@ -582,6 +668,9 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e2x2"+colSuffix).c_str(), *privateData_->e2x2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e2nd"+colSuffix).c_str(), *privateData_->e2nd, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e1x5"+colSuffix).c_str(), *privateData_->e1x5, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Max"+colSuffix).c_str(), *privateData_->e2x5Max, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e4SwissCross"+colSuffix).c_str(), *privateData_->e4SwissCross, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
@@ -594,6 +683,8 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"fracClosProbl"+colSuffix).c_str(), *privateData_->fracClosProbl, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"scBasedEcalSum03"+colSuffix).c_str(), *privateData_->scBasedEcalSum03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"scBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -619,6 +710,17 @@ void CmsSuperClusterFiller::treeSCVtxPropagationInfo(const std::string colPrefix
   cmstree->column((colPrefix+"pxVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pxVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pyVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pyVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pzVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pzVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
+}
+
+void CmsSuperClusterFiller::treePhotonInfo(const std::string colPrefix, const std::string colSuffix) {
+  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
+  cmstree->column((colPrefix+"ecalRecHitSumEtConeDR03"+colSuffix).c_str(), *privateData_->ecalRecHitSumEtConeDR03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hcalTowerSumEtConeDR03"+colSuffix).c_str(), *privateData_->hcalTowerSumEtConeDR03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trkSumPtSolidConeDR03"+colSuffix).c_str(), *privateData_->trkSumPtSolidConeDR03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"ecalRecHitSumEtConeDR04"+colSuffix).c_str(), *privateData_->ecalRecHitSumEtConeDR04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hcalTowerSumEtConeDR04"+colSuffix).c_str(), *privateData_->hcalTowerSumEtConeDR04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trkSumPtSolidConeDR04"+colSuffix).c_str(), *privateData_->trkSumPtSolidConeDR04, nCandString.c_str(), 0, "Reco");
+
 }
 
 // copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
@@ -737,6 +839,9 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   eMax = new vector<float>;
   e2x2 = new vector<float>;
   e2nd = new vector<float>;
+  e1x5 = new vector<float>;
+  e2x5Max = new vector<float>;
+  e4SwissCross = new vector<float>;
   hOverE = new vector<float>;
   covIEtaIEta = new vector<float>;
   covIEtaIPhi = new vector<float>;
@@ -763,6 +868,14 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   idClosProbl = new vector<int>;
   sevClosProbl = new vector<int>;
   fracClosProbl = new vector<float>;
+  scBasedEcalSum03 = new vector<float>;
+  scBasedEcalSum04 = new vector<float>;
+  ecalRecHitSumEtConeDR03 = new vector<float>;
+  hcalTowerSumEtConeDR03 = new vector<float>;
+  trkSumPtSolidConeDR03 = new vector<float>;
+  ecalRecHitSumEtConeDR04 = new vector<float>;
+  hcalTowerSumEtConeDR04 = new vector<float>;
+  trkSumPtSolidConeDR04 = new vector<float>;
   nSC =  new int;
 }
 
@@ -781,6 +894,9 @@ void CmsSuperClusterFillerData::clear()
   eMax->clear();
   e2x2->clear();
   e2nd->clear();
+  e1x5->clear();
+  e2x5Max->clear();
+  e4SwissCross->clear();
   hOverE->clear();
   covIEtaIEta->clear();
   covIEtaIPhi->clear();
@@ -807,4 +923,12 @@ void CmsSuperClusterFillerData::clear()
   idClosProbl->clear();
   sevClosProbl->clear();
   fracClosProbl->clear();
+  scBasedEcalSum03->clear();
+  scBasedEcalSum04->clear();
+  ecalRecHitSumEtConeDR03->clear();
+  hcalTowerSumEtConeDR03->clear();
+  trkSumPtSolidConeDR03->clear();
+  ecalRecHitSumEtConeDR04->clear();
+  hcalTowerSumEtConeDR04->clear();
+  trkSumPtSolidConeDR04->clear();
 }

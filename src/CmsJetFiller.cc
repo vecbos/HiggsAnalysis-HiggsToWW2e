@@ -126,6 +126,7 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->softMuonBJetTags;
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
+  delete privateData_->uncorrEnergy;
 
 }
 
@@ -143,12 +144,21 @@ void CmsJetFiller::saveJetBTag(bool what) { saveJetBTag_=what; }
 void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
-					 bool dumpData) {
+					 bool dumpData,
+                                         edm::InputTag uncorrectedCollectionTag) {
 
   edm::Handle< edm::View<reco::Candidate> > collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
+
+  const edm::View<reco::Candidate> *uncorrectedCollection = 0;
+  if(uncorrectedCollectionTag.label() != std::string("")) {
+    edm::Handle< edm::View<reco::Candidate> > uncorrectedCollectionHandle;
+    try { iEvent.getByLabel(uncorrectedCollectionTag, uncorrectedCollectionHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << uncorrectedCollectionTag; }
+    uncorrectedCollection = uncorrectedCollectionHandle.product();
+  }
   
   privateData_->clearTrkVectors();
 
@@ -251,11 +261,27 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->trackCountingHighPurBJetTags->push_back( -1. );
         privateData_->trackCountingHighEffBJetTags->push_back( -1. );
       }
+
+      // if an uncorrected jet collection is provided, save also the uncorrected energy
+      if(uncorrectedCollection) {
+        dumpUncorrEnergy_ = true;
+        float rawEnergy = -1.;
+        edm::View<reco::Candidate>::const_iterator cand2;
+        for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
+          const CaloJet *uncorrectedRecoJet = dynamic_cast< const CaloJet * > ( &(*cand2) );
+          // corrected and uncorrected jets differ only for jet PT 
+          if( thisRecoJet->emEnergyFraction() == uncorrectedRecoJet->emEnergyFraction() ) {
+            rawEnergy = uncorrectedRecoJet->energy();
+            break;
+          }
+        }
+        privateData_->uncorrEnergy->push_back(rawEnergy);
+      } else dumpUncorrEnergy_ = false;
       index++;
     }
   }
   else {
-  *(privateData_->ncand) = 0;
+    *(privateData_->ncand) = 0;
   }
   
   // The class member vectors containing the relevant quantities 
@@ -296,6 +322,9 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
     cmstree->column((colPrefix+"trackCountingHighPurBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighPurBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighEffBJetTags, nCandString.c_str(), 0, "Reco");
   }
+  if(dumpUncorrEnergy_) {
+    cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
+  }
 }
 
 
@@ -318,7 +347,7 @@ void CmsJetFillerData::initialise() {
   softMuonBJetTags = new vector<float>;
   trackCountingHighPurBJetTags = new vector<float>;
   trackCountingHighEffBJetTags = new vector<float>;
-
+  uncorrEnergy = new vector<float>;
 }
 
 
@@ -338,5 +367,6 @@ void CmsJetFillerData::clearTrkVectors() {
   softMuonBJetTags->clear();
   trackCountingHighPurBJetTags->clear();
   trackCountingHighEffBJetTags->clear();
+  uncorrEnergy->clear();
 
 }
