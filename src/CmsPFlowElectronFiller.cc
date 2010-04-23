@@ -104,7 +104,12 @@ CmsPFlowElectronFiller::~CmsPFlowElectronFiller() {
   delete privateData_->PS1Energy;
   delete privateData_->PS2Energy;
   delete privateData_->EcalEnergy;  
-  delete privateData_->EcalElectronEnergy;
+  delete privateData_->RawEcalEnergy;
+  delete privateData_->HcalEnergy;  
+  delete privateData_->RawHcalEnergy;  
+  delete privateData_->PositionAtEcalX;
+  delete privateData_->PositionAtEcalY;
+  delete privateData_->PositionAtEcalZ;
 }
 
 
@@ -212,7 +217,12 @@ void CmsPFlowElectronFiller::writePFEleBasicInfo(const reco::PFCandidateRef pflo
     privateData_->PS1Energy->push_back(pflowCandRef->pS1Energy());
     privateData_->PS2Energy->push_back(pflowCandRef->pS2Energy());
     privateData_->EcalEnergy->push_back(pflowCandRef->ecalEnergy());
-    privateData_->EcalElectronEnergy->push_back(pflowCandRef->rawEcalEnergy());
+    privateData_->HcalEnergy->push_back(pflowCandRef->hcalEnergy());    
+    privateData_->RawEcalEnergy->push_back(pflowCandRef->rawEcalEnergy());
+    privateData_->RawHcalEnergy->push_back(pflowCandRef->rawHcalEnergy());    
+    privateData_->PositionAtEcalX->push_back(pflowCandRef->positionAtECALEntrance().x());
+    privateData_->PositionAtEcalY->push_back(pflowCandRef->positionAtECALEntrance().y());
+    privateData_->PositionAtEcalZ->push_back(pflowCandRef->positionAtECALEntrance().z());
 
   } else {  
     
@@ -220,7 +230,12 @@ void CmsPFlowElectronFiller::writePFEleBasicInfo(const reco::PFCandidateRef pflo
     privateData_->PS1Energy->push_back(-1.);
     privateData_->PS2Energy->push_back(-1.);
     privateData_->EcalEnergy->push_back(-1.);
-    privateData_->EcalElectronEnergy->push_back(-1.);
+    privateData_->HcalEnergy->push_back(-1.);
+    privateData_->RawEcalEnergy->push_back(-1.);
+    privateData_->RawHcalEnergy->push_back(-1.);
+    privateData_->PositionAtEcalX->push_back(-1.);
+    privateData_->PositionAtEcalY->push_back(-1.);
+    privateData_->PositionAtEcalZ->push_back(-1.);
   }
 }
 
@@ -240,7 +255,12 @@ void CmsPFlowElectronFiller::treePFEleBasicInfo(const std::string &colPrefix, co
   cmstree->column((colPrefix+"PS1Energy"+colSuffix).c_str(),  *privateData_->PS1Energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PS2Energy"+colSuffix).c_str(),  *privateData_->PS2Energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"EcalEnergy"+colSuffix).c_str(),  *privateData_->EcalEnergy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"EcalElectronEnergy"+colSuffix).c_str(),  *privateData_->EcalElectronEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"HcalEnergy"+colSuffix).c_str(),  *privateData_->HcalEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"RawEcalEnergy"+colSuffix).c_str(),  *privateData_->RawEcalEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"RawHcalEnergy"+colSuffix).c_str(),  *privateData_->RawHcalEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"PositionAtEcalX"+colSuffix).c_str(),  *privateData_->PositionAtEcalX, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"PositionAtEcalY"+colSuffix).c_str(),  *privateData_->PositionAtEcalY, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"PositionAtEcalZ"+colSuffix).c_str(),  *privateData_->PositionAtEcalZ, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -257,7 +277,12 @@ void CmsPFlowElectronFillerData::initialise() {
   PS1Energy = new vector<float>;
   PS2Energy = new vector<float>;
   EcalEnergy = new vector<float>;
-  EcalElectronEnergy = new vector<float>;
+  HcalEnergy = new vector<float>;
+  RawEcalEnergy = new vector<float>;
+  RawHcalEnergy = new vector<float>;
+  PositionAtEcalX = new vector<float>;
+  PositionAtEcalY = new vector<float>;
+  PositionAtEcalZ = new vector<float>;
 }
 void CmsPFlowElectronFillerData::clearTrkVectors() {
 
@@ -271,5 +296,10 @@ void CmsPFlowElectronFillerData::clearTrkVectors() {
   PS1Energy->clear();
   PS2Energy->clear();
   EcalEnergy->clear();
-  EcalElectronEnergy->clear();
+  HcalEnergy->clear();
+  RawEcalEnergy->clear();
+  RawHcalEnergy->clear();
+  PositionAtEcalX->clear();
+  PositionAtEcalY->clear();
+  PositionAtEcalZ->clear();
 }

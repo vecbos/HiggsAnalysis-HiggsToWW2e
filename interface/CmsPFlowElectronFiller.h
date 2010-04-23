@@ -36,7 +36,11 @@ struct CmsPFlowElectronFillerData : public CmsCandidateFillerData {
   // basic pf candidates info
   vector<float> *MvaOutput;
   vector<float> *PS1Energy,*PS2Energy;
-  vector<float> *EcalEnergy,*EcalElectronEnergy;
+  vector<float> *EcalEnergy,*RawEcalEnergy;  
+  vector<float> *HcalEnergy,*RawHcalEnergy;
+  vector<float> *PositionAtEcalX;
+  vector<float> *PositionAtEcalY;
+  vector<float> *PositionAtEcalZ;
 
 public:
   void initialise();
