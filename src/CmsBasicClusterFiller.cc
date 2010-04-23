@@ -90,7 +90,6 @@ CmsBasicClusterFiller::~CmsBasicClusterFiller()
 {
   // delete here the vector ptr's  delete privateData_->nBC;
   delete privateData_->nCrystals;
-  delete privateData_->iAlgo;
   delete privateData_->energy;
   delete privateData_->seedEnergy;
   delete privateData_->eta;
@@ -243,7 +242,6 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
     std::vector< std::pair<DetId, float> > ids = cand->hitsAndFractions();
   
     privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
-    privateData_->iAlgo->push_back((int)cand->algo());
     privateData_->energy->push_back((float)cand->energy());
     privateData_->eta->push_back((float)cand->position().eta());
     privateData_->theta->push_back((float)cand->position().theta());
@@ -350,7 +348,6 @@ void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::s
 {
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"nCrystals"+colSuffix).c_str(), *privateData_->nCrystals, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"iAlgo"+colSuffix).c_str(), *privateData_->iAlgo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
@@ -471,7 +468,6 @@ int CmsBasicClusterFiller::distancePhi(const EBDetId& a,const EBDetId& b)
 void CmsBasicClusterFillerData::initialiseCandidate() 
 {
   nCrystals = new vector<int>; 
-  iAlgo = new vector<int>;
   energy = new vector<float>; 
   eta = new vector<float>; 
   theta = new vector<float>; 
@@ -498,7 +494,6 @@ void CmsBasicClusterFillerData::initialiseCandidate()
 void CmsBasicClusterFillerData::clear() 
 {
   nCrystals->clear();
-  iAlgo->clear();
   energy->clear();
   eta->clear(); 
   theta->clear();

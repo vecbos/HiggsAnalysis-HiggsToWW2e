@@ -72,13 +72,14 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   // delete here the vector ptr's
   delete privateData_->nBC;
   delete privateData_->nCrystals;
-  delete privateData_->iAlgo;
   delete privateData_->rawEnergy;
   delete privateData_->energy;
   delete privateData_->seedEnergy;
   delete privateData_->eta;
   delete privateData_->theta;
   delete privateData_->phi;
+  delete privateData_->phiWidth;
+  delete privateData_->etaWidth;
   delete privateData_->e3x3;
   delete privateData_->e5x5;
   delete privateData_->eMax;
@@ -244,9 +245,10 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
   // fill the SC infos
   privateData_->nBC->push_back((int)cand->clustersSize());
   privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
-  privateData_->iAlgo->push_back((int)cand->seed()->algo());
   privateData_->rawEnergy->push_back((float)cand->rawEnergy());
   privateData_->energy->push_back((float)cand->energy());
+  privateData_->phiWidth->push_back((float)cand->phiWidth());
+  privateData_->etaWidth->push_back((float)cand->etaWidth());
   privateData_->eta->push_back((float)cand->position().eta());
   privateData_->theta->push_back((float)cand->position().theta());
   privateData_->phi->push_back((float)cand->position().phi());
@@ -657,12 +659,13 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"nBC"+colSuffix).c_str(), *privateData_->nBC, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nCrystals"+colSuffix).c_str(), *privateData_->nCrystals, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"iAlgo"+colSuffix).c_str(), *privateData_->iAlgo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rawEnergy"+colSuffix).c_str(), *privateData_->rawEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"phiWidth"+colSuffix).c_str(), *privateData_->phiWidth, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"etaWidth"+colSuffix).c_str(), *privateData_->etaWidth, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
@@ -828,12 +831,13 @@ void CmsSuperClusterFillerData::initialiseCandidate()
 {
   nBC = new vector<int>;
   nCrystals = new vector<int>; 
-  iAlgo = new vector<int>;
   rawEnergy = new vector<float>; 
   energy = new vector<float>; 
   eta = new vector<float>; 
   theta = new vector<float>; 
   phi = new vector<float>;
+  phiWidth = new vector<float>;
+  etaWidth = new vector<float>;
   e3x3 = new vector<float>;
   e5x5 = new vector<float>;
   eMax = new vector<float>;
@@ -883,12 +887,13 @@ void CmsSuperClusterFillerData::clear()
 {
   nBC->clear();
   nCrystals->clear();
-  iAlgo->clear();
   rawEnergy->clear();
   energy->clear();
   eta->clear(); 
   theta->clear();
   phi->clear();
+  phiWidth->clear();
+  etaWidth->clear();
   e3x3->clear();
   e5x5->clear();
   eMax->clear();
