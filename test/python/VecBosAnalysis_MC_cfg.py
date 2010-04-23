@@ -21,6 +21,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
 # --- ECAL clusters merging in a unique collection ---
+process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
 # --- to recover the ak5 GenJets that are not re-recoed in 33X samples ---
@@ -49,15 +50,15 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(1000) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('/store/relval/CMSSW_3_5_7/RelValSingleGammaPt35/GEN-SIM-RECO/MC_3XY_V26-v1/0012/80E3D299-6949-DF11-9E78-0030486791F2.root')
+                            fileNames = cms.untracked.vstring('/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V26A_356ReReco-v1/0007/FE8922F3-E33D-DF11-8E74-00261894393C.root')
                             )
 
-process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters *
+process.p = cms.Path ( process.lowThrCaloTowers * process.mergedBasicClusters * process.mergedSuperClusters *
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.ourJetSequence * process.newBtaggingSequence *
                        process.eIdSequence *

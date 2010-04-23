@@ -168,6 +168,7 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       try { iEvent.getByLabel(Calotowers_, calotowers_); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary calotowers collection" << Calotowers_; }
       
+      nBCCandOfSC = 0;
       BasicClusterCollection::const_iterator cand;
       for(cand=collection->begin(); cand!=collection->end(); cand++) 
 	{
@@ -184,10 +185,10 @@ void CmsBasicClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   // have all been filled. Now transfer those we want into the 
   // tree 
   
-  int blockSize = (collection) ? collection->size() : 0;
+  //  int blockSize = (collection) ? collection->size() : 0;
   
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
-  cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
+  cmstree->column(nCandString.c_str(),nBCCandOfSC,0,"Reco");
   
 //   if(collection) 
 //     {
@@ -212,32 +213,59 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
 
 {
 
-  std::vector< std::pair<DetId, float> > ids = cand->hitsAndFractions();
+  // int limit_to_print=1;
   
-  privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
-  privateData_->iAlgo->push_back((int)cand->algo());
-  privateData_->energy->push_back((float)cand->energy());
-  privateData_->eta->push_back((float)cand->position().eta());
-  privateData_->theta->push_back((float)cand->position().theta());
-  privateData_->phi->push_back((float)cand->position().phi());
-
-  // fill the seed basic cluster shapes
-  edm::ESHandle<CaloTopology> pTopology;
-  iSetup.get<CaloTopologyRecord>().get(pTopology);
+  int index_SC=-1; 
+  int index_SC_ref=-1; 
   
-  edm::ESHandle<CaloGeometry> pGeometry;
-  iSetup.get<CaloGeometryRecord>().get(pGeometry);
+  SuperClusterCollection::const_iterator iSC;
+  for(iSC=ESCCollection->begin(); iSC!=ESCCollection->end(); iSC++)
+    {
+      index_SC++;
+      // find SC constituents 
+      for(CaloClusterPtrVector::const_iterator bcItr = iSC->clustersBegin(); bcItr != iSC->clustersEnd(); bcItr++)
+        {
+          if( cand->energy()== (*bcItr)->energy() 
+              && cand->eta()== (*bcItr)->eta() 
+              && cand->phi()== (*bcItr)->phi()  ) {
+            index_SC_ref=index_SC;
+          }
+        }
+    }
 
-  if ( pTopology.isValid() && pGeometry.isValid() ) {
+  if(  index_SC > -1 ) {
+
+    nBCCandOfSC++;
+    privateData_->indexSC->push_back(index_SC_ref);
+
+      
+
+    std::vector< std::pair<DetId, float> > ids = cand->hitsAndFractions();
+  
+    privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
+    privateData_->iAlgo->push_back((int)cand->algo());
+    privateData_->energy->push_back((float)cand->energy());
+    privateData_->eta->push_back((float)cand->position().eta());
+    privateData_->theta->push_back((float)cand->position().theta());
+    privateData_->phi->push_back((float)cand->position().phi());
+
+    // fill the seed basic cluster shapes
+    edm::ESHandle<CaloTopology> pTopology;
+    iSetup.get<CaloTopologyRecord>().get(pTopology);
+  
+    edm::ESHandle<CaloGeometry> pGeometry;
+    iSetup.get<CaloGeometryRecord>().get(pGeometry);
+
+    if ( pTopology.isValid() && pGeometry.isValid() ) {
     
-    const CaloTopology *topology = pTopology.product();
+      const CaloTopology *topology = pTopology.product();
 
-    const EcalRecHitCollection *rechits = 0;
+      const EcalRecHitCollection *rechits = 0;
 
-    float seedEta = cand->position().eta();
+      float seedEta = cand->position().eta();
 
-    if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
-    else rechits = EERecHits; 
+      if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
+      else rechits = EERecHits; 
 
       float eMax = EcalClusterTools::eMax( *cand, &(*rechits) );
       float e3x3 = EcalClusterTools::e3x3( *cand, &(*rechits), topology );
@@ -293,54 +321,26 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
         privateData_->sevClosProbl->push_back(-1);
       }
 
-      if(true) { // if SC collection exists
 
-	// int limit_to_print=1;
-
-	int index_SC=-1; 
-	int index_SC_ref=-1; 
-	
-	SuperClusterCollection::const_iterator iSC;
-	for(iSC=ESCCollection->begin(); iSC!=ESCCollection->end(); iSC++)
-	  {
-	    index_SC++;
-	    // find SC constituents 
-	    for(CaloClusterPtrVector::const_iterator bcItr = iSC->clustersBegin(); bcItr != iSC->clustersEnd(); bcItr++)
-	      {
-		if( cand->energy()== (*bcItr)->energy() 
-		    && cand->eta()== (*bcItr)->eta() 
-		    && cand->phi()== (*bcItr)->phi()  ) {
-		  index_SC_ref=index_SC;
-		}
-	      }
-	  }
-
-	privateData_->indexSC->push_back(index_SC_ref);
-
-      }
-      
-
-
-
-
-  } else {
-    privateData_->e3x3->push_back(-1.);
-    privateData_->e5x5->push_back(-1.);
-    privateData_->eMax->push_back(-1.);
-    privateData_->e2x2->push_back(-1.);
-    privateData_->e2nd->push_back(-1.);
-    privateData_->covIEtaIEta->push_back(-1.);
-    privateData_->covIEtaIPhi->push_back(-1.);
-    privateData_->covIPhiIPhi->push_back(-1.);
-    privateData_->time->push_back(-999.);
-    privateData_->chi2->push_back(-999.);
-    privateData_->recoFlag->push_back(-1);
-    privateData_->seedEnergy->push_back(-1.);
-    privateData_->fracClosProbl->push_back(-1);
-    privateData_->idClosProbl->push_back(-1);
-    privateData_->idClosProbl->push_back(-1);
-    privateData_->sevClosProbl->push_back(-1);
-    privateData_->indexSC->push_back(-1);
+    } else {
+      privateData_->e3x3->push_back(-1.);
+      privateData_->e5x5->push_back(-1.);
+      privateData_->eMax->push_back(-1.);
+      privateData_->e2x2->push_back(-1.);
+      privateData_->e2nd->push_back(-1.);
+      privateData_->covIEtaIEta->push_back(-1.);
+      privateData_->covIEtaIPhi->push_back(-1.);
+      privateData_->covIPhiIPhi->push_back(-1.);
+      privateData_->time->push_back(-999.);
+      privateData_->chi2->push_back(-999.);
+      privateData_->recoFlag->push_back(-1);
+      privateData_->seedEnergy->push_back(-1.);
+      privateData_->fracClosProbl->push_back(-1);
+      privateData_->idClosProbl->push_back(-1);
+      privateData_->idClosProbl->push_back(-1);
+      privateData_->sevClosProbl->push_back(-1);
+      privateData_->indexSC->push_back(-1);
+    }
   }
 
 }

@@ -119,6 +119,7 @@ protected:
 
   edm::Handle<CaloTowerCollection> calotowers_;
 
+  int nBCCandOfSC;
 
   DetId closestProb_;
   int severityClosestProb_;
