@@ -395,7 +395,14 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
       GlobalVector direction(trkRef->px(), trkRef->py(), trkRef->pz());
       TransientTrack tt = trackBuilder_->build(&(*trkRef));
 
-      std::pair<bool,Measurement1D> sgnImpPar3D = IPTools::signedImpactParameter3D(tt,direction,bestPrimaryVertex_);
+      std::pair<bool,Measurement1D> sgnImpPar3D = std::pair<bool,Measurement1D>(false,Measurement1D());
+
+      try {
+       if (bestPrimaryVertex_.isValid() && tt.isValid() )
+	 sgnImpPar3D = IPTools::signedImpactParameter3D(tt,direction,bestPrimaryVertex_);
+      }
+      catch ( cms::Exception& ex ) {
+      }
 
       if( sgnImpPar3D.first ) {
         privateData_->impactPar3D->push_back(sgnImpPar3D.second.value());
@@ -404,8 +411,14 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
         privateData_->impactPar3D->push_back(-1.);
         privateData_->impactPar3DError->push_back(-1.);
       }
-
-      std::pair<bool,Measurement1D> sgnTransvImpPar = IPTools::signedTransverseImpactParameter(tt,direction,bestPrimaryVertex_);
+      
+      std::pair<bool,Measurement1D> sgnTransvImpPar = std::pair<bool,Measurement1D>(false,Measurement1D());
+      try {
+      if (bestPrimaryVertex_.isValid() && tt.isValid())
+	 sgnTransvImpPar  = IPTools::signedTransverseImpactParameter(tt,direction,bestPrimaryVertex_);
+      }
+      catch ( cms::Exception& ex ) {
+      }
 
       if( sgnTransvImpPar.first ) {
         privateData_->transvImpactPar->push_back(sgnTransvImpPar.second.value());
