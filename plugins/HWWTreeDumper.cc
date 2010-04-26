@@ -340,7 +340,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.saveFatTrk(saveFatTrk_);
     treeFiller.setRefittedTracksForDeDxProducer(gsfTrackCollection_);
     treeFiller.saveDeDx(false);
-    treeFiller.saveVtxTrk(false);
+    treeFiller.saveVtxTrk(true);
 
     std::string prefix("");
     std::string suffix("GsfTrack");
