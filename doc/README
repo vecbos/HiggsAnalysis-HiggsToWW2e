@@ -37,11 +37,11 @@ scramv1 p CMSSW CMSSW_3_5_6
 cd CMSSW_3_5_6/src
 cmsenv
 
-cvs co -r V03-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V04-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 addpkg RecoEgamma/ElectronIdentification
 cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 addpkg RecoEgamma/ElectronIdentification V00-03-05
-addpkg RecoEgamma/EgammaTools V00-05-02
+addpkg RecoEgamma/EgammaTools V00-05-03
 addpkg TrackingTools/IPTools V00-01-05
 checkdeps -a
 
