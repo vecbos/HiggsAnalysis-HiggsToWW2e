@@ -55,13 +55,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring(
-    '/store/data/Commissioning10/MinimumBias/RECO/v7/000/132/440/26C8DED9-0E3C-DF11-9D83-0030487CD7B4.root'
-                            )
+#                            skipEvents = cms.untracked.uint32(6764),
+                            fileNames = cms.untracked.vstring('/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/133/927/F2675B6B-1151-DF11-982A-003048D47754.root')
                             )
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
                        process.ourJetSequence * process.newBtaggingSequence *
+                       process.gsfElectrons *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )

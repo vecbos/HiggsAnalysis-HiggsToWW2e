@@ -91,6 +91,11 @@ void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsGsfTrackFiller") << "Can't get GSF track collection: " << collectionTag; }
   const edm::View<reco::Track> *collection = collectionHandle.product();
 
+  edm::ESHandle<MagneticField> magfield;
+  iSetup.get<IdealMagneticFieldRecord>().get( magfield );     
+  edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry;
+  iSetup.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry);       
+
   privateData_->clearTrkVectorsGsf();
 
   int blockSize=0;
@@ -131,13 +136,14 @@ void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
       if( saveDeDx_ ) {
         if ( i != (int)refittedTracksForDeDx_->size() ) {
           RefToBase<reco::Track> refittedTrack(refittedTracksForDeDx_, i);
-          if(saveTrk_) writeTrkInfo( refittedTrack );
+          if(saveTrk_) writeTrkInfo( refittedTrack , magfield, theTrackingGeometry);
           writeDeDxInfo( refittedTrack );
         }
       } else {
         RefToBase<reco::Track> trkRef(collectionHandle, i);
-        if(saveTrk_) writeTrkInfo( trkRef );
+        if(saveTrk_) writeTrkInfo( trkRef , magfield, theTrackingGeometry);
       }
+
 
       GsfTrackRef gsfTrackRef = RefToBase<reco::Track>(collectionHandle, i).castTo<GsfTrackRef>();
       writeGsfTrkInfo( gsfTrackRef );

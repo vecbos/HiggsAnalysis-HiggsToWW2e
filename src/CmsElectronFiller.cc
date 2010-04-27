@@ -67,6 +67,9 @@
 
 #include <TTree.h>
 
+#include "FWCore/Utilities/interface/EDMException.h"
+#include "FWCore/Utilities/interface/Exception.h"
+
 #include <string>
 
 using namespace edm;
@@ -408,7 +411,6 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
       privateData_->convY->push_back(convY);
       privateData_->convZ->push_back(convZ);
       privateData_->convChi2Prob->push_back(convChi2Prob);
-
     } else {
       privateData_->convDist->push_back(999);
       privateData_->convDcot->push_back(999);

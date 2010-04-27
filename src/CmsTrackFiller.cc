@@ -24,12 +24,18 @@
 #include "DataFormats/Candidate/interface/CandMatchMap.h"
 #include "DataFormats/TrackReco/interface/Track.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
+
+#include "DataFormats/GsfTrackReco/interface/GsfTrack.h"
+#include "DataFormats/GsfTrackReco/interface/GsfTrackFwd.h"
+
 #include "TrackingTools/IPTools/interface/IPTools.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTrackFiller.h"
 #include "DataFormats/Math/interface/Point3D.h"
+
+#include "TrackingTools/TransientTrack/interface/GsfTransientTrack.h"
 
 #include <TTree.h>
 
@@ -58,6 +64,7 @@ CmsTrackFiller::CmsTrackFiller(CmsTree *cmsTree,
   vertexCollection_=vertexCollection;
 
   saveTrk_=true;
+  isGsf_=false;
   saveFatTrk_=true;
   saveVtxTrk_=true; // to change when bug is fixed
   saveDeDx_=false;
@@ -168,6 +175,8 @@ void CmsTrackFiller::saveFatTrk(bool what) { saveFatTrk_=what;}
 
 void CmsTrackFiller::saveVtxTrk(bool what) { saveVtxTrk_=what;}
 
+void CmsTrackFiller::isGsf(bool what) { isGsf_=what;}
+
 void CmsTrackFiller::saveDeDx(bool what ) { saveDeDx_=what; }
 
 void CmsTrackFiller::findPrimaryVertex(const edm::Event& iEvent) {
@@ -230,6 +239,11 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
   privateData_->clearTrkVectors();
 
+  edm::ESHandle<MagneticField> magfield;
+  iSetup.get<IdealMagneticFieldRecord>().get( magfield );     
+  edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry;
+  iSetup.get<GlobalTrackingGeometryRecord>().get(theTrackingGeometry);       
+  
   int blockSize=0;
 
   if(collection) {
@@ -271,14 +285,14 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
       if( saveDeDx_ ) {
         if ( i != (int)refittedTracksForDeDx_->size() ) {
           RefToBase<reco::Track> refittedTrack(refittedTracksForDeDx_, i);
-          if(saveTrk_) writeTrkInfo( refittedTrack );
+          if(saveTrk_) writeTrkInfo( refittedTrack , magfield, theTrackingGeometry);
           writeDeDxInfo( refittedTrack );
         }
       } else {
         // if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
         //        TrackRef trkRef = cand->get<TrackRef>();
         RefToBase<reco::Track> trkRef(collectionHandle, i);
-        if(saveTrk_) writeTrkInfo( trkRef );
+        if(saveTrk_) writeTrkInfo( trkRef , magfield, theTrackingGeometry );
       }
     }
   } else {
@@ -300,7 +314,8 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 }
 
 
-void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
+void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm::ESHandle<MagneticField>& magfield, const edm::ESHandle<GlobalTrackingGeometry>& theTrackingGeometry) 
+{
 
   if(trkRef.isNonnull()) {
     
@@ -390,45 +405,59 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef) {
     privateData_->trackVy ->push_back(trkRef->vy());
     privateData_->trackVz ->push_back(trkRef->vz());
 
-    if ( saveVtxTrk_ ) { 
-      
-      GlobalVector direction(trkRef->px(), trkRef->py(), trkRef->pz());
-      TransientTrack tt = trackBuilder_->build(&(*trkRef));
+    if ( saveVtxTrk_ && trkRef.isNonnull() ) 
+      { 
 
-      std::pair<bool,Measurement1D> sgnImpPar3D = std::pair<bool,Measurement1D>(false,Measurement1D());
+	GlobalVector direction(trkRef->px(), trkRef->py(), trkRef->pz());		    
 
-      try {
-       if (bestPrimaryVertex_.isValid() && tt.isValid() )
-	 sgnImpPar3D = IPTools::signedImpactParameter3D(tt,direction,bestPrimaryVertex_);
-      }
-      catch ( cms::Exception& ex ) {
-      }
-
-      if( sgnImpPar3D.first ) {
-        privateData_->impactPar3D->push_back(sgnImpPar3D.second.value());
-        privateData_->impactPar3DError->push_back(sgnImpPar3D.second.error());
+	TransientTrack tt;
+	if (isGsf_)
+	  {
+	    GsfTrackRef gsfTrackRef = trkRef.castTo<GsfTrackRef>();
+	    if (gsfTrackRef.isNonnull())
+		tt = TransientTrack(new GsfTransientTrack(gsfTrackRef,&(*magfield),&(*theTrackingGeometry)));
+	  }
+	else
+	  {
+	    tt = TransientTrack(trkRef.castTo<TrackRef>(),&(*magfield),&(*theTrackingGeometry));
+	  }
+	
+	std::pair<bool,Measurement1D> sgnImpPar3D = std::pair<bool,Measurement1D>(false,Measurement1D());
+	
+	try {
+	  if (bestPrimaryVertex_.isValid() && tt.isValid() )
+	    sgnImpPar3D = IPTools::signedImpactParameter3D(tt,direction,bestPrimaryVertex_);
+	}
+	catch ( cms::Exception& ex ) {
+	}
+	
+	if( sgnImpPar3D.first ) {
+	  privateData_->impactPar3D->push_back(sgnImpPar3D.second.value());
+	  privateData_->impactPar3DError->push_back(sgnImpPar3D.second.error());
+	}
+	else {
+	  privateData_->impactPar3D->push_back(-1.);
+	  privateData_->impactPar3DError->push_back(-1.);
+	}
+	
+	std::pair<bool,Measurement1D> sgnTransvImpPar = std::pair<bool,Measurement1D>(false,Measurement1D());
+	
+	try {
+	  if (bestPrimaryVertex_.isValid() && tt.isValid())
+	    sgnTransvImpPar  = IPTools::signedTransverseImpactParameter(tt,direction,bestPrimaryVertex_);
+	}
+	catch ( cms::Exception& ex ) {
+	}
+	
+	if( sgnTransvImpPar.first ) {
+	  privateData_->transvImpactPar->push_back(sgnTransvImpPar.second.value());
+	  privateData_->transvImpactParError->push_back(sgnTransvImpPar.second.error());
+	} else {
+	  privateData_->transvImpactPar->push_back(-1.);
+	  privateData_->transvImpactParError->push_back(-1.);
+	}
+	
       } else {
-        privateData_->impactPar3D->push_back(-1.);
-        privateData_->impactPar3DError->push_back(-1.);
-      }
-      
-      std::pair<bool,Measurement1D> sgnTransvImpPar = std::pair<bool,Measurement1D>(false,Measurement1D());
-      try {
-      if (bestPrimaryVertex_.isValid() && tt.isValid())
-	 sgnTransvImpPar  = IPTools::signedTransverseImpactParameter(tt,direction,bestPrimaryVertex_);
-      }
-      catch ( cms::Exception& ex ) {
-      }
-
-      if( sgnTransvImpPar.first ) {
-        privateData_->transvImpactPar->push_back(sgnTransvImpPar.second.value());
-        privateData_->transvImpactParError->push_back(sgnTransvImpPar.second.error());
-      } else {
-        privateData_->transvImpactPar->push_back(-1.);
-        privateData_->transvImpactParError->push_back(-1.);
-      }
-
-    } else {
       privateData_->impactPar3D->push_back(-1.);
       privateData_->impactPar3DError->push_back(-1.);
       privateData_->transvImpactPar->push_back(-1.);

@@ -30,6 +30,11 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "DataFormats/Math/interface/Point3D.h"
+#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
+#include "MagneticField/Records/interface/IdealMagneticFieldRecord.h"
+#include "boost/mpl/vector.hpp" 
+#include "Geometry/CommonDetUnit/interface/GlobalTrackingGeometry.h"
+#include "FWCore/Framework/interface/ESHandle.h"
 #include <TTree.h>
 
 struct CmsTrackFillerData {
@@ -89,6 +94,8 @@ class CmsTrackFiller {
 
   /// dump tracking related variables
   void saveTrk(bool );
+  /// are tracks Gsf
+  void isGsf(bool );
   /// dump track-extras related variables
   void saveFatTrk(bool );
   /// dump Vtx related variables
@@ -110,7 +117,7 @@ class CmsTrackFiller {
 
  protected:
   
-  void writeTrkInfo(edm::RefToBase<reco::Track> trackRef);
+  void writeTrkInfo(edm::RefToBase<reco::Track> trackRef, const edm::ESHandle<MagneticField>& magfield, const edm::ESHandle<GlobalTrackingGeometry>& theTrackingGeometry);
   void writeDeDxInfo(edm::RefToBase<reco::Track> refittedTrack);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
   void treeDeDxInfo(const std::string &colPrefix, const std::string &colSuffix);
@@ -118,6 +125,7 @@ class CmsTrackFiller {
   bool hasValidHitInNthPixelEndcap(uint32_t nlayer, reco::HitPattern pattern);
 
   bool saveTrk_;
+  bool isGsf_;
   bool saveFatTrk_;
   bool saveVtxTrk_;
   bool saveDeDx_;

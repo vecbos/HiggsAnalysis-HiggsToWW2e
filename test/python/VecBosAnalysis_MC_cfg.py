@@ -35,8 +35,10 @@ process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = True
+process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
+process.treeDumper.dumpBCs = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
@@ -55,12 +57,13 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('/store/mc/Spring10/MinBias/GEN-SIM-RECO/START3X_V26A_356ReReco-v1/0007/FE8922F3-E33D-DF11-8E74-00261894393C.root')
+                            fileNames = cms.untracked.vstring('/store/relval/CMSSW_3_5_7/RelValWE/GEN-SIM-RECO/START3X_V26-v1/0012/E2E0DBBC-4749-DF11-B841-003048678FC4.root')
                             )
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedBasicClusters * process.mergedSuperClusters *
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.ourJetSequence * process.newBtaggingSequence *
+                       process.gsfElectrons *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )

@@ -321,6 +321,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     CmsTrackFiller treeFiller(tree_, vertexCollection_, true);
     treeFiller.saveFatTrk(saveFatTrk_);
+
+    treeFiller.isGsf(false);
     treeFiller.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFiller.saveDeDx(saveTrackDeDx_);
 
@@ -339,8 +341,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     CmsGsfTrackFiller treeFiller(tree_, vertexCollection_, true);
     treeFiller.saveFatTrk(saveFatTrk_);
     treeFiller.setRefittedTracksForDeDxProducer(gsfTrackCollection_);
+    treeFiller.isGsf(true);
     treeFiller.saveDeDx(false);
+    treeFiller.findPrimaryVertex(iEvent);
     treeFiller.saveVtxTrk(true);
+
 
     std::string prefix("");
     std::string suffix("GsfTrack");
@@ -356,9 +361,9 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFillerGlobalMuonTrack.saveFatTrk(saveFatTrk_);
     treeFillerGlobalMuonTrack.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFillerGlobalMuonTrack.saveDeDx(false);
-
+    treeFillerGlobalMuonTrack.isGsf(false);
     treeFillerGlobalMuonTrack.findPrimaryVertex(iEvent);
-    treeFillerGlobalMuonTrack.saveVtxTrk(false);
+    treeFillerGlobalMuonTrack.saveVtxTrk(true);
 
     std::string prefix("");
     std::string suffix1("GlobalMuonTrack");
@@ -369,9 +374,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFillerSTAMuonTrack.saveFatTrk(saveFatTrk_);
     treeFillerSTAMuonTrack.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFillerSTAMuonTrack.saveDeDx(false);
+    treeFillerSTAMuonTrack.isGsf(false);
 
     treeFillerSTAMuonTrack.findPrimaryVertex(iEvent);
-    treeFillerSTAMuonTrack.saveVtxTrk(false);
+    treeFillerSTAMuonTrack.saveVtxTrk(true);
 
     std::string suffix2("STAMuonTrack");
     treeFillerSTAMuonTrack.writeCollectionToTree(standAloneMuonTrackCollection_, iEvent, iSetup, prefix, suffix2, false);
