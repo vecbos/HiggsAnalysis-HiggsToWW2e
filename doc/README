@@ -33,8 +33,8 @@ HiggsAnalysis/HiggsToWW2e/test/crab
 
 --- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_5_X ---
 
-scramv1 p CMSSW CMSSW_3_5_6
-cd CMSSW_3_5_6/src
+scramv1 p CMSSW CMSSW_3_5_8
+cd CMSSW_3_5_8/src
 cmsenv
 
 cvs co -r V07-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
@@ -42,8 +42,6 @@ addpkg RecoEgamma/ElectronIdentification
 cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 addpkg RecoEgamma/ElectronIdentification V00-03-05
 addpkg RecoEgamma/EgammaTools V00-05-03
-addpkg TrackingTools/IPTools V00-01-05
-checkdeps -a
 
 cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
 cd RecoEgamma/ElectronIdentification/python/
