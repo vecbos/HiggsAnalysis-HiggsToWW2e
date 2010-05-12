@@ -56,7 +56,7 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('/store/data/Commissioning10/MinimumBias/RAW-RECO/v9/000/133/927/F2675B6B-1151-DF11-982A-003048D47754.root')
+                            fileNames = cms.untracked.vstring('/store/data/Commissioning10/MinimumBias/RECO/May3rdReReco_PreProduction_v1/0103/FED84A1A-1D57-DF11-9CE8-0018F3D09678.root')
                             )
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
