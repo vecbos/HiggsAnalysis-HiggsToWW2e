@@ -41,6 +41,12 @@ struct CmsPFlowElectronFillerData : public CmsCandidateFillerData {
   vector<float> *PositionAtEcalX;
   vector<float> *PositionAtEcalY;
   vector<float> *PositionAtEcalZ;
+  vector<float> *chIso03veto,   *chIso04veto,   *chIso05veto;
+  vector<float> *chIso03noVeto, *chIso04noVeto, *chIso05noVeto;
+  vector<float> *nhIso03veto,   *nhIso04veto,   *nhIso05veto;
+  vector<float> *nhIso03noVeto, *nhIso04noVeto, *nhIso05noVeto;
+  vector<float> *phIso03veto,   *phIso04veto,   *phIso05veto;
+  vector<float> *phIso03noVeto, *phIso04noVeto, *phIso05noVeto;
 
 public:
   void initialise();
@@ -65,8 +71,9 @@ public:
   //! Destructor
   virtual ~CmsPFlowElectronFiller();
   
-  void savePFEleTrk(bool what)   { savePFEleTrk_=what;};
-  void savePFEleBasic(bool what) { savePFEleBasic_=what;};
+  void savePFEleTrk(bool what)    { savePFEleTrk_=what;};
+  void savePFEleBasic(bool what)  { savePFEleBasic_=what;};
+  void savePFEleIsoDep(bool what) { savePFEleIsoDep_=what;};
 
   //! write the electron related informations for the given collection
   void writeCollectionToTree(edm::InputTag collectionTag,
@@ -83,10 +90,12 @@ private:
   void treePFEleTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
   void writePFEleBasicInfo(const reco::PFCandidateRef pflowCandRef);
   void treePFEleBasicInfo(const std::string &colPrefix, const std::string &colSuffix);
+  void treePFEleIsoInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   bool savePFEleTrk_;
   bool savePFEleBasic_;
-  
+  bool savePFEleIsoDep_;
+
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
   int maxMCTracks_;

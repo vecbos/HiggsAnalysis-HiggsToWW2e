@@ -55,6 +55,7 @@ private:
   //! dump the particle flow electron block
   bool savePFEleBasic_; 
   bool savePFEleTrk_;
+  bool savePFEleIsoDep_;
   //! dump the jet alpha parameter
   bool saveJetAlpha_;
   //! dump the jet b-tag output
