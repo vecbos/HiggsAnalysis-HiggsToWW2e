@@ -270,7 +270,7 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
           const CaloJet *uncorrectedRecoJet = dynamic_cast< const CaloJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
-          if( thisRecoJet->emEnergyFraction() == uncorrectedRecoJet->emEnergyFraction() ) {
+          if( thisRecoJet->eta() == uncorrectedRecoJet->eta() && thisRecoJet->phi() == uncorrectedRecoJet->phi() ) {
             rawEnergy = uncorrectedRecoJet->energy();
             break;
           }
