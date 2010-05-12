@@ -109,7 +109,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
     
-    eleIdResults_ = new eleIdContainer(6);
+    eleIdResults_ = new eleIdContainer(12);
 
     iEvent.getByLabel( "eidLoose", (*eleIdResults_)[0] );
     iEvent.getByLabel( "eidTight", (*eleIdResults_)[1] );
@@ -117,6 +117,12 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     iEvent.getByLabel( "eidRobustTight", (*eleIdResults_)[3] );
     iEvent.getByLabel( "eidRobustHighEnergy", (*eleIdResults_)[4] );
     iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[5] );
+    iEvent.getByLabel( "eidVeryLooseCIC", (*eleIdResults_)[6] );
+    iEvent.getByLabel( "eidLooseCIC", (*eleIdResults_)[7] );
+    iEvent.getByLabel( "eidMediumCIC", (*eleIdResults_)[8] );
+    iEvent.getByLabel( "eidTightCIC", (*eleIdResults_)[9] );
+    iEvent.getByLabel( "eidSuperTightCIC", (*eleIdResults_)[10] );
+    iEvent.getByLabel( "eidHypertight1CIC", (*eleIdResults_)[11] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -185,6 +191,12 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   const eleIdMap & eleIdRobustTightVal = *( (*eleIdResults_)[3] );
   const eleIdMap & eleIdRobustHighEnergyVal = *( (*eleIdResults_)[4] );
   const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[5] );
+  const eleIdMap & eleIdVeryLooseCICVal = *( (*eleIdResults_)[6] );
+  const eleIdMap & eleIdLooseCICVal = *( (*eleIdResults_)[7] );
+  const eleIdMap & eleIdMediumCICVal = *( (*eleIdResults_)[8] );
+  const eleIdMap & eleIdTightCICVal = *( (*eleIdResults_)[9] );
+  const eleIdMap & eleIdSuperTightCICVal = *( (*eleIdResults_)[10] );
+  const eleIdMap & eleIdHypertight1CICVal = *( (*eleIdResults_)[11] );
 
   int packed_sel = -1;
   int eleIdLoose = eleIdLooseVal[electronRef];
@@ -192,10 +204,18 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   int eleIdRobustLoose = eleIdRobustLooseVal[electronRef];
   int eleIdRobustTight = eleIdRobustTightVal[electronRef];
   int eleIdRobustHighEnergy = eleIdRobustHighEnergyVal[electronRef];
+  int eleIdVeryLooseCIC = eleIdVeryLooseCICVal[electronRef];
+  int eleIdLooseCIC = eleIdLooseCICVal[electronRef];
+  int eleIdMediumCIC = eleIdMediumCICVal[electronRef];
+  int eleIdTightCIC = eleIdTightCICVal[electronRef];
+  int eleIdSuperTightCIC = eleIdSuperTightCICVal[electronRef];
+  int eleIdHypertight1CIC = eleIdHypertight1CICVal[electronRef];
 
-  packed_sel = ( eleIdLoose << 12 ) | ( eleIdTight << 9 ) |
+  packed_sel = ( eleIdVeryLooseCIC << 30 ) | ( eleIdLooseCIC << 27 ) | ( eleIdMediumCIC << 24 ) | ( eleIdTightCIC << 21 ) |
+    ( eleIdSuperTightCIC << 18 ) | ( eleIdHypertight1CIC << 15 ) |
+    ( eleIdLoose << 12 ) | ( eleIdTight << 9 ) |
     ( eleIdRobustLoose << 6 ) | ( eleIdRobustTight << 3 ) | eleIdRobustHighEnergy;
-
+  
   privateData_->eleIdCuts->push_back( packed_sel );
   privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
   privateData_->pflowMVA->push_back( electronRef->mva() );
