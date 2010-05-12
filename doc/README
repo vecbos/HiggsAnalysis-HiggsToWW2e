@@ -4,10 +4,10 @@ scramv1 p CMSSW CMSSW_3_6_0
 cd CMSSW_3_6_0/src
 cmsenv
 
-cvs co -r V03-3_6_0 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V08-3_6_0 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 addpkg RecoEgamma/ElectronIdentification
 addpkg RecoEgamma/EgammaTools V00-05-02
-cvs co -r V01-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
 cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
 cd RecoEgamma/ElectronIdentification/python/
@@ -37,9 +37,9 @@ scramv1 p CMSSW CMSSW_3_5_8
 cd CMSSW_3_5_8/src
 cmsenv
 
-cvs co -r V07-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V08-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 addpkg RecoEgamma/ElectronIdentification
-cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 addpkg RecoEgamma/ElectronIdentification V00-03-05
 addpkg RecoEgamma/EgammaTools V00-05-03
 
