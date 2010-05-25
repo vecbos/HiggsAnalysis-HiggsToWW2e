@@ -17,8 +17,7 @@ typedef ObjectSelector< HWWEleAmbiguityResolve,
 typedef CollectionCombiner< reco::SuperClusterCollection > SuperClusterCombiner;
 typedef CollectionCombiner< reco::BasicClusterCollection > BasicClusterCombiner;
 
-DEFINE_SEAL_MODULE () ;
-DEFINE_ANOTHER_FWK_MODULE (AmbResolver) ;
-DEFINE_ANOTHER_FWK_MODULE(SuperClusterCombiner);
-DEFINE_ANOTHER_FWK_MODULE(BasicClusterCombiner);
-DEFINE_ANOTHER_FWK_MODULE (HWWTreeDumper);  
+DEFINE_FWK_MODULE (AmbResolver) ;
+DEFINE_FWK_MODULE(SuperClusterCombiner);
+DEFINE_FWK_MODULE(BasicClusterCombiner);
+DEFINE_FWK_MODULE (HWWTreeDumper);  
