@@ -35,6 +35,7 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFPreIdFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
@@ -114,6 +115,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
+  dumpPFpreId_             = iConfig.getUntrackedParameter<bool>("dumpPFpreId", false);  
 
   // data run informations
   dumpRunInfo_ = iConfig.getUntrackedParameter<bool>("dumpRunInfo",false);
@@ -156,6 +158,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hepMcCollection_         = iConfig.getParameter<edm::InputTag>("hepMcCollection");
   genInfoCollection_       = iConfig.getParameter<edm::InputTag>("genInfoCollection");
   genWeightCollection_     = iConfig.getUntrackedParameter<std::string>("genWeightCollection");
+  PFpreIdCollection_       = iConfig.getParameter<edm::InputTag>("PFpreIdCollection");
 
   // calotowers collections
   calotowerCollection_ = iConfig.getParameter<edm::InputTag>("calotowerCollection");
@@ -278,6 +281,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.savePFEleIsoDep(savePFEleIsoDep_);
     treeFill.writeCollectionToTree(pflowElectronCollection_, iEvent, iSetup, prefix, suffix, false);
   }
+
+  if(dumpPFpreId_) {
+    CmsPFPreIdFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("PFpreId");
+    treeFill.writeCollectionToTree(PFpreIdCollection_, trackCollection_, iEvent, iSetup, prefix, suffix, false);  
+  }
+
 
   // fill SC block
   if (dumpSCs_) {

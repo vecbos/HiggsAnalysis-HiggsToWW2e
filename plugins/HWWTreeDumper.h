@@ -16,16 +16,16 @@
 #include <TFile.h>
 
 class HWWTreeDumper : public edm::EDAnalyzer {
- public:
+public:
   explicit HWWTreeDumper(const edm::ParameterSet&);
   ~HWWTreeDumper();
-
-
- private:
+  
+  
+private:
   virtual void beginJob() ;
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
-
+  
 private:
   
   //! name of the output ROOT file
@@ -64,6 +64,8 @@ private:
   bool dumpElectrons_;
   //! dump the particle flow electron block
   bool dumpPFlowElectrons_;
+  //! dump the particle flow electron pre-identification block
+  bool dumpPFpreId_; 
   //! dump muon block
   bool dumpMuons_;
   //! dump reco / generated jets block
@@ -122,7 +124,8 @@ private:
   std::string genWeightCollection_;
   //! results of the HLT
   edm::InputTag triggerInputTag_ ;
-
+  //! PF electrons pre-identification
+  edm::InputTag PFpreIdCollection_;
   //! ROOT file with the plain ROOT tree inside
   TFile *fileOut_;
   //! the tree with the events
