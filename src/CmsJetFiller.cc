@@ -65,14 +65,12 @@ using namespace reco;
 
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
-			   edm::InputTag jetVertexAlphaCollection,
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
   CmsCandidateFiller(cmsTree,maxTracks,maxMCTracks,noOutputIfLimitsReached),
   privateData_(new CmsJetFillerData)
 {
   cmstree=cmsTree;
-  jetVertexAlphaCollection_=jetVertexAlphaCollection;
 
   saveJetExtras_=true;
 
@@ -88,7 +86,6 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 }
 
 CmsJetFiller::CmsJetFiller(CmsTree *cmsTree, 
-			   edm::InputTag jetVertexAlphaCollection,
 			   bool fatTree, 
 			   int maxTracks, int maxMCTracks,
 			   bool noOutputIfLimitsReached):
@@ -96,7 +93,6 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
   privateData_(new CmsJetFillerData)
 {
   cmstree=cmsTree;
-  jetVertexAlphaCollection_=jetVertexAlphaCollection;
 
   trkIndexName_ = new std::string("n");
 
@@ -117,7 +113,6 @@ CmsJetFiller::~CmsJetFiller() {
   // delete here the vector ptr's
   delete privateData_->emFrac;
   delete privateData_->hadFrac;
-  delete privateData_->alpha;
   delete privateData_->combinedSecondaryVertexBJetTags;
   delete privateData_->combinedSecondaryVertexMVABJetTags;
   delete privateData_->jetBProbabilityBJetTags;
@@ -181,17 +176,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
     *(privateData_->ncand) = collection->size();
 
-    typedef std::vector<double> jetVtxQualCollection;
-    Handle<jetVtxQualCollection> JV_alpha;
-    jetVtxQualCollection::const_iterator jetVtxAlphaItr;
-    if(saveJetExtras_) {
-      try { iEvent.getByLabel(jetVertexAlphaCollection_,JV_alpha); }
-      catch ( cms::Exception& ex ) { 
-	edm::LogWarning("CmsJetFiller") << "Can't get jet vertex alpha collection " 
-				   << jetVertexAlphaCollection_;   
-      }     
-      jetVtxAlphaItr = JV_alpha->begin();
-    }
 
     //    typedef AssociationVector<CandidateBaseRefProd, vector<float> > btagCollection;
     //    Handle<btagCollection> combinedSecondaryVertexBJetTags, 
@@ -223,8 +207,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
       // fill jet extra informations
       if(saveJetExtras_) { 
-	privateData_->alpha->push_back(*jetVtxAlphaItr);
-	jetVtxAlphaItr++;
 
 	// em, had fractions
 	if( thisRecoJet != 0 ) { 
@@ -237,7 +219,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	}
       }
       else {
-	privateData_->alpha->push_back( -1. );
 	privateData_->emFrac->push_back( -1. );
 	privateData_->hadFrac->push_back( -1. );
       }
@@ -309,7 +290,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
-  cmstree->column((colPrefix+"alpha"+colSuffix).c_str(), *privateData_->alpha, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
   if(saveJetBTag_) {
@@ -336,7 +316,6 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
 void CmsJetFillerData::initialise() {
 
   initialiseCandidate();
-  alpha = new vector<float>;
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
   combinedSecondaryVertexBJetTags = new vector<float>;
@@ -356,7 +335,6 @@ void CmsJetFillerData::initialise() {
 void CmsJetFillerData::clearTrkVectors() {
 
   clearTrkVectorsCandidate();
-  alpha->clear();
   emFrac->clear();
   hadFrac->clear();
   combinedSecondaryVertexBJetTags->clear();

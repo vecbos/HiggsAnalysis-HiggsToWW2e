@@ -79,7 +79,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveFatDT_      = iConfig.getUntrackedParameter<bool>("saveFatDT", false);
   saveFatCSC_     = iConfig.getUntrackedParameter<bool>("saveFatCSC", false);
   saveFatRPC_     = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
-  saveJetAlpha_   = iConfig.getUntrackedParameter<bool>("saveJetAlpha", false);
   saveJet1BTag_    = iConfig.getUntrackedParameter<bool>("saveJet1BTag", false);
 
   //electron pflow
@@ -120,10 +119,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // data run informations
   dumpRunInfo_ = iConfig.getUntrackedParameter<bool>("dumpRunInfo",false);
 
-  // jet vertex collections
-  jetVertexAlphaCollection1_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection1");
-  jetVertexAlphaCollection2_ = iConfig.getParameter<edm::InputTag>("jetVertexAlphaCollection2");
-
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
   pflowElectronCollection_ = iConfig.getParameter<edm::InputTag>("pflowElectronCollection");
   photonCollection_        = iConfig.getParameter<edm::InputTag>("photonCollection");
@@ -148,6 +143,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
   PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
+  JPTjetCollection1_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection1");
+  JPTjetCollection2_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection2");
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
   PFmetCollection_         = iConfig.getParameter<edm::InputTag>("PFmetCollection");
@@ -482,11 +479,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-    CmsJetFiller treeRecoFill1(tree_, jetVertexAlphaCollection1_, true);
+    CmsJetFiller treeRecoFill1(tree_, true);
     std::string prefix("");
     std::string suffix("AK5Jet");
     treeRecoFill1.saveCand(saveCand_);
-    treeRecoFill1.saveJetExtras(saveJetAlpha_);
+    treeRecoFill1.saveJetExtras(true);
     treeRecoFill1.saveJetBTag(saveJet1BTag_);
     treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_);
 
@@ -500,10 +497,17 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     }
 
+    // Jet Plus Tracks jets
+    CmsJetFiller JetFiller2(tree_, true);
+    suffix = "AK5JPTJet";
+    JetFiller2.saveCand(saveCand_);
+    JetFiller2.writeCollectionToTree(JPTjetCollection1_, iEvent, iSetup, prefix, suffix, false, JPTjetCollection2_);
+
+
     // dump generated JETs
     if(dumpGenJets_) {
 
-      CmsJetFiller treeGenFill(tree_, jetVertexAlphaCollection1_, true);
+      CmsJetFiller treeGenFill(tree_, true);
       suffix = "AK5GenJet";
       treeGenFill.saveJetExtras(false);
       treeGenFill.saveJetBTag(false);

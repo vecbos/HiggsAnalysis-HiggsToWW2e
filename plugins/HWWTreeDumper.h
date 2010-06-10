@@ -99,6 +99,7 @@ private:
   edm::InputTag vertexCollection_;
   edm::InputTag K0sCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
+  edm::InputTag JPTjetCollection1_, JPTjetCollection2_;
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;
   //! supercluster collections in input
@@ -110,8 +111,6 @@ private:
   edm::InputTag ecalBarrelRecHits_, ecalEndcapRecHits_;
   //! track and calotowers collection for isolation studies
   edm::InputTag calotowersForIsolationProducer_;
-  //! collection of jet vertices for alpha evaluation
-  edm::InputTag jetVertexAlphaCollection1_, jetVertexAlphaCollection2_;
   //! calotowers collections
   edm::InputTag calotowerCollection_, hbheLabel_, hoLabel_, hfLabel_;
   std::vector<edm::InputTag> ecalLabels_;

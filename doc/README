@@ -78,6 +78,11 @@ cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/Is
 cvs co -r V00-3_5_X -d Configuration/ElectronIdentification UserCode/emanuele/Configuration/ElectronIdentification
 addpkg RecoEgamma/ElectronIdentification V00-03-08
 addpkg RecoEgamma/EgammaTools V00-05-03
+cvs co -r V02-00-05-07    CondFormats/JetMETObjects
+cvs co -r V02-00-02-03    JetMETCorrections/Configuration
+cvs co -r V02-00-02       JetMETCorrections/Algorithms
+cvs co -r V03-00-01       JetMETCorrections/Modules
+cvs co -r V03-00-01       JetMETCorrections/Objects
 
 cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
 cd RecoEgamma/ElectronIdentification/python/

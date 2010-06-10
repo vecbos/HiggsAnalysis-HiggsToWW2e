@@ -51,13 +51,11 @@ class CmsJetFiller : public CmsCandidateFiller {
 
   // Dump everything
   CmsJetFiller(CmsTree *, 
-	       edm::InputTag jetVertexAlphaCollection,
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
 
   // Dump  everything if fatTree is true and less informations otherwise
   CmsJetFiller(CmsTree *, 
-	       edm::InputTag jetVertexAlphaCollection,
 	       bool fatTree, 
 	       int maxTracks=500, int maxMCTracks=2000, 
 	       bool noOutputIfLimitsReached=false );
@@ -98,7 +96,6 @@ class CmsJetFiller : public CmsCandidateFiller {
   std::string *trkIndexName_;
 
   CmsJetFillerData *privateData_;
-  edm::InputTag jetVertexAlphaCollection_;
 
   CmsTree *cmstree;
 
