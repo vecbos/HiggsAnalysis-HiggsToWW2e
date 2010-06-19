@@ -25,9 +25,9 @@ do
     sleep 5
     crab -status -c $task > crab_${task}_status.log 2>&1
 
-    jobsSubmittingCreated=`cat crab_${task}_status.log | egrep "(Submit|Created|Running)" `
+    jobsSubmittingCreated=`cat crab_${task}_status.log | egrep "(Submit|Created|Running|Ready)" `
     if [ "${jobsSubmittingCreated}AAA" != "AAA" ]; then
-	echo ">>>> ${task} still in submission/created /running state. Better to wait or relaunch it. Do you want to relaunch it (y/n)?"
+	echo ">>>> ${task} still in submission/created/running/ready state. Better to wait or relaunch it.\n>>>> Do you want to relaunch it now (y/n)?"
 ###FIXME TO BE CHECKED CLEAN AND RELAUNCH
 	read KEYINPUT
 	if [ "$KEYINPUTXXX" == "yXXX" ]; then
@@ -42,7 +42,7 @@ do
     fi
    jobsDoneDup=`cat crab_${task}_status.log | grep -A 2 "Wrapper Exit Code" | grep -A 2 "Wrapper Exit Code : 60303" | grep -A2 ">>>>>>>>>" | grep "List of jobs:" | sed -e "s%.*List of jobs: %%g" | awk '{printf "%s,",$1}' | sed -e 's%,$%%g' | awk -f expandJobsList.awk | sed -e 's%,$%%g' ` 
    if [ "${jobsDoneDup}AAA" != "AAA" ]; then
-       echo ">>>> Jobs ${jobsDoneDup} are in status 60303 (FileAlready present in the output)"
+       echo ">>>> Jobs ${jobsDoneDup} are in status 60303 (FileAlready present in the output). In a future version can will be cleaned and relaunched"
    fi
 
     jobsCrashed=`cat crab_${task}_status.log | grep -A 2 "Wrapper Exit Code" | grep -v "Wrapper Exit Code : 0" | grep -v "Wrapper Exit Code : 60303" | grep -A2 ">>>>>>>>>" | grep "List of jobs:" | sed -e "s%.*List of jobs: %%g" | awk '{printf "%s,",$1}' | sed -e 's%,$%%g'` 
@@ -58,7 +58,7 @@ do
     fi
 
 
-    ##FINAL CHECKS. IF EVERYTHING OK THEN CLEARING OUTPUT
+    ##FINAL CHECKS. IF EVERYTHING OK THEN CLEARING OUTPUT. CONSIDERING GOOD FOR THE MOMENT ALSO 60303
     jobsDone=${jobsDoneOK},${jobsDoneDup}
     if [ "${jobsDone}AAA" != ",AAA" ]; then
 	echo ">>>> Checking output of jobs for task $task"
