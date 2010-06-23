@@ -381,7 +381,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
   float TowerHcalESum2 = towerIso2->getTowerESum(cand);
   float hcalESum = TowerHcalESum1 + TowerHcalESum2;
   
-  privateData_->hOverE->push_back(hcalESum);
+  privateData_->hOverE->push_back(hcalESum/cand->energy());
 
   delete towerIso1;
   delete towerIso2;
