@@ -66,8 +66,8 @@ while (<FILE>) {
 print CRABCFG 
     <<EOF;
 [CMSSW]
-events_per_job=$EVENTSPERJOB
-total_number_of_events=$NEVENTS
+lumis_per_job=$EVENTSPERJOB
+total_number_of_lumis=$NEVENTS
 # number_of_jobs=1
 #dbs_url=http://cmsdbsprod.cern.ch/cms_dbs_prod_global/servlet/DBSServlet 
 datasetpath=${DATASET}
@@ -91,7 +91,8 @@ copy_data = 1
 storage_element = srm-cms.cern.ch
 storage_path=/srm/managerv2?SFN=/castor/cern.ch
 user_remote_dir=/user/m/meridian/VecBos/${DIRNAME}/${RUNNUMBER}
-additional_input_files = /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db
+additional_input_files=/afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db
+check_user_remote_dir=0
 
 [CRAB]
 scheduler=glite

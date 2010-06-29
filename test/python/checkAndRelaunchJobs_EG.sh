@@ -9,7 +9,7 @@ source /afs/cern.ch/cms/ccs/wm/scripts/Crab/crab.sh
 CASTORDIR=$2
 BLACKLIST=`cat ~/physEGAMMA/dashboard/blacklist.txt` 
 
-for run in `find . -type d -name "$1*"| sed -e "s%$1_%%g" | sed -e "s%./%%g"` 
+for run in `find . -type d -name "$1*"| grep -v ".old" | sed -e "s%$1_%%g" | sed -e "s%./%%g"` 
 do
     task=${1}_${run}
 
@@ -30,7 +30,7 @@ do
 	echo ">>>> ${task} still in submission/created/running/ready state. Better to wait or relaunch it.\n>>>> Do you want to relaunch it now (y/n)?"
 ###FIXME TO BE CHECKED CLEAN AND RELAUNCH
 	read KEYINPUT
-	if [ "$KEYINPUTXXX" == "yXXX" ]; then
+	if [ "$KEYINPUT" == "y" ]; then
 	    rfrm -r ${CASTORDIR}/${run}; mv -f $task $task.old; crab -create -submit --GRID.ce_black_list='ce02.lcg.cscs.ch,ce11.lcg.cscs.ch' --GRID.se_black_list=${BLACKLIST}  -cfg crab_${task}.cfg > crab_${task}_resubmit.log 2>&1 &
 	fi
 	continue
