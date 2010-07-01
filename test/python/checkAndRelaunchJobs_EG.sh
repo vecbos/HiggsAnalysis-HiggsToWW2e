@@ -15,6 +15,7 @@ do
 
     echo "++++++++++ Checking task $task ++++++ "
 
+#    rm -rf ${task}/res/lumiSummary.json
     if [ -f ${task}/res/lumiSummary.json ]; then
 	echo ">>>> Task ${task} already cleared. Moving on"
 	continue
@@ -25,11 +26,11 @@ do
     sleep 5
     crab -status -c $task > crab_${task}_status.log 2>&1
 
+    nTotalJobs=`cat crab_${task}_status.log | grep "Total Jobs" | awk '{print $2}'`
     jobsSubmittingCreated=`cat crab_${task}_status.log | egrep "(Submit|Created|Running|Ready)" `
     if [ "${jobsSubmittingCreated}AAA" != "AAA" ]; then
-	echo ">>>> ${task} still in submission/created/running/ready state. Better to wait or relaunch it.\n>>>> Do you want to relaunch it now (y/n)?"
-###FIXME TO BE CHECKED CLEAN AND RELAUNCH
-	read KEYINPUT
+	echo ">>>> ${task} still in submission/created/running/ready state. Better to wait or relaunch it.\n>>>> Do you want to relaunch it now (y/n)? 10 seconds to decide"
+	read -t 10 KEYINPUT
 	if [ "$KEYINPUT" == "y" ]; then
 	    rfrm -r ${CASTORDIR}/${run}; mv -f $task $task.old; crab -create -submit --GRID.ce_black_list='ce02.lcg.cscs.ch,ce11.lcg.cscs.ch' --GRID.se_black_list=${BLACKLIST}  -cfg crab_${task}.cfg > crab_${task}_resubmit.log 2>&1 &
 	fi
@@ -59,8 +60,8 @@ do
 
 
     ##FINAL CHECKS. IF EVERYTHING OK THEN CLEARING OUTPUT. CONSIDERING GOOD FOR THE MOMENT ALSO 60303
-    jobsDone=${jobsDoneOK},${jobsDoneDup}
-    if [ "${jobsDone}AAA" != ",AAA" ]; then
+    jobsDone=${jobsDoneOK},${jobsDoneDup},
+    if [ "${jobsDone}AAA" != ",AAA," ]; then
 	echo ">>>> Checking output of jobs for task $task"
 	FILENOTOK=""
 	for job in `echo ${jobsDone} | sed -e 's%,% %g'`
@@ -75,10 +76,16 @@ do
 	    jobsCrashed=`echo ${FILENOTOK} | sed -e 's%,$%%g'` 
 	    crab -getoutput ${jobsCrashed} -c $task > crab_${task}_getoutput.log ; sleep 10; crab -forceResubmit ${jobsCrashed} --GRID.ce_black_list='ce02.lcg.cscs.ch,ce11.lcg.cscs.ch' --GRID.se_black_list=${BLACKLIST}  -c $task > crab_${task}_resubmit_crashed.log 2>&1 &
 	else
-	    if [ "${jobsCrashed}AAA" == "AAA"  -a "${jobsAborted}AAA" == "AAA" ]; then
+	    nJobsDoneOK=`echo $jobsDoneOK | awk -F "," '{print NF}'`
+	    nJobsDoneDup=`echo $jobsDoneDup | awk -F "," '{print NF}'`
+	    (( nJobsDone = nJobsDoneOK + nJobsDoneDup ))
+	    if [ "${jobsCrashed}AAA" == "AAA"  -a "${jobsAborted}AAA" == "AAA" -a ${nTotalJobs} == ${nJobsDone} ]; then
 		echo ">>>> Everything OK. Clearing task ${task}"
 		crab -getoutput -c $task > crab_${task}_getoutput.log ; sleep 2; crab -report -c $task > crab_${task}_report.log 2>&1 &
+	    else
+		echo ">>>> Still not all jobs done/retrieved/ok for ${task}. Try later"
 	    fi
+	    
 	fi
     fi
 done
