@@ -8,7 +8,8 @@ process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cf
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR10_P_V6::All'
+process.GlobalTag.globaltag = 'GR10_P_V7::All'
+#process.GlobalTag.globaltag = 'GR_R_36X_V12A::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
@@ -58,7 +59,9 @@ process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_
 process.load('HLTrigger/HLTfilters/hltLevel1GTSeed_cfi')
 process.L1BSC=process.hltLevel1GTSeed.clone()
 process.L1BSC.L1TechTriggerSeeding = cms.bool(True)
-process.L1BSC.L1SeedsLogicalExpression = cms.string('0 AND (34) AND NOT (36,37,38,39)')
+#process.L1BSC.L1SeedsLogicalExpression = cms.string('0 AND (34) AND NOT (36,37,38,39)')
+#Only BPTX gating
+process.L1BSC.L1SeedsLogicalExpression = cms.string('0')
 
 process.HFCoincidence =  cms.EDFilter("HFCoincidence",
                                       threshold = cms.untracked.double(2.0),
@@ -94,7 +97,8 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.p = cms.Path (
-    process.L1BSC *  process.HFCoincidence * process.noscraping * process.primaryVertexFilter *
+    process.L1BSC *
+#    process.HFCoincidence * process.noscraping * process.primaryVertexFilter *
     process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
     process.ourJetSequence * process.newBtaggingSequence *
     process.gsfElectrons *
