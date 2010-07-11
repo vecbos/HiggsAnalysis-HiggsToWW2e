@@ -4,6 +4,7 @@
 # LM: updated 03/04/2010 --> adapted to new runreg api (and dcs status info)
 # LM: updated 15/04/2010 --> added bfield threshold
 # LM: updated 3/05/2010 --> added Energy range selection,Lumi quality flags and DBS cross check
+# LM: updated 1/07/2010 --> fixed a bug which would prevent the BAD LS comment to be picked up for some runs
 
 # include XML-RPC client library
 # RR API uses XML-RPC webservices interface for data access
@@ -82,8 +83,11 @@ def searchrun(runno):
     intervallist=[]
     selectls=""
 
+    run_found=False
+
     for line in ls_temp_data.split("\n"):
         if runno in line:
+            run_found=True
 #            print line
             try:
                 if "%%%BAD LS INFO BEGIN%%%" in line:
@@ -122,6 +126,9 @@ def searchrun(runno):
                 EXRUN=int(runno)
     intervallist=merge_intervals(intervallist)
     # print runno, intervallist
+    if not run_found:
+        print "\nWARNING: run "+runno+" not found in the ls table, no LSBAD comment parsed for this run"
+
     return intervallist
 
 
@@ -172,7 +179,7 @@ def ene_in_run(run_data):
 #    RRserver = xmlrpclib.ServerProxy('http://pccmsdqm04.cern.ch/runregistry/xmlrpc')
 #    selection="{groupName} ='Collisions10' and {runNumber} >= "+RUNMIN+" and {runNumber} <= "+RUNMAX+" and {bfield}>"+BFIELD+" and {datasetName} LIKE '%Express%'"
 #    XMLALL = RRserver.DataExporter.export('RUN', 'GLOBAL', 'xml_all', selection)
-##    print XMLALL
+#    print XMLALL
 #    doc = xml.dom.minidom.parseString(XMLALL)
 #    run_list = doc.getElementsByTagName('RUN')
 ##    print run_list
@@ -214,6 +221,7 @@ def ene_in_run(run_data):
 #            print "WARNING: run "+run+" not found in RR energy map, using default energy for it."
 #            ene_map[str(runno)]=BEAM_ENE_DEF
 #
+#    print ene_map
 #    return ene_map
 
 # in order to get dbsjson files
@@ -360,7 +368,7 @@ except:
 try:
     BEAMENE_float=float(BEAMENE)
 except:
-    print "BEAMENE threshold value not understood:",BFIELD
+    print "BEAMENE value not understood:",BEAMENE
     sys.exit(1)
 
 # report the request
@@ -402,7 +410,7 @@ sel_dstable="{groupName} ='"+GROUP+"' and {runNumber} >= "+RUNMIN+" and {runNumb
 for key in QF_Req.keys():
     if key != "Lumi" and key != "NONE" and QF_Req[key]!="NONE":
         sel_runtable+=" and {cmp"+key+"} = '"+QF_Req[key]+"'"
-        sel_dstable+=" and {cmp"+key+"} = '"+QF_Req[key]+"'"
+#        sel_dstable+=" and {cmp"+key+"} = '"+QF_Req[key]+"'"
 #print sel_runtable
 
 # build up selection in RUNLUMISECTION table, not requestuing bfield here because only runs in the run table selection will be considered
@@ -422,6 +430,8 @@ while Tries<10:
         dcs_data = server.DataExporter.export('RUNLUMISECTION', 'GLOBAL', 'json', sel_dcstable)
         run_data = server.DataExporter.export('RUN', 'GLOBAL', 'csv_runs', sel_runtable)
         ls_temp_data = server.DataExporter.export('RUN', 'GLOBAL', 'csv_datasets', sel_dstable)
+            
+
         break
     except:
         print "Something wrong in accessing runregistry, retrying in 3s...."
@@ -504,7 +514,7 @@ for element in jsonlist:
 # WARNING: Don't use selected_dcs before dumping into file, it gets screwed up (don't know why!!)
 if JSONFILE != "NONE":
     lumiSummary = open(JSONFILE, 'w')
-    json.dump(selected_dcs, lumiSummary)
+    json.dump(selected_dcs, lumiSummary,sort_keys=True)
     lumiSummary.close() 
     print " "
     print "-------------------------------------------"

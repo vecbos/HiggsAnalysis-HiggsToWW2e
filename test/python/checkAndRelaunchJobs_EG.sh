@@ -79,7 +79,7 @@ do
 	    nJobsDoneOK=`echo $jobsDoneOK | awk -F "," '{print NF}'`
 	    nJobsDoneDup=`echo $jobsDoneDup | awk -F "," '{print NF}'`
 	    (( nJobsDone = nJobsDoneOK + nJobsDoneDup ))
-	    if [ "${jobsCrashed}AAA" == "AAA"  -a "${jobsAborted}AAA" == "AAA" -a ${nTotalJobs} == ${nJobsDone} ]; then
+	    if [ "${jobsCrashed}AAA" == "AAA"  -a "${jobsAborted}AAA" == "AAA" -a "${nTotalJobs}AAA" == "${nJobsDone}AAA" ]; then
 		echo ">>>> Everything OK. Clearing task ${task}"
 		crab -getoutput -c $task > crab_${task}_getoutput.log ; sleep 2; crab -report -c $task > crab_${task}_report.log 2>&1 &
 	    else
