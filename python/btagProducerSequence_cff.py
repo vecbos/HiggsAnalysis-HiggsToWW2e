@@ -40,14 +40,20 @@ newSoftElectronTagInfos = RecoBTag.Configuration.RecoBTag_cff.softElectronTagInf
 newSoftElectronTagInfos.jets = "ak5CaloJetsL2L3"
 newSoftElectronBJetTags = RecoBTag.Configuration.RecoBTag_cff.softElectronBJetTags.clone()
 newSoftElectronBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSoftElectronTagInfos") )
+newSoftElectronByIP3dBJetTags = RecoBTag.Configuration.RecoBTag_cff.softElectronByIP3dBJetTags.clone()
+newSoftElectronByIP3dBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSoftElectronTagInfos") )
+newSoftElectronByPtBJetTags = RecoBTag.Configuration.RecoBTag_cff.softElectronByPtBJetTags.clone()
+newSoftElectronByPtBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSoftElectronTagInfos") )
 
 # soft muon b-tag
 newSoftMuonTagInfos = RecoBTag.Configuration.RecoBTag_cff.softMuonTagInfos.clone()
 newSoftMuonTagInfos.jets = "ak5CaloJetsL2L3"
 newSoftMuonBJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonBJetTags.clone()
 newSoftMuonBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSoftMuonTagInfos") )
-newSoftMuonNoIPBJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonNoIPBJetTags.clone()
-newSoftMuonNoIPBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSoftMuonTagInfos") )
+newSoftMuonByIP3dBJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonByIP3dBJetTags.clone()
+newSoftMuonByIP3dBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSoftMuonTagInfos") )
+newSoftMuonByPtBJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonByPtBJetTags.clone()
+newSoftMuonByPtBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newSoftMuonTagInfos") )
 
 # prepare a path running the new modules
 newJetTracksAssociator = cms.Sequence(
@@ -71,14 +77,18 @@ newJetBtaggingSV = cms.Sequence(
     )
 
 newJetBtaggingEle = cms.Sequence(
+    softElectronCands * 
     newSoftElectronTagInfos *
-       newSoftElectronBJetTags
+       newSoftElectronBJetTags +
+       newSoftElectronByIP3dBJetTags +
+       newSoftElectronByPtBJetTags
     )
 
 newJetBtaggingMu = cms.Sequence(
     newSoftMuonTagInfos * (
        newSoftMuonBJetTags +
-       newSoftMuonNoIPBJetTags )
+       newSoftMuonByIP3dBJetTags +
+       newSoftMuonByPtBJetTags )
     )
 
 newJetBtagging = cms.Sequence(
