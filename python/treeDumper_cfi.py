@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-treeDumper = cms.EDFilter("HWWTreeDumper",
+treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                           TriggerResultsTag = cms.InputTag("TriggerResults::HLT"),
                           electronCollection = cms.InputTag("ambiguityResolvedElectrons"),
                           #pflowElectronCollection = cms.InputTag("particleFlow","electrons"),
