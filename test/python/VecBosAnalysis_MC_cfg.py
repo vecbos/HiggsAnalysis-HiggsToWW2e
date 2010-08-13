@@ -6,7 +6,8 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START3X_V26A::All'
+process.GlobalTag.globaltag = 'START38_V9::All'
+process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
@@ -66,7 +67,6 @@ process.source = cms.Source("PoolSource",
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedBasicClusters * process.mergedSuperClusters *
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.ourJetSequence * process.newBtaggingSequence *
-                       process.gsfElectrons *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )

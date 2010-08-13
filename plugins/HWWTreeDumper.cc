@@ -498,10 +498,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     }
 
     // Jet Plus Tracks jets
-    CmsJetFiller JetFiller2(tree_, true);
-    suffix = "AK5JPTJet";
-    JetFiller2.saveCand(saveCand_);
-    JetFiller2.writeCollectionToTree(JPTjetCollection1_, iEvent, iSetup, prefix, suffix, false, JPTjetCollection2_);
+//     CmsJetFiller JetFiller2(tree_, true);
+//     suffix = "AK5JPTJet";
+//     JetFiller2.saveCand(saveCand_);
+//     JetFiller2.writeCollectionToTree(JPTjetCollection1_, iEvent, iSetup, prefix, suffix, false, JPTjetCollection2_);
 
 
     // dump generated JETs

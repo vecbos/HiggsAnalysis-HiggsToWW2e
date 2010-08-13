@@ -1,12 +1,12 @@
 import FWCore.ParameterSet.Config as cms
 
-process = cms.Process("JPsiAnalysis")
+process = cms.Process("VecBosAnalysis")
 
 process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR10_P_V5::All'
+process.GlobalTag.globaltag = 'GR10_P_V8::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
@@ -56,12 +56,11 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('/store/data/Commissioning10/MinimumBias/RECO/May3rdReReco_PreProduction_v1/0103/FED84A1A-1D57-DF11-9CE8-0018F3D09678.root')
+                            fileNames = cms.untracked.vstring('/store/data/Run2010A/EG/RECO/Jul16thReReco-v2/0063/10753EB3-2591-DF11-822A-002618943800.root')
                             )
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
                        process.ourJetSequence * process.newBtaggingSequence *
-                       process.gsfElectrons *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
