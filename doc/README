@@ -1,3 +1,37 @@
+--- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 38X / 39X ---
+
+cmsrel CMSSW_3_9_0_pre1
+cd CMSSW_3_9_0_pre1/src
+cmsenv
+
+cvs co -r V01-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V00-3_5_X -d Configuration/ElectronIdentification UserCode/emanuele/Configuration/ElectronIdentification
+addpkg RecoEgamma/ElectronIdentification
+cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+
+cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
+cd RecoEgamma/ElectronIdentification/python/
+rm likelihoodPdfsDB_cfi.py
+wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
+cd -
+
+scram b
+
+cd HiggsAnalysis/HiggsToWW2e/test/python
+(1) H->WW trees:
+cmsRun HWW2eAnalysis_cfg.py
+(2) V+jets trees:
+cmsRun VecBosAnalysis_data_cfg.py
+cmsRun VecBosAnalysis_MC_cfg.py
+(3) J/Psi trees:
+cmsRun JPsiAnalysis_data_cfg.py
+cmsRun JPsiAnalysis_MC_cfg.py
+
+* crab and multicrab cfgs examples are in:
+HiggsAnalysis/HiggsToWW2e/test/crab
+
+
+
 --- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 361_p2 ---
 
 scramv1 p CMSSW CMSSW_3_6_1_patch2
