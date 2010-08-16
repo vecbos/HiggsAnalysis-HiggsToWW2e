@@ -119,10 +119,10 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->jetProbabilityBJetTags;
   delete privateData_->simpleSecondaryVertexBJetTags;
   delete privateData_->softMuonBJetTags;
-  delete privateData_->softMuonByPtBJetTags;
+  delete privateData_->softMuonByIP3dBJetTags;
   delete privateData_->softMuonByPtBJetTags;
   delete privateData_->softElectronBJetTags;
-  delete privateData_->softElectronByPtBJetTags;
+  delete privateData_->softElectronByIP3dBJetTags;
   delete privateData_->softElectronByPtBJetTags;
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
