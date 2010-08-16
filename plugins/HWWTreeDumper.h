@@ -129,8 +129,6 @@ private:
   TFile *fileOut_;
   //! the tree with the events
   CmsTree *tree_;
-  //! the tree with the run conditions (for now only the trigger words)
-  TTree *treeConditions_;
 
   //! number of the processed event
   int jevt_;

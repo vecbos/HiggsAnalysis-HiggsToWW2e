@@ -205,17 +205,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string suffix ("Trg") ;
     triggerTreeFill.writeTriggerToTree (triggerInputTag_, iEvent, prefix, suffix) ;
 
-    /// fill the trigger mask in the Conditions tree
-    if ( jevt_ == 1 ) {
-
-      CmsConditionsFiller conditionsFiller( treeConditions_ );
-      conditionsFiller.setHLTResults( triggerInputTag_, iEvent );
-      conditionsFiller.writeConditionsToTree( iSetup, "", "", true);
-
-      jevt_++;
-
-    }
-
+    /// fill the trigger mask in the Event tree
+    std::vector<std::string>* trgNames = new vector<std::string>;
+    bool firstEvent = true;
+    if(jevt_>1) firstEvent=false; 
+    CmsConditionsFiller conditionsFiller( tree_, trgNames );
+    conditionsFiller.writeConditionsToTree( triggerInputTag_, iEvent,  firstEvent);
+    jevt_++;
   }
 
 
@@ -544,8 +540,6 @@ void HWWTreeDumper::beginJob() {
 
   tree_  = new  CmsTree(nameTree_.c_str(),nameTree_.c_str());
 
-  treeConditions_ = new TTree("Conditions","Conditions");
-
   jevt_ = 1;
 
 }
@@ -559,8 +553,6 @@ void  HWWTreeDumper::endJob() {
 
   TTree* treeEventsOut = tree_->getTree();
   treeEventsOut->Write();
-
-  treeConditions_->Write();
 
   fileOut_->Close();
 

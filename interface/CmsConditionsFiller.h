@@ -17,6 +17,13 @@
 #include <vector>
 
 struct CmsConditionsFillerData {
+  int *nHLT;
+  std::vector<int> *trgIndices;
+  std::vector<std::string> *trgNames;
+  
+  public:
+  void initialise(std::vector<std::string>* trgnames);
+  void clearVectors();
 };
 
 class CmsConditionsFiller {
@@ -24,39 +31,24 @@ class CmsConditionsFiller {
  public:
 
   /// Constructor
-  CmsConditionsFiller(TTree * );
+  CmsConditionsFiller(CmsTree *, std::vector<std::string>* trgNames );
 
   /// Destructor
   virtual ~CmsConditionsFiller();
 
   /// dump the "conditions", i.e. trigger mask right now.
-  virtual void writeConditionsToTree(const edm::EventSetup&,
-				     const std::string &columnPrefix, const std::string &columnSuffix,
-				     bool dumpData=false);
+  virtual void writeConditionsToTree(edm::InputTag triggerTag, const edm::Event&, bool firstEvent);
 
-  /// set the HLT results handle
-  virtual void setHLTResults(edm::InputTag triggerTag, const edm::Event& iEvent);
+  /// create the branches at the first event
+  void setHLTResults();
 
  protected:
   
-  void writeConditionsInfo(const edm::EventSetup&);
-  void treeConditionsInfo(const std::string colPrefix, const std::string colSuffix);
-
   /// the data container of this filler
   CmsConditionsFillerData *privateData_;
   
   /// the physical tree
-  TTree *tree;
-
-  /// the trigger names container
-  edm::TriggerNames hltNames_;
-  /// to be stored in the ROOT tree
-  int nHLT_;
-  std::vector< std::string > trgNames_;
-  std::vector<unsigned int> trgIndices_;
-
-  /// used to initialize HLT only once if needed
-  bool HLTinitialised_;
+  CmsTree *cmstree;
 
 };
 
