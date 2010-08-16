@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //---------------------------------------------------------------------------------
 //
-// $Id: CmsTreeColumn.cc,v 1.1 2007/04/13 13:05:16 emanuele Exp $
+// $Id: CmsTreeColumn.cc,v 1.1 2007/07/20 15:48:13 govoni Exp $
 //
 // Description:
 //    Class CmsTreeColumn
@@ -393,3 +393,41 @@ void DoubleDynArrCmsTreeColumn::setValue( const void* p, CmsTreeColumn* cp ) {
 }
 
 
+// String columns:
+StringCmsTreeColumn::StringCmsTreeColumn( const char* lb, const string & v, 
+                                          const string & d, TTree* tp ) : 
+  CmsTreeColumn( lb ), defValue( d ) {
+				 
+  // Create a new branch:
+  int l = v.length();
+  char* cp = new char[l+1];
+  pointer= cp;
+  strcpy( cp, v.c_str() );
+  std::string leafs( lb ) ;
+  leafs+= "/C";
+  brp= tp->Branch( label.c_str(), pointer, leafs.c_str(), 8000 );
+
+}
+
+void StringCmsTreeColumn::setDefValue() {
+
+  if( pointer ) delete[] (char*)pointer;
+  int l= defValue.length();
+  char* cp= new char[l+1];
+  pointer= cp;
+  strcpy( cp, defValue.c_str() );
+  brp->SetAddress( &cp[0] );
+
+}
+
+void StringCmsTreeColumn::setValue( const void* p, CmsTreeColumn* cp ) {
+
+  const char* cpin= (const char*) p;
+  if( pointer ) delete[] (char*)pointer;
+  int l= strlen( cpin );
+  char* chp= new char[l+1];
+  pointer= chp;
+  strcpy( chp, cpin );
+  brp->SetAddress( &chp[0] );
+
+}

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //---------------------------------------------------------------------------------
 //
-// $Id: CmsTreeColumn.h,v 1.1 2007/04/13 13:05:16 emanuele Exp $
+// $Id: CmsTreeColumn.h,v 1.1 2007/07/20 15:48:12 govoni Exp $
 //
 // Description:
 //    Class CmsTreeColumn
@@ -191,5 +191,15 @@ private:
   CmsTreeColumn* indexp;
 };
 
+// Classes for string:
+class StringCmsTreeColumn : public CmsTreeColumn {
+public:
+  StringCmsTreeColumn( const char*, const string &, const string &, TTree* );
+  virtual ~StringCmsTreeColumn() { delete[] (char*)pointer; }
+  virtual void setDefValue();
+  virtual void setValue( const void* p, CmsTreeColumn* cp= 0 );
+private:
+  string defValue;
+};
 
 #endif  // CmsTreeColumn_h

@@ -140,6 +140,14 @@ public:
 		       const char* block= 0);
 
 
+  // ====== String type ======
+  // Make/fill column with a single value
+  virtual void column( const char* label, 
+		       string value,
+		       string defval= string(""),
+		       const char* block= 0);
+
+
   // Dump all the data into the ntuple and then clear:
   virtual int dumpData();
      

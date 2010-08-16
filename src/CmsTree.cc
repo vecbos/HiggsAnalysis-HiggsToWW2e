@@ -312,6 +312,29 @@ void CmsTree::column( const char* label,
 
 
 
+// ====== String type ======
+// Make/fill column with a single value
+void CmsTree::column( const char* label, 
+		       string value,
+		       string defval,
+		       const char* block) {
+
+  CmsTreeColumn* colp= lpmap.getColumn( label );
+  if( colp ) {
+    // Column exists, fill corresponding memory location with value:
+    colp->setValue( &value );
+    colp->setUseDefValue( false );
+  }
+  else {
+    // Create a new column:
+    colp= new StringCmsTreeColumn( label, value, defval, treep );
+    lpmap.append( colp );
+  }
+
+
+}
+
+
 // Dump all the data into the ntuple and then clear
 int CmsTree::dumpData() { 
 
