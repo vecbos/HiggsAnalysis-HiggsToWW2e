@@ -50,18 +50,18 @@ process.treeDumper.saveJet1BTag = True
 process.treeDumper.dumpTree = True
 
 # in order to take the correct HLT informations in Spring10 samples
-process.treeDumper.TriggerResultsTag = "TriggerResults::REDIGI"
+process.treeDumper.TriggerResultsTag = "TriggerResults::REDIGI37X"
 
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('/store/mc/Spring10/QCD_BCtoE_Pt80to170/GEN-SIM-RECO/MC_3XY_V25_S09_preproduction-v2/0120/08901658-0F3B-DF11-8E12-001D0967DA17.root')
+                            fileNames = cms.untracked.vstring('/store/mc/Summer10/Wenu/GEN-SIM-RECO/START37_V5_S09-v1/0136/D825D343-F681-DF11-AD47-00215E21DECA.root')
                             )
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedBasicClusters * process.mergedSuperClusters *
