@@ -302,7 +302,15 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
           const CaloJet *uncorrectedRecoJet = dynamic_cast< const CaloJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
-          if( thisRecoJet->eta() == uncorrectedRecoJet->eta() && thisRecoJet->phi() == uncorrectedRecoJet->phi() ) {
+          std::vector <CaloTowerPtr> candConstituents = thisRecoJet->getCaloConstituents();
+          std::vector <CaloTowerPtr> cand2Constituents = uncorrectedRecoJet->getCaloConstituents();
+          CaloTowerPtr candFirstCT = candConstituents.at(0);
+          CaloTowerPtr candLastCT = candConstituents.at(candConstituents.size()-1);
+          CaloTowerPtr cand2FirstCT = cand2Constituents.at(0);
+          CaloTowerPtr cand2LastCT = cand2Constituents.at(cand2Constituents.size()-1);
+
+          if( thisRecoJet->eta() == uncorrectedRecoJet->eta() && thisRecoJet->phi() == uncorrectedRecoJet->phi() && 
+              candConstituents.size() == cand2Constituents.size() && candFirstCT == cand2FirstCT && candLastCT == cand2LastCT ) {
 
             rawEnergy = uncorrectedRecoJet->energy();
 
