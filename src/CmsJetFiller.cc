@@ -11,6 +11,7 @@
 // system include files
 #include <memory>
 
+#include "PhysicsTools/SelectorUtils/interface/JetIDSelectionFunctor.h"
 #include "FWCore/Framework/interface/Frameworkfwd.h"
 #include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
@@ -113,6 +114,14 @@ CmsJetFiller::~CmsJetFiller() {
   // delete here the vector ptr's
   delete privateData_->emFrac;
   delete privateData_->hadFrac;
+  delete privateData_->Id;
+  delete privateData_->nHit;
+  delete privateData_->nHit90;
+  delete privateData_->fHPD;
+  delete privateData_->covEtaEta;
+  delete privateData_->covPhiPhi;
+  delete privateData_->fLS;
+  delete privateData_->fOOT;
   delete privateData_->combinedSecondaryVertexBJetTags;
   delete privateData_->combinedSecondaryVertexMVABJetTags;
   delete privateData_->jetBProbabilityBJetTags;
@@ -152,9 +161,9 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
 
-  const edm::View<reco::Candidate> *uncorrectedCollection = 0;
+  const edm::View<reco::CaloJet> *uncorrectedCollection = 0;
   if(uncorrectedCollectionTag.label() != std::string("")) {
-    edm::Handle< edm::View<reco::Candidate> > uncorrectedCollectionHandle;
+    edm::Handle< edm::View<reco::CaloJet> > uncorrectedCollectionHandle;
     try { iEvent.getByLabel(uncorrectedCollectionTag, uncorrectedCollectionHandle); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << uncorrectedCollectionTag; }
     uncorrectedCollection = uncorrectedCollectionHandle.product();
@@ -214,6 +223,19 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       iEvent.getByLabel("newTrackCountingHighEffBJetTags", trackCountingHighEffBJetTags);
     }
 
+    edm::Handle<reco::JetIDValueMap> hJetIDMap;
+    if(saveJetExtras_) {
+      if ( iEvent.getByLabel( "ak5JetID", hJetIDMap ) ) {}
+      else edm::LogWarning("CmsJetFiller") << "Can't get ak5JetID collection." << endl;
+    }
+
+    JetIDSelectionFunctor jetIDFunctorPURE1( JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::MINIMAL );
+    JetIDSelectionFunctor jetIDFunctorPURE2( JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::LOOSE );
+    JetIDSelectionFunctor jetIDFunctorPURE3( JetIDSelectionFunctor::PURE09, JetIDSelectionFunctor::TIGHT );
+    JetIDSelectionFunctor jetIDFunctorDQM1( JetIDSelectionFunctor::DQM09, JetIDSelectionFunctor::MINIMAL );
+    JetIDSelectionFunctor jetIDFunctorDQM2( JetIDSelectionFunctor::DQM09, JetIDSelectionFunctor::LOOSE );
+    JetIDSelectionFunctor jetIDFunctorDQM3( JetIDSelectionFunctor::DQM09, JetIDSelectionFunctor::TIGHT );
+
     int index = 0;
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
@@ -223,7 +245,7 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       // fill jet extra informations
       if(saveJetExtras_) { 
 
-	// em, had fractions
+	// em, had fractions and Jet ID
 	if( thisRecoJet != 0 ) { 
 	  privateData_->emFrac->push_back( thisRecoJet->emEnergyFraction() );
 	  privateData_->hadFrac->push_back( thisRecoJet->energyFractionHadronic() );
@@ -271,17 +293,55 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       // if an uncorrected jet collection is provided, save also the uncorrected energy
       if(uncorrectedCollection) {
         dumpUncorrEnergy_ = true;
-        float rawEnergy = -1.;
-        edm::View<reco::Candidate>::const_iterator cand2;
+        float rawEnergy = -999.;
+        float fHPD, covEtaEta, covPhiPhi, fLS, fOOT;
+        fHPD = covEtaEta = covPhiPhi = fLS = fOOT = -999.;
+        int Id, nHit, nHit90;
+        Id = nHit = nHit90 = -999;
+        edm::View<reco::CaloJet>::const_iterator cand2;
         for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
           const CaloJet *uncorrectedRecoJet = dynamic_cast< const CaloJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
           if( thisRecoJet->eta() == uncorrectedRecoJet->eta() && thisRecoJet->phi() == uncorrectedRecoJet->phi() ) {
+
             rawEnergy = uncorrectedRecoJet->energy();
+
+            if(saveJetExtras_) { // jet ID has to be done on uncorrected jets
+              unsigned int idx = cand2 - uncorrectedCollection->begin();
+              edm::RefToBase<reco::CaloJet> jetRef = uncorrectedCollection->refAt(idx);
+              reco::JetID const & jetId = (*hJetIDMap)[ jetRef ];
+
+              fHPD = jetId.fHPD;
+              fLS = jetId.fLS;
+              fOOT = jetId.fHFOOT;
+              nHit = jetIDFunctorPURE1.count_hits( cand2->getCaloConstituents() );
+              nHit90 = jetId.n90Hits;
+              covEtaEta = cand2->etaetaMoment();
+              covPhiPhi = cand2->phiphiMoment();
+
+              int passedPURE1 = ( jetIDFunctorPURE1( *cand2, jetId ) ) ? 1 : 0;
+              int passedPURE2 = ( jetIDFunctorPURE2( *cand2, jetId ) ) ? 1 : 0;
+              int passedPURE3 = ( jetIDFunctorPURE3( *cand2, jetId ) ) ? 1 : 0;
+              int passedDQM1 = ( jetIDFunctorDQM1( *cand2, jetId ) ) ? 1 : 0;
+              int passedDQM2 = ( jetIDFunctorDQM2( *cand2, jetId ) ) ? 1 : 0;
+              int passedDQM3 = ( jetIDFunctorDQM3( *cand2, jetId ) ) ? 1 : 0;
+
+              Id = ( passedPURE3 << 5 ) | ( passedPURE2 << 4 ) | ( passedPURE1 << 3 ) |
+                ( passedDQM3 << 2 ) | ( passedDQM2 << 1 ) | passedDQM1; 
+
+            }
             break;
           }
         }
         privateData_->uncorrEnergy->push_back(rawEnergy);
+        privateData_->Id->push_back(Id);
+        privateData_->nHit->push_back(nHit);
+        privateData_->nHit90->push_back(nHit90);
+        privateData_->fHPD->push_back(fHPD);
+        privateData_->covEtaEta->push_back(covEtaEta);
+        privateData_->covPhiPhi->push_back(covPhiPhi);
+        privateData_->fLS->push_back(fLS);
+        privateData_->fOOT->push_back(fOOT);
       } else dumpUncorrEnergy_ = false;
       index++;
     }
@@ -317,6 +377,16 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
+  if(saveJetExtras_) {
+    cmstree->column((colPrefix+"Id"+colSuffix).c_str(), *privateData_->Id, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"nHit"+colSuffix).c_str(), *privateData_->nHit, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"nHit90"+colSuffix).c_str(), *privateData_->nHit90, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"fHPD"+colSuffix).c_str(), *privateData_->fHPD, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"covEtaEta"+colSuffix).c_str(), *privateData_->covEtaEta, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"covPhiPhi"+colSuffix).c_str(), *privateData_->covPhiPhi, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"fLS"+colSuffix).c_str(), *privateData_->fLS, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"fOOT"+colSuffix).c_str(), *privateData_->fOOT, nCandString.c_str(), 0, "Reco");
+  }
   if(saveJetBTag_) {
     cmstree->column((colPrefix+"combinedSecondaryVertexBJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"combinedSecondaryVertexMVABJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexMVABJetTags, nCandString.c_str(), 0, "Reco");
@@ -344,10 +414,17 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
 
 
 void CmsJetFillerData::initialise() {
-
   initialiseCandidate();
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
+  Id = new vector<int>;
+  nHit = new vector<int>;
+  nHit90 = new vector<int>;
+  fHPD = new vector<float>;
+  covEtaEta = new vector<float>;
+  covPhiPhi = new vector<float>;
+  fLS = new vector<float>;
+  fOOT = new vector<float>;
   combinedSecondaryVertexBJetTags = new vector<float>;
   combinedSecondaryVertexMVABJetTags = new vector<float>;
   jetBProbabilityBJetTags = new vector<float>;
@@ -372,6 +449,14 @@ void CmsJetFillerData::clearTrkVectors() {
   clearTrkVectorsCandidate();
   emFrac->clear();
   hadFrac->clear();
+  Id->clear();
+  nHit->clear();
+  nHit90->clear();
+  fHPD->clear();
+  covEtaEta->clear();
+  covPhiPhi->clear();
+  fLS->clear();
+  fOOT->clear();
   combinedSecondaryVertexBJetTags->clear();
   combinedSecondaryVertexMVABJetTags->clear();
   jetBProbabilityBJetTags->clear();

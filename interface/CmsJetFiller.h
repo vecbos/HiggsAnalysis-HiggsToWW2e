@@ -26,7 +26,9 @@
 struct CmsJetFillerData : public CmsCandidateFillerData {
 
   std::vector<float> *emFrac, *hadFrac;
-  std::vector<float> *alpha;
+  std::vector<int> *Id;
+  std::vector<int> *nHit, *nHit90;
+  std::vector<float> *fHPD, *covEtaEta, *covPhiPhi, *fLS, *fOOT;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *combinedSecondaryVertexMVABJetTags,
     *jetBProbabilityBJetTags,
