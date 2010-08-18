@@ -4,7 +4,7 @@ cmsrel CMSSW_3_9_0_pre1
 cd CMSSW_3_9_0_pre1/src
 cmsenv
 
-cvs co -r V02-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V03-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-3_5_X -d Configuration/ElectronIdentification UserCode/emanuele/Configuration/ElectronIdentification
 addpkg RecoEgamma/ElectronIdentification
 cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
