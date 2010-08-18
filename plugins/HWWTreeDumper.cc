@@ -47,6 +47,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsVertexFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsJPTJetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCaloTowerFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsV0CandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
@@ -79,8 +80,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveFatDT_      = iConfig.getUntrackedParameter<bool>("saveFatDT", false);
   saveFatCSC_     = iConfig.getUntrackedParameter<bool>("saveFatCSC", false);
   saveFatRPC_     = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
-  saveJet1BTag_    = iConfig.getUntrackedParameter<bool>("saveJet1BTag", false);
-  saveJet2BTag_    = iConfig.getUntrackedParameter<bool>("saveJet2BTag", false);
+  saveJetBTag_    = iConfig.getUntrackedParameter<bool>("saveJetBTag", false);
 
   //electron pflow
   savePFEleTrk_    = iConfig.getUntrackedParameter<bool>("savePFEleGsfTrk", true);
@@ -476,40 +476,40 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   // fill JET block
   if(dumpJets_) {
 
-    CmsJetFiller treeRecoFill1(tree_, true);
+    CmsJetFiller caloJetFiller(tree_, true);
     std::string prefix("");
     std::string suffix("AK5Jet");
-    treeRecoFill1.saveCand(saveCand_);
-    treeRecoFill1.saveJetExtras(true);
-    treeRecoFill1.saveJetBTag(saveJet1BTag_);
-    treeRecoFill1.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_);
+    caloJetFiller.saveCand(saveCand_);
+    caloJetFiller.saveJetExtras(true);
+    caloJetFiller.saveJetBTag(saveJetBTag_);
+    caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_);
 
 
     // particle flow jets
     if ( dumpParticleFlowObjects_ ) {  
-      CmsPFJetFiller pfJetFiller1(tree_, true);
+      CmsPFJetFiller pfJetFiller(tree_, true);
       suffix = "AK5PFJet";
-      pfJetFiller1.saveCand(saveCand_);
-      pfJetFiller1.saveJetBTag(saveJet2BTag_);
-      pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
+      pfJetFiller.saveCand(saveCand_);
+      pfJetFiller.saveJetBTag(saveJetBTag_);
+      pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
 
     }
 
     // Jet Plus Tracks jets
-//     CmsJetFiller JetFiller2(tree_, true);
-//     suffix = "AK5JPTJet";
-//     JetFiller2.saveCand(saveCand_);
-//     JetFiller2.writeCollectionToTree(JPTjetCollection1_, iEvent, iSetup, prefix, suffix, false, JPTjetCollection2_);
-
+    CmsJPTJetFiller jptJetFiller(tree_, true);
+    suffix = "AK5JPTJet";
+    jptJetFiller.saveCand(saveCand_);
+    jptJetFiller.saveJetBTag(saveJetBTag_);
+    jptJetFiller.writeCollectionToTree(JPTjetCollection1_, iEvent, iSetup, prefix, suffix, false, JPTjetCollection2_);
 
     // dump generated JETs
     if(dumpGenJets_) {
 
-      CmsJetFiller treeGenFill(tree_, true);
+      CmsJetFiller genJetFiller(tree_, true);
       suffix = "AK5GenJet";
-      treeGenFill.saveJetExtras(false);
-      treeGenFill.saveJetBTag(false);
-      treeGenFill.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
+      genJetFiller.saveJetExtras(false);
+      genJetFiller.saveJetBTag(false);
+      genJetFiller.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     }
 

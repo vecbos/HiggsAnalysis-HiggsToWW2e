@@ -12,6 +12,9 @@ process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
 # --- electron sequences ---
 process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
@@ -63,9 +66,10 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('/store/mc/Summer10/Wenu/GEN-SIM-RECO/START37_V5_S09-v1/0136/D825D343-F681-DF11-AD47-00215E21DECA.root')
                             )
 
-process.p = cms.Path ( process.lowThrCaloTowers * process.mergedBasicClusters * process.mergedSuperClusters *
+process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
-                       process.ourJetSequence * process.newBtaggingSequence * process.newPFJetBtaggingSequence *
+                       process.ourJetSequence *
+                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newJPTJetBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )

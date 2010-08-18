@@ -11,6 +11,9 @@ process.GlobalTag.globaltag = 'GR10_P_V8::All'
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
 # --- electron sequences ---
 process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
@@ -58,8 +61,9 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('/store/data/Run2010A/EG/RECO/Jul16thReReco-v2/0063/10753EB3-2591-DF11-822A-002618943800.root')
                             )
 
-process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
-                       process.ourJetSequence * process.newBtaggingSequence * process.newPFJetBtaggingSequence *
+process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
+                       process.ourJetSequence *
+                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newJPTJetBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
