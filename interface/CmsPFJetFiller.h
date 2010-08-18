@@ -28,8 +28,9 @@
 
 struct CmsPFJetFillerData : public CmsCandidateFillerData {
 
-  std::vector<float> *chargedHadronEnergy, *neutralHadronEnergy, *chargedEmEnergy, *neutralEmEnergy;
-  std::vector<float> *neutralMultiplicity, *chargedMultiplicity, *muonMultiplicity;
+  std::vector<float> *chargedHadronEnergy, *neutralHadronEnergy, *photonEnergy, *electronEnergy, *muonEnergy;
+  std::vector<int> *chargedHadronMultiplicity, *neutralHadronMultiplicity, 
+    *photonMultiplicity, *electronMultiplicity, *muonMultiplicity;
   std::vector<float> *uncorrEnergy;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *combinedSecondaryVertexMVABJetTags,
@@ -44,6 +45,9 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
     *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags;
+  
+  // for backward compatibility with existing trees
+  std::vector<float> *chargedEmEnergy, *neutralEmEnergy;
 
 public:
   void initialise();
