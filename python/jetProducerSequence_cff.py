@@ -8,6 +8,7 @@ from JetMETCorrections.Configuration.JetCorrectionCondDB_cff import *
 #    )
 
 from HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff import *
+from HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff import *
 
 CaloJetSequence = cms.Sequence( ak5CaloJetsL2L3 )
 PFJetAK5Sequence = cms.Sequence( ak5PFJetsL2L3 )

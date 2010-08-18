@@ -43,7 +43,6 @@ process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
-process.treeDumper.saveJet1BTag = True
 process.treeDumper.dumpTree = True
 
 process.options = cms.untracked.PSet(
@@ -60,7 +59,7 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.p = cms.Path ( process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
-                       process.ourJetSequence * process.newBtaggingSequence *
+                       process.ourJetSequence * process.newBtaggingSequence * process.newPFJetBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )

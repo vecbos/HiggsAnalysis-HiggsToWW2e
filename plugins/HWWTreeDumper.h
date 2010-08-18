@@ -59,7 +59,7 @@ private:
   //! dump the jet alpha parameter
   bool saveJetAlpha_;
   //! dump the jet b-tag output
-  bool saveJet1BTag_;
+  bool saveJet1BTag_, saveJet2BTag_;
   //! dump the electron block
   bool dumpElectrons_;
   //! dump the particle flow electron block

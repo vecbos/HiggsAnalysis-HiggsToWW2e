@@ -80,6 +80,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveFatCSC_     = iConfig.getUntrackedParameter<bool>("saveFatCSC", false);
   saveFatRPC_     = iConfig.getUntrackedParameter<bool>("saveFatRPC", false);
   saveJet1BTag_    = iConfig.getUntrackedParameter<bool>("saveJet1BTag", false);
+  saveJet2BTag_    = iConfig.getUntrackedParameter<bool>("saveJet2BTag", false);
 
   //electron pflow
   savePFEleTrk_    = iConfig.getUntrackedParameter<bool>("savePFEleGsfTrk", true);
@@ -489,6 +490,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsPFJetFiller pfJetFiller1(tree_, true);
       suffix = "AK5PFJet";
       pfJetFiller1.saveCand(saveCand_);
+      pfJetFiller1.saveJetBTag(saveJet2BTag_);
       pfJetFiller1.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
 
     }

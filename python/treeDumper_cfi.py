@@ -74,6 +74,7 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                           savePFEleGsfTrk = cms.untracked.bool(True),
                           savePFEleBasic = cms.untracked.bool(True),
                           saveJet1BTag = cms.untracked.bool(True),
+                          saveJet2BTag = cms.untracked.bool(True),
                           # MC truth
                           mcTruthCollection = cms.InputTag("genParticles"),
                           electronMatchMap = cms.InputTag("electronMatchMap"),

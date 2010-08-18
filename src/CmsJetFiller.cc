@@ -97,6 +97,10 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 
   trkIndexName_ = new std::string("n");
 
+  saveJetExtras_=true;
+
+  saveJetBTag_ = false;
+
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
@@ -190,9 +194,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
     *(privateData_->ncand) = collection->size();
 
-
-    //    typedef AssociationVector<CandidateBaseRefProd, vector<float> > btagCollection;
-    //    Handle<btagCollection> combinedSecondaryVertexBJetTags, 
     edm::Handle<reco::JetTagCollection> combinedSecondaryVertexBJetTags,
       combinedSecondaryVertexMVABJetTags,
       jetBProbabilityBJetTags,

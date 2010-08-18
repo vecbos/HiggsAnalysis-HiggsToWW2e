@@ -31,6 +31,19 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
   std::vector<float> *chargedHadronEnergy, *neutralHadronEnergy, *chargedEmEnergy, *neutralEmEnergy;
   std::vector<float> *neutralMultiplicity, *chargedMultiplicity, *muonMultiplicity;
   std::vector<float> *uncorrEnergy;
+  std::vector<float> *combinedSecondaryVertexBJetTags, 
+    *combinedSecondaryVertexMVABJetTags,
+    *jetBProbabilityBJetTags,
+    *jetProbabilityBJetTags,
+    *simpleSecondaryVertexBJetTags,
+    *softMuonBJetTags,
+    *softMuonByIP3dBJetTags,
+    *softMuonByPtBJetTags,
+    *softElectronBJetTags,
+    *softElectronByIP3dBJetTags,
+    *softElectronByPtBJetTags,
+    *trackCountingHighPurBJetTags,
+    *trackCountingHighEffBJetTags;
 
 public:
   void initialise();
@@ -52,6 +65,9 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   // Destructor
   virtual ~CmsPFJetFiller();
 
+  // Modifiers
+  void saveJetBTag(bool );
+
   // Operators
 
   // run number and all of that --- to implement
@@ -68,6 +84,7 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   void treeJetInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   // Friends
+  bool saveJetBTag_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
