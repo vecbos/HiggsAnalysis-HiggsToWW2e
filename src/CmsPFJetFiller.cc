@@ -254,7 +254,14 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
           const PFJet *uncorrectedPFJet = dynamic_cast< const PFJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
-          if( thisPFJet->neutralEmEnergy() == uncorrectedPFJet->neutralEmEnergy() ) {
+          std::vector <reco::PFCandidatePtr> candConstituents = thisPFJet->getPFConstituents();
+          std::vector <reco::PFCandidatePtr> cand2Constituents = uncorrectedPFJet->getPFConstituents();
+          reco::PFCandidatePtr candFirstCT = candConstituents.at(0);
+          reco::PFCandidatePtr candLastCT = candConstituents.at(candConstituents.size()-1);
+          reco::PFCandidatePtr cand2FirstCT = cand2Constituents.at(0);
+          reco::PFCandidatePtr cand2LastCT = cand2Constituents.at(cand2Constituents.size()-1);
+          if(  thisPFJet->eta() == uncorrectedPFJet->eta() && thisPFJet->phi() == uncorrectedPFJet->phi() && 
+              candConstituents.size() == cand2Constituents.size() && candFirstCT == cand2FirstCT && candLastCT == cand2LastCT ) {
             rawEnergy = uncorrectedPFJet->energy();
             break;
           }

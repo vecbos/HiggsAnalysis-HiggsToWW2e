@@ -245,7 +245,7 @@ void CmsJPTJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
           const JPTJet *uncorrectedJPTJet = dynamic_cast< const JPTJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
-          if( thisJPTJet->neutralEmEnergy() == uncorrectedJPTJet->neutralEmEnergy() ) {
+          if( thisJPTJet->eta() == uncorrectedJPTJet->eta() && thisJPTJet->phi() == uncorrectedJPTJet->phi() ) {
             rawEnergy = uncorrectedJPTJet->energy();
             break;
           }
