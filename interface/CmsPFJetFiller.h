@@ -28,9 +28,11 @@
 
 struct CmsPFJetFillerData : public CmsCandidateFillerData {
 
-  std::vector<float> *chargedHadronEnergy, *neutralHadronEnergy, *photonEnergy, *electronEnergy, *muonEnergy;
+  std::vector<float> *chargedHadronEnergy, *neutralHadronEnergy, *photonEnergy, *electronEnergy, *muonEnergy, 
+    *HFHadronEnergy, *HFEMEnergy;
   std::vector<int> *chargedHadronMultiplicity, *neutralHadronMultiplicity, 
-    *photonMultiplicity, *electronMultiplicity, *muonMultiplicity;
+    *photonMultiplicity, *electronMultiplicity, *muonMultiplicity,
+    *HFHadronMultiplicity, *HFEMMultiplicity;
   std::vector<float> *uncorrEnergy;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *combinedSecondaryVertexMVABJetTags,

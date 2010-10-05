@@ -67,11 +67,15 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->photonEnergy;
   delete privateData_->electronEnergy;
   delete privateData_->muonEnergy;
+  delete privateData_->HFHadronEnergy;
+  delete privateData_->HFEMEnergy;
   delete privateData_->chargedHadronMultiplicity;
   delete privateData_->neutralHadronMultiplicity;
   delete privateData_->photonMultiplicity;
   delete privateData_->electronMultiplicity;
   delete privateData_->muonMultiplicity;
+  delete privateData_->HFHadronMultiplicity;
+  delete privateData_->HFEMMultiplicity;
   delete privateData_->combinedSecondaryVertexBJetTags;
   delete privateData_->combinedSecondaryVertexMVABJetTags;
   delete privateData_->jetBProbabilityBJetTags;
@@ -188,12 +192,16 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->photonEnergy->push_back( thisPFJet->photonEnergy() );
         privateData_->electronEnergy->push_back( thisPFJet->electronEnergy() );
         privateData_->muonEnergy->push_back( thisPFJet->muonEnergy() );
+        privateData_->HFHadronEnergy->push_back( thisPFJet->HFHadronEnergy() );
+        privateData_->HFEMEnergy->push_back( thisPFJet->HFEMEnergy() );
         privateData_->chargedHadronMultiplicity->push_back( thisPFJet->chargedHadronMultiplicity() );
         privateData_->neutralHadronMultiplicity->push_back( thisPFJet->neutralHadronMultiplicity() );
         privateData_->photonMultiplicity->push_back( thisPFJet->photonMultiplicity() );
         privateData_->electronMultiplicity->push_back( thisPFJet->electronMultiplicity() );
         privateData_->muonMultiplicity->push_back( thisPFJet->muonMultiplicity() );
-
+        privateData_->HFHadronMultiplicity->push_back( thisPFJet->HFHadronMultiplicity() );
+        privateData_->HFEMMultiplicity->push_back( thisPFJet->HFEMMultiplicity() );
+        
         // for backward compatibility with existing trees
         privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
         privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
@@ -305,11 +313,15 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"photonEnergy"+colSuffix).c_str(), *privateData_->photonEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"electronEnergy"+colSuffix).c_str(), *privateData_->electronEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"muonEnergy"+colSuffix).c_str(), *privateData_->muonEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"HFHadronEnergy"+colSuffix).c_str(), *privateData_->HFHadronEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"HFEMEnergy"+colSuffix).c_str(), *privateData_->HFEMEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chargedHadronMultiplicity"+colSuffix).c_str(), *privateData_->chargedHadronMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"neutralHadronMultiplicity"+colSuffix).c_str(), *privateData_->neutralHadronMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"photonMultiplicity"+colSuffix).c_str(), *privateData_->photonMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"electronMultiplicity"+colSuffix).c_str(), *privateData_->electronMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"muonMultiplicity"+colSuffix).c_str(), *privateData_->muonMultiplicity, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"HFHadronMultiplicity"+colSuffix).c_str(), *privateData_->HFHadronMultiplicity, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"HFEMMultiplicity"+colSuffix).c_str(), *privateData_->HFEMMultiplicity, nCandString.c_str(), 0, "Reco");
 
   // for backward compatibility with existing trees 
   cmstree->column((colPrefix+"chargedEmEnergy"+colSuffix).c_str(), *privateData_->chargedEmEnergy, nCandString.c_str(), 0, "Reco");
@@ -351,11 +363,15 @@ void CmsPFJetFillerData::initialise() {
   photonEnergy = new vector<float>;
   electronEnergy = new vector<float>;
   muonEnergy = new vector<float>;
+  HFHadronEnergy = new vector<float>;
+  HFEMEnergy = new vector<float>;
   chargedHadronMultiplicity = new vector<int>;
   neutralHadronMultiplicity = new vector<int>;
   photonMultiplicity = new vector<int>;
   electronMultiplicity = new vector<int>;
   muonMultiplicity = new vector<int>;
+  HFHadronMultiplicity = new vector<int>;
+  HFEMMultiplicity = new vector<int>;
   combinedSecondaryVertexBJetTags = new vector<float>;
   combinedSecondaryVertexMVABJetTags = new vector<float>;
   jetBProbabilityBJetTags = new vector<float>;
@@ -383,11 +399,15 @@ void CmsPFJetFillerData::clearTrkVectors() {
   photonEnergy->clear();
   electronEnergy->clear();
   muonEnergy->clear();
+  HFHadronEnergy->clear();
+  HFEMEnergy->clear();
   chargedHadronMultiplicity->clear();
   neutralHadronMultiplicity->clear();
   photonMultiplicity->clear();
   electronMultiplicity->clear();
   muonMultiplicity->clear();
+  HFHadronMultiplicity->clear();
+  HFEMMultiplicity->clear();
   combinedSecondaryVertexBJetTags->clear();
   combinedSecondaryVertexMVABJetTags->clear();
   jetBProbabilityBJetTags->clear();
