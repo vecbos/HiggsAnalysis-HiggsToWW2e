@@ -50,7 +50,7 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *scBasedEcalSum03, *scBasedEcalSum04;
 
   vector<float> *eleLik, *pflowMVA;
-  vector<int> *eleIdCuts;
+  vector<int> *eleIdCuts, *eleIdCIC;
 
 public:
   void initialise();

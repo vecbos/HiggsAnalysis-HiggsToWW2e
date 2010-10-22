@@ -71,6 +71,7 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->scBasedEcalSum03;
   delete privateData_->scBasedEcalSum04;
   delete privateData_->eleIdCuts;
+  delete privateData_->eleIdCIC;
   delete privateData_->eleLik;
   delete privateData_->pflowMVA;
 }
@@ -109,7 +110,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
     
-    eleIdResults_ = new eleIdContainer(12);
+    eleIdResults_ = new eleIdContainer(14);
 
     iEvent.getByLabel( "eidLoose", (*eleIdResults_)[0] );
     iEvent.getByLabel( "eidTight", (*eleIdResults_)[1] );
@@ -123,6 +124,8 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     iEvent.getByLabel( "eidTightCIC", (*eleIdResults_)[9] );
     iEvent.getByLabel( "eidSuperTightCIC", (*eleIdResults_)[10] );
     iEvent.getByLabel( "eidHypertight1CIC", (*eleIdResults_)[11] );
+    iEvent.getByLabel( "eidHypertight2CIC", (*eleIdResults_)[12] );
+    iEvent.getByLabel( "eidHypertight3CIC", (*eleIdResults_)[13] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -197,6 +200,8 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   const eleIdMap & eleIdTightCICVal = *( (*eleIdResults_)[9] );
   const eleIdMap & eleIdSuperTightCICVal = *( (*eleIdResults_)[10] );
   const eleIdMap & eleIdHypertight1CICVal = *( (*eleIdResults_)[11] );
+  const eleIdMap & eleIdHypertight2CICVal = *( (*eleIdResults_)[12] );
+  const eleIdMap & eleIdHypertight3CICVal = *( (*eleIdResults_)[13] );
 
   int packed_sel = -1;
   int eleIdLoose = eleIdLooseVal[electronRef];
@@ -204,19 +209,24 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   int eleIdRobustLoose = eleIdRobustLooseVal[electronRef];
   int eleIdRobustTight = eleIdRobustTightVal[electronRef];
   int eleIdRobustHighEnergy = eleIdRobustHighEnergyVal[electronRef];
+  int packed_selCIC = -1;
   int eleIdVeryLooseCIC = eleIdVeryLooseCICVal[electronRef];
   int eleIdLooseCIC = eleIdLooseCICVal[electronRef];
   int eleIdMediumCIC = eleIdMediumCICVal[electronRef];
   int eleIdTightCIC = eleIdTightCICVal[electronRef];
   int eleIdSuperTightCIC = eleIdSuperTightCICVal[electronRef];
   int eleIdHypertight1CIC = eleIdHypertight1CICVal[electronRef];
+  int eleIdHypertight2CIC = eleIdHypertight2CICVal[electronRef];
+  int eleIdHypertight3CIC = eleIdHypertight3CICVal[electronRef];
 
-  packed_sel = ( eleIdVeryLooseCIC << 30 ) | ( eleIdLooseCIC << 27 ) | ( eleIdMediumCIC << 24 ) | ( eleIdTightCIC << 21 ) |
-    ( eleIdSuperTightCIC << 18 ) | ( eleIdHypertight1CIC << 15 ) |
-    ( eleIdLoose << 12 ) | ( eleIdTight << 9 ) |
+  packed_sel = ( eleIdLoose << 12 ) | ( eleIdTight << 9 ) |
     ( eleIdRobustLoose << 6 ) | ( eleIdRobustTight << 3 ) | eleIdRobustHighEnergy;
   
+  packed_selCIC = ( eleIdVeryLooseCIC << 28 ) | ( eleIdLooseCIC << 24 ) | ( eleIdMediumCIC << 20 ) | ( eleIdTightCIC << 16 ) |
+    ( eleIdSuperTightCIC << 12 ) | ( eleIdHypertight1CIC << 8 ) | ( eleIdHypertight2CIC << 4) | eleIdHypertight3CIC;
+
   privateData_->eleIdCuts->push_back( packed_sel );
+  privateData_->eleIdCIC->push_back( packed_selCIC );
   privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
   privateData_->pflowMVA->push_back( electronRef->mva() );
 
@@ -272,6 +282,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"scBasedEcalSum03"+colSuffix).c_str(), *privateData_->scBasedEcalSum03, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCuts"+colSuffix).c_str(), *privateData_->eleIdCuts, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eleIdCIC"+colSuffix).c_str(), *privateData_->eleIdCIC, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
 }
@@ -302,6 +313,7 @@ void CmsEleIDTreeFillerData::initialise() {
   scBasedEcalSum03         = new vector<float>;
   scBasedEcalSum04         = new vector<float>;
   eleIdCuts                = new vector<int>;
+  eleIdCIC                 = new vector<int>;
   eleLik                   = new vector<float>;
   pflowMVA                 = new vector<float>;
 }
@@ -329,6 +341,7 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   scBasedEcalSum03         ->clear();
   scBasedEcalSum04         ->clear();
   eleIdCuts                ->clear();
+  eleIdCIC                 ->clear();
   eleLik                   ->clear();
   pflowMVA                 ->clear();
 }
