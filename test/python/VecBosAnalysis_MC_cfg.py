@@ -6,7 +6,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START38_V9::All'
+process.GlobalTag.globaltag = 'START38_V12::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
@@ -51,9 +51,6 @@ process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
 process.treeDumper.dumpTree = True
 
-# in order to take the correct HLT informations in Spring10 samples
-process.treeDumper.TriggerResultsTag = "TriggerResults::REDIGI37X"
-
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
@@ -63,7 +60,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('/store/mc/Summer10/Wenu/GEN-SIM-RECO/START37_V5_S09-v1/0136/D825D343-F681-DF11-AD47-00215E21DECA.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root')
                             )
 
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
