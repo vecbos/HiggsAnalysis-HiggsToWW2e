@@ -75,6 +75,8 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->rawEnergy;
   delete privateData_->energy;
   delete privateData_->seedEnergy;
+  delete privateData_->seedX;
+  delete privateData_->seedY;
   delete privateData_->eta;
   delete privateData_->theta;
   delete privateData_->phi;
@@ -314,6 +316,16 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->chi2->push_back((float)seedRH->chi2());
       privateData_->recoFlag->push_back((int)seedRH->recoFlag());
       privateData_->seedEnergy->push_back((float)maxRH.second);
+
+      if(EcalSubdetector(seedCrystalId.subdetId()) == EcalBarrel) {
+        EBDetId id(seedCrystalId);
+        privateData_->seedX->push_back(id.ieta());
+        privateData_->seedY->push_back(id.iphi());
+      } else {
+        EEDetId id(seedCrystalId);
+        privateData_->seedX->push_back(id.ix());
+        privateData_->seedY->push_back(id.iy());        
+      }
 
       // channel status
       edm::ESHandle<EcalChannelStatus> pChannelStatus;
@@ -683,6 +695,8 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"seedX"+colSuffix).c_str(), *privateData_->seedX, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"seedY"+colSuffix).c_str(), *privateData_->seedY, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"fracClosProbl"+colSuffix).c_str(), *privateData_->fracClosProbl, nCandString.c_str(), 0, "Reco");
@@ -869,6 +883,8 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   time = new vector<float>;
   chi2 = new vector<float>;
   seedEnergy = new vector<float>;
+  seedX = new vector<float>;
+  seedY = new vector<float>;
   idClosProbl = new vector<int>;
   sevClosProbl = new vector<int>;
   fracClosProbl = new vector<float>;
@@ -925,6 +941,8 @@ void CmsSuperClusterFillerData::clear()
   time->clear();
   chi2->clear();
   seedEnergy->clear();
+  seedX->clear();
+  seedY->clear();
   idClosProbl->clear();
   sevClosProbl->clear();
   fracClosProbl->clear();
