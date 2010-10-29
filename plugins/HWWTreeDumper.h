@@ -54,7 +54,6 @@ private:
   bool saveEleID_;
   //! dump the particle flow electron block
   bool savePFEleBasic_; 
-  bool savePFEleTrk_;
   bool savePFEleIsoDep_;
   //! dump the jet alpha parameter
   bool saveJetAlpha_;
@@ -96,6 +95,7 @@ private:
   edm::InputTag photonCollection_;
   edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
+  // edm::InputTag corrmetCollection_;
   edm::InputTag vertexCollection_;
   edm::InputTag K0sCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;

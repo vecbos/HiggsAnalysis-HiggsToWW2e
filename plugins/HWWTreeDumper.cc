@@ -83,7 +83,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveJetBTag_    = iConfig.getUntrackedParameter<bool>("saveJetBTag", false);
 
   //electron pflow
-  savePFEleTrk_    = iConfig.getUntrackedParameter<bool>("savePFEleGsfTrk", true);
   savePFEleBasic_  = iConfig.getUntrackedParameter<bool>("savePFEleBasic",  true);
   savePFEleIsoDep_ = iConfig.getUntrackedParameter<bool>("savePFEleIsoDep", true);
 
@@ -147,6 +146,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   JPTjetCollection1_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection1");
   JPTjetCollection2_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection2");
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
+  // corrmetCollection_       = iConfig.getParameter<edm::InputTag>("corrmetCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
   PFmetCollection_         = iConfig.getParameter<edm::InputTag>("PFmetCollection");
   genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
@@ -256,7 +256,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
-    // treeFill.savePFextra(savePFEleTrk_);
 
     treeFill.writeCollectionToTree(electronCollection_, iEvent, iSetup, prefix, suffix, false);
     if(doMCEleMatch_) {
@@ -270,8 +269,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string prefix("");
     std::string suffix("PFEle");
     treeFill.saveCand(saveCand_);
+    treeFill.setGeneralTracks(trackCollection_);
     treeFill.savePFEleBasic(savePFEleBasic_);
-    treeFill.savePFEleTrk(savePFEleTrk_);
     treeFill.savePFEleIsoDep(savePFEleIsoDep_);
     treeFill.writeCollectionToTree(pflowElectronCollection_, iEvent, iSetup, prefix, suffix, false);
   }
@@ -445,6 +444,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string suffix("Met");
     treeRecoFill1.saveCand(saveCand_);
     treeRecoFill1.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
+
+    // Corrected CALO MET
+    // CmsCandidateFiller treeRecoFill1bis(tree_, true);
+    // suffix = "CorrMet";
+    // treeRecoFill1bis.saveCand(saveCand_);
+    // treeRecoFill1bis.writeCollectionToTree(corrmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // Track-Corrected MET
     CmsCandidateFiller treeRecoFill2(tree_, true);

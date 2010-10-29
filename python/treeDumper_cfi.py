@@ -31,6 +31,7 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                           PFjetCollection1 = cms.InputTag("ak5PFJetsL2L3"),
                           PFjetCollection2 = cms.InputTag("ak5PFJets"),
                           metCollection = cms.InputTag("met"), # preselection
+                          # corrmetCollection = cms.InputTag("metMuonJESCorAK5"), # type I and II corr applied
                           TCmetCollection = cms.InputTag("tcMet"),
                           genMetCollection = cms.InputTag("genMetCalo"),
                           PFmetCollection = cms.InputTag("pfMet"),

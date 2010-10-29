@@ -20,6 +20,8 @@
 <use name=DataFormats/HepMCCandidate>
 <use name=DataFormats/TrackCandidate>
 <use name=DataFormats/EgammaCandidates>
+<use name=DataFormats/ParticleFlowCandidate>
+<use name=DataFormats/ParticleFlowReco>
 <use name=CondFormats/EcalObjects>
 <use name=MyAnalysis/IsolationTools>
 <use name=DataFormats/Common>

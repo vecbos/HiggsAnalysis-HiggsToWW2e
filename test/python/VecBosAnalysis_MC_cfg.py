@@ -16,6 +16,14 @@ process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
+# to correct calo met ---
+#process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
+#from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
+#process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
+#process.metMuonJESCorAK5.inputUncorMetLabel = "met"
+#process.metMuonJESCorAK5.useTypeII = True
+#process.metMuonJESCorAK5.hasMuonsCorr = False
+
 # --- electron sequences ---
 process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
