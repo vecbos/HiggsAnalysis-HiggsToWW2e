@@ -12,6 +12,8 @@
 #include "FWCore/Framework/interface/EDAnalyzer.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsHLTObjectFiller.h"
+
 #include <TTree.h>
 #include <TFile.h>
 
@@ -23,6 +25,7 @@ public:
   
 private:
   virtual void beginJob() ;
+  virtual void beginRun(const edm::Run & iRun, const edm::EventSetup & iSetup );
   virtual void analyze(const edm::Event&, const edm::EventSetup&);
   virtual void endJob() ;
   
@@ -132,6 +135,11 @@ private:
 
   //! number of the processed event
   int jevt_;
+
+  //! need to keep the HLTObjectDumper to update the trigger configuration on run boundaries
+  bool dumpHLTObject_;
+  CmsHLTObjectFiller* hltObjectFiller_;
+  edm::ParameterSet hltObjectParms_; //parameters for HLTObject filler
 
 };
 #endif // HWWTreeDumper_h

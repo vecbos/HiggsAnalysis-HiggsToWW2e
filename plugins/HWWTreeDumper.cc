@@ -168,11 +168,15 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // trigger Collections
   triggerInputTag_     = iConfig.getParameter<edm::InputTag>("TriggerResultsTag") ;
   dumpTriggerResults_  = iConfig.getUntrackedParameter<bool>("dumpTriggerResults");
+  dumpHLTObject_       = iConfig.getUntrackedParameter<bool>("dumpHLTObjects");
+  hltObjectParms_      = iConfig.getUntrackedParameter<edm::ParameterSet>("dumpHLTObjectsInfo");
 }
 
 
 
-HWWTreeDumper::~HWWTreeDumper() { }
+HWWTreeDumper::~HWWTreeDumper() { 
+  if(hltObjectFiller_) delete(hltObjectFiller_);
+}
 
 
 
@@ -214,7 +218,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     conditionsFiller.writeConditionsToTree( triggerInputTag_, iEvent,  firstEvent);
     jevt_++;
   }
-
+  if(dumpHLTObject_)
+    hltObjectFiller_->writeHLTObjectToTree(iEvent);
 
   // fill preselection output
   if (dumpPreselInfo_) {
@@ -549,6 +554,17 @@ void HWWTreeDumper::beginJob() {
 
   jevt_ = 1;
 
+  //HLTObject Filler needs to exist before beginRun is called
+  if(dumpHLTObject_)
+    hltObjectFiller_ = new CmsHLTObjectFiller(tree_,hltObjectParms_);
+
+}
+
+void HWWTreeDumper::beginRun( const Run & iRun, const EventSetup & iSetup )
+{
+  //forward beginRun to HLTObjectFiller
+  if(dumpHLTObject_)
+    hltObjectFiller_->beginRun( iRun, iSetup);
 }
 
 
