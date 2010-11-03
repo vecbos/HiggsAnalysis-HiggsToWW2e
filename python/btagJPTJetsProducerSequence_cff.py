@@ -28,8 +28,10 @@ newImpactParameterMVABJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJ
 # secondary vertex b-tag
 newJPTJetsSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
 newJPTJetsSecondaryVertexTagInfos.trackIPTagInfos = "newJPTJetsImpactParameterTagInfos"
-newSimpleSecondaryVertexBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexBJetTags.clone()
-newSimpleSecondaryVertexBJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJetsSecondaryVertexTagInfos") )
+newSimpleSecondaryVertexHighEffBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighEffBJetTags.clone()
+newSimpleSecondaryVertexHighEffBJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJetsSecondaryVertexTagInfos") )
+newSimpleSecondaryVertexHighPurBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.simpleSecondaryVertexHighPurBJetTags.clone()
+newSimpleSecondaryVertexHighPurBJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJetsSecondaryVertexTagInfos") )
 newCombinedSecondaryVertexBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexBJetTags.clone()
 newCombinedSecondaryVertexBJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJetsImpactParameterTagInfos"), cms.InputTag("newJPTJetsSecondaryVertexTagInfos") )
 newCombinedSecondaryVertexMVABJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.combinedSecondaryVertexMVABJetTags.clone()
@@ -71,7 +73,8 @@ newJPTJetBtaggingIP = cms.Sequence(
 newJPTJetBtaggingSV = cms.Sequence(
     newJPTJetsImpactParameterTagInfos *
     newJPTJetsSecondaryVertexTagInfos * (
-       newSimpleSecondaryVertexBJPTJetTags +
+       newSimpleSecondaryVertexHighEffBJPTJetTags +
+       newSimpleSecondaryVertexHighPurBJPTJetTags +
        newCombinedSecondaryVertexBJPTJetTags +
        newCombinedSecondaryVertexMVABJPTJetTags )
     )
