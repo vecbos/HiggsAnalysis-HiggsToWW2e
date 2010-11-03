@@ -40,6 +40,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_data.root'
 process.treeDumper.dumpTriggerResults = True
+process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = False
 process.treeDumper.dumpMCTruth = False
 process.treeDumper.dumpSignalKfactor = False

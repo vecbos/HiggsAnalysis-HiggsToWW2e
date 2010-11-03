@@ -44,6 +44,7 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
 process.treeDumper.dumpTriggerResults = True
+process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = True
