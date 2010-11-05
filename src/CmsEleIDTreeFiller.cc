@@ -120,17 +120,15 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     iEvent.getByLabel( "eidTight", (*eleIdResults_)[4] );
     iEvent.getByLabel( "eidSuperTight", (*eleIdResults_)[5] );
     iEvent.getByLabel( "eidHyperTight1", (*eleIdResults_)[6] );
-    iEvent.getByLabel( "eidHyperTight2", (*eleIdResults_)[7] );
-    iEvent.getByLabel( "eidHyperTight3", (*eleIdResults_)[8] );
 
-    iEvent.getByLabel( "eidHWWVeryLoose", (*eleIdResults_)[9] );
-    iEvent.getByLabel( "eidHWWLoose", (*eleIdResults_)[10] );
-    iEvent.getByLabel( "eidHWWMedium", (*eleIdResults_)[11] );
-    iEvent.getByLabel( "eidHWWTight", (*eleIdResults_)[12] );
-    iEvent.getByLabel( "eidHWWSuperTight", (*eleIdResults_)[13] );
-    iEvent.getByLabel( "eidHWWHyperTight1", (*eleIdResults_)[14] );
-    iEvent.getByLabel( "eidHWWHyperTight2", (*eleIdResults_)[15] );
-    iEvent.getByLabel( "eidHWWHyperTight3", (*eleIdResults_)[16] );
+    iEvent.getByLabel( "eidHWWVeryLoose", (*eleIdResults_)[7] );
+    iEvent.getByLabel( "eidHWWLoose", (*eleIdResults_)[8] );
+    iEvent.getByLabel( "eidHWWMedium", (*eleIdResults_)[9] );
+    iEvent.getByLabel( "eidHWWTight", (*eleIdResults_)[10] );
+    iEvent.getByLabel( "eidHWWSuperTight", (*eleIdResults_)[11] );
+    iEvent.getByLabel( "eidHWWHyperTight1", (*eleIdResults_)[12] );
+    iEvent.getByLabel( "eidHWWHyperTight2", (*eleIdResults_)[13] );
+    iEvent.getByLabel( "eidHWWHyperTight3", (*eleIdResults_)[14] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -201,17 +199,15 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   const eleIdMap & eleIdTightVal = *( (*eleIdResults_)[4] );
   const eleIdMap & eleIdSuperTightVal = *( (*eleIdResults_)[5] );
   const eleIdMap & eleIdHyperTight1Val = *( (*eleIdResults_)[6] );
-  const eleIdMap & eleIdHyperTight2Val = *( (*eleIdResults_)[7] );
-  const eleIdMap & eleIdHyperTight3Val = *( (*eleIdResults_)[8] );
 
-  const eleIdMap & eleIdHWWVeryLooseVal = *( (*eleIdResults_)[9] );
-  const eleIdMap & eleIdHWWLooseVal = *( (*eleIdResults_)[10] );
-  const eleIdMap & eleIdHWWMediumVal = *( (*eleIdResults_)[11] );
-  const eleIdMap & eleIdHWWTightVal = *( (*eleIdResults_)[12] );
-  const eleIdMap & eleIdHWWSuperTightVal = *( (*eleIdResults_)[13] );
-  const eleIdMap & eleIdHWWHyperTight1Val = *( (*eleIdResults_)[14] );
-  const eleIdMap & eleIdHWWHyperTight2Val = *( (*eleIdResults_)[15] );
-  const eleIdMap & eleIdHWWHyperTight3Val = *( (*eleIdResults_)[16] );
+  const eleIdMap & eleIdHWWVeryLooseVal = *( (*eleIdResults_)[7] );
+  const eleIdMap & eleIdHWWLooseVal = *( (*eleIdResults_)[8] );
+  const eleIdMap & eleIdHWWMediumVal = *( (*eleIdResults_)[9] );
+  const eleIdMap & eleIdHWWTightVal = *( (*eleIdResults_)[10] );
+  const eleIdMap & eleIdHWWSuperTightVal = *( (*eleIdResults_)[11] );
+  const eleIdMap & eleIdHWWHyperTight1Val = *( (*eleIdResults_)[12] );
+  const eleIdMap & eleIdHWWHyperTight2Val = *( (*eleIdResults_)[13] );
+  const eleIdMap & eleIdHWWHyperTight3Val = *( (*eleIdResults_)[14] );
 
   int packed_sel = -1;
   int eleIdVeryLoose = eleIdVeryLooseVal[electronRef];
@@ -220,8 +216,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   int eleIdTight = eleIdTightVal[electronRef];
   int eleIdSuperTight = eleIdSuperTightVal[electronRef];
   int eleIdHyperTight1 = eleIdHyperTight1Val[electronRef];
-  int eleIdHyperTight2 = eleIdHyperTight2Val[electronRef];
-  int eleIdHyperTight3 = eleIdHyperTight3Val[electronRef];
 
   int packed_selHWW = -1;
   int eleIdHWWVeryLoose = eleIdHWWVeryLooseVal[electronRef];
@@ -233,8 +227,8 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   int eleIdHWWHyperTight2 = eleIdHWWHyperTight2Val[electronRef];
   int eleIdHWWHyperTight3 = eleIdHWWHyperTight3Val[electronRef];
 
-  packed_sel = ( eleIdVeryLoose << 28 ) | ( eleIdLoose << 24 ) | ( eleIdMedium << 20 ) | ( eleIdTight << 16 ) |
-    ( eleIdSuperTight << 12 ) | ( eleIdHyperTight1 << 8 ) | ( eleIdHyperTight2 << 4) | eleIdHyperTight3;
+  packed_sel = ( eleIdVeryLoose << 20 ) | ( eleIdLoose << 16 ) | ( eleIdMedium << 12 ) | ( eleIdTight << 8 ) |
+    ( eleIdSuperTight << 4 ) | eleIdHyperTight1;
   packed_selHWW = ( eleIdHWWVeryLoose << 28 ) | ( eleIdHWWLoose << 24 ) | ( eleIdHWWMedium << 20 ) | ( eleIdHWWTight << 16 ) |
     ( eleIdHWWSuperTight << 12 ) | ( eleIdHWWHyperTight1 << 8 ) | ( eleIdHWWHyperTight2 << 4) | eleIdHWWHyperTight3;
 
