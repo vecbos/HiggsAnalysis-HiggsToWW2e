@@ -11,30 +11,12 @@
 // system include files
 #include <memory>
 
-#include "FWCore/Framework/interface/Frameworkfwd.h"
-#include "FWCore/Framework/interface/EDProducer.h"
 #include "FWCore/Framework/interface/Event.h"
-#include "FWCore/Framework/interface/MakerMacros.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
-#include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/EgammaReco/interface/BasicCluster.h"
-#include "DataFormats/EgammaReco/interface/SuperCluster.h"
-#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
-#include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
-#include "DataFormats/EgammaCandidates/interface/Electron.h"
-#include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/Candidate/interface/CandMatchMap.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
 
-#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
-#include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 
 #include "FWCore/Common/interface/TriggerNames.h"
@@ -59,9 +41,12 @@ struct CmsTriggerTreeFillerData {
 //----------------
 
 
-CmsTriggerTreeFiller::CmsTriggerTreeFiller(CmsTree *cmsTree)
+CmsTriggerTreeFiller::CmsTriggerTreeFiller(CmsTree *cmsTree,edm::ParameterSet& iConfig)
 {
   cmstree=cmsTree;
+  nameProcess_        = iConfig.getParameter<std::string>("processName");
+  tagTriggerResults_  = iConfig.getParameter<edm::InputTag>("triggerResults");
+  tagTriggerEvent_    = iConfig.getParameter<edm::InputTag>("triggerSummaryAOD");
 }
 
 
@@ -72,14 +57,28 @@ CmsTriggerTreeFiller::~CmsTriggerTreeFiller() {
 
 
 void
-CmsTriggerTreeFiller::writeTriggerToTree (edm::InputTag triggerResultsTag,
-					  const edm::Event& iEvent,
+CmsTriggerTreeFiller::writeTriggerToTree (const edm::Event& iEvent,
 					  const std::string & columnPrefix, const std::string & columnSuffix) 
 {
 
+  Handle< trigger::TriggerEvent > handleTriggerEvent;
+  if((tagTriggerResults_.process()).compare("AUTO") == 0) {
+    iEvent.getByLabel( edm::InputTag(tagTriggerEvent_.label(), tagTriggerEvent_.instance()), handleTriggerEvent );
+    if (!handleTriggerEvent.failedToGet()) {
+      const edm::Provenance *meta = handleTriggerEvent.provenance();
+      if (meta->processName() != nameProcess_) {
+        nameProcess_ = meta->processName();
+        tagTriggerResults_ = InputTag( tagTriggerResults_.label(), tagTriggerResults_.instance(), nameProcess_ );
+        tagTriggerEvent_   = InputTag( tagTriggerEvent_.label(),   tagTriggerEvent_.instance(),   nameProcess_ );
+      }
+    }
+  } else {
+    iEvent.getByLabel( tagTriggerEvent_, handleTriggerEvent );
+  }
+
   edm::Handle<edm::TriggerResults> trh;
-  try {iEvent.getByLabel(triggerResultsTag, trh);} 
-  catch( cms::Exception& ex ) { edm::LogWarning("CmsTriggerTreeFiller") << "Trigger results: " << triggerResultsTag << " not found"; }
+  try {iEvent.getByLabel(tagTriggerResults_, trh);} 
+  catch( cms::Exception& ex ) { edm::LogWarning("CmsTriggerTreeFiller") << "Trigger results: " << tagTriggerResults_ << " not found"; }
   if (!trh.isValid())
       throw cms::Exception("ProductNotValid") << "TriggerResults product not valid";
 

@@ -1,11 +1,10 @@
 import FWCore.ParameterSet.Config as cms
 
 treeDumper = cms.EDAnalyzer("HWWTreeDumper",
-                            TriggerResultsTag = cms.InputTag("TriggerResults::HLT"),
-                            dumpHLTObjectsInfo = cms.untracked.PSet(triggerResults = cms.InputTag("TriggerResults","","HLT"),
-                                                                    processName = cms.string("HLT"),
-                                                                    triggerSummaryAOD = cms.InputTag("hltTriggerSummaryAOD","","HLT")
-                                                                    ),
+                            HLTObjectsInfo = cms.untracked.PSet(triggerResults = cms.InputTag("TriggerResults","","AUTO"),
+                                                                processName = cms.string("AUTO"),
+                                                                triggerSummaryAOD = cms.InputTag("hltTriggerSummaryAOD","","HLT")
+                                                                ),
                             electronCollection = cms.InputTag("ambiguityResolvedElectrons"),
                             #pflowElectronCollection = cms.InputTag("particleFlow","electrons"),
                             pflowElectronCollection = cms.InputTag("particleFlow"),
@@ -23,7 +22,7 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                             gsfTrackCollection = cms.InputTag("electronGsfTracks"),
                             globalMuonTrackCollection = cms.InputTag("globalMuons"),
                             standAloneMuonTrackCollection = cms.InputTag("standAloneMuons"),
-                            #                          refittedForDeDxTrackCollection = cms.InputTag("RefitterForDeDx"),
+                            #  refittedForDeDxTrackCollection = cms.InputTag("RefitterForDeDx"),
                             refittedForDeDxTrackCollection = cms.InputTag("generalTracks"),
                             vertexCollection = cms.InputTag("offlinePrimaryVertices"),
                             K0sCollection = cms.InputTag("generalV0Candidates","Kshort"),

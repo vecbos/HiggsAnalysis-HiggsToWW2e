@@ -31,13 +31,13 @@ class CmsConditionsFiller {
  public:
 
   /// Constructor
-  CmsConditionsFiller(CmsTree *, std::vector<std::string>* trgNames );
+  CmsConditionsFiller(CmsTree *, edm::ParameterSet&, std::vector<std::string>* trgNames );
 
   /// Destructor
   virtual ~CmsConditionsFiller();
 
   /// dump the "conditions", i.e. trigger mask right now.
-  virtual void writeConditionsToTree(edm::InputTag triggerTag, const edm::Event&, bool firstEvent);
+  virtual void writeConditionsToTree(const edm::Event&, bool firstEvent);
 
   /// create the branches at the first event
   void setHLTResults();
@@ -49,6 +49,10 @@ class CmsConditionsFiller {
   
   /// the physical tree
   CmsTree *cmstree;
+
+  std::string               nameProcess_; 
+  edm::InputTag             tagTriggerResults_;   
+  edm::InputTag             tagTriggerEvent_;
 
 };
 

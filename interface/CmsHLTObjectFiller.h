@@ -28,7 +28,7 @@ class CmsHLTObjectFiller {
   void writeHLTObjectToTree (  const edm::Event & iEvent) ;
 
   /// Initialize config service
-  void beginRun( const edm::Run & iRun, const edm::EventSetup & iSetup ) ;
+  void beginRun( const edm::Event & iEvent, const edm::Run & iRun, const edm::EventSetup & iSetup ) ;
 
  protected:
   HLTConfigProvider         hltConfig_;

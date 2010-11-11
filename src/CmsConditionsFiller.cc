@@ -1,11 +1,15 @@
 #include "DataFormats/Common/interface/TriggerResults.h"
+#include "DataFormats/HLTReco/interface/TriggerEvent.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsConditionsFiller.h"
 
 /// Constructor
-CmsConditionsFiller::CmsConditionsFiller(CmsTree *cmsTree, std::vector<std::string>* trgNames) :
+CmsConditionsFiller::CmsConditionsFiller(CmsTree *cmsTree, edm::ParameterSet& iConfig, std::vector<std::string>* trgNames) :
   privateData_(new CmsConditionsFillerData)
 {
   cmstree = cmsTree;
+  nameProcess_        = iConfig.getParameter<std::string>("processName");
+  tagTriggerResults_  = iConfig.getParameter<edm::InputTag>("triggerResults");
+  tagTriggerEvent_    = iConfig.getParameter<edm::InputTag>("triggerSummaryAOD");
   privateData_->initialise(trgNames);
 }
 
@@ -15,13 +19,29 @@ CmsConditionsFiller::~CmsConditionsFiller() {
   delete privateData_->trgIndices;
 }
 
-void CmsConditionsFiller::writeConditionsToTree(edm::InputTag triggerTag, const edm::Event& iEvent, bool firstEvent) {
+void CmsConditionsFiller::writeConditionsToTree(const edm::Event& iEvent, bool firstEvent) {
 
   privateData_->clearVectors();
 
+  edm::Handle< trigger::TriggerEvent > handleTriggerEvent;
+  if((tagTriggerResults_.process()).compare("AUTO") == 0) {
+    iEvent.getByLabel( edm::InputTag(tagTriggerEvent_.label(), tagTriggerEvent_.instance()), handleTriggerEvent );
+    if (!handleTriggerEvent.failedToGet()) {
+      const edm::Provenance *meta = handleTriggerEvent.provenance();
+      if (meta->processName() != nameProcess_) {
+        nameProcess_ = meta->processName();
+        if(firstEvent) std::cout << "CmsConditionsFiller: using Automatic process name for HLT results. Discovered the following process: " << nameProcess_ << std::endl;
+        tagTriggerResults_ = edm::InputTag( tagTriggerResults_.label(), tagTriggerResults_.instance(), nameProcess_ );
+        tagTriggerEvent_   = edm::InputTag( tagTriggerEvent_.label(),   tagTriggerEvent_.instance(),   nameProcess_ );
+      }
+    }
+  } else {
+    iEvent.getByLabel( tagTriggerEvent_, handleTriggerEvent );
+  }
+
   edm::Handle<edm::TriggerResults> trh;
-  try {iEvent.getByLabel(triggerTag,trh);} 
-  catch( cms::Exception& ex ) { std::cout << "Trigger results: " << triggerTag << " not found"; }
+  try {iEvent.getByLabel(tagTriggerResults_,trh);} 
+  catch( cms::Exception& ex ) { std::cout << "Trigger results: " << tagTriggerResults_ << " not found"; }
 
   /// the trigger names container
   edm::TriggerNames hltNames_ = iEvent.triggerNames(*trh);

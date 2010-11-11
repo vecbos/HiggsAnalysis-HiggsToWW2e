@@ -166,10 +166,9 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalLabels_ = iConfig.getParameter<std::vector<edm::InputTag> >("ecalInputs");
 
   // trigger Collections
-  triggerInputTag_     = iConfig.getParameter<edm::InputTag>("TriggerResultsTag") ;
   dumpTriggerResults_  = iConfig.getUntrackedParameter<bool>("dumpTriggerResults");
   dumpHLTObject_       = iConfig.getUntrackedParameter<bool>("dumpHLTObjects");
-  hltObjectParms_      = iConfig.getUntrackedParameter<edm::ParameterSet>("dumpHLTObjectsInfo");
+  hltParms_            = iConfig.getUntrackedParameter<edm::ParameterSet>("HLTObjectsInfo");
 }
 
 
@@ -201,25 +200,28 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   }
 
 
-
+  jevtInRun_++;
   // fill the trigger paths info
   if(dumpTriggerResults_) {
 
-    CmsTriggerTreeFiller triggerTreeFill (tree_) ;
+    CmsTriggerTreeFiller triggerTreeFill (tree_, hltParms_) ;
     std::string prefix ("") ;
     std::string suffix ("Trg") ;
-    triggerTreeFill.writeTriggerToTree (triggerInputTag_, iEvent, prefix, suffix) ;
+    triggerTreeFill.writeTriggerToTree (iEvent, prefix, suffix) ;
 
     /// fill the trigger mask in the Event tree
     std::vector<std::string>* trgNames = new vector<std::string>;
     bool firstEvent = true;
     if(jevt_>1) firstEvent=false; 
-    CmsConditionsFiller conditionsFiller( tree_, trgNames );
-    conditionsFiller.writeConditionsToTree( triggerInputTag_, iEvent,  firstEvent);
+    CmsConditionsFiller conditionsFiller( tree_, hltParms_, trgNames );
+    conditionsFiller.writeConditionsToTree(iEvent,  firstEvent);
     jevt_++;
   }
-  if(dumpHLTObject_)
+  if(dumpHLTObject_) {
+    //forward beginRun to HLTObjectFiller
+    if(jevtInRun_==1) hltObjectFiller_->beginRun( iEvent, iEvent.getRun(), iSetup);
     hltObjectFiller_->writeHLTObjectToTree(iEvent);
+  }
 
   // fill preselection output
   if (dumpPreselInfo_) {
@@ -556,15 +558,13 @@ void HWWTreeDumper::beginJob() {
 
   //HLTObject Filler needs to exist before beginRun is called
   if(dumpHLTObject_)
-    hltObjectFiller_ = new CmsHLTObjectFiller(tree_,hltObjectParms_);
+    hltObjectFiller_ = new CmsHLTObjectFiller(tree_,hltParms_);
 
 }
 
 void HWWTreeDumper::beginRun( const Run & iRun, const EventSetup & iSetup )
 {
-  //forward beginRun to HLTObjectFiller
-  if(dumpHLTObject_)
-    hltObjectFiller_->beginRun( iRun, iSetup);
+  jevtInRun_ = 0;
 }
 
 

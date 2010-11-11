@@ -17,9 +17,25 @@ CmsHLTObjectFiller::CmsHLTObjectFiller(CmsTree * tree,edm::ParameterSet& iConfig
 CmsHLTObjectFiller::~CmsHLTObjectFiller(){}
 
 
-void CmsHLTObjectFiller::beginRun( const edm::Run & iRun, const edm::EventSetup & iSetup ){
+void CmsHLTObjectFiller::beginRun(const edm::Event & iEvent,  const edm::Run & iRun, const edm::EventSetup & iSetup ){
   // Initialize HLTConfigProvider
   bool changed( true );
+
+  edm::Handle< trigger::TriggerEvent > handleTriggerEvent;
+  if((tagTriggerResults_.process()).compare("AUTO") == 0) {
+    iEvent.getByLabel( edm::InputTag(tagTriggerEvent_.label(), tagTriggerEvent_.instance()), handleTriggerEvent );
+    if (!handleTriggerEvent.failedToGet()) {
+      const edm::Provenance *meta = handleTriggerEvent.provenance();
+      if (meta->processName() != nameProcess_) {
+        nameProcess_ = meta->processName();
+        tagTriggerResults_ = edm::InputTag( tagTriggerResults_.label(), tagTriggerResults_.instance(), nameProcess_ );
+        tagTriggerEvent_   = edm::InputTag( tagTriggerEvent_.label(),   tagTriggerEvent_.instance(),   nameProcess_ );
+      }
+    }
+  } else {
+    iEvent.getByLabel( tagTriggerEvent_, handleTriggerEvent );
+  }
+
   if ( ! hltConfig_.init( iRun, iSetup, nameProcess_, changed ) ) {
     edm::LogError( "errorHltConfigExtraction" ) << "HLT config extraction error with process name " << nameProcess_;
   } else if ( hltConfig_.size() <= 0 ) {
@@ -39,14 +55,12 @@ void CmsHLTObjectFiller::writeHLTObjectToTree(const edm::Event & iEvent){
   std::vector<int> passingIndexPerPath;
   std::vector<int> passingIndexRanges;
 
-
   //read trigger results
   edm::Handle< edm::TriggerResults > handleTriggerResults;
   iEvent.getByLabel( tagTriggerResults_, handleTriggerResults );
   edm::Handle< trigger::TriggerEvent > handleTriggerEvent;
   iEvent.getByLabel( tagTriggerEvent_, handleTriggerEvent );
-
-
+ 
   //Load info used in other trigger dump modules to check consitency
   edm::TriggerNames hltNam;
   hltNam = iEvent.triggerNames(*handleTriggerResults);

@@ -33,19 +33,22 @@ class CmsTriggerTreeFiller {
  public:
 
   /// Constructors
-  CmsTriggerTreeFiller(CmsTree *);
+  CmsTriggerTreeFiller(CmsTree *, edm::ParameterSet&);
 
   /// Destructor
   virtual ~CmsTriggerTreeFiller();
 
   /// Write the trigger bits to the tree
-  void writeTriggerToTree (edm::InputTag triggerResultsTag,
-			   const edm::Event& iEvent,
+  void writeTriggerToTree (const edm::Event& iEvent,
                            const std::string & columnPrefix, const std::string & columnSuffix) ;
 
  protected:
   
   std::vector<std::string> m_TrigNames ;
+
+  std::string               nameProcess_; 
+  edm::InputTag             tagTriggerResults_;   
+  edm::InputTag             tagTriggerEvent_;       
 
   CmsTree *cmstree;
 

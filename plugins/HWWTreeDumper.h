@@ -124,8 +124,6 @@ private:
   //! generator-level informations present in the soups
   edm::InputTag hepMcCollection_, genInfoCollection_;
   std::string genWeightCollection_;
-  //! results of the HLT
-  edm::InputTag triggerInputTag_ ;
   //! PF electrons pre-identification
   edm::InputTag PFpreIdCollection_;
   //! ROOT file with the plain ROOT tree inside
@@ -135,11 +133,12 @@ private:
 
   //! number of the processed event
   int jevt_;
+  int jevtInRun_;
 
   //! need to keep the HLTObjectDumper to update the trigger configuration on run boundaries
   bool dumpHLTObject_;
   CmsHLTObjectFiller* hltObjectFiller_;
-  edm::ParameterSet hltObjectParms_; //parameters for HLTObject filler
+  edm::ParameterSet hltParms_; //parameters for HLTObject filler
 
 };
 #endif // HWWTreeDumper_h
