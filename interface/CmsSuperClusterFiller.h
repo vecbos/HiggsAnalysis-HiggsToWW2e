@@ -53,7 +53,7 @@ struct CmsSuperClusterFillerData {
   // All the vectors that will store the stuff
   // going into the tree.
   vector<int>  *nBC, *nCrystals, *recoFlag, *channelStatus, *sevClosProbl, *idClosProbl;
-  vector<float> *rawEnergy, *energy, *phiWidth, *etaWidth, *eta, *theta, *phi, *time, *chi2, *fracClosProbl;
+  vector<float> *rawEnergy, *energy, *esEnergy, *phiWidth, *etaWidth, *eta, *theta, *phi, *time, *chi2, *fracClosProbl;
   vector<float> *seedEnergy, *seedX, *seedY;
   vector<float> *e3x3, * e5x5, *eMax, *e2x2, *e2nd, *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi,
     *e1x5, *e2x5Max, *e4SwissCross;

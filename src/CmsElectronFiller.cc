@@ -140,7 +140,6 @@ CmsElectronFiller::~CmsElectronFiller() {
   // delete here the vector ptr's
   delete privateData_->fiducialFlags;
   delete privateData_->recoFlags;
-  delete privateData_->esEnergy;
   delete privateData_->energyCorrections;
   delete privateData_->scPixCharge;
 
@@ -514,16 +513,12 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     packed_corr = ( isEcalEnergyCorrected << 1 ) | isMomentumCorrected;
     privateData_->energyCorrections->push_back( packed_corr );
 
-    // preshower energy
-    privateData_->esEnergy->push_back(sclusRef->preshowerEnergy());
-
   } else {
     privateData_->fiducialFlags->push_back(-1);
     privateData_->recoFlags->push_back(-1);
     privateData_->superClusterIndex->push_back( -1 );
     privateData_->PFsuperClusterIndex->push_back( -1 );
     privateData_->energyCorrections->push_back( -1 );
-    privateData_->esEnergy->push_back(-1.);
   }
 
 }
@@ -534,7 +529,6 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"fiducialFlags"+colSuffix).c_str(), *privateData_->fiducialFlags, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlags"+colSuffix).c_str(), *privateData_->recoFlags, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energyCorrections"+colSuffix).c_str(), *privateData_->energyCorrections, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"esEnergy"+colSuffix).c_str(), *privateData_->esEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"superClusterIndex"+colSuffix).c_str(), *privateData_->superClusterIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PFsuperClusterIndex"+colSuffix).c_str(), *privateData_->PFsuperClusterIndex, nCandString.c_str(), 0, "Reco");
 
@@ -549,7 +543,6 @@ void CmsElectronFillerData::initialise() {
 
   fiducialFlags = new vector<int>;
   recoFlags = new vector<int>;
-  esEnergy = new vector<float>;
   energyCorrections = new vector<int>;
 
   superClusterIndex = new vector<int>;
@@ -575,7 +568,6 @@ void CmsElectronFillerData::clearTrkVectors() {
 
   fiducialFlags->clear();
   recoFlags->clear();
-  esEnergy->clear();
   energyCorrections->clear();
 
   superClusterIndex->clear();

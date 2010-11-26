@@ -74,6 +74,7 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->nCrystals;
   delete privateData_->rawEnergy;
   delete privateData_->energy;
+  delete privateData_->esEnergy;
   delete privateData_->seedEnergy;
   delete privateData_->seedX;
   delete privateData_->seedY;
@@ -249,6 +250,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
   privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
   privateData_->rawEnergy->push_back((float)cand->rawEnergy());
   privateData_->energy->push_back((float)cand->energy());
+  privateData_->esEnergy->push_back((float)cand->preshowerEnergy());
   privateData_->phiWidth->push_back((float)cand->phiWidth());
   privateData_->etaWidth->push_back((float)cand->etaWidth());
   privateData_->eta->push_back((float)cand->position().eta());
@@ -673,6 +675,7 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"nCrystals"+colSuffix).c_str(), *privateData_->nCrystals, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rawEnergy"+colSuffix).c_str(), *privateData_->rawEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esEnergy"+colSuffix).c_str(), *privateData_->esEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
@@ -847,6 +850,7 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   nCrystals = new vector<int>; 
   rawEnergy = new vector<float>; 
   energy = new vector<float>; 
+  esEnergy = new vector<float>; 
   eta = new vector<float>; 
   theta = new vector<float>; 
   phi = new vector<float>;
@@ -905,6 +909,7 @@ void CmsSuperClusterFillerData::clear()
   nCrystals->clear();
   rawEnergy->clear();
   energy->clear();
+  esEnergy->clear();
   eta->clear(); 
   theta->clear();
   phi->clear();
