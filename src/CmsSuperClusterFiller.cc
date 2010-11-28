@@ -92,6 +92,9 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->covIEtaIEta;
   delete privateData_->covIEtaIPhi;
   delete privateData_->covIPhiIPhi;
+  delete privateData_->sMaj;
+  delete privateData_->sMin;
+  delete privateData_->alpha;
   delete privateData_->e1x5;
   delete privateData_->e2x5Max;
   delete privateData_->e4SwissCross;
@@ -310,6 +313,15 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->covIEtaIPhi->push_back(covIEtaIPhi);
       privateData_->covIPhiIPhi->push_back(covIPhiIPhi);
 
+      // seed second moments wrt principal axes:
+      Cluster2ndMoments moments = EcalClusterTools::cluster2ndMoments(*theSeed, *rechits );
+      privateData_->sMaj->push_back(moments.sMaj);
+      privateData_->sMin->push_back(moments.sMin);
+      // angle between sMaj and phi direction:
+      privateData_->alpha->push_back(moments.alpha);
+
+
+
       std::pair<DetId, float> maxRH = EcalClusterTools::getMaximum( *theSeed, &(*rechits) );
       DetId seedCrystalId = maxRH.first;
       EcalRecHitCollection::const_iterator seedRH = rechits->find(seedCrystalId);
@@ -371,6 +383,9 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->covIEtaIEta->push_back(-1.);
     privateData_->covIEtaIPhi->push_back(-1.);
     privateData_->covIPhiIPhi->push_back(-1.);
+    privateData_->sMaj->push_back(-1.);
+    privateData_->sMin->push_back(-1.);
+    privateData_->alpha->push_back(-1.);
     privateData_->e1x5->push_back(-1);
     privateData_->e2x5Max->push_back(-1);
     privateData_->e4SwissCross->push_back(-1);
@@ -692,6 +707,9 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"sMaj"+colSuffix).c_str(), *privateData_->sMaj, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"sMin"+colSuffix).c_str(), *privateData_->sMin, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"alpha"+colSuffix).c_str(), *privateData_->alpha, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hOverE"+colSuffix).c_str(), *privateData_->hOverE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlag"+colSuffix).c_str(), *privateData_->recoFlag, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"channelStatus"+colSuffix).c_str(), *privateData_->channelStatus, nCandString.c_str(), 0, "Reco");
@@ -868,6 +886,9 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   covIEtaIEta = new vector<float>;
   covIEtaIPhi = new vector<float>;
   covIPhiIPhi = new vector<float>;
+  sMaj = new vector<float>;
+  sMin = new vector<float>;
+  alpha = new vector<float>;
   trackIndex = new vector<int>;
   trackDeltaR = new vector<float>;
   trackDeltaPhi = new vector<float>;
@@ -927,6 +948,9 @@ void CmsSuperClusterFillerData::clear()
   covIEtaIEta->clear();
   covIEtaIPhi->clear();
   covIPhiIPhi->clear();
+  sMaj->clear();
+  sMin->clear();
+  alpha->clear();
   trackIndex->clear();
   trackDeltaR->clear();
   trackDeltaPhi->clear();
