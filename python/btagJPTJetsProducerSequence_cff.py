@@ -7,7 +7,7 @@ from RecoBTag.Configuration.RecoBTag_cff import *
 # create a new jets and tracks association
 import RecoJets.JetAssociationProducers.ak5JTA_cff
 newJPTJetTracksAssociatorAtVertex = RecoJets.JetAssociationProducers.ak5JTA_cff.ak5JetTracksAssociatorAtVertex.clone()
-newJPTJetTracksAssociatorAtVertex.jets = "ak5JPTJetsL2L3"
+newJPTJetTracksAssociatorAtVertex.jets = "ak5JPTJetsL2L3Residual"
 newJPTJetTracksAssociatorAtVertex.tracks = "generalTracks"
 
 # impact parameter b-tag
@@ -39,7 +39,7 @@ newCombinedSecondaryVertexMVABJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag(
 
 # soft electron b-tag
 newJPTJetsSoftElectronTagInfos = RecoBTag.Configuration.RecoBTag_cff.softElectronTagInfos.clone()
-newJPTJetsSoftElectronTagInfos.jets = "ak5JPTJetsL2L3"
+newJPTJetsSoftElectronTagInfos.jets = "ak5JPTJetsL2L3Residual"
 newSoftElectronBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.softElectronBJetTags.clone()
 newSoftElectronBJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJetsSoftElectronTagInfos") )
 newSoftElectronByIP3dBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.softElectronByIP3dBJetTags.clone()
@@ -49,7 +49,7 @@ newSoftElectronByPtBJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJet
 
 # soft muon b-tag
 newJPTJetsSoftMuonTagInfos = RecoBTag.Configuration.RecoBTag_cff.softMuonTagInfos.clone()
-newJPTJetsSoftMuonTagInfos.jets = "ak5JPTJetsL2L3"
+newJPTJetsSoftMuonTagInfos.jets = "ak5JPTJetsL2L3Residual"
 newSoftMuonBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonBJetTags.clone()
 newSoftMuonBJPTJetTags.tagInfos = cms.VInputTag( cms.InputTag("newJPTJetsSoftMuonTagInfos") )
 newSoftMuonByIP3dBJPTJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonByIP3dBJetTags.clone()

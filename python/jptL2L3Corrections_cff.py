@@ -23,7 +23,7 @@ ak5JPTL2L3 = cms.ESSource(
     correctors = cms.vstring('ak5JPTL2Relative','ak5JPTL3Absolute')
     )
 
-ak5JPTJetsL2L3   = cms.EDProducer('JPTJetCorrectionProducer',
-                                  src         = cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
-                                  correctors  = cms.vstring('ak5JPTL2L3')
-                                  )
+ak5JPTJetsL2L3Residual   = cms.EDProducer('JPTJetCorrectionProducer',
+                                          src         = cms.InputTag('JetPlusTrackZSPCorJetAntiKt5'),
+                                          correctors  = cms.vstring('ak5JPTL2L3Residual')
+                                          )
