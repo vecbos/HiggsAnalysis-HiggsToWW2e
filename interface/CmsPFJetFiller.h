@@ -26,6 +26,15 @@
 #include <vector>
 #include <TTree.h>
 
+
+struct QGLikelihoodVars {
+
+  float ptD;
+  float rmsCand;
+
+};
+
+
 struct CmsPFJetFillerData : public CmsCandidateFillerData {
 
   std::vector<float> *chargedHadronEnergy, *neutralHadronEnergy, *photonEnergy, *electronEnergy, *muonEnergy, 
@@ -34,6 +43,7 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
     *photonMultiplicity, *electronMultiplicity, *muonMultiplicity,
     *HFHadronMultiplicity, *HFEMMultiplicity;
   std::vector<float> *uncorrEnergy;
+  std::vector<float> *ptD, *rmsCand;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *combinedSecondaryVertexMVABJetTags,
     *jetBProbabilityBJetTags,

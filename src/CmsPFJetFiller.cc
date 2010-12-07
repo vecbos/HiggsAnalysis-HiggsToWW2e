@@ -20,10 +20,17 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
 
+#include "fastjet/PseudoJet.hh"
+#include "fastjet/ClusterSequence.hh"
+
 #include <string>
 
 using namespace edm;
 using namespace reco;
+
+
+
+QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R=0., float ptratio=0.);
 
 
 //		----------------------------------------
@@ -95,6 +102,10 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   // for backward compatibility with existing trees
   delete privateData_->chargedEmEnergy;
   delete privateData_->neutralEmEnergy;
+
+  // additional variables for Marini's likelihood:
+  delete privateData_->ptD;
+  delete privateData_->rmsCand;
 }
 
 
@@ -208,6 +219,12 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         // for backward compatibility with existing trees
         privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
         privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
+
+        // compute marini's variables
+        QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
+        privateData_->ptD->push_back( qgvars.ptD );
+        privateData_->rmsCand->push_back( qgvars.rmsCand );
+
       }
       else {
         privateData_->chargedHadronEnergy->push_back( -1. );
@@ -350,6 +367,8 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   if(dumpUncorrEnergy_) {
     cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
   }
+  cmstree->column((colPrefix+"rmsCand"+colSuffix).c_str(), *privateData_->rmsCand, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"ptD"+colSuffix).c_str(), *privateData_->ptD, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -393,6 +412,8 @@ void CmsPFJetFillerData::initialise() {
   trackCountingHighPurBJetTags = new vector<float>;
   trackCountingHighEffBJetTags = new vector<float>;
   uncorrEnergy = new vector<float>;
+  ptD = new vector<float>;
+  rmsCand = new vector<float>;
 
 }
 
@@ -430,5 +451,107 @@ void CmsPFJetFillerData::clearTrkVectors() {
   trackCountingHighPurBJetTags->clear();
   trackCountingHighEffBJetTags->clear();
   uncorrEnergy->clear();
+  ptD->clear();
+  rmsCand->clear();
+
+}
+
+
+
+QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptratio ) {
+
+  std::vector<fastjet::PseudoJet> *input_particles = new std::vector<fastjet::PseudoJet>;
+
+  for(long int i=0;i<pfjet->nConstituents();++i)
+     {
+     input_particles->push_back(fastjet::PseudoJet( pfjet->getJetConstituentsQuick()[i]->px(),
+                          pfjet->getJetConstituentsQuick()[i]->py(),
+                          pfjet->getJetConstituentsQuick()[i]->pz(),
+                          pfjet->getJetConstituentsQuick()[i]->energy()
+                      ) );
+     }
+
+  fastjet::JetDefinition ak_def(fastjet::antikt_algorithm, R);
+  fastjet::JetDefinition ak_def1(fastjet::antikt_algorithm, 0.04);
+  fastjet::JetDefinition ak_def2(fastjet::antikt_algorithm, 0.25);
+  
+  fastjet::ClusterSequence seq(*input_particles, ak_def);
+  fastjet::ClusterSequence seq1(*input_particles,ak_def1);
+  fastjet::ClusterSequence seq2(*input_particles,ak_def2);
+  
+  float jtpt = pfjet->pt();
+
+  //recompute ptmin
+  float ptmin = ptratio * jtpt;
+  
+  //now I want to know how many subjets there are with pt>ptmin
+  vector<fastjet::PseudoJet> inclusive_jets;
+  
+  inclusive_jets = sorted_by_pt(seq1.inclusive_jets(jtpt*0.30));
+  int nsubjets1=inclusive_jets.size();
+  
+  inclusive_jets = sorted_by_pt(seq2.inclusive_jets(jtpt*0.05));
+  int nsubjets2=inclusive_jets.size();
+  
+  inclusive_jets = sorted_by_pt(seq.inclusive_jets(ptmin));
+  int nsubjets =  inclusive_jets.size(); 
+  
+  //cerco il raggio del jet
+  //the next definition of WEIGHT is used in the radius: Pt^2
+  Double_t jtpt_s=0;//sum to get the jtpt that I see after clustering
+  if(inclusive_jets.size()>0)
+    {
+    jtpt_s=0;
+    for(unsigned int i = 0; i<inclusive_jets.size(); i++ )
+    		jtpt_s+=inclusive_jets.at(i).perp();
+  }
+  #define WEIGHT (inclusive_jets.at(i).perp()*inclusive_jets.at(i).perp())
+  float r=0.;
+  if(inclusive_jets.size()>0)
+  {
+  Double_t eta0=0,phi0=0,Sum=0.0;
+  for(unsigned int i=0;i<inclusive_jets.size();i++)
+    {
+    Sum+= WEIGHT ;
+    eta0+= WEIGHT * inclusive_jets.at(i).eta();
+    //problema con phi
+    if(1.5<inclusive_jets.at(0).phi()&&inclusive_jets.at(0).phi()<4.6)
+    	phi0+= WEIGHT * inclusive_jets.at(i).phi();
+    else
+    	phi0+= WEIGHT * inclusive_jets.at(i).phi_std();
+    }
+  eta0/=Sum;
+  phi0/=Sum;
+  r=0.;
+  for(unsigned int i=0;i<inclusive_jets.size();i++)
+    {
+    if(1.5<inclusive_jets.at(0).phi()&&inclusive_jets.at(0).phi()<4.6)
+    r+= ((inclusive_jets.at(i).eta()-eta0)*(inclusive_jets.at(i).eta()-eta0) 
+    		+ (inclusive_jets.at(i).phi()-phi0)*(inclusive_jets.at(i).phi()-phi0)) * WEIGHT ;
+    else
+    r+=((inclusive_jets.at(i).eta()-eta0)*(inclusive_jets.at(i).eta()-eta0) 
+    		+ (inclusive_jets.at(i).phi_std()-phi0)*(inclusive_jets.at(i).phi_std()-phi0))*WEIGHT;
+    }
+    r/=Sum;
+  }else r=0;
+  //I want to compute the PtD =\sqrt( \sum_j (Pt_j/Pt_jet) ^ 2)
+  float PtD=0.0;
+  for(unsigned int i=0 ; i < inclusive_jets.size(); i++ )
+    {
+    PtD+=inclusive_jets.at(i).perp2()/(jtpt_s*jtpt_s);
+    }
+  PtD=sqrt(PtD);
+  
+//  //I compute sub1ptratio
+//if (inclusive_jets.size()>0)
+//	sub1ptratio=inclusive_jets.at(0).perp()/jtpt_s;
+//else 
+//	sub1ptratio=0;
+
+  QGLikelihoodVars vars;
+  vars.ptD = PtD;
+  vars.rmsCand = r;
+
+  return vars;
 
 }
