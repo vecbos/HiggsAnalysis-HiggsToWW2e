@@ -3,6 +3,7 @@
 <use name=FWCore/Utilities>
 <use name=root>
 <use name=rootcore>
+<use name=fastjet>
 <use name=DataFormats/DetId>
 <use name=DataFormats/BTauReco>
 <use name=DataFormats/TrackerRecHit2D>
@@ -53,6 +54,7 @@
    <use name=FWCore/Utilities>
    <use name=root>
    <use name=rootcore>
+   <use name=fastjet>
    <use name=DataFormats/DetId>
    <use name=DataFormats/TrackerRecHit2D>
    <use name=DataFormats/TrackingRecHit>
