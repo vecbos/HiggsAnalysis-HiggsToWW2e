@@ -35,6 +35,7 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFTauFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFPreIdFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowElectronFiller.h"
@@ -86,6 +87,11 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   savePFEleBasic_  = iConfig.getUntrackedParameter<bool>("savePFEleBasic",  true);
   savePFEleIsoDep_ = iConfig.getUntrackedParameter<bool>("savePFEleIsoDep", true);
 
+  //tau pflow                                                                                                                                                                                                                              
+  savePFTauBasic_  = iConfig.getUntrackedParameter<bool>("savePFTauBasic", false);
+  saveLeadPFCand_  = iConfig.getUntrackedParameter<bool>("saveLeadPFCand", false);
+  savePFTauDiscriminators_ = iConfig.getUntrackedParameter<bool>("savePFTauDiscriminators", false);
+
   // particle identification
   saveEleID_    = iConfig.getUntrackedParameter<bool>("saveEleID", false);
 
@@ -104,6 +110,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpGsfTracks_      = iConfig.getUntrackedParameter<bool>("dumpGsfTracks", false);
   dumpMuonTracks_     = iConfig.getUntrackedParameter<bool>("dumpMuonTracks", false);
   dumpMuons_          = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
+  dumpPFTaus_         = iConfig.getUntrackedParameter<bool>("dumpPFTaus", false);
   dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
   dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
   dumpMet_            = iConfig.getUntrackedParameter<bool>("dumpMet", false);
@@ -123,6 +130,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   pflowElectronCollection_ = iConfig.getParameter<edm::InputTag>("pflowElectronCollection");
   photonCollection_        = iConfig.getParameter<edm::InputTag>("photonCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
+  pfTauCollection_         = iConfig.getParameter<edm::InputTag>("pfTauCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
   ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
@@ -169,6 +177,21 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpTriggerResults_  = iConfig.getUntrackedParameter<bool>("dumpTriggerResults");
   dumpHLTObject_       = iConfig.getUntrackedParameter<bool>("dumpHLTObjects");
   hltParms_            = iConfig.getUntrackedParameter<edm::ParameterSet>("HLTObjectsInfo");
+
+  // PFTau Discriminators                                                                                                                                                                                                                  
+  tauDiscrByLeadTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadTrackFindingTag");
+  tauDiscrByLeadTrackPtCutTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadTrackPtCutTag");
+  //  tauDiscrByNProngsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByNProngsTag");                                                                                                                                                 
+  tauDiscrByTrackIsoTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTrackIsoTag");
+  tauDiscrByEcalIsoTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByEcalIsoTag");
+  tauDiscrAgainstMuonsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstMuonsTag");
+  tauDiscrAgainstElectronsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstElectronsTag");
+  tauDiscrByTaNCTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCTag");
+  tauDiscrByTaNCfrHalfPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrHalfPercentTag");
+  tauDiscrByTaNCfrOnePercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrOnePercentTag");
+  tauDiscrByTaNCfrQuarterPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrQuarterPercentTag");
+  tauDiscrByTaNCfrTenthPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrTenthPercentTag");
+
 }
 
 
@@ -431,6 +454,23 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     }
 
   }
+
+  // fill PFTau block                                                                                                                                                                                                                      
+  if(dumpPFTaus_)
+    {
+      CmsPFTauFiller treeFill(tree_, true);
+      std::string prefix("");
+      std::string suffix("PFTau");
+      treeFill.savePFTauBasic(savePFTauBasic_);
+      treeFill.saveLeadPFCand(saveLeadPFCand_);
+      treeFill.writeCollectionToTree(pfTauCollection_, iEvent, iSetup, prefix, suffix,
+                                     tauDiscrByLeadTrackFindingTag_, tauDiscrByLeadTrackPtCutTag_, //tauDiscrByNProngsTag_,
+                                     tauDiscrByTrackIsoTag_, tauDiscrByEcalIsoTag_, tauDiscrAgainstMuonsTag_, tauDiscrAgainstElectronsTag_,
+                                     tauDiscrByTaNCTag_,
+                                     tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
+                                     tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_, false);
+    }
+
 
   // fill CaloTower block
   if(dumpCaloTowers_){

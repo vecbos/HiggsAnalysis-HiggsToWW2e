@@ -53,6 +53,8 @@ private:
   bool saveTrk_, saveEcal_, saveHcal_, saveDT_, saveCSC_, saveRPC_;
   //! dump more specific reco informations in addition to candidate variables
   bool saveFatTrk_, saveFatEcal_, saveFatHcal_, saveFatDT_, saveFatCSC_, saveFatRPC_;
+  //! dump more specific reco informations in addition to candidate variables
+  bool savePFTauBasic_, savePFTauDiscriminators_, saveLeadPFCand_;
   //! dump electron ID variables
   bool saveEleID_;
   //! dump the particle flow electron block
@@ -70,6 +72,8 @@ private:
   bool dumpPFpreId_; 
   //! dump muon block
   bool dumpMuons_;
+  //! dump pftau block
+  bool dumpPFTaus_;
   //! dump reco / generated jets block
   bool dumpJets_, dumpGenJets_;
   //! dump reco / generated MET block
@@ -105,6 +109,7 @@ private:
   edm::InputTag JPTjetCollection1_, JPTjetCollection2_;
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;
+  edm::InputTag pfTauCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalPFClusterCollection_;
@@ -126,6 +131,12 @@ private:
   std::string genWeightCollection_;
   //! PF electrons pre-identification
   edm::InputTag PFpreIdCollection_;
+  //! PF Tau Discriminators
+  edm::InputTag tauDiscrByLeadTrackFindingTag_, tauDiscrByLeadTrackPtCutTag_,// tauDiscrByNProngsTag_,
+    tauDiscrByTrackIsoTag_, tauDiscrByEcalIsoTag_, tauDiscrAgainstMuonsTag_, tauDiscrAgainstElectronsTag_,
+    tauDiscrByTaNCTag_,
+    tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
+    tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_;
   //! ROOT file with the plain ROOT tree inside
   TFile *fileOut_;
   //! the tree with the events
