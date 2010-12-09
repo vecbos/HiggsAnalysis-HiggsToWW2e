@@ -7,6 +7,8 @@ process.load('Configuration.StandardSequences.GeometryExtended_cff')
 process.load('Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff')
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 
+process.TFileService = cms.Service("TFileService", fileName = cms.string("lumi.root") )
+
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'GR10_P_V7::All'
 #process.GlobalTag.globaltag = 'GR_R_36X_V12A::All'
@@ -47,12 +49,19 @@ process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.saveFatTrk = True
 process.treeDumper.saveTrackDeDx = True
-process.treeDumper.saveJet1BTag = True
+#process.treeDumper.saveJet1BTag = False
+process.treeDumper.dumpJets = False
 process.treeDumper.dumpTree = True
+process.treeDumper.dumpHLTObjects = cms.untracked.bool(True)
+process.treeDumper.dumpHLTObjectsInfo = cms.untracked.PSet(
+    triggerResults = cms.InputTag("TriggerResults","","HLT"),
+    processName = cms.string("HLT"),
+    triggerSummaryAOD = cms.InputTag("hltTriggerSummaryAOD","","HLT")
+    )
 
 process.options = cms.untracked.PSet(
     fileMode =  cms.untracked.string('NOMERGE'),
-    wantSummary = cms.untracked.bool(True) 
+    #wantSummary = cms.untracked.bool(True) 
     )
 
 process.load('L1TriggerConfig.L1GtConfigProducers.L1GtTriggerMaskTechTrigConfig_cff')
@@ -87,20 +96,23 @@ process.primaryVertexFilter = cms.EDFilter("GoodVertexFilter",
                                            maxd0 = cms.double(2)	
                                            )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
 #                            duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('/store/data/Run2010A/EG/RECO/v2/000/136/100/32D5C3FF-D767-DF11-A25F-0030487C912E.root')
+                            fileNames = cms.untracked.vstring('file:46040E22-37D1-DF11-8F23-0030487C6062.root')
                             )
 
+process.lumiAna = cms.EDAnalyzer("LumiAnalyzer")
+
 process.p = cms.Path (
+     process.lumiAna *
     process.L1BSC *
 #    process.HFCoincidence * process.noscraping * process.primaryVertexFilter *
     process.lowThrCaloTowers * process.mergedSuperClusters * process.mergedBasicClusters *
-    process.ourJetSequence * process.newBtaggingSequence *
+    process.ourJetSequence * #process.newBtaggingSequence *
     process.gsfElectrons *
     process.eIdSequence *
     process.eleIsolationSequence *
