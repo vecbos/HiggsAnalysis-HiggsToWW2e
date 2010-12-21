@@ -1,10 +1,10 @@
 --- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 38X / 39X ---
 
-cmsrel CMSSW_3_8_6
-cd CMSSW_3_8_6/src
+cmsrel CMSSW_3_8_7
+cd CMSSW_3_8_7/src
 cmsenv
 
-cvs co -r fp2010-12-07 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V12-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-03-14-03 RecoEgamma/ElectronIdentification
 cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 
