@@ -74,8 +74,8 @@ private:
   bool dumpMuons_;
   //! dump pftau block
   bool dumpPFTaus_;
-  //! dump reco / generated jets block
-  bool dumpJets_, dumpGenJets_;
+  //! dump reco / generated / PU corrected jets block
+  bool dumpJets_, dumpGenJets_, dumpPUcorrPFJet_;
   //! dump reco / generated MET block
   bool dumpMet_, dumpGenMet_;
   //! dump Super/Basic Clusters block
@@ -101,14 +101,19 @@ private:
   edm::InputTag electronCollection_, muonCollection_,pflowElectronCollection_;
   edm::InputTag photonCollection_;
   edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
+  edm::InputTag PFpuCorrJetCollection1_, PFpuCorrJetCollection2_;
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
   // edm::InputTag corrmetCollection_;
   edm::InputTag vertexCollection_;
   edm::InputTag K0sCollection_;
   edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_;
   edm::InputTag JPTjetCollection1_, JPTjetCollection2_;
+  //! btag collections (only PF, the other are hardcoded)
+  edm::ParameterSet PFJetsBTags_, PFPUcorrJetsBTags_;
+  //! track collections
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;
+  //! taus
   edm::InputTag pfTauCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters

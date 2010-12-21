@@ -117,6 +117,8 @@ CmsPFJetFiller::~CmsPFJetFiller() {
 
 void CmsPFJetFiller::saveJetBTag(bool what) { saveJetBTag_=what; }
 
+void CmsPFJetFiller::setBTags(edm::ParameterSet btagcollections) { BTagCollections_ = btagcollections; }
+
 // Set boolean control options for quantities that are written out
 
 void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
@@ -175,20 +177,20 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       trackCountingHighEffBJetTags;
 
     if(saveJetBTag_) {
-      iEvent.getByLabel("newCombinedSecondaryVertexBPFJetTags", combinedSecondaryVertexBJetTags);
-      iEvent.getByLabel("newCombinedSecondaryVertexMVABPFJetTags", combinedSecondaryVertexMVABJetTags);
-      iEvent.getByLabel("newJetBProbabilityBPFJetTags", jetBProbabilityBJetTags);
-      iEvent.getByLabel("newJetProbabilityBPFJetTags", jetProbabilityBJetTags);
-      iEvent.getByLabel("newSimpleSecondaryVertexHighEffBPFJetTags", simpleSecondaryVertexHighEffBJetTags);
-      iEvent.getByLabel("newSimpleSecondaryVertexHighPurBPFJetTags", simpleSecondaryVertexHighPurBJetTags);
-      iEvent.getByLabel("newSoftMuonBPFJetTags", softMuonBJetTags);
-      iEvent.getByLabel("newSoftMuonByIP3dBPFJetTags", softMuonByIP3dBJetTags);
-      iEvent.getByLabel("newSoftMuonByPtBPFJetTags", softMuonByPtBJetTags);
-      iEvent.getByLabel("newSoftElectronBPFJetTags", softElectronBJetTags);
-      iEvent.getByLabel("newSoftElectronByIP3dBPFJetTags", softElectronByIP3dBJetTags);
-      iEvent.getByLabel("newSoftElectronByPtBPFJetTags", softElectronByPtBJetTags);
-      iEvent.getByLabel("newTrackCountingHighPurBPFJetTags", trackCountingHighPurBJetTags);
-      iEvent.getByLabel("newTrackCountingHighEffBPFJetTags", trackCountingHighEffBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("combinedSecondaryVertexBJetTags"), combinedSecondaryVertexBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("combinedSecondaryVertexMVABJetTags"), combinedSecondaryVertexMVABJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("jetBProbabilityBJetTags"), jetBProbabilityBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("jetProbabilityBJetTags"), jetProbabilityBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("simpleSecondaryVertexHighEffBJetTags"), simpleSecondaryVertexHighEffBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("simpleSecondaryVertexHighPurBJetTags"), simpleSecondaryVertexHighPurBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softMuonBJetTags"), softMuonBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softMuonByIP3dBJetTags"), softMuonByIP3dBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softMuonByPtBJetTags"), softMuonByPtBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softElectronBJetTags"), softElectronBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softElectronByIP3dBJetTags"), softElectronByIP3dBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softElectronByPtBJetTags"), softElectronByPtBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingHighPurBJetTags"), trackCountingHighPurBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingHighEffBJetTags"), trackCountingHighEffBJetTags);
     }
 
     int index = 0;
@@ -488,13 +490,13 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
   vector<fastjet::PseudoJet> inclusive_jets;
   
   inclusive_jets = sorted_by_pt(seq1.inclusive_jets(jtpt*0.30));
-  int nsubjets1=inclusive_jets.size();
+  //int nsubjets1=inclusive_jets.size();
   
   inclusive_jets = sorted_by_pt(seq2.inclusive_jets(jtpt*0.05));
-  int nsubjets2=inclusive_jets.size();
+  //  int nsubjets2=inclusive_jets.size();
   
   inclusive_jets = sorted_by_pt(seq.inclusive_jets(ptmin));
-  int nsubjets =  inclusive_jets.size(); 
+  //  int nsubjets =  inclusive_jets.size(); 
   
   //cerco il raggio del jet
   //the next definition of WEIGHT is used in the radius: Pt^2

@@ -85,6 +85,8 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   // Modifiers
   void saveJetBTag(bool );
 
+  void setBTags(edm::ParameterSet btagcollections);
+
   // Operators
 
   // run number and all of that --- to implement
@@ -102,6 +104,8 @@ class CmsPFJetFiller : public CmsCandidateFiller {
 
   // Friends
   bool saveJetBTag_;
+
+  edm::ParameterSet BTagCollections_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;

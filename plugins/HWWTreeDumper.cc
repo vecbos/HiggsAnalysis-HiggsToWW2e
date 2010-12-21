@@ -113,6 +113,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpPFTaus_         = iConfig.getUntrackedParameter<bool>("dumpPFTaus", false);
   dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
   dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
+  dumpPUcorrPFJet_    = iConfig.getUntrackedParameter<bool>("dumpPUcorrPFJet", false);
   dumpMet_            = iConfig.getUntrackedParameter<bool>("dumpMet", false);
   dumpGenMet_         = iConfig.getUntrackedParameter<bool>("dumpGenMet", false);
   dumpVertices_       = iConfig.getUntrackedParameter<bool>("dumpVertices", false);
@@ -151,8 +152,15 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
   PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
+  PFpuCorrJetCollection1_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection1");
+  PFpuCorrJetCollection2_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection2");
   JPTjetCollection1_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection1");
   JPTjetCollection2_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection2");
+
+  // btag collections
+  PFJetsBTags_              = iConfig.getUntrackedParameter<edm::ParameterSet>("PFJetsBTags");
+  PFPUcorrJetsBTags_        = iConfig.getUntrackedParameter<edm::ParameterSet>("PFPUcorrJetsBTags");
+
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
   // corrmetCollection_       = iConfig.getParameter<edm::InputTag>("corrmetCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
@@ -543,16 +551,27 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       suffix = "AK5PFJet";
       pfJetFiller.saveCand(saveCand_);
       pfJetFiller.saveJetBTag(saveJetBTag_);
+      pfJetFiller.setBTags(PFJetsBTags_);
       pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
 
     }
 
+    // particle flow jets with correction for pileup
+    if ( dumpParticleFlowObjects_ && dumpPUcorrPFJet_ ) {
+      CmsPFJetFiller pfPUcorrJetFiller(tree_, true);
+      suffix = "AK5PFPUcorrJet";
+      pfPUcorrJetFiller.saveCand(saveCand_);
+      pfPUcorrJetFiller.saveJetBTag(saveJetBTag_);
+      pfPUcorrJetFiller.setBTags(PFPUcorrJetsBTags_);
+      pfPUcorrJetFiller.writeCollectionToTree(PFpuCorrJetCollection1_, iEvent, iSetup, prefix, suffix, false,PFpuCorrJetCollection2_);
+    }
+
     // Jet Plus Tracks jets
-    CmsJPTJetFiller jptJetFiller(tree_, true);
-    suffix = "AK5JPTJet";
-    jptJetFiller.saveCand(saveCand_);
-    jptJetFiller.saveJetBTag(saveJetBTag_);
-    jptJetFiller.writeCollectionToTree(JPTjetCollection1_, iEvent, iSetup, prefix, suffix, false, JPTjetCollection2_);
+    //     CmsJPTJetFiller jptJetFiller(tree_, true);
+    //     suffix = "AK5JPTJet";
+    //     jptJetFiller.saveCand(saveCand_);
+    //     jptJetFiller.saveJetBTag(saveJetBTag_);
+    //     jptJetFiller.writeCollectionToTree(JPTjetCollection1_, iEvent, iSetup, prefix, suffix, false, JPTjetCollection2_);
 
     // dump generated JETs
     if(dumpGenJets_) {

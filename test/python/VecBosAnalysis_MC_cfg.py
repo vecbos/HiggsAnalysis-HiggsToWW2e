@@ -14,7 +14,8 @@ process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
-process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
+#process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -75,7 +76,7 @@ process.source = cms.Source("PoolSource",
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.ourJetSequence *
-                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newJPTJetBtaggingSequence *
+                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
