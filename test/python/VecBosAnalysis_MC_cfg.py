@@ -17,6 +17,18 @@ process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
+# do not use residual corrections in MC
+process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
+process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
+process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
+process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3'
+process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3'
+process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3'
+process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFPUcorrJetsL2L3'
+process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFPUcorrJetsL2L3'
+process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFPUcorrJetsL2L3'
+
+
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
 #from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
@@ -44,6 +56,10 @@ process.load("RecoJets.Configuration.RecoGenJets_cff")
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
+process.treeDumper.jetCollection1 = 'ak5CaloJetsL2L3'
+process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
+process.treeDumper.PFjetCollection1 = 'ak5PFJetsL2L3'
+process.treeDumper.PFpuCorrJetCollection1 = 'PUcorrAk5PFJetsL1L2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
@@ -75,7 +91,7 @@ process.source = cms.Source("PoolSource",
 
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
-                       process.ourJetSequence *
+                       process.ourJetSequenceMC *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *

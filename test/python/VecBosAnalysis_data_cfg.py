@@ -75,7 +75,7 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
-                       process.ourJetSequence *
+                       process.ourJetSequenceData *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence *
                        process.eleIsolationSequence *
