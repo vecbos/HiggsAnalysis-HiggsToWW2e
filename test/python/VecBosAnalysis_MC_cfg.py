@@ -24,9 +24,9 @@ process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
 process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3'
 process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3'
 process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3'
-process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFPUcorrJetsL2L3'
-process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFPUcorrJetsL2L3'
-process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFPUcorrJetsL2L3'
+process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'PUcorrAk5PFJetsL1L2L3'
+process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'PUcorrAk5PFJetsL1L2L3'
+process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'PUcorrAk5PFJetsL1L2L3'
 
 
 # to correct calo met ---
