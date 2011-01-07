@@ -17,7 +17,7 @@
 #include <iostream>
 
 LumiAnalyzer::LumiAnalyzer(const edm::ParameterSet&){
-  edm::LogWarning("")<<"LumiAnalyzer::LumiAnalyzer()"<<std::endl;
+  edm::LogInfo("")<<"LumiAnalyzer::LumiAnalyzer()"<<std::endl;
   nEvent=0;
   nLumiSec=0;
   nRun=0;
@@ -48,17 +48,17 @@ LumiAnalyzer::LumiAnalyzer(const edm::ParameterSet&){
 
 
 LumiAnalyzer::~LumiAnalyzer(){
-  edm::LogWarning("") <<"total number of events "<<nEvent<<std::endl;
-  edm::LogWarning("") <<"total number of lumiSec "<<nLumiSec<<std::endl;
-  edm::LogWarning("") <<"total number of runs "<<nRun<<std::endl;
-  edm::LogWarning("") <<"total lumi "<<totalLumi<<std::endl;
+  edm::LogInfo("") <<"total number of events "<<nEvent<<std::endl;
+  edm::LogInfo("") <<"total number of lumiSec "<<nLumiSec<<std::endl;
+  edm::LogInfo("") <<"total number of runs "<<nRun<<std::endl;
+  edm::LogInfo("") <<"total lumi "<<totalLumi<<std::endl;
 
   for(unsigned int i=0; i<runList.size(); i++){
-    edm::LogWarning("") <<"run "<<runList[i]<<" with "<<lumiSecByRun[i]<<" lumisec;  "<<eventByRun[i]<<" events;  "<<lumiByRun[i]<<" luminosity"<<std::endl;
+    edm::LogInfo("") <<"run "<<runList[i]<<" with "<<lumiSecByRun[i]<<" lumisec;  "<<eventByRun[i]<<" events;  "<<lumiByRun[i]<<" luminosity"<<std::endl;
   }
   //lumiOutput->cd();
   // tree->Write();
-  edm::LogWarning("") <<"LumiAnalyzer::~LumiAnalyzer()"<<std::endl;
+  edm::LogInfo("") <<"LumiAnalyzer::~LumiAnalyzer()"<<std::endl;
 
 }
 
@@ -74,11 +74,11 @@ void LumiAnalyzer::beginRun(edm::Run const& iRun , edm::EventSetup const& eventS
 
 void LumiAnalyzer::beginLuminosityBlock(const edm::LuminosityBlock& lumiBlock, const edm::EventSetup& eventSetup) {
 
-  edm::LogWarning("")<<"LumiAnalyzer::beginLuminosityBlock"<<std::endl;
+  edm::LogInfo("")<<"LumiAnalyzer::beginLuminosityBlock"<<std::endl;
   edm::Handle<LumiSummary> lumiSummary;
   lumiBlock.getByLabel("lumiProducer", lumiSummary);
   if(lumiSummary->isValid()){
-    edm::LogWarning("")<<"LumiAnalyzer::lumiSummary is valid"<<std::endl;
+    edm::LogInfo("")<<"LumiAnalyzer::lumiSummary is valid"<<std::endl;
 
     lumiSection = lumiSummary->lsNumber();
     nLumiSec++;
@@ -95,12 +95,12 @@ void LumiAnalyzer::analyze(edm::Event const&, edm::EventSetup const&){
   nEventByRun++;
   nEvent++;
 
-  //edm::LogWarning("") <<"nEventByLS "<<nEventByLS<<std::endl;
+  //edm::LogInfo("") <<"nEventByLS "<<nEventByLS<<std::endl;
 }
 
 void LumiAnalyzer::endLuminosityBlock(const edm::LuminosityBlock& lumiBlock, const edm::EventSetup& eventSetup) {
 
-  edm::LogWarning("")<<"LumiAnalyzer::endLuminosityBlock"<<std::endl;
+  edm::LogInfo("")<<"LumiAnalyzer::endLuminosityBlock"<<std::endl;
   edm::Handle<LumiSummary> lumiSummary;
   lumiBlock.getByLabel("lumiProducer", lumiSummary);
   //This is not working properly in 384, it will work in 386
@@ -112,7 +112,7 @@ void LumiAnalyzer::endLuminosityBlock(const edm::LuminosityBlock& lumiBlock, con
     }*/
   //This is the recipe from zhen for 384
   if(lumiSummary->isValid()){
-    edm::LogWarning("")<<"LumiAnalyzer::lumiSummary is valid"<<std::endl;
+    edm::LogInfo("")<<"LumiAnalyzer::lumiSummary is valid"<<std::endl;
     float integratedRecorded;
     if(lumiSummary->nTriggerLine()) {
       float integratedDelivered=lumiSummary->avgInsDelLumi()*lumiSummary->lumiSectionLength();
@@ -126,11 +126,11 @@ void LumiAnalyzer::endLuminosityBlock(const edm::LuminosityBlock& lumiBlock, con
     totalLumiByRun = totalLumiByRun + integratedRecorded;
     totalLumiByLS = integratedRecorded;
   }  
-  /*edm::LogWarning("") <<"totalLumi "<<totalLumi<<std::endl;
-   edm::LogWarning("") <<"totalLumiByRun "<<totalLumiByRun<<std::endl;
-   edm::LogWarning("") <<"totalLumiByLS "<<totalLumiByLS<<std::endl;
+  /*edm::LogInfo("") <<"totalLumi "<<totalLumi<<std::endl;
+   edm::LogInfo("") <<"totalLumiByRun "<<totalLumiByRun<<std::endl;
+   edm::LogInfo("") <<"totalLumiByLS "<<totalLumiByLS<<std::endl;
 
-   edm::LogWarning("") <<"nEventByLS "<<nEventByLS<<std::endl;*/
+   edm::LogInfo("") <<"nEventByLS "<<nEventByLS<<std::endl;*/
 
   tree->Fill();
 }
