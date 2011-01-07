@@ -15,6 +15,8 @@ from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 # to run the offset corrections on PFJets and L2L3 on top of them
 PUcorrAk5PFJets=ak5PFJets.clone()
 PUcorrAk5PFJets.doAreaFastjet = True
+PUcorrAk5PFJets.Rho_EtaMax=cms.double(4.5)
+PUcorrAk5PFJets.Ghost_EtaMax= cms.double(6.0)
 PUcorrKt6PFJets=kt6PFJets.clone()
 PUcorrKt6PFJets.doRhoFastjet = True
 PUcorrKt6PFJets.doAreaFastjet = True
