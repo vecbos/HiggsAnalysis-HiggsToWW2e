@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 # to run likelihood and standard CIC
-from RecoEgamma.ElectronIdentification.cutsInCategoriesElectronIdentificationV06_cfi import *
+from RecoEgamma.ElectronIdentification.cutsInCategoriesElectronIdentificationV06_DataTuning_cfi import *
 eIdSequence = cms.Sequence(eidVeryLoose+eidLoose+eidMedium+eidTight+eidSuperTight+eidHyperTight1)
 
 # to run the HWW V04 CIC
