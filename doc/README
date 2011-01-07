@@ -1,4 +1,34 @@
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 38X / 39X ---
+--- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 39X ---
+
+cmsrel CMSSW_3_9_6
+cd CMSSW_3_9_6/src
+cmsenv
+
+cvs co -r V14-3_9_6 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V00-03-21 RecoEgamma/ElectronIdentification
+cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V03-01-01 JetMETCorrections/Configuration
+
+scram b
+
+* To produce the trees on AOD:
+- cd HiggsAnalysis/HiggsToWW2e/test/python
+- change in the following cfg.py's: 'runOnAOD = 1' at the beginning of the file
+cmsRun VecBosAnalysis_data_cfg.py
+cmsRun VecBosAnalysis_MC_cfg.py
+
+* To produce the trees on RECO (more complete than the AOD ones):
+- cd HiggsAnalysis/HiggsToWW2e/test/python
+- change in the following cfg.py's: 'runOnAOD = 0' at the beginning of the file
+cmsRun VecBosAnalysis_data_cfg.py
+cmsRun VecBosAnalysis_MC_cfg.py
+
+* crab and multicrab cfgs examples are in:
+HiggsAnalysis/HiggsToWW2e/test/crab
+
+
+
+--- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 38X ---
 
 cmsrel CMSSW_3_8_7
 cd CMSSW_3_8_7/src
