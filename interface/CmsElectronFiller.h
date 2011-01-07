@@ -41,7 +41,7 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<float> *ecal, *eraw, *caloEta, *caloPhi;
   vector<int> *energyCorrections;
 
-  vector<float> *convDist, *convDcot, *convRadius, *convX, *convY, *convZ, *convChi2Prob;
+  vector<float> *convDist, *convDcot, *convRadius;
   vector<int> *convTrackIndex;
 
 public:
