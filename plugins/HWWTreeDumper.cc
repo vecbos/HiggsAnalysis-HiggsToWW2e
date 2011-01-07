@@ -371,7 +371,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.saveDeDx(saveTrackDeDx_);
 
     treeFiller.findPrimaryVertex(iEvent);
-    treeFiller.saveVtxTrk(true);
+    treeFiller.saveVtxTrk(saveFatTrk_);
 
     std::string prefix("");
     std::string suffix("Track");
@@ -388,7 +388,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.isGsf(true);
     treeFiller.saveDeDx(false);
     treeFiller.findPrimaryVertex(iEvent);
-    treeFiller.saveVtxTrk(true);
+    treeFiller.saveVtxTrk(saveFatTrk_);
 
 
     std::string prefix("");
@@ -407,7 +407,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFillerGlobalMuonTrack.saveDeDx(false);
     treeFillerGlobalMuonTrack.isGsf(false);
     treeFillerGlobalMuonTrack.findPrimaryVertex(iEvent);
-    treeFillerGlobalMuonTrack.saveVtxTrk(true);
+    treeFillerGlobalMuonTrack.saveVtxTrk(saveFatTrk_);
 
     std::string prefix("");
     std::string suffix1("GlobalMuonTrack");
@@ -421,11 +421,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFillerSTAMuonTrack.isGsf(false);
 
     treeFillerSTAMuonTrack.findPrimaryVertex(iEvent);
-    treeFillerSTAMuonTrack.saveVtxTrk(true);
+    treeFillerSTAMuonTrack.saveVtxTrk(saveFatTrk_);
 
     std::string suffix2("STAMuonTrack");
     treeFillerSTAMuonTrack.writeCollectionToTree(standAloneMuonTrackCollection_, iEvent, iSetup, prefix, suffix2, false);
-    
+
   }
 
   //fill Primary Vertex and associated tracks
