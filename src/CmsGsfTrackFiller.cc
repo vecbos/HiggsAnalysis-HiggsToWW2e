@@ -177,41 +177,44 @@ void CmsGsfTrackFiller::writeGsfTrkInfo(GsfTrackRef trkRef) {
   privateData_->pyMode->push_back(trkRef->pyMode());
   privateData_->pzMode->push_back(trkRef->pzMode());
 
-  ElectronSeedRef seedRef= trkRef->extra()->seedRef().castTo<ElectronSeedRef>();
-  bool isEcalDriven    = false;
-  bool isTrackerDriven = false;
-  if(seedRef.isNonnull()) {
-    if(seedRef->caloCluster().isNonnull()) { 
-      isEcalDriven = true; 
-    }
-    else { 
-      isEcalDriven = false; 
-    }
-    if(seedRef->ctfTrack().isNonnull()) {
-      isTrackerDriven = true;
+  if(saveFatTrk_) {
+    ElectronSeedRef seedRef= trkRef->extra()->seedRef().castTo<ElectronSeedRef>();
+    bool isEcalDriven    = false;
+    bool isTrackerDriven = false;
+    if(seedRef.isNonnull()) {
+      if(seedRef->caloCluster().isNonnull()) { 
+        isEcalDriven = true; 
+      }
+      else { 
+        isEcalDriven = false; 
+      }
+      if(seedRef->ctfTrack().isNonnull()) {
+        isTrackerDriven = true;
+      }
+      else {
+        isTrackerDriven = false;
+      }
+  
+      int packed_reco;
+      int ecaldriven = ( isEcalDriven ) ? 1 : 0;
+      int trackerdriven = ( isTrackerDriven ) ? 1 : 0;
+      packed_reco = ( ecaldriven << 1 ) | trackerdriven;
+      privateData_->recoFlags->push_back( packed_reco );
     }
     else {
-      isTrackerDriven = false;
+      privateData_->recoFlags->push_back(-1);
     }
-  
-    int packed_reco;
-    int ecaldriven = ( isEcalDriven ) ? 1 : 0;
-    int trackerdriven = ( isTrackerDriven ) ? 1 : 0;
-    packed_reco = ( ecaldriven << 1 ) | trackerdriven;
-    privateData_->recoFlags->push_back( packed_reco );
-  }
-  else {
-    privateData_->recoFlags->push_back(-1);
-  }
+  } else privateData_->recoFlags->push_back(-1);
 }
 
 void CmsGsfTrackFiller::treeGsfTrkInfo(const std::string &colPrefix, const std::string &colSuffix) {
   std::string nCandString=colPrefix+(*trkIndexName_)+colSuffix;
 
-    cmstree->column((colPrefix+"chargeMode"+colSuffix).c_str(), *privateData_->chargeMode, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pxMode"+colSuffix).c_str(), *privateData_->pxMode, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pyMode"+colSuffix).c_str(), *privateData_->pyMode, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"pzMode"+colSuffix).c_str(), *privateData_->pzMode, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"chargeMode"+colSuffix).c_str(), *privateData_->chargeMode, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pxMode"+colSuffix).c_str(), *privateData_->pxMode, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pyMode"+colSuffix).c_str(), *privateData_->pyMode, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pzMode"+colSuffix).c_str(), *privateData_->pzMode, nCandString.c_str(), 0, "Reco");
+  if(saveFatTrk_) 
     cmstree->column((colPrefix+"recoFlags"+colSuffix).c_str(), *privateData_->recoFlags, nCandString.c_str(), 0, "Reco");
 }
 
