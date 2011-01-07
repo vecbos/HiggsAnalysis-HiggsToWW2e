@@ -17,16 +17,18 @@ PUcorrAk5PFJets=ak5PFJets.clone()
 PUcorrAk5PFJets.doAreaFastjet = True
 PUcorrKt6PFJets=kt6PFJets.clone()
 PUcorrKt6PFJets.doRhoFastjet = True
+PUcorrKt6PFJets.doAreaFastjet = True
+PUcorrKt6PFJets.Rho_EtaMax=cms.double(4.5)
+PUcorrKt6PFJets.Ghost_EtaMax= cms.double(6.0)
 PUcorrL1Fastjet=L1Fastjet.clone();
 PUcorrL1Fastjet.algorithm = cms.string('AK5Calo') #DUMMY THESE are DUMMY,
 PUcorrL1Fastjet.era = 'Spring10'                  #DUMMY
 PUcorrL1Fastjet.level = cms.string('L2Relative')  #DUMMY
 PUcorrL1Fastjet.useCondDB = cms.untracked.bool(False)
-PUcorrL1Fastjet.srcMedianPt = 'PUcorrKt6PFJets'
+PUcorrL1Fastjet.srcMedianPt = cms.InputTag('PUcorrKt6PFJets',productInstanceLabel='rho')
 PUcorrAk5PFJetsL1 = ak5PFJetsL1.clone()
 PUcorrAk5PFJetsL1.src = 'PUcorrAk5PFJets'
 PUcorrAk5PFJetsL1.correctors = ['PUcorrL1Fastjet']
-
 PUcorrAk5PFJetsL1L2L3Residual   = ak5PFJetsL2L3.clone(src = 'PUcorrAk5PFJetsL1', correctors = ['ak5PFL2L3Residual'])
 PUcorrAk5PFJetsL1L2L3  = ak5PFJetsL2L3.clone(src = 'PUcorrAk5PFJetsL1', correctors = ['ak5PFL2L3'])
 
