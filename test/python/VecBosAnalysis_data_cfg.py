@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+runOnAOD = 1
+
 process = cms.Process("VecBosAnalysis")
 
 process.load("Configuration.StandardSequences.MagneticField_cff")
@@ -25,7 +27,6 @@ process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
 #process.metMuonJESCorAK5.hasMuonsCorr = False
 
 # --- electron sequences ---
-process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
@@ -54,10 +55,16 @@ process.treeDumper.dumpBCs = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
-process.treeDumper.saveFatTrk = True
-process.treeDumper.saveTrackDeDx = True
 process.treeDumper.dumpTree = True
-
+if (runOnAOD == 1) :
+    process.treeDumper.saveFatTrk = False
+    process.treeDumper.saveTrackDeDx = False
+    process.treeDumper.dumpPFlowElectrons = False
+else :
+    process.treeDumper.saveFatTrk = True
+    process.treeDumper.saveTrackDeDx = True
+    process.treeDumper.dumpPFlowElectrons = True
+    
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
@@ -71,14 +78,13 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('/store/data/Run2010B/MinimumBias/RECO/PromptReco-v2/000/149/711/9CA637FC-8DE7-DF11-8DBB-001617C3B65A.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/AOD_Electron_Run2010B_2.root')
                             )
 
 process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
                        process.ourJetSequenceData *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence *
-                       process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons *
                        process.lumiAna # save lumi info by LS
                        )

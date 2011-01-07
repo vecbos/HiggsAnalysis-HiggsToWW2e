@@ -1,5 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
+runOnAOD = 1
+
 process = cms.Process("VecBosAnalysis")
 
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
@@ -38,7 +40,6 @@ process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'PUcorrAk5PFJetsL1L2L3'
 #process.metMuonJESCorAK5.hasMuonsCorr = False
 
 # --- electron sequences ---
-process.load("RecoEgamma.EgammaIsolationAlgos.eleIsolationSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
 
@@ -73,9 +74,15 @@ process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
 process.treeDumper.dumpParticleFlowObjects = True
-process.treeDumper.saveFatTrk = True
-process.treeDumper.saveTrackDeDx = True
 process.treeDumper.dumpTree = True
+if (runOnAOD == 1) :
+    process.treeDumper.saveFatTrk = False
+    process.treeDumper.saveTrackDeDx = False
+    process.treeDumper.dumpPFlowElectrons = False
+else :
+    process.treeDumper.saveFatTrk = True
+    process.treeDumper.saveTrackDeDx = True
+    process.treeDumper.dumpPFlowElectrons = True
 
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
@@ -86,7 +93,8 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root')
+#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/AODSIM_39X.root')
                             )
 
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
@@ -94,7 +102,6 @@ process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters
                        process.ourJetSequenceMC *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence *
-                       process.eleIsolationSequence *
                        process.ambiguityResolvedElectrons )
                        
 process.q = cms.EndPath ( process.treeDumper )
