@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 runOnAOD = 1
+useL1Offset = 1 # 1=L1Offset with vtx correction 0=FastJet
 
 process = cms.Process("VecBosAnalysis")
 
@@ -12,7 +13,6 @@ process.GlobalTag.globaltag = 'START39_V8::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
-process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
@@ -20,16 +20,29 @@ process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
 # do not use residual corrections in MC
-process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
-process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
-process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
-process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3'
-process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3'
-process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3'
-process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-
+if (useL1Offset == 1) :
+    process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
+    process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
+    process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
+    process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
+    process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3'
+    process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3'
+    process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3'
+    process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1L2L3'
+    process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1L2L3'
+    process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1L2L3'
+else:
+    process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
+    process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
+    process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
+    process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
+    process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3'
+    process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3'
+    process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3'
+    process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
+    process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+    process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+    
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -60,8 +73,12 @@ process.treeDumper.nameFile = 'default_MC.root'
 process.treeDumper.jetCollection1 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
 process.treeDumper.PFjetCollection1 = 'ak5PFJetsL2L3'
-process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
-process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1FastL2L3'
+if (useL1Offset == 1) :
+    process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1L2L3'
+    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1L2L3'
+else:
+    process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
+    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1FastL2L3'    
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
@@ -70,7 +87,7 @@ process.treeDumper.dumpTracks = True
 process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = True
+process.treeDumper.dumpBCs = False
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
@@ -95,7 +112,7 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/AODSIM_39X.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
                             )
 
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *

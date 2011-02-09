@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 runOnAOD = 1
+useL1Offset = 1 # 1=L1Offset with vtx correction 0=FastJet
 
 process = cms.Process("VecBosAnalysis")
 
@@ -11,12 +12,34 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 process.GlobalTag.globaltag = 'GR_R_39X_V5::All'
 
 # --- jet met sequences ---
-process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
+
+if (useL1Offset == 1) :
+    process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequence_cff")
+    process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
+    process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+    process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+    process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3Residual'
+    process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3Residual'
+    process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3Residual'
+    process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1L2L3Residual'
+    process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1L2L3Residual'
+    process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1L2L3Residual'
+else:
+    process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
+    process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
+    process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+    process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+    process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3Residual'
+    process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3Residual'
+    process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3Residual'
+    process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
+    process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
+    process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -41,6 +64,12 @@ process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_data.root'
+if (useL1Offset == 1) :
+    process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1L2L3Residual'
+    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1L2L3Residual'
+else:
+    process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3Residual'
+    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1FastL2L3Residual'    
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = False
@@ -51,7 +80,7 @@ process.treeDumper.dumpGenJets = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = True
+process.treeDumper.dumpBCs = False
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
