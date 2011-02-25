@@ -24,16 +24,23 @@ struct CmsRunInfoFillerData {
   int *nl1Global, *nl1Technical;
   vector<int> *l1Global, *l1Technical;
   int *run, *lumisection, *event, *bx, *orbit;
-  
+  int *nInteractions;
+  vector<float> *PUzposition, *PUsumpTLowpT, *PUsumpTHighpT;
+  vector<int> *PUnTracksLowpT, *PUnTracksHighpT;
+
+  int isMC_;
+
 public:
   void initialise();
+  void clearVectors();
+  void setMC(bool what) { isMC_ = what; }
 };
 
 class CmsRunInfoFiller {
 
 public:
   
-  CmsRunInfoFiller(CmsTree *tree);
+  CmsRunInfoFiller(CmsTree *tree, bool isMC);
   virtual ~CmsRunInfoFiller();
 
   void writeRunInfoToTree(const edm::Event&, const edm::EventSetup&, 
@@ -46,6 +53,7 @@ protected:
   CmsRunInfoFillerData *privateData_;
   
   CmsTree *cmstree;
+  bool isMC_;
 
 };
 

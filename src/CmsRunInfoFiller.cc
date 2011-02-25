@@ -1,14 +1,17 @@
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
+#include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
 
 using namespace edm;
 using namespace std;
 
-CmsRunInfoFiller::CmsRunInfoFiller(CmsTree *cmsTree): 
+CmsRunInfoFiller::CmsRunInfoFiller(CmsTree *cmsTree, bool isMC): 
   privateData_(new CmsRunInfoFillerData) {
 
   cmstree=cmsTree;
   privateData_->initialise();
+  isMC_=isMC;
+  privateData_->setMC(isMC_);
 
 }
 
@@ -24,11 +27,20 @@ CmsRunInfoFiller::~CmsRunInfoFiller() {
   delete privateData_->nl1Technical;
   delete privateData_->l1Global;
   delete privateData_->l1Technical;
-
+  if(isMC_) {
+    delete privateData_->nInteractions;
+    delete privateData_->PUzposition;
+    delete privateData_->PUsumpTLowpT;
+    delete privateData_->PUsumpTHighpT;
+    delete privateData_->PUnTracksLowpT;
+    delete privateData_->PUnTracksHighpT;
+  }
 }
 
 void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::EventSetup& iSetup,
                                           bool dumpData) {
+
+  privateData_->clearVectors();
 
   *(privateData_->run) = iEvent.id().run();
   *(privateData_->event) = iEvent.id().event();
@@ -89,6 +101,20 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
 
   cmstree->column("l1Global", *privateData_->l1Global, "nl1Global", 0, "L1T");
 
+  if(isMC_) {
+
+    // Pile Up informations
+    edm::Handle<PileupSummaryInfo> PupInfo;
+    iEvent.getByLabel("addPileupInfo", PupInfo);
+    
+    *(privateData_->nInteractions) = PupInfo->getPU_NumInteractions();
+    *(privateData_->PUzposition) = PupInfo->getPU_zpositions();
+    *(privateData_->PUsumpTLowpT) = PupInfo->getPU_sumpT_lowpT();
+    *(privateData_->PUsumpTHighpT) = PupInfo->getPU_sumpT_highpT();
+    *(privateData_->PUnTracksLowpT) = PupInfo->getPU_ntrks_lowpT();
+    *(privateData_->PUnTracksHighpT) = PupInfo->getPU_ntrks_highpT();
+  }
+
   treeRunInfo();
 
   if(dumpData) cmstree->dumpData();
@@ -102,7 +128,16 @@ void CmsRunInfoFiller::treeRunInfo() {
   cmstree->column("lumiBlock", *privateData_->lumisection, 0, "L1T");
   cmstree->column("bunchCrossing", *privateData_->bx, 0, "L1T");
   cmstree->column("orbitNumber", *privateData_->orbit, 0, "L1T");
-  
+
+  if(isMC_) {
+    cmstree->column("nPU", *privateData_->nInteractions, 0, "Sim");
+    cmstree->column("zpositionPU", *privateData_->PUzposition, "nPU", 0, "Sim");
+    cmstree->column("sumpTLowpTPU", *privateData_->PUsumpTLowpT, "nPU", 0, "Sim");
+    cmstree->column("sumpTHighpTPU", *privateData_->PUsumpTHighpT, "nPU", 0, "Sim");
+    cmstree->column("nTracksLowpTPU", *privateData_->PUnTracksLowpT, "nPU", 0, "Sim");
+    cmstree->column("nTracksHighpTPU", *privateData_->PUnTracksHighpT, "nPU", 0, "Sim");
+  }
+
 }
 
 void CmsRunInfoFillerData::initialise() {
@@ -118,5 +153,23 @@ void CmsRunInfoFillerData::initialise() {
   l1Global = new vector<int>;
   l1Technical = new vector<int>;
 
+  if(isMC_) {
+    nInteractions = new int;
+    PUzposition = new vector<float>;
+    PUsumpTLowpT = new vector<float>;
+    PUsumpTHighpT = new vector<float>;
+    PUnTracksLowpT = new vector<int>;
+    PUnTracksHighpT = new vector<int>;
+  }
+
 }
 
+void CmsRunInfoFillerData::clearVectors() {
+  if(isMC_) {
+    PUzposition->clear();
+    PUsumpTLowpT->clear();
+    PUsumpTHighpT->clear();
+    PUnTracksLowpT->clear();
+    PUnTracksHighpT->clear();
+  }
+}
