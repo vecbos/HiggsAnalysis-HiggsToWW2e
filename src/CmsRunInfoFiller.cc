@@ -9,9 +9,9 @@ CmsRunInfoFiller::CmsRunInfoFiller(CmsTree *cmsTree, bool isMC):
   privateData_(new CmsRunInfoFillerData) {
 
   cmstree=cmsTree;
+  privateData_->setMC(isMC_);
   privateData_->initialise();
   isMC_=isMC;
-  privateData_->setMC(isMC_);
 
 }
 
