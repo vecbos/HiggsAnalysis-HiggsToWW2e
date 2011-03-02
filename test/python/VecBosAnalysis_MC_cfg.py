@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 runOnAOD = 1
-useL1Offset = 1 # 1=L1Offset with vtx correction 0=FastJet
+useL1Offset = 0 # 1=L1Offset with vtx correction 0=FastJet
 
 process = cms.Process("VecBosAnalysis")
 
@@ -119,7 +119,7 @@ process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.ourJetSequenceMC *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
-                       process.eIdSequence *
+                       process.eIdSequence * process.FastjetForIsolation *
                        process.ambiguityResolvedElectrons )
                        
 process.q = cms.EndPath ( process.treeDumper )

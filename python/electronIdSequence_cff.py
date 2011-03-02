@@ -13,3 +13,11 @@ import RecoEgamma.ElectronIdentification.electronIdLikelihoodExt_cfi
 egammaIDLikelihood = RecoEgamma.ElectronIdentification.electronIdLikelihoodExt_cfi.eidLikelihoodExt.clone()
 
 eIdSequence = cms.Sequence( eIdSequence * eIdHWWSequence * egammaIDLikelihood )
+
+
+# to compute FastJet rho to correct isolation (note: EtaMax restricted to 2.5)
+from RecoJets.JetProducers.kt4PFJets_cfi import *
+kt6PFJetsForIsolation = kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
+kt6PFJetsForIsolation.Rho_EtaMax = cms.double(2.5)
+
+FastjetForIsolation = cms.Sequence( kt6PFJetsForIsolation )

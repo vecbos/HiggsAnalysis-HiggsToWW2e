@@ -115,6 +115,12 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
     *(privateData_->PUnTracksHighpT) = PupInfo->getPU_ntrks_highpT();
   }
 
+  // get the rho parameter from Fastjet computation 
+  edm::Handle<double> rhoH;
+  iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","rho"),rhoH);
+  float rho = *rhoH;
+  cmstree->column("rhoFastjet", rho, float(0.), "Iso");
+  
   treeRunInfo();
 
   if(dumpData) cmstree->dumpData();

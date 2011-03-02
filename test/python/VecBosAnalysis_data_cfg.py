@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 runOnAOD = 1
-useL1Offset = 1 # 1=L1Offset with vtx correction 0=FastJet
+useL1Offset = 0 # 1=L1Offset with vtx correction 0=FastJet
 
 process = cms.Process("VecBosAnalysis")
 
@@ -113,7 +113,7 @@ process.source = cms.Source("PoolSource",
 process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
                        process.ourJetSequenceData *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
-                       process.eIdSequence *
+                       process.eIdSequence * process.FastjetForIsolation  *
                        process.ambiguityResolvedElectrons *
                        process.lumiAna # save lumi info by LS
                        )
