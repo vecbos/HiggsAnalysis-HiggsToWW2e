@@ -61,7 +61,6 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->deltaEtaAtCalo;
   delete privateData_->deltaPhiAtVtx;
   delete privateData_->deltaPhiAtCalo;
-  delete privateData_->tip;
   delete privateData_->dr03TkSumPt;
   delete privateData_->dr03EcalRecHitSumEt;
   delete privateData_->dr03HcalTowerSumEt;
@@ -70,6 +69,8 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->dr04HcalTowerSumEt;
   delete privateData_->scBasedEcalSum03;
   delete privateData_->scBasedEcalSum04;
+  delete privateData_->dr03HcalTowerSumEtFullCone;
+  delete privateData_->dr04HcalTowerSumEtFullCone;
   delete privateData_->eleIdCuts;
   delete privateData_->eleIdCutsHWW;
   delete privateData_->eleLik;
@@ -137,6 +138,15 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(calotowersProducer_, m_calotowers); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get calotowers product" << calotowersProducer_; }
 
+    // HCAL isolation in the full cone (to be used w/o H/E)
+    float egHcalIsoConeSizeOutSmall=0.3, egHcalIsoConeSizeOutLarge=0.4;
+    float egHcalIsoConeSizeIn=0.0, egHcalIsoPtMin=0.0;
+    int egHcalDepth1=1, egHcalDepth2=2;
+    hadDepth1Isolation03_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutSmall,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth1,m_calotowers.product()) ;
+    hadDepth2Isolation03_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutSmall,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth2,m_calotowers.product()) ;
+    hadDepth1Isolation04_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutLarge,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth1,m_calotowers.product()) ;
+    hadDepth2Isolation04_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutLarge,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth2,m_calotowers.product()) ;
+
     for(int index = 0; index < (int)collection->size(); index++) {
 	  
       const GsfElectronRef electronRef = collection->refAt(index).castTo<GsfElectronRef>();
@@ -159,6 +169,12 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
   treeEleInfo(columnPrefix,columnSuffix);
   if(dumpData) cmstree->dumpData();
+  
+  delete hadDepth1Isolation03_;
+  delete hadDepth2Isolation03_;
+  delete hadDepth1Isolation04_;
+  delete hadDepth2Isolation04_;
+
 }
 
 
@@ -172,10 +188,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   float mySeedE         = 0.;
   if(sclusRef.isNonnull()) mySeedE = sclusRef->seed()->energy();
   
-  // transverse impact parameter
-  GsfTrackRef trRef = electronRef->gsfTrack();
-  float myTip = sqrt((trRef->vertex().x())*(trRef->vertex().x()) + (trRef->vertex().y())*(trRef->vertex().y()));
-
   // eleID
   privateData_->classification->push_back(electronRef->classification());
   privateData_->standardClassification->push_back(stdEleIdClassify(&(*electronRef)));
@@ -188,7 +200,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   privateData_->deltaPhiAtVtx->push_back(electronRef->deltaPhiSuperClusterTrackAtVtx());
   privateData_->deltaEtaAtCalo->push_back(electronRef->deltaEtaSeedClusterTrackAtCalo());
   privateData_->deltaPhiAtCalo->push_back(electronRef->deltaPhiSeedClusterTrackAtCalo());
-  privateData_->tip->push_back(myTip);
 
   // results of standard electron ID sequences
   const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[0] );
@@ -261,6 +272,15 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   float scBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scBasedEcalSum04->push_back(scBasedEcalSum04);
 
+  float hcalDepth1TowerSumEt03 = hadDepth1Isolation03_->getTowerEtSum(&(*electronRef));
+  float hcalDepth2TowerSumEt03 = hadDepth2Isolation03_->getTowerEtSum(&(*electronRef));
+  float hcalDepth1TowerSumEt04 = hadDepth1Isolation04_->getTowerEtSum(&(*electronRef));
+  float hcalDepth2TowerSumEt04 = hadDepth2Isolation04_->getTowerEtSum(&(*electronRef));
+
+  privateData_->dr03HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt03+hcalDepth2TowerSumEt03);
+  privateData_->dr04HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt04+hcalDepth2TowerSumEt04);
+
+
 }
 
 
@@ -279,7 +299,6 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"deltaPhiAtVtx"+colSuffix).c_str(), *privateData_->deltaPhiAtVtx, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"deltaEtaAtCalo"+colSuffix).c_str(), *privateData_->deltaEtaAtCalo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"deltaPhiAtCalo"+colSuffix).c_str(), *privateData_->deltaPhiAtCalo, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"tip"+colSuffix).c_str(), *privateData_->tip, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr03TkSumPt"+colSuffix).c_str(), *privateData_->dr03TkSumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr03EcalRecHitSumEt"+colSuffix).c_str(), *privateData_->dr03EcalRecHitSumEt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr03HcalTowerSumEt"+colSuffix).c_str(), *privateData_->dr03HcalTowerSumEt, nCandString.c_str(), 0, "Reco");
@@ -288,6 +307,8 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"dr04HcalTowerSumEt"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scBasedEcalSum03"+colSuffix).c_str(), *privateData_->scBasedEcalSum03, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr03HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr03HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr04HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCuts"+colSuffix).c_str(), *privateData_->eleIdCuts, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdCutsHWW"+colSuffix).c_str(), *privateData_->eleIdCutsHWW, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
@@ -310,7 +331,6 @@ void CmsEleIDTreeFillerData::initialise() {
   deltaEtaAtCalo           = new vector<float>;
   deltaPhiAtVtx            = new vector<float>;
   deltaPhiAtCalo           = new vector<float>;
-  tip                      = new vector<float>;
   dr03TkSumPt              = new vector<float>;
   dr03EcalRecHitSumEt      = new vector<float>;
   dr03HcalTowerSumEt       = new vector<float>;
@@ -319,6 +339,8 @@ void CmsEleIDTreeFillerData::initialise() {
   dr04HcalTowerSumEt       = new vector<float>;
   scBasedEcalSum03         = new vector<float>;
   scBasedEcalSum04         = new vector<float>;
+  dr03HcalTowerSumEtFullCone = new vector<float>;
+  dr04HcalTowerSumEtFullCone = new vector<float>;
   eleIdCuts                = new vector<int>;
   eleIdCutsHWW             = new vector<int>;
   eleLik                   = new vector<float>;
@@ -338,7 +360,6 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   deltaEtaAtCalo           ->clear();
   deltaPhiAtVtx            ->clear();
   deltaPhiAtCalo           ->clear();
-  tip                      ->clear();
   dr03TkSumPt              ->clear();
   dr03EcalRecHitSumEt      ->clear();
   dr03HcalTowerSumEt       ->clear();
@@ -347,6 +368,8 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   dr04HcalTowerSumEt       ->clear();
   scBasedEcalSum03         ->clear();
   scBasedEcalSum04         ->clear();
+  dr03HcalTowerSumEtFullCone -> clear();
+  dr04HcalTowerSumEtFullCone -> clear();
   eleIdCuts                ->clear();
   eleIdCutsHWW             ->clear();
   eleLik                   ->clear();

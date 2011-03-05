@@ -16,6 +16,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.dinamicAnnealingVertexing_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
 if (useL1Offset == 1) :
@@ -112,6 +113,7 @@ process.source = cms.Source("PoolSource",
 
 process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
                        process.ourJetSequenceData *
+                       process.offlinePrimaryVertices *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence * process.FastjetForIsolation  *
                        process.ambiguityResolvedElectrons *

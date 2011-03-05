@@ -53,6 +53,7 @@ struct CmsTrackFillerData {
 
   vector<float> *charge, *pterr, *recHitsSize;
   vector<float> *impactPar3D, *impactPar3DError, *transvImpactPar, *transvImpactParError;
+  vector<float> *impactPar3DBiased, *impactPar3DBiasedError, *transvImpactParBiased, *transvImpactParBiasedError;
 
   vector<float> *truncatedDeDx, *truncatedDeDxError, *truncatedDeDxNoM;
   vector<float> *medianDeDx, *medianDeDxError, *medianDeDxNoM;
@@ -101,7 +102,7 @@ class CmsTrackFiller {
   /// dump Vtx related variables
   void saveVtxTrk(bool );
   /// Find Primary Vertex
-  void findPrimaryVertex(const edm::Event& iEvent);
+  void findHardestPrimaryVertex(const edm::Event& iEvent);
   /// Save the dEdX: needs the right sequence to be run in the cms path
   void saveDeDx(bool );
 

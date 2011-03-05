@@ -150,6 +150,15 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->harmonic2DeDxError;
   delete privateData_->harmonic2DeDxNoM;
 
+  delete privateData_->impactPar3D;
+  delete privateData_->impactPar3DError;
+  delete privateData_->transvImpactPar;
+  delete privateData_->transvImpactParError;
+  delete privateData_->impactPar3DBiased;
+  delete privateData_->impactPar3DBiasedError;
+  delete privateData_->transvImpactParBiased;
+  delete privateData_->transvImpactParBiasedError;
+
   delete privateData_->pixelHits;
   delete privateData_->expInnerLayers;
   delete privateData_->numberOfValidPixelBarrelHits;
@@ -179,7 +188,7 @@ void CmsTrackFiller::isGsf(bool what) { isGsf_=what;}
 
 void CmsTrackFiller::saveDeDx(bool what ) { saveDeDx_=what; }
 
-void CmsTrackFiller::findPrimaryVertex(const edm::Event& iEvent) {
+void CmsTrackFiller::findHardestPrimaryVertex(const edm::Event& iEvent) {
 
   edm::Handle< reco::VertexCollection>  primaryVertex  ;
   try { iEvent.getByLabel(vertexCollection_, primaryVertex); }
@@ -266,6 +275,8 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(vertexCollection_, primaryVertex_); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
 
+    this->findHardestPrimaryVertex(iEvent);
+
     if ( saveDeDx_ ) {
       iEvent.getByLabel( "dedxTruncated40", truncatedEnergyLoss_ );
       iEvent.getByLabel( "dedxMedian", medianEnergyLoss_ );
@@ -317,6 +328,8 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm::ESHandle<MagneticField>& magfield, const edm::ESHandle<GlobalTrackingGeometry>& theTrackingGeometry) 
 {
 
+  reco::Vertex closestVertex;
+
   if(trkRef.isNonnull()) {
     
     if ( saveVtxTrk_ ) { 
@@ -324,6 +337,8 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
       int iVtx = -1;
       int counter = 0;
       double weight = 0.;
+      double dist(9999.);
+      double zPos = trkRef->vz();
       if(saveVtxTrk_) {
 	if(primaryVertex_->size() >0 ) { // there is at least one vertex in the event
 	  for(VertexCollection::const_iterator v = primaryVertex_->begin();
@@ -334,6 +349,8 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
 	      weight = tmpw;
 	      iVtx = counter;
 	    }
+            float tmpDist = fabs(zPos-v->position().z());
+            if(tmpDist<dist) closestVertex = *v;
 	    counter++;
 	  }
 	}
@@ -410,53 +427,68 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
     if ( saveVtxTrk_ && trkRef.isNonnull() ) 
       { 
 
-	GlobalVector direction(trkRef->px(), trkRef->py(), trkRef->pz());		    
+        // this is only needed if one wants to use the signed IP
+        // GlobalVector direction(trkRef->px(), trkRef->py(), trkRef->pz());		    
 
 	TransientTrack tt;
 	if (isGsf_)
 	  {
 	    GsfTrackRef gsfTrackRef = trkRef.castTo<GsfTrackRef>();
 	    if (gsfTrackRef.isNonnull())
-		tt = TransientTrack(new GsfTransientTrack(gsfTrackRef,&(*magfield),&(*theTrackingGeometry)));
+              tt = TransientTrack(new GsfTransientTrack(gsfTrackRef,&(*magfield),&(*theTrackingGeometry)));
 	  }
 	else
 	  {
 	    tt = TransientTrack(trkRef.castTo<TrackRef>(),&(*magfield),&(*theTrackingGeometry));
 	  }
 	
-	std::pair<bool,Measurement1D> sgnImpPar3D = std::pair<bool,Measurement1D>(false,Measurement1D());
+	std::pair<bool,Measurement1D> absImpPar3D = std::pair<bool,Measurement1D>(false,Measurement1D());
+	std::pair<bool,Measurement1D> absImpPar3DBiased = std::pair<bool,Measurement1D>(false,Measurement1D());
 	
 	try {
 	  if (bestPrimaryVertex_.isValid() && tt.isValid() )
-	    sgnImpPar3D = IPTools::signedImpactParameter3D(tt,direction,bestPrimaryVertex_);
+	    absImpPar3D = IPTools::absoluteImpactParameter3D(tt,bestPrimaryVertex_);
+          if (closestVertex.isValid() && tt.isValid() )
+            absImpPar3DBiased = IPTools::absoluteImpactParameter3D(tt,closestVertex);
 	}
 	catch ( cms::Exception& ex ) {
 	}
 	
-	if( sgnImpPar3D.first ) {
-	  privateData_->impactPar3D->push_back(sgnImpPar3D.second.value());
-	  privateData_->impactPar3DError->push_back(sgnImpPar3D.second.error());
+	if( absImpPar3D.first && absImpPar3DBiased.first ) {
+	  privateData_->impactPar3D->push_back(absImpPar3D.second.value());
+	  privateData_->impactPar3DError->push_back(absImpPar3D.second.error());
+	  privateData_->impactPar3DBiased->push_back(absImpPar3DBiased.second.value());
+	  privateData_->impactPar3DBiasedError->push_back(absImpPar3DBiased.second.error());
 	}
 	else {
 	  privateData_->impactPar3D->push_back(-1.);
 	  privateData_->impactPar3DError->push_back(-1.);
+	  privateData_->impactPar3DBiased->push_back(-1.);
+	  privateData_->impactPar3DBiasedError->push_back(-1.);
 	}
-	
-	std::pair<bool,Measurement1D> sgnTransvImpPar = std::pair<bool,Measurement1D>(false,Measurement1D());
+
+	std::pair<bool,Measurement1D> absTransvImpPar = std::pair<bool,Measurement1D>(false,Measurement1D());
+	std::pair<bool,Measurement1D> absTransvImpParBiased = std::pair<bool,Measurement1D>(false,Measurement1D());
 	
 	try {
 	  if (bestPrimaryVertex_.isValid() && tt.isValid())
-	    sgnTransvImpPar  = IPTools::signedTransverseImpactParameter(tt,direction,bestPrimaryVertex_);
+	    absTransvImpPar  = IPTools::absoluteTransverseImpactParameter(tt,bestPrimaryVertex_);
+	  if (closestVertex.isValid() && tt.isValid())
+	    absTransvImpParBiased  = IPTools::absoluteTransverseImpactParameter(tt,closestVertex);          
 	}
 	catch ( cms::Exception& ex ) {
 	}
 	
-	if( sgnTransvImpPar.first ) {
-	  privateData_->transvImpactPar->push_back(sgnTransvImpPar.second.value());
-	  privateData_->transvImpactParError->push_back(sgnTransvImpPar.second.error());
+	if( absTransvImpPar.first && absTransvImpParBiased.first ) {
+	  privateData_->transvImpactPar->push_back(absTransvImpPar.second.value());
+	  privateData_->transvImpactParError->push_back(absTransvImpPar.second.error());
+	  privateData_->transvImpactParBiased->push_back(absTransvImpParBiased.second.value());
+	  privateData_->transvImpactParBiasedError->push_back(absTransvImpParBiased.second.error());
 	} else {
 	  privateData_->transvImpactPar->push_back(-1.);
 	  privateData_->transvImpactParError->push_back(-1.);
+	  privateData_->transvImpactParBiased->push_back(-1.);
+	  privateData_->transvImpactParBiasedError->push_back(-1.);
 	}
 	
       } else {
@@ -464,6 +496,10 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
       privateData_->impactPar3DError->push_back(-1.);
       privateData_->transvImpactPar->push_back(-1.);
       privateData_->transvImpactParError->push_back(-1.);
+      privateData_->impactPar3DBiased->push_back(-1.);
+      privateData_->impactPar3DBiasedError->push_back(-1.);
+      privateData_->transvImpactParBiased->push_back(-1.);
+      privateData_->transvImpactParBiasedError->push_back(-1.);
     }
 
   } else {
@@ -512,6 +548,10 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
     privateData_->impactPar3DError->push_back(-1.);
     privateData_->transvImpactPar->push_back(-1.);
     privateData_->transvImpactParError->push_back(-1.);
+    privateData_->impactPar3DBiased->push_back(-1.);
+    privateData_->impactPar3DBiasedError->push_back(-1.);
+    privateData_->transvImpactParBiased->push_back(-1.);
+    privateData_->transvImpactParBiasedError->push_back(-1.);
   }
 
 }
@@ -553,6 +593,11 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
     cmstree->column((colPrefix+"impactPar3DError"+colSuffix).c_str(), *privateData_->impactPar3DError, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"transvImpactPar"+colSuffix).c_str(), *privateData_->transvImpactPar, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"transvImpactParError"+colSuffix).c_str(), *privateData_->transvImpactParError, nCandString.c_str(), 0, "Reco");
+
+    cmstree->column((colPrefix+"impactPar3DBiased"+colSuffix).c_str(), *privateData_->impactPar3DBiased, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"impactPar3DBiasedError"+colSuffix).c_str(), *privateData_->impactPar3DBiasedError, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"transvImpactParBiased"+colSuffix).c_str(), *privateData_->transvImpactParBiased, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"transvImpactParBiasedError"+colSuffix).c_str(), *privateData_->transvImpactParBiasedError, nCandString.c_str(), 0, "Reco");
   }
 
   cmstree->column((colPrefix+"charge"+colSuffix).c_str(), *privateData_->charge, nCandString.c_str(), 0, "Reco");
@@ -644,6 +689,10 @@ void CmsTrackFillerData::initialise() {
   impactPar3DError = new vector<float>;
   transvImpactPar = new vector<float>;
   transvImpactParError = new vector<float>;
+  impactPar3DBiased = new vector<float>;
+  impactPar3DBiasedError = new vector<float>;
+  transvImpactParBiased = new vector<float>;
+  transvImpactParBiasedError = new vector<float>;
   trackVx = new vector<float>;
   trackVy = new vector<float>;
   trackVz = new vector<float>;
@@ -699,6 +748,10 @@ void CmsTrackFillerData::clearTrkVectors() {
   impactPar3DError->clear();
   transvImpactPar->clear();
   transvImpactParError->clear();
+  impactPar3DBiased->clear();
+  impactPar3DBiasedError->clear();
+  transvImpactParBiased->clear();
+  transvImpactParBiasedError->clear();
   trackVx->clear();
   trackVy->clear();
   trackVz->clear();

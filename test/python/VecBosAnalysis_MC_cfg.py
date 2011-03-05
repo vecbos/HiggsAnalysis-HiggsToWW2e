@@ -17,6 +17,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.dinamicAnnealingVertexing_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
 # do not use residual corrections in MC
@@ -117,6 +118,7 @@ process.source = cms.Source("PoolSource",
 
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
+                       process.offlinePrimaryVertices *
                        process.ourJetSequenceMC *
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence * process.FastjetForIsolation *

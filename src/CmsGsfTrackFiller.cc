@@ -120,6 +120,8 @@ void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(vertexCollection_, primaryVertex_); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsGsfTrackFiller") << "Can't get candidate collection: " << vertexCollection_; }
 
+    this->findHardestPrimaryVertex(iEvent);
+
     if ( saveDeDx_ ) {
       iEvent.getByLabel( "dedxTruncated40", truncatedEnergyLoss_ );
       iEvent.getByLabel( "dedxMedian", medianEnergyLoss_ );

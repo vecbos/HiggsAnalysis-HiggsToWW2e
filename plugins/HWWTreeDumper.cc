@@ -370,8 +370,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFiller.saveDeDx(saveTrackDeDx_);
 
-    treeFiller.findPrimaryVertex(iEvent);
-    treeFiller.saveVtxTrk(saveFatTrk_);
+    treeFiller.saveVtxTrk(true);
 
     std::string prefix("");
     std::string suffix("Track");
@@ -387,8 +386,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.setRefittedTracksForDeDxProducer(gsfTrackCollection_);
     treeFiller.isGsf(true);
     treeFiller.saveDeDx(false);
-    treeFiller.findPrimaryVertex(iEvent);
-    treeFiller.saveVtxTrk(saveFatTrk_);
+    treeFiller.saveVtxTrk(true);
 
 
     std::string prefix("");
@@ -406,8 +404,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFillerGlobalMuonTrack.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFillerGlobalMuonTrack.saveDeDx(false);
     treeFillerGlobalMuonTrack.isGsf(false);
-    treeFillerGlobalMuonTrack.findPrimaryVertex(iEvent);
-    treeFillerGlobalMuonTrack.saveVtxTrk(saveFatTrk_);
+    treeFillerGlobalMuonTrack.saveVtxTrk(true);
 
     std::string prefix("");
     std::string suffix1("GlobalMuonTrack");
@@ -419,9 +416,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFillerSTAMuonTrack.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFillerSTAMuonTrack.saveDeDx(false);
     treeFillerSTAMuonTrack.isGsf(false);
-
-    treeFillerSTAMuonTrack.findPrimaryVertex(iEvent);
-    treeFillerSTAMuonTrack.saveVtxTrk(saveFatTrk_);
+    treeFillerSTAMuonTrack.saveVtxTrk(false);
 
     std::string suffix2("STAMuonTrack");
     treeFillerSTAMuonTrack.writeCollectionToTree(standAloneMuonTrackCollection_, iEvent, iSetup, prefix, suffix2, false);
@@ -430,10 +425,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   //fill Primary Vertex and associated tracks
   if(dumpVertices_){
-    CmsVertexFiller treeFill(tree_, true);
+    CmsVertexFiller treeFillerVertices(tree_, true);
     std::string prefix("");
     std::string suffix("PV");
-    treeFill.writeCollectionToTree(vertexCollection_, iEvent, iSetup, prefix, suffix);
+    treeFillerVertices.writeCollectionToTree(vertexCollection_, iEvent, iSetup, prefix, suffix);
   }
 
   //fill V0 candidates and associated daughter tracks indices

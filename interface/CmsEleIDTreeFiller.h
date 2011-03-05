@@ -30,6 +30,8 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
+#include "RecoEgamma/EgammaIsolationAlgos/interface/EgammaTowerIsolation.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 
@@ -44,10 +46,10 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<int>   *nbrems;
   vector<float> *hOverE, *eSuperClusterOverP, *eSeedOverPout;
   vector<float> *deltaEtaAtVtx, *deltaEtaAtCalo, *deltaPhiAtVtx, *deltaPhiAtCalo;
-  vector<float> *tip;
   vector<float> *dr03TkSumPt, *dr03EcalRecHitSumEt, *dr03HcalTowerSumEt;
   vector<float> *dr04TkSumPt, *dr04EcalRecHitSumEt, *dr04HcalTowerSumEt;
   vector<float> *scBasedEcalSum03, *scBasedEcalSum04;
+  vector<float> *dr03HcalTowerSumEtFullCone, *dr04HcalTowerSumEtFullCone;
 
   vector<float> *eleLik, *pflowMVA;
   vector<int> *eleIdCuts, *eleIdCutsHWW;
@@ -125,6 +127,9 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
 
   edm::Handle<CaloTowerCollection> m_calotowers;
   edm::Handle<reco::TrackCollection> m_tracks;
+
+  EgammaTowerIsolation *hadDepth1Isolation03_, *hadDepth2Isolation03_, 
+    *hadDepth1Isolation04_, *hadDepth2Isolation04_;
 
   const CaloGeometry* caloGeo;
 };
