@@ -90,6 +90,8 @@ private:
   bool dumpTriggerResults_;
   //! dump the Particle Flow objects
   bool dumpParticleFlowObjects_;
+  //! dump hcal noise flags
+  bool dumpHcalNoiseFlags_;
   //! dump the run info informations
   bool dumpRunInfo_;
   //! save the dE/dx of the tracks (requires the right module to be run)
@@ -142,6 +144,8 @@ private:
     tauDiscrByTaNCTag_,
     tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
     tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_;
+  //! Hcal noise summary object
+  edm::InputTag hcalNoiseSummaryLabel_;
   //! ROOT file with the plain ROOT tree inside
   TFile *fileOut_;
   //! the tree with the events

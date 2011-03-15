@@ -70,7 +70,7 @@ if (useL1Offset == 1) :
     process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1L2L3Residual'
 else:
     process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3Residual'
-    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1FastL2L3Residual'    
+    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1FastL2L3Residual'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = False
@@ -94,7 +94,8 @@ else :
     process.treeDumper.saveFatTrk = True
     process.treeDumper.saveTrackDeDx = True
     process.treeDumper.dumpPFlowElectrons = True
-    
+    process.treeDumper.dumpHcalNoiseFlags = True
+
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
@@ -119,5 +120,5 @@ process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters
                        process.ambiguityResolvedElectrons *
                        process.lumiAna # save lumi info by LS
                        )
-                       
+
 process.q = cms.EndPath ( process.treeDumper )

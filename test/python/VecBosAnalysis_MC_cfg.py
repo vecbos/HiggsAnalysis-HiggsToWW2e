@@ -43,7 +43,7 @@ else:
     process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
     process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
     process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-    
+
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -79,7 +79,7 @@ if (useL1Offset == 1) :
     process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1L2L3'
 else:
     process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
-    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1FastL2L3'    
+    process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1FastL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
@@ -102,6 +102,7 @@ else :
     process.treeDumper.saveFatTrk = True
     process.treeDumper.saveTrackDeDx = True
     process.treeDumper.dumpPFlowElectrons = True
+    process.treeDumper.dumpHcalNoiseFlags = True
 
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
@@ -123,5 +124,5 @@ process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters
                        process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
                        process.eIdSequence * process.FastjetForIsolation *
                        process.ambiguityResolvedElectrons )
-                       
+
 process.q = cms.EndPath ( process.treeDumper )

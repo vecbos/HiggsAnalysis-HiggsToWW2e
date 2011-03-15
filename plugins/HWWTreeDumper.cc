@@ -54,6 +54,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTriggerTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsHcalNoiseFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
@@ -119,6 +120,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpVertices_       = iConfig.getUntrackedParameter<bool>("dumpVertices", false);
   dumpK0s_            = iConfig.getUntrackedParameter<bool>("dumpK0s", false);
   dumpCaloTowers_     = iConfig.getUntrackedParameter<bool>("dumpCaloTowers", false);
+  dumpHcalNoiseFlags_ = iConfig.getUntrackedParameter<bool>("dumpHcalNoiseFlags", false);
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
@@ -186,10 +188,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpHLTObject_       = iConfig.getUntrackedParameter<bool>("dumpHLTObjects");
   hltParms_            = iConfig.getUntrackedParameter<edm::ParameterSet>("HLTObjectsInfo");
 
-  // PFTau Discriminators                                                                                                                                                                                                                  
+  // PFTau Discriminators
   tauDiscrByLeadTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadTrackFindingTag");
   tauDiscrByLeadTrackPtCutTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadTrackPtCutTag");
-  //  tauDiscrByNProngsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByNProngsTag");                                                                                                                                                 
+  //  tauDiscrByNProngsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByNProngsTag");
   tauDiscrByTrackIsoTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTrackIsoTag");
   tauDiscrByEcalIsoTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByEcalIsoTag");
   tauDiscrAgainstMuonsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstMuonsTag");
@@ -200,6 +202,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   tauDiscrByTaNCfrQuarterPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrQuarterPercentTag");
   tauDiscrByTaNCfrTenthPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrTenthPercentTag");
 
+  // Hcal collections
+  hcalNoiseSummaryLabel_ = iConfig.getParameter<edm::InputTag>("hcalNoiseSummary");
 }
 
 
@@ -592,6 +596,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     CmsGenInfoFiller treeFill(tree_);
     treeFill.writeGenInfoToTree( gei );
 
+  }
+  
+  
+  // dump Hcal noise flags
+  if(dumpHcalNoiseFlags_) {
+
+    CmsHcalNoiseFiller treeFill(tree_, true);
+
+    treeFill.writeHcalNoiseSummaryToTree(hbheLabel_, hfLabel_, hcalNoiseSummaryLabel_, iEvent, iSetup);
   }
 
  
