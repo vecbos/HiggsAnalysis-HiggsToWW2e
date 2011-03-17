@@ -1,16 +1,20 @@
 --- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 39X ---
 
-cmsrel CMSSW_3_9_8
-cd CMSSW_3_9_8/src
+cmsrel CMSSW_3_9_9
+cd CMSSW_3_9_9/src
 cmsenv
 
-cvs co -r V19-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V20-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V03-01-21    CondFormats/JetMETObjects
 cvs co -r V02-02-03    JetMETCorrections/Algorithms
 cvs co -r V03-02-07    JetMETCorrections/Configuration
 cvs co -r V05-00-17    JetMETCorrections/Modules
 cvs co -r V00-03-21    RecoEgamma/ElectronIdentification
+addpkg                 TrackingTools/TrajectoryState
+cvs update -r 1.5 TrackingTools/TrajectoryState/src/TrajectoryStateClosestToBeamLine.cc
+cvs co -r 1.2 TrackingTools/TrajectoryState/BuildFile.xml
+rm TrackingTools/TrajectoryState/BuildFile
 
 scram b
 
