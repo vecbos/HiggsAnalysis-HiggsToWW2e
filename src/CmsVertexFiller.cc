@@ -95,6 +95,7 @@ CmsVertexFiller::~CmsVertexFiller() {
   delete privateData_->SumPt;
   delete privateData_->ndof;
   delete privateData_->chi2;
+  delete privateData_->isFake;  
 }
 
 
@@ -136,6 +137,8 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	privateData_->SumPt->push_back(SumPt);
 	privateData_->ndof->push_back((*v).ndof());
 	privateData_->chi2->push_back((*v).chi2());
+	if ((*v).isFake())   privateData_->isFake->push_back(1);
+	if (!(*v).isFake())  privateData_->isFake->push_back(0);
 	nVtx++;
       }
     }
@@ -149,6 +152,7 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
     privateData_->SumPt->push_back(-1.);
     privateData_->ndof->push_back(-1.);
     privateData_->chi2->push_back(-1.);
+    privateData_->isFake->push_back(-1.);
   }
 
   *(privateData_->ncand) = nVtx;
@@ -176,6 +180,7 @@ void CmsVertexFiller::treeVertexInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"SumPt"+colSuffix).c_str(), *privateData_->SumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ndof"+colSuffix).c_str(), *privateData_->ndof, nCandString.c_str(), 0, "Reco");  
   cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"isFake"+colSuffix).c_str(), *privateData_->isFake, nCandString.c_str(), 0, "Reco");
   
 }
 
@@ -190,6 +195,7 @@ void CmsVertexFillerData::initialise() {
   SumPt = new vector<float>;
   ndof = new vector<float>;
   chi2 = new vector<float>;
+  isFake = new vector<int>;
 }
 
 void CmsVertexFillerData::clearTrkVectors() {
@@ -203,6 +209,7 @@ void CmsVertexFillerData::clearTrkVectors() {
   SumPt->clear();
   ndof->clear();
   chi2->clear();
+  isFake->clear();
 
 }
 

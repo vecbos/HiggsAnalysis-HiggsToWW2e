@@ -34,6 +34,7 @@ struct CmsVertexFillerData : public CmsCandidateFillerData {
   std::vector<float> *PVx, *PVy, *PVz;
   std::vector<float> *PVErrx, *PVErry, *PVErrz;
   std::vector<float> *SumPt, *ndof, *chi2;
+  std::vector<int> *isFake;
 
 public:
   void initialise();
