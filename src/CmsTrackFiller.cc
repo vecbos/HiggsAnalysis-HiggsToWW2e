@@ -384,32 +384,33 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
       privateData_->xAtOuter->push_back(trkRef->outerPosition().x());
       privateData_->yAtOuter->push_back(trkRef->outerPosition().y());
       privateData_->zAtOuter->push_back(trkRef->outerPosition().z());
-      
+
       privateData_->recHitsSize->push_back(trkRef->recHitsSize());
-    
-      // conversions rejection
-      const HitPattern trackerPattern = trkRef->hitPattern();
-
-      int isPixB1 = (hasValidHitInNthPixelBarrel(1,trackerPattern)) ? 1 : 0;
-      int isPixB2 = (hasValidHitInNthPixelBarrel(2,trackerPattern)) ? 1 : 0;
-      int isPixE1 = (hasValidHitInNthPixelEndcap(1,trackerPattern)) ? 1 : 0;
-      int isPixE2 = (hasValidHitInNthPixelEndcap(2,trackerPattern)) ? 1 : 0;
       
-      int packed_sel = (isPixB1 << 3) | (isPixB2 << 2) | (isPixE1 << 1) | isPixE2;
-      
-      privateData_->pixelHits->push_back(packed_sel);
-
-      privateData_->numberOfValidPixelBarrelHits->push_back(trackerPattern.numberOfValidPixelBarrelHits());
-      privateData_->numberOfValidPixelEndcapHits->push_back(trackerPattern.numberOfValidPixelEndcapHits());
-      privateData_->numberOfValidStripTIBHits->push_back(trackerPattern.numberOfValidStripTIBHits());
-      privateData_->numberOfValidStripTIDHits->push_back(trackerPattern.numberOfValidStripTIDHits());
-      privateData_->numberOfValidStripTOBHits->push_back(trackerPattern.numberOfValidStripTOBHits());
-      privateData_->numberOfValidStripTECHits->push_back(trackerPattern.numberOfValidStripTECHits());
-    
-      const HitPattern innerPattern = trkRef->trackerExpectedHitsInner();
-      int expInnerLayers = innerPattern.numberOfHits();
-      privateData_->expInnerLayers->push_back(expInnerLayers);
     }
+    
+    // conversions rejection
+    const HitPattern trackerPattern = trkRef->hitPattern();
+
+    int isPixB1 = (hasValidHitInNthPixelBarrel(1,trackerPattern)) ? 1 : 0;
+    int isPixB2 = (hasValidHitInNthPixelBarrel(2,trackerPattern)) ? 1 : 0;
+    int isPixE1 = (hasValidHitInNthPixelEndcap(1,trackerPattern)) ? 1 : 0;
+    int isPixE2 = (hasValidHitInNthPixelEndcap(2,trackerPattern)) ? 1 : 0;
+      
+    int packed_sel = (isPixB1 << 3) | (isPixB2 << 2) | (isPixE1 << 1) | isPixE2;
+      
+    privateData_->pixelHits->push_back(packed_sel);
+
+    privateData_->numberOfValidPixelBarrelHits->push_back(trackerPattern.numberOfValidPixelBarrelHits());
+    privateData_->numberOfValidPixelEndcapHits->push_back(trackerPattern.numberOfValidPixelEndcapHits());
+    privateData_->numberOfValidStripTIBHits->push_back(trackerPattern.numberOfValidStripTIBHits());
+    privateData_->numberOfValidStripTIDHits->push_back(trackerPattern.numberOfValidStripTIDHits());
+    privateData_->numberOfValidStripTOBHits->push_back(trackerPattern.numberOfValidStripTOBHits());
+    privateData_->numberOfValidStripTECHits->push_back(trackerPattern.numberOfValidStripTECHits());
+    
+    const HitPattern innerPattern = trkRef->trackerExpectedHitsInner();
+    int expInnerLayers = innerPattern.numberOfHits();
+    privateData_->expInnerLayers->push_back(expInnerLayers);
 
     // track quality
     privateData_->charge->push_back(trkRef->charge());
@@ -627,17 +628,17 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
     cmstree->column((colPrefix+"zAtInner"+colSuffix).c_str(), *privateData_->zAtInner, nCandString.c_str(), 0, "Reco");
 
     cmstree->column((colPrefix+"recHitsSize"+colSuffix).c_str(), *privateData_->recHitsSize, nCandString.c_str(), 0, "Reco");
-    
-    cmstree->column((colPrefix+"pixelHits"+colSuffix).c_str(), *privateData_->pixelHits, nCandString.c_str(), 0, "Reco");  
-    cmstree->column((colPrefix+"expInnerLayers"+colSuffix).c_str(), *privateData_->expInnerLayers, nCandString.c_str(), 0, "Reco");  
-    cmstree->column((colPrefix+"numberOfValidPixelBarrelHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelBarrelHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidPixelEndcapHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelEndcapHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTIBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIBHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTIDHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIDHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTOBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTOBHits, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"numberOfValidStripTECHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTECHits, nCandString.c_str(), 0, "Reco");
-  }
+  }    
 
+  cmstree->column((colPrefix+"pixelHits"+colSuffix).c_str(), *privateData_->pixelHits, nCandString.c_str(), 0, "Reco");  
+  cmstree->column((colPrefix+"expInnerLayers"+colSuffix).c_str(), *privateData_->expInnerLayers, nCandString.c_str(), 0, "Reco");  
+  cmstree->column((colPrefix+"numberOfValidPixelBarrelHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelBarrelHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidPixelEndcapHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelEndcapHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTIBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIBHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTIDHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIDHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTOBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTOBHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidStripTECHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTECHits, nCandString.c_str(), 0, "Reco");
+    
 }
 
 void CmsTrackFiller::treeDeDxInfo(const std::string &colPrefix, const std::string &colSuffix) {
