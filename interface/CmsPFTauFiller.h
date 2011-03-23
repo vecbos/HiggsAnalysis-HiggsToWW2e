@@ -82,11 +82,11 @@ struct CmsPFTauFillerData : public CmsCandidateFillerData {
   vector<float> *theTauDiscrByEcalIso;
   vector<float> *theTauDiscrAgainstMuons;
   vector<float> *theTauDiscrAgainstElectrons;
-  vector<float> *theTauDiscrByTaNC;
-  vector<float> *theTauDiscrByTaNCfrHalfPercent;
-  vector<float> *theTauDiscrByTaNCfrOnePercent;
-  vector<float> *theTauDiscrByTaNCfrQuarterPercent;
-  vector<float> *theTauDiscrByTaNCfrTenthPercent;
+//   vector<float> *theTauDiscrByTaNC;
+//   vector<float> *theTauDiscrByTaNCfrHalfPercent;
+//   vector<float> *theTauDiscrByTaNCfrOnePercent;
+//   vector<float> *theTauDiscrByTaNCfrQuarterPercent;
+//   vector<float> *theTauDiscrByTaNCfrTenthPercent;
 
 
 public:
@@ -121,11 +121,11 @@ public:
 			     edm::InputTag tauDiscrByEcalIsoTag, 
 			     edm::InputTag tauDiscrAgainstMuonsTag,
 			     edm::InputTag tauDiscrAgainstElectronsTag,
-			     edm::InputTag tauDiscrByTaNCTag,
-			     edm::InputTag tauDiscrByTaNCfrHalfPercentTag,
-			     edm::InputTag tauDiscrByTaNCfrOnePercentTag,
-			     edm::InputTag tauDiscrByTaNCfrQuarterPercentTag,
-			     edm::InputTag tauDiscrByTaNCfrTenthPercentTag,
+// 			     edm::InputTag tauDiscrByTaNCTag,
+// 			     edm::InputTag tauDiscrByTaNCfrHalfPercentTag,
+// 			     edm::InputTag tauDiscrByTaNCfrOnePercentTag,
+// 			     edm::InputTag tauDiscrByTaNCfrQuarterPercentTag,
+// 			     edm::InputTag tauDiscrByTaNCfrTenthPercentTag,
 			     bool dumpData=false);
   
 private:
@@ -142,12 +142,13 @@ private:
 			  const reco::PFTauDiscriminator *tauDiscrByTrackIso,
 			  const reco::PFTauDiscriminator *tauDiscrByEcalIso,
 			  const reco::PFTauDiscriminator *tauDiscrAgainstMuons,
-			  const reco::PFTauDiscriminator *tauDiscrAgainstElectrons,
-			  const reco::PFTauDiscriminator *tauDiscrByTaNC,
-			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrHalfPercent,
-			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrOnePercent,
-			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrQuarterPercent,
-			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrTenthPercent);
+			  const reco::PFTauDiscriminator *tauDiscrAgainstElectrons
+// 			  const reco::PFTauDiscriminator *tauDiscrByTaNC,
+// 			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrHalfPercent,
+// 			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrOnePercent,
+// 			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrQuarterPercent,
+// 			  const reco::PFTauDiscriminator *tauDiscrByTaNCfrTenthPercent
+                          );
 
   void treePFTauBasicInfo(const std::string &colPrefix, const std::string &colSuffix);
   void treePFTauDiscInfo(const std::string &colPrefix, const std::string &colSuffix);

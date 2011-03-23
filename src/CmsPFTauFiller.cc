@@ -118,11 +118,11 @@ CmsPFTauFiller::~CmsPFTauFiller()
   delete privateData_->theTauDiscrByEcalIso;
   delete privateData_->theTauDiscrAgainstMuons;
   delete privateData_->theTauDiscrAgainstElectrons;
-  delete privateData_->theTauDiscrByTaNC;
-  delete privateData_->theTauDiscrByTaNCfrHalfPercent;
-  delete privateData_->theTauDiscrByTaNCfrOnePercent;
-  delete privateData_->theTauDiscrByTaNCfrQuarterPercent;
-  delete privateData_->theTauDiscrByTaNCfrTenthPercent;
+//   delete privateData_->theTauDiscrByTaNC;
+//   delete privateData_->theTauDiscrByTaNCfrHalfPercent;
+//   delete privateData_->theTauDiscrByTaNCfrOnePercent;
+//   delete privateData_->theTauDiscrByTaNCfrQuarterPercent;
+//   delete privateData_->theTauDiscrByTaNCfrTenthPercent;
 
   delete privateData_->ncand;
 }
@@ -146,11 +146,11 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					   edm::InputTag tauDiscrByEcalIsoTag, 
 					   edm::InputTag tauDiscrAgainstMuonsTag,
 					   edm::InputTag tauDiscrAgainstElectronsTag,
-					   edm::InputTag tauDiscrByTaNCTag,
-					   edm::InputTag tauDiscrByTaNCfrHalfPercentTag,
-					   edm::InputTag tauDiscrByTaNCfrOnePercentTag,
-					   edm::InputTag tauDiscrByTaNCfrQuarterPercentTag,
-					   edm::InputTag tauDiscrByTaNCfrTenthPercentTag,
+// 					   edm::InputTag tauDiscrByTaNCTag,
+// 					   edm::InputTag tauDiscrByTaNCfrHalfPercentTag,
+// 					   edm::InputTag tauDiscrByTaNCfrOnePercentTag,
+// 					   edm::InputTag tauDiscrByTaNCfrQuarterPercentTag,
+// 					   edm::InputTag tauDiscrByTaNCfrTenthPercentTag,
 					   bool dumpData) {
 
   edm::Handle<reco::PFTauCollection> collectionHandle;
@@ -228,37 +228,38 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrAgainstElectronsTag; }
 	const reco::PFTauDiscriminator *tauDiscrAgainstElectrons = tauDiscrAgainstElectronsHandle.product();
 
-	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCHandle;
-	try { iEvent.getByLabel(tauDiscrByTaNCTag, tauDiscrByTaNCHandle); }
-	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCTag; }
-	const reco::PFTauDiscriminator *tauDiscrByTaNC = tauDiscrByTaNCHandle.product();
+// 	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCHandle;
+// 	try { iEvent.getByLabel(tauDiscrByTaNCTag, tauDiscrByTaNCHandle); }
+// 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCTag; }
+// 	const reco::PFTauDiscriminator *tauDiscrByTaNC = tauDiscrByTaNCHandle.product();
 
-	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrHalfPercentHandle;
-	try { iEvent.getByLabel(tauDiscrByTaNCfrHalfPercentTag, tauDiscrByTaNCfrHalfPercentHandle); }
-	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrHalfPercentTag; }
-	const reco::PFTauDiscriminator *tauDiscrByTaNCfrHalfPercent = tauDiscrByTaNCfrHalfPercentHandle.product();
+// 	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrHalfPercentHandle;
+// 	try { iEvent.getByLabel(tauDiscrByTaNCfrHalfPercentTag, tauDiscrByTaNCfrHalfPercentHandle); }
+// 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrHalfPercentTag; }
+// 	const reco::PFTauDiscriminator *tauDiscrByTaNCfrHalfPercent = tauDiscrByTaNCfrHalfPercentHandle.product();
 
-	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrOnePercentHandle;
-	try { iEvent.getByLabel(tauDiscrByTaNCfrOnePercentTag, tauDiscrByTaNCfrOnePercentHandle); }
-	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrOnePercentTag; }
-	const reco::PFTauDiscriminator *tauDiscrByTaNCfrOnePercent = tauDiscrByTaNCfrOnePercentHandle.product();
+// 	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrOnePercentHandle;
+// 	try { iEvent.getByLabel(tauDiscrByTaNCfrOnePercentTag, tauDiscrByTaNCfrOnePercentHandle); }
+// 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrOnePercentTag; }
+// 	const reco::PFTauDiscriminator *tauDiscrByTaNCfrOnePercent = tauDiscrByTaNCfrOnePercentHandle.product();
 
-	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrQuarterPercentHandle;
-	try { iEvent.getByLabel(tauDiscrByTaNCfrQuarterPercentTag, tauDiscrByTaNCfrQuarterPercentHandle); }
-	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrQuarterPercentTag; }
-	const reco::PFTauDiscriminator *tauDiscrByTaNCfrQuarterPercent = tauDiscrByTaNCfrQuarterPercentHandle.product();
+// 	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrQuarterPercentHandle;
+// 	try { iEvent.getByLabel(tauDiscrByTaNCfrQuarterPercentTag, tauDiscrByTaNCfrQuarterPercentHandle); }
+// 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrQuarterPercentTag; }
+// 	const reco::PFTauDiscriminator *tauDiscrByTaNCfrQuarterPercent = tauDiscrByTaNCfrQuarterPercentHandle.product();
 
-	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrTenthPercentHandle;
-	try { iEvent.getByLabel(tauDiscrByTaNCfrTenthPercentTag, tauDiscrByTaNCfrTenthPercentHandle); }
-	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrTenthPercentTag; }
-	const reco::PFTauDiscriminator *tauDiscrByTaNCfrTenthPercent = tauDiscrByTaNCfrTenthPercentHandle.product();
+// 	edm::Handle<reco::PFTauDiscriminator> tauDiscrByTaNCfrTenthPercentHandle;
+// 	try { iEvent.getByLabel(tauDiscrByTaNCfrTenthPercentTag, tauDiscrByTaNCfrTenthPercentHandle); }
+// 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << tauDiscrByTaNCfrTenthPercentTag; }
+// 	const reco::PFTauDiscriminator *tauDiscrByTaNCfrTenthPercent = tauDiscrByTaNCfrTenthPercentHandle.product();
 
 	writePFTauDiscInfo(collectionHandle, iTauJet,
 			   tauDiscrByLeadTrackFinding, tauDiscrByLeadTrackPtCut,// tauDiscrByNProngs, 
-			   tauDiscrByTrackIso, tauDiscrByEcalIso, tauDiscrAgainstMuons, tauDiscrAgainstElectrons,
-			   tauDiscrByTaNC,
-			   tauDiscrByTaNCfrHalfPercent, tauDiscrByTaNCfrOnePercent,
-			   tauDiscrByTaNCfrQuarterPercent, tauDiscrByTaNCfrTenthPercent);
+			   tauDiscrByTrackIso, tauDiscrByEcalIso, tauDiscrAgainstMuons, tauDiscrAgainstElectrons
+// 			   tauDiscrByTaNC,
+// 			   tauDiscrByTaNCfrHalfPercent, tauDiscrByTaNCfrOnePercent,
+// 			   tauDiscrByTaNCfrQuarterPercent, tauDiscrByTaNCfrTenthPercent
+                           );
       }
 
       // fill Additional Tau Info
@@ -315,12 +316,13 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
 					const reco::PFTauDiscriminator *tauDiscrByTrackIso,
 					const reco::PFTauDiscriminator *tauDiscrByEcalIso,
 					const reco::PFTauDiscriminator *tauDiscrAgainstMuons,
-					const reco::PFTauDiscriminator *tauDiscrAgainstElectrons,
-					const reco::PFTauDiscriminator *tauDiscrByTaNC,
-					const reco::PFTauDiscriminator *tauDiscrByTaNCfrHalfPercent,
-					const reco::PFTauDiscriminator *tauDiscrByTaNCfrOnePercent,
-					const reco::PFTauDiscriminator *tauDiscrByTaNCfrQuarterPercent,
-					const reco::PFTauDiscriminator *tauDiscrByTaNCfrTenthPercent)
+					const reco::PFTauDiscriminator *tauDiscrAgainstElectrons
+// 					const reco::PFTauDiscriminator *tauDiscrByTaNC,
+// 					const reco::PFTauDiscriminator *tauDiscrByTaNCfrHalfPercent,
+// 					const reco::PFTauDiscriminator *tauDiscrByTaNCfrOnePercent,
+// 					const reco::PFTauDiscriminator *tauDiscrByTaNCfrQuarterPercent,
+// 					const reco::PFTauDiscriminator *tauDiscrByTaNCfrTenthPercent
+                                        )
 {
   if ( theTauJetIndex != -1 ) {
     reco::PFTauRef theTauJetRef(tauCollection, theTauJetIndex);
@@ -331,11 +333,11 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
     privateData_->theTauDiscrByEcalIso->push_back((*tauDiscrByEcalIso)[theTauJetRef]);
     privateData_->theTauDiscrAgainstMuons->push_back((*tauDiscrAgainstMuons)[theTauJetRef]);
     privateData_->theTauDiscrAgainstElectrons->push_back((*tauDiscrAgainstElectrons)[theTauJetRef]);
-    privateData_->theTauDiscrByTaNC->push_back((*tauDiscrByTaNC)[theTauJetRef]);
-    privateData_->theTauDiscrByTaNCfrHalfPercent->push_back((*tauDiscrByTaNCfrHalfPercent)[theTauJetRef]);
-    privateData_->theTauDiscrByTaNCfrOnePercent->push_back((*tauDiscrByTaNCfrOnePercent)[theTauJetRef]);
-    privateData_->theTauDiscrByTaNCfrQuarterPercent->push_back((*tauDiscrByTaNCfrQuarterPercent)[theTauJetRef]);
-    privateData_->theTauDiscrByTaNCfrTenthPercent->push_back((*tauDiscrByTaNCfrTenthPercent)[theTauJetRef]);
+//     privateData_->theTauDiscrByTaNC->push_back((*tauDiscrByTaNC)[theTauJetRef]);
+//     privateData_->theTauDiscrByTaNCfrHalfPercent->push_back((*tauDiscrByTaNCfrHalfPercent)[theTauJetRef]);
+//     privateData_->theTauDiscrByTaNCfrOnePercent->push_back((*tauDiscrByTaNCfrOnePercent)[theTauJetRef]);
+//     privateData_->theTauDiscrByTaNCfrQuarterPercent->push_back((*tauDiscrByTaNCfrQuarterPercent)[theTauJetRef]);
+//     privateData_->theTauDiscrByTaNCfrTenthPercent->push_back((*tauDiscrByTaNCfrTenthPercent)[theTauJetRef]);
   } else {
     privateData_->theTauDiscrByLeadTrackFinding->push_back(-1);
     privateData_->theTauDiscrByLeadTrackPtCut->push_back(-1);
@@ -344,11 +346,11 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
     privateData_->theTauDiscrByEcalIso->push_back(-1);
     privateData_->theTauDiscrAgainstMuons->push_back(-1);
     privateData_->theTauDiscrAgainstElectrons->push_back(-1);
-    privateData_->theTauDiscrByTaNC->push_back(-1);
-    privateData_->theTauDiscrByTaNCfrHalfPercent->push_back(-1);
-    privateData_->theTauDiscrByTaNCfrOnePercent->push_back(-1);
-    privateData_->theTauDiscrByTaNCfrQuarterPercent->push_back(-1);
-    privateData_->theTauDiscrByTaNCfrTenthPercent->push_back(-1);
+//     privateData_->theTauDiscrByTaNC->push_back(-1);
+//     privateData_->theTauDiscrByTaNCfrHalfPercent->push_back(-1);
+//     privateData_->theTauDiscrByTaNCfrOnePercent->push_back(-1);
+//     privateData_->theTauDiscrByTaNCfrQuarterPercent->push_back(-1);
+//     privateData_->theTauDiscrByTaNCfrTenthPercent->push_back(-1);
   }
 }
 
@@ -399,11 +401,11 @@ void CmsPFTauFiller::treePFTauDiscInfo(const std::string &colPrefix, const std::
   cmstree->column((colPrefix+"theTauDiscrByEcalIso"+colSuffix).c_str(), *privateData_->theTauDiscrByEcalIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theTauDiscrAgainstMuons"+colSuffix).c_str(), *privateData_->theTauDiscrAgainstMuons, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theTauDiscrAgainstElectrons"+colSuffix).c_str(), *privateData_->theTauDiscrAgainstElectrons, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"theTauDiscrByTaNC"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNC, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"theTauDiscrByTaNCfrHalfPercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrHalfPercent, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"theTauDiscrByTaNCfrOnePercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrOnePercent, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"theTauDiscrByTaNCfrQuarterPercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrQuarterPercent, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"theTauDiscrByTaNCfrTenthPercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrTenthPercent, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"theTauDiscrByTaNC"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNC, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"theTauDiscrByTaNCfrHalfPercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrHalfPercent, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"theTauDiscrByTaNCfrOnePercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrOnePercent, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"theTauDiscrByTaNCfrQuarterPercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrQuarterPercent, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"theTauDiscrByTaNCfrTenthPercent"+colSuffix).c_str(), *privateData_->theTauDiscrByTaNCfrTenthPercent, nCandString.c_str(), 0, "Reco");
 }
 
 void CmsPFTauFiller::treeLeadPFCandInfo(const std::string &colPrefix, const std::string &colSuffix)
@@ -461,11 +463,11 @@ void CmsPFTauFillerData::initialise()
   theTauDiscrByEcalIso = new vector<float>;
   theTauDiscrAgainstMuons = new vector<float>;
   theTauDiscrAgainstElectrons = new vector<float>;
-  theTauDiscrByTaNC = new vector<float>;
-  theTauDiscrByTaNCfrHalfPercent = new vector<float>;
-  theTauDiscrByTaNCfrOnePercent = new vector<float>;
-  theTauDiscrByTaNCfrQuarterPercent = new vector<float>;
-  theTauDiscrByTaNCfrTenthPercent = new vector<float>;
+//   theTauDiscrByTaNC = new vector<float>;
+//   theTauDiscrByTaNCfrHalfPercent = new vector<float>;
+//   theTauDiscrByTaNCfrOnePercent = new vector<float>;
+//   theTauDiscrByTaNCfrQuarterPercent = new vector<float>;
+//   theTauDiscrByTaNCfrTenthPercent = new vector<float>;
 }
 
 
@@ -509,9 +511,9 @@ void CmsPFTauFillerData::clear()
   theTauDiscrByEcalIso->clear();
   theTauDiscrAgainstMuons->clear();
   theTauDiscrAgainstElectrons->clear();
-  theTauDiscrByTaNC->clear();
-  theTauDiscrByTaNCfrHalfPercent->clear();
-  theTauDiscrByTaNCfrOnePercent->clear();
-  theTauDiscrByTaNCfrQuarterPercent->clear();
-  theTauDiscrByTaNCfrTenthPercent->clear();
+//   theTauDiscrByTaNC->clear();
+//   theTauDiscrByTaNCfrHalfPercent->clear();
+//   theTauDiscrByTaNCfrOnePercent->clear();
+//   theTauDiscrByTaNCfrQuarterPercent->clear();
+//   theTauDiscrByTaNCfrTenthPercent->clear();
 }

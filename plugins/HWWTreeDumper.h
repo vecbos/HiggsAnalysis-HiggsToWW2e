@@ -140,10 +140,10 @@ private:
   edm::InputTag PFpreIdCollection_;
   //! PF Tau Discriminators
   edm::InputTag tauDiscrByLeadTrackFindingTag_, tauDiscrByLeadTrackPtCutTag_,// tauDiscrByNProngsTag_,
-    tauDiscrByTrackIsoTag_, tauDiscrByEcalIsoTag_, tauDiscrAgainstMuonsTag_, tauDiscrAgainstElectronsTag_,
-    tauDiscrByTaNCTag_,
-    tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
-    tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_;
+    tauDiscrByTrackIsoTag_, tauDiscrByEcalIsoTag_, tauDiscrAgainstMuonsTag_, tauDiscrAgainstElectronsTag_;
+//     tauDiscrByTaNCTag_,
+//     tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
+//     tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_;
   //! Hcal noise summary object
   edm::InputTag hcalNoiseSummaryLabel_;
   //! ROOT file with the plain ROOT tree inside

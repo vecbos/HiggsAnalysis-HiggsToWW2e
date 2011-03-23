@@ -196,11 +196,11 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   tauDiscrByEcalIsoTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByEcalIsoTag");
   tauDiscrAgainstMuonsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstMuonsTag");
   tauDiscrAgainstElectronsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstElectronsTag");
-  tauDiscrByTaNCTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCTag");
-  tauDiscrByTaNCfrHalfPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrHalfPercentTag");
-  tauDiscrByTaNCfrOnePercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrOnePercentTag");
-  tauDiscrByTaNCfrQuarterPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrQuarterPercentTag");
-  tauDiscrByTaNCfrTenthPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrTenthPercentTag");
+//   tauDiscrByTaNCTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCTag");
+//   tauDiscrByTaNCfrHalfPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrHalfPercentTag");
+//   tauDiscrByTaNCfrOnePercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrOnePercentTag");
+//   tauDiscrByTaNCfrQuarterPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrQuarterPercentTag");
+//   tauDiscrByTaNCfrTenthPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrTenthPercentTag");
 
   // Hcal collections
   hcalNoiseSummaryLabel_ = iConfig.getParameter<edm::InputTag>("hcalNoiseSummary");
@@ -473,9 +473,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.writeCollectionToTree(pfTauCollection_, iEvent, iSetup, prefix, suffix,
                                      tauDiscrByLeadTrackFindingTag_, tauDiscrByLeadTrackPtCutTag_, //tauDiscrByNProngsTag_,
                                      tauDiscrByTrackIsoTag_, tauDiscrByEcalIsoTag_, tauDiscrAgainstMuonsTag_, tauDiscrAgainstElectronsTag_,
-                                     tauDiscrByTaNCTag_,
-                                     tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
-                                     tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_, false);
+//                                      tauDiscrByTaNCTag_,
+//                                      tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
+//                                      tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_,
+                                     false);
     }
 
 
