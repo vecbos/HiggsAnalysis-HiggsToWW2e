@@ -24,9 +24,9 @@ struct CmsRunInfoFillerData {
   int *nl1Global, *nl1Technical;
   vector<int> *l1Global, *l1Technical;
   int *run, *lumisection, *event, *bx, *orbit;
-  int *nInteractions;
-  vector<float> *PUzposition, *PUsumpTLowpT, *PUsumpTHighpT;
-  vector<int> *PUnTracksLowpT, *PUnTracksHighpT;
+  // pileup info
+  int *nBX;
+  vector<int> *nInteractions, *bxPU;
 
   int isMC_;
 

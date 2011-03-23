@@ -9,7 +9,7 @@ CmsRunInfoFiller::CmsRunInfoFiller(CmsTree *cmsTree, bool isMC):
   privateData_(new CmsRunInfoFillerData) {
 
   cmstree=cmsTree;
-  privateData_->setMC(isMC_);
+  privateData_->setMC(isMC);
   privateData_->initialise();
   isMC_=isMC;
 
@@ -28,12 +28,9 @@ CmsRunInfoFiller::~CmsRunInfoFiller() {
   delete privateData_->l1Global;
   delete privateData_->l1Technical;
   if(isMC_) {
+    delete privateData_->nBX;
     delete privateData_->nInteractions;
-    delete privateData_->PUzposition;
-    delete privateData_->PUsumpTLowpT;
-    delete privateData_->PUsumpTHighpT;
-    delete privateData_->PUnTracksLowpT;
-    delete privateData_->PUnTracksHighpT;
+    delete privateData_->bxPU;
   }
 }
 
@@ -104,15 +101,17 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
   if(isMC_) {
 
     // Pile Up informations
-    edm::Handle<PileupSummaryInfo> PupInfo;
+    Handle<std::vector< PileupSummaryInfo > >  PupInfo;
     iEvent.getByLabel("addPileupInfo", PupInfo);
-    
-    *(privateData_->nInteractions) = PupInfo->getPU_NumInteractions();
-    *(privateData_->PUzposition) = PupInfo->getPU_zpositions();
-    *(privateData_->PUsumpTLowpT) = PupInfo->getPU_sumpT_lowpT();
-    *(privateData_->PUsumpTHighpT) = PupInfo->getPU_sumpT_highpT();
-    *(privateData_->PUnTracksLowpT) = PupInfo->getPU_ntrks_lowpT();
-    *(privateData_->PUnTracksHighpT) = PupInfo->getPU_ntrks_highpT();
+
+    *(privateData_->nBX) = PupInfo->size();
+
+    std::vector<PileupSummaryInfo>::const_iterator PVI;
+    for(PVI = PupInfo->begin(); PVI < PupInfo->end(); ++PVI) {
+      privateData_->nInteractions->push_back(PVI->getPU_NumInteractions());
+      privateData_->bxPU->push_back(PVI->getBunchCrossing());
+    }
+
   }
 
   // get the rho parameter from Fastjet computation 
@@ -120,7 +119,7 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
   iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","rho"),rhoH);
   float rho = *rhoH;
   cmstree->column("rhoFastjet", rho, float(0.), "Iso");
-  
+
   treeRunInfo();
 
   if(dumpData) cmstree->dumpData();
@@ -136,12 +135,9 @@ void CmsRunInfoFiller::treeRunInfo() {
   cmstree->column("orbitNumber", *privateData_->orbit, 0, "L1T");
 
   if(isMC_) {
-    cmstree->column("nPU", *privateData_->nInteractions, 0, "Sim");
-    cmstree->column("zpositionPU", *privateData_->PUzposition, "nPU", 0, "Sim");
-    cmstree->column("sumpTLowpTPU", *privateData_->PUsumpTLowpT, "nPU", 0, "Sim");
-    cmstree->column("sumpTHighpTPU", *privateData_->PUsumpTHighpT, "nPU", 0, "Sim");
-    cmstree->column("nTracksLowpTPU", *privateData_->PUnTracksLowpT, "nPU", 0, "Sim");
-    cmstree->column("nTracksHighpTPU", *privateData_->PUnTracksHighpT, "nPU", 0, "Sim");
+    cmstree->column("nBX", *(privateData_->nBX), 0, "Sim");
+    cmstree->column("nPU", *privateData_->nInteractions, "nBX", 0, "Sim");
+    cmstree->column("bxPU", *privateData_->bxPU, "nBX", 0, "Sim");
   }
 
 }
@@ -160,22 +156,16 @@ void CmsRunInfoFillerData::initialise() {
   l1Technical = new vector<int>;
 
   if(isMC_) {
-    nInteractions = new int;
-    PUzposition = new vector<float>;
-    PUsumpTLowpT = new vector<float>;
-    PUsumpTHighpT = new vector<float>;
-    PUnTracksLowpT = new vector<int>;
-    PUnTracksHighpT = new vector<int>;
+    nBX = new int;
+    nInteractions = new vector<int>;
+    bxPU = new vector<int>;
   }
 
 }
 
 void CmsRunInfoFillerData::clearVectors() {
   if(isMC_) {
-    PUzposition->clear();
-    PUsumpTLowpT->clear();
-    PUsumpTHighpT->clear();
-    PUnTracksLowpT->clear();
-    PUnTracksHighpT->clear();
+    nInteractions->clear();
+    bxPU->clear();
   }
 }
