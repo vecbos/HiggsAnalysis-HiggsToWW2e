@@ -12,8 +12,6 @@ from RecoJets.Configuration.RecoPFJets_cff import *
 from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import *
 from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 
-##-------------------- Disable the CondDB for the L1FastJet (until they are included in a new global tag) -------
-ak5PFL1Fastjet.useCondDB = False
 ##-------------------- Turn-on the FastJet density calculation -----------------------
 kt6PFJets.doRhoFastjet = True
 kt6PFJets.Rho_EtaMax=cms.double(4.5)

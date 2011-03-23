@@ -12,9 +12,6 @@ from RecoJets.Configuration.RecoPFJets_cff import *
 from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import *
 from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 
-##-------------------- Disable the CondDB for the L1Offset (until they are included in a new global tag) -------
-ak5PFL1Offset.useCondDB = False
-
 # data sequences use residual corrections
 CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3Residual )                   
 PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL2L3Residual * ak5PFJetsL1L2L3Residual )
