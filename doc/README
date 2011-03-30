@@ -1,5 +1,6 @@
 --- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 41X (Run2011A data and Spring11 MC)  ---
 
+setenv SCRAM_ARCH slc5_amd64_gcc434
 cmsrel CMSSW_4_1_3
 cd CMSSW_4_1_3/src
 cmsenv
