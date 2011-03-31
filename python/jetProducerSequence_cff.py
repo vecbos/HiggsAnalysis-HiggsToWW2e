@@ -14,13 +14,13 @@ from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 
 # data sequences use residual corrections
 CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3Residual )                   
-PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL2L3Residual * ak5PFJetsL1L2L3Residual )
+PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL1L2L3Residual )
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 ourJetSequenceData = cms.Sequence( CaloJetSequenceData * PFJetAK5SequenceData )
 
 # MC sequeces use only L2L3 corrections
 CaloJetSequenceMC = cms.Sequence( ak5CaloJetsL2L3 )
-PFJetAK5SequenceMC = cms.Sequence( ak5PFJetsL2L3 * ak5PFJetsL1L2L3 )
+PFJetAK5SequenceMC = cms.Sequence( ak5PFJetsL1L2L3 )
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
 ourJetSequenceMC = cms.Sequence( CaloJetSequenceMC * PFJetAK5SequenceMC )
 
