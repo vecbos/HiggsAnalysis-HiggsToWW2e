@@ -550,7 +550,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsPFJetFiller pfJetFiller(tree_, true);
       suffix = "AK5PFJet";
       pfJetFiller.saveCand(saveCand_);
-      pfJetFiller.saveJetBTag(saveJetBTag_);
+      pfJetFiller.saveJetBTag(false);  // since it is done on the same collection as pfPUcorrJetFiller, do not waste CPU repeating it
       pfJetFiller.setBTags(PFJetsBTags_);
       pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
 
