@@ -115,10 +115,13 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
   }
 
   // get the rho parameter from Fastjet computation 
-  edm::Handle<double> rhoH;
+  edm::Handle<double> rhoH, sigmaH;
   iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","rho"),rhoH);
   float rho = *rhoH;
+  iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","sigma"),sigmaH);
+  float sigma = *sigmaH;
   cmstree->column("rhoFastjet", rho, float(0.), "Iso");
+  cmstree->column("sigmaFastjet", sigma, float(0.), "Iso");
 
   treeRunInfo();
 
