@@ -5,7 +5,7 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                                                                 processName = cms.string("AUTO"),
                                                                 triggerSummaryAOD = cms.InputTag("hltTriggerSummaryAOD","","HLT")
                                                                 ),
-                            electronCollection = cms.InputTag("ambiguityResolvedElectrons"),
+                            electronCollection = cms.InputTag("gsfElectrons"),
                             #pflowElectronCollection = cms.InputTag("particleFlow","electrons"),
                             pflowElectronCollection = cms.InputTag("particleFlow"),
                             photonCollection = cms.InputTag("photons"),
