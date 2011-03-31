@@ -102,9 +102,6 @@ process.options = cms.untracked.PSet(
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(300) )
 
-process.lumiAna = cms.EDAnalyzer("LumiAnalyzer")
-process.TFileService = cms.Service("TFileService", fileName = cms.string("lumi.root") )
-
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
@@ -112,13 +109,10 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_Run2011A.root')
                             )
 
-process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
-                       process.ourJetSequenceData *
+process.p = cms.Path ( process.mergedSuperClusters *
                        process.offlinePrimaryVertices *
-                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
-                       process.eIdSequence * process.FastjetForIsolation  *
-                       process.ambiguityResolvedElectrons *
-                       process.lumiAna # save lumi info by LS
-                       )
+                       process.ourJetSequenceData *
+                       process.newPFPUcorrJetBtaggingSequence *
+                       process.eIdSequence * process.FastjetForIsolation )
 
 process.q = cms.EndPath ( process.treeDumper )

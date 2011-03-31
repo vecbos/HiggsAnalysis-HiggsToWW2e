@@ -118,12 +118,10 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_HWW_Spring11.root')
                             )
 
-process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
-                       process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
+process.p = cms.Path ( process.mergedSuperClusters *
                        process.offlinePrimaryVertices *
                        process.ourJetSequenceMC *
-                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
-                       process.eIdSequence * process.FastjetForIsolation *
-                       process.ambiguityResolvedElectrons )
+                       process.newPFPUcorrJetBtaggingSequence *
+                       process.eIdSequence * process.FastjetForIsolation)
 
 process.q = cms.EndPath ( process.treeDumper )
