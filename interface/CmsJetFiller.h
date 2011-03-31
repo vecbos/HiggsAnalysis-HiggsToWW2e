@@ -38,7 +38,7 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
     *softMuonBJetTags,
     *softMuonByIP3dBJetTags,
     *softMuonByPtBJetTags,
-    *softElectronBJetTags,
+  //    *softElectronBJetTags, 
     *softElectronByIP3dBJetTags,
     *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
