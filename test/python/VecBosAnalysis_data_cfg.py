@@ -9,7 +9,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR_R_311_V2::All'
+process.GlobalTag.globaltag = 'GR_R_42_V8::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -106,7 +106,8 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_Run2011A.root')
+#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_Run2011A.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/RECO_DataElectron_4_2_0_GR_R_42_V8.root')
                             )
 
 process.p = cms.Path ( process.mergedSuperClusters *
