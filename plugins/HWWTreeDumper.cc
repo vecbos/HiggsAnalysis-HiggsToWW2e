@@ -121,6 +121,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpK0s_            = iConfig.getUntrackedParameter<bool>("dumpK0s", false);
   dumpCaloTowers_     = iConfig.getUntrackedParameter<bool>("dumpCaloTowers", false);
   dumpHcalNoiseFlags_ = iConfig.getUntrackedParameter<bool>("dumpHcalNoiseFlags", false);
+  aodHcalNoiseFlags_  = iConfig.getUntrackedParameter<bool>("AODHcalNoiseFlags", true);
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
@@ -550,7 +551,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsPFJetFiller pfJetFiller(tree_, true);
       suffix = "AK5PFJet";
       pfJetFiller.saveCand(saveCand_);
-      pfJetFiller.saveJetBTag(saveJetBTag_);
+      pfJetFiller.saveJetBTag(false);  // since it is done on the same collection as pfPUcorrJetFiller, do not waste CPU repeating it
       pfJetFiller.setBTags(PFJetsBTags_);
       pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
 
@@ -605,7 +606,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     CmsHcalNoiseFiller treeFill(tree_, true);
 
-    treeFill.writeHcalNoiseSummaryToTree(hbheLabel_, hfLabel_, hcalNoiseSummaryLabel_, iEvent, iSetup);
+    treeFill.writeHcalNoiseSummaryToTree(hbheLabel_, hfLabel_, hcalNoiseSummaryLabel_, iEvent, iSetup,
+      aodHcalNoiseFlags_);
   }
 
  

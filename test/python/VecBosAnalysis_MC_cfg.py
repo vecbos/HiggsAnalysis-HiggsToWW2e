@@ -9,7 +9,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START39_V8::All'
+process.GlobalTag.globaltag = 'START311_V2::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
@@ -98,11 +98,14 @@ if (runOnAOD == 1) :
     process.treeDumper.saveFatTrk = False
     process.treeDumper.saveTrackDeDx = False
     process.treeDumper.dumpPFlowElectrons = False
+    process.treeDumper.dumpHcalNoiseFlags = True
+    process.treeDumper.AODHcalNoiseFlags = True
 else :
     process.treeDumper.saveFatTrk = True
     process.treeDumper.saveTrackDeDx = True
     process.treeDumper.dumpPFlowElectrons = True
     process.treeDumper.dumpHcalNoiseFlags = True
+    process.treeDumper.AODHcalNoiseFlags = False
 
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
@@ -114,7 +117,8 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
+#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_HWW_Spring11.root')
                             )
 
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *

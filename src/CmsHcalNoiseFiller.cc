@@ -83,15 +83,18 @@ CmsHcalNoiseFiller::~CmsHcalNoiseFiller()
 void CmsHcalNoiseFiller::writeHcalNoiseSummaryToTree(edm::InputTag rechitHBHETag,
       edm::InputTag rechitHFTag,
       edm::InputTag noiseSummaryTag,
-      const edm::Event &iEvent, const edm::EventSetup &iSetup)
+      const edm::Event &iEvent, const edm::EventSetup &iSetup,
+      bool IfAOD)
 {
    using namespace edm;
 
    Handle<HBHERecHitCollection> hHBHERecHits;
-   iEvent.getByLabel(rechitHBHETag, hHBHERecHits);
+   if(IfAOD == false)
+      iEvent.getByLabel(rechitHBHETag, hHBHERecHits);
    
    Handle<HFRecHitCollection> hHFRecHits;
-   iEvent.getByLabel(rechitHFTag, hHFRecHits);
+   if(IfAOD == false)
+      iEvent.getByLabel(rechitHFTag, hHFRecHits);
 
    Handle<HcalNoiseSummary> hSummary;
    iEvent.getByLabel(noiseSummaryTag, hSummary);
@@ -106,62 +109,50 @@ void CmsHcalNoiseFiller::writeHcalNoiseSummaryToTree(edm::InputTag rechitHBHETag
    double SumEOfTriangleHBHENoise = 0;
    int NumberOfTimingHBHENoise = 0;
    double SumEOfTimingHBHENoise = 0;
-   int NumberOfHBHENoise = 0;
-   double SumEOfHBHENoise = 0;
 
-   for(int i = 0; i < (int)hHBHERecHits->size(); i++)
+   if(IfAOD == false)
    {
-      bool IsNoise = false;
-      double Energy = (*hHBHERecHits)[i].energy();
+      for(int i = 0; i < (int)hHBHERecHits->size(); i++)
+      {
+         double Energy = (*hHBHERecHits)[i].energy();
 
-      if((*hHBHERecHits)[i].flagField(8) > 0)   // Out-of-time noise
-      {
-         IsNoise = true;
-         NumberOfTimingHBHENoise = NumberOfTimingHBHENoise + 1;
-         SumEOfTimingHBHENoise = SumEOfTimingHBHENoise + Energy;
-      }
-      if((*hHBHERecHits)[i].flagField(11) > 0)   // isolated noise
-      {
-         IsNoise = true;
-         NumberOfIsolatedHBHENoise = NumberOfIsolatedHBHENoise + 1;
-         SumEOfIsolatedHBHENoise = SumEOfIsolatedHBHENoise + Energy;
-      }
-      if((*hHBHERecHits)[i].flagField(12) > 0)   // flat noise
-      {
-         IsNoise = true;
-         NumberOfFlatHBHENoise = NumberOfFlatHBHENoise + 1;
-         SumEOfFlatHBHENoise = SumEOfFlatHBHENoise + Energy;
-      }
-      if((*hHBHERecHits)[i].flagField(13) > 0)   // spike-like noise
-      {
-         IsNoise = true;
-         NumberOfSpikeHBHENoise = NumberOfSpikeHBHENoise + 1;
-         SumEOfSpikeHBHENoise = SumEOfSpikeHBHENoise + Energy;
-      }
-      if((*hHBHERecHits)[i].flagField(14) > 0)   // triangle noise
-      {
-         IsNoise = true;
-         NumberOfTriangleHBHENoise = NumberOfTriangleHBHENoise + 1;
-         SumEOfTriangleHBHENoise = SumEOfTriangleHBHENoise + Energy;
-      }
-      if(IsNoise == true)
-      {
-         NumberOfHBHENoise = NumberOfHBHENoise + 1;
-         SumEOfHBHENoise = SumEOfHBHENoise + Energy;
+         if((*hHBHERecHits)[i].flagField(8) > 0)   // Out-of-time noise
+         {
+            NumberOfTimingHBHENoise = NumberOfTimingHBHENoise + 1;
+            SumEOfTimingHBHENoise = SumEOfTimingHBHENoise + Energy;
+         }
+         if((*hHBHERecHits)[i].flagField(12) > 0)   // flat noise
+         {
+            NumberOfFlatHBHENoise = NumberOfFlatHBHENoise + 1;
+            SumEOfFlatHBHENoise = SumEOfFlatHBHENoise + Energy;
+         }
+         if((*hHBHERecHits)[i].flagField(13) > 0)   // spike-like noise
+         {
+            NumberOfSpikeHBHENoise = NumberOfSpikeHBHENoise + 1;
+            SumEOfSpikeHBHENoise = SumEOfSpikeHBHENoise + Energy;
+         }
+         if((*hHBHERecHits)[i].flagField(14) > 0)   // triangle noise
+         {
+            NumberOfTriangleHBHENoise = NumberOfTriangleHBHENoise + 1;
+            SumEOfTriangleHBHENoise = SumEOfTriangleHBHENoise + Energy;
+         }
       }
    }
 
    int NumberOfHFPMTHits = 0;
    double SumEOfHFPMTHits = 0;
 
-   for(int i = 0; i < (int)hHFRecHits->size(); i++)
+   if(IfAOD == false)
    {
-      double Energy = (*hHFRecHits)[i].energy();
-
-      if((*hHFRecHits)[i].flagField(HcalCaloFlagLabels::HFLongShort) > 0)
+      for(int i = 0; i < (int)hHFRecHits->size(); i++)
       {
-         NumberOfHFPMTHits = NumberOfHFPMTHits + 1;
-         SumEOfHFPMTHits = SumEOfHFPMTHits + Energy;
+         double Energy = (*hHFRecHits)[i].energy();
+
+         if((*hHFRecHits)[i].flagField(HcalCaloFlagLabels::HFLongShort) > 0)
+         {
+            NumberOfHFPMTHits = NumberOfHFPMTHits + 1;
+            SumEOfHFPMTHits = SumEOfHFPMTHits + Energy;
+         }
       }
    }
 
@@ -181,25 +172,31 @@ void CmsHcalNoiseFiller::writeHcalNoiseSummaryToTree(edm::InputTag rechitHBHETag
       FailE2E10 = true;
    FailICHEPFilter = FailHPDHits || FailHPDNoOtherHits || FailMaxZeros || FailE2E10;
 
-   cmstree->column("nHBHENoise", NumberOfHBHENoise, int(0), "HcalNoise");
-   cmstree->column("sumEHBHENoise",SumEOfHBHENoise, double(0), "HcalNoise");
-   cmstree->column("nTimingHBHENoise", NumberOfTimingHBHENoise, int(0), "HcalNoise");
-   cmstree->column("sumETimingHBHENoise", SumEOfTimingHBHENoise, double(0), "HcalNoise");
-   cmstree->column("nIsolatedHBHENoise", NumberOfIsolatedHBHENoise, int(0), "HcalNoise");
-   cmstree->column("sumEIsolatedHBHENoise", SumEOfIsolatedHBHENoise, double(0), "HcalNoise");
-   cmstree->column("nFlatHBHENoise", NumberOfFlatHBHENoise, int(0), "HcalNoise");
-   cmstree->column("sumEFlatHBHENoise", SumEOfFlatHBHENoise, double(0), "HcalNoise");
-   cmstree->column("nSpikeHBHENoise", NumberOfSpikeHBHENoise, int(0), "HcalNoise");
-   cmstree->column("sumESpikeHBHENoise", SumEOfSpikeHBHENoise, double(0), "HcalNoise");
-   cmstree->column("nTriangleHBHENoise", NumberOfTriangleHBHENoise, int(0), "HcalNoise");
-   cmstree->column("sumETriangleHBHENoise", SumEOfTriangleHBHENoise, double(0), "HcalNoise");
-   cmstree->column("nHFPMT", NumberOfHFPMTHits, int(0), "HcalNoise");
-   cmstree->column("sumEHFPMT",SumEOfHFPMTHits, double(0), "HcalNoise");
+   NumberOfIsolatedHBHENoise = hSummary->numIsolatedNoiseChannels();
+   SumEOfIsolatedHBHENoise = hSummary->isolatedNoiseSumE();
+
+   if(IfAOD == false)
+   {
+      cmstree->column("nTimingHBHENoise", NumberOfTimingHBHENoise, int(0), "HcalNoise");
+      cmstree->column("sumETimingHBHENoise", SumEOfTimingHBHENoise, double(0), "HcalNoise");
+      cmstree->column("nFlatHBHENoise", NumberOfFlatHBHENoise, int(0), "HcalNoise");
+      cmstree->column("sumEFlatHBHENoise", SumEOfFlatHBHENoise, double(0), "HcalNoise");
+      cmstree->column("nSpikeHBHENoise", NumberOfSpikeHBHENoise, int(0), "HcalNoise");
+      cmstree->column("sumESpikeHBHENoise", SumEOfSpikeHBHENoise, double(0), "HcalNoise");
+      cmstree->column("nTriangleHBHENoise", NumberOfTriangleHBHENoise, int(0), "HcalNoise");
+      cmstree->column("sumETriangleHBHENoise", SumEOfTriangleHBHENoise, double(0), "HcalNoise");
+      cmstree->column("nHFPMT", NumberOfHFPMTHits, int(0), "HcalNoise");
+      cmstree->column("sumEHFPMT",SumEOfHFPMTHits, double(0), "HcalNoise");
+   }
+
    cmstree->column("failHPDHits", FailHPDHits, false, "HcalNoise");
    cmstree->column("failHPDNoOtherHits", FailHPDNoOtherHits, false, "HcalNoise");
    cmstree->column("failMaxZeros", FailMaxZeros, false, "HcalNoise");
    cmstree->column("failE2E10", FailE2E10, false, "HcalNoise");
    cmstree->column("failICHEPFilter", FailICHEPFilter, false, "HcalNoise");
+   
+   cmstree->column("nIsolatedHBHENoise", NumberOfIsolatedHBHENoise, int(0), "HcalNoise");
+   cmstree->column("sumEIsolatedHBHENoise", SumEOfIsolatedHBHENoise, double(0), "HcalNoise");
 }
 
 
