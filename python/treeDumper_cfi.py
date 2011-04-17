@@ -73,6 +73,7 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                             dumpPUcorrPFJet = cms.untracked.bool(True),
                             dumpMet = cms.untracked.bool(True),
                             dumpHcalNoiseFlags = cms.untracked.bool(False),
+                            AODHcalNoiseFlags = cms.untracked.bool(True),
                             # switch ON/OFF the particle flow objects to dump
                             dumpParticleFlowObjects = cms.untracked.bool(False),
                             # switch ON/OFF the additional informations to dump

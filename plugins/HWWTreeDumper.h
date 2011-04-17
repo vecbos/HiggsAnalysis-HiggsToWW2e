@@ -92,6 +92,7 @@ private:
   bool dumpParticleFlowObjects_;
   //! dump hcal noise flags
   bool dumpHcalNoiseFlags_;
+  bool aodHcalNoiseFlags_;
   //! dump the run info informations
   bool dumpRunInfo_;
   //! save the dE/dx of the tracks (requires the right module to be run)

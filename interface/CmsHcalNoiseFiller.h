@@ -67,7 +67,8 @@ class CmsHcalNoiseFiller
   void writeHcalNoiseSummaryToTree(edm::InputTag rechitHBHETag,
               edm::InputTag rechitHFTag,
               edm::InputTag noiseSummaryTag,
-			     const edm::Event &iEvent, const edm::EventSetup &iSetup);
+			     const edm::Event &iEvent, const edm::EventSetup &iSetup,
+              bool IfAOD = true);
 
   
  private:
