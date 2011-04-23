@@ -45,7 +45,7 @@ struct CmsMuonFillerData : public CmsCandidateFillerData {
 
   vector<float> *sumPt03, *emEt03, *hadEt03, *hoEt03, *nTrk03, *nJets03;
   vector<float> *sumPt05, *emEt05, *hadEt05, *hoEt05, *nTrk05, *nJets05;
-  vector<int> *muonId;
+  vector<int> *muonId, *type, *numberOfMatches;
 
   vector<float> *EcalExpDepo, *HcalExpDepo, *HoExpDepo, *emS9, *hadS9, *hoS9, *CaloComp;
 

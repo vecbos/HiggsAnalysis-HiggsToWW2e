@@ -167,6 +167,7 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->numberOfValidStripTIDHits;
   delete privateData_->numberOfValidStripTOBHits;
   delete privateData_->numberOfValidStripTECHits;
+  delete privateData_->numberOfValidMuonHits;
 
   delete privateData_->ncand;
 
@@ -407,7 +408,8 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
     privateData_->numberOfValidStripTIDHits->push_back(trackerPattern.numberOfValidStripTIDHits());
     privateData_->numberOfValidStripTOBHits->push_back(trackerPattern.numberOfValidStripTOBHits());
     privateData_->numberOfValidStripTECHits->push_back(trackerPattern.numberOfValidStripTECHits());
-    
+    privateData_->numberOfValidMuonHits->push_back(trackerPattern.numberOfValidMuonHits());
+
     const HitPattern innerPattern = trkRef->trackerExpectedHitsInner();
     int expInnerLayers = innerPattern.numberOfHits();
     privateData_->expInnerLayers->push_back(expInnerLayers);
@@ -638,6 +640,7 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"numberOfValidStripTIDHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTIDHits, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"numberOfValidStripTOBHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTOBHits, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"numberOfValidStripTECHits"+colSuffix).c_str(), *privateData_->numberOfValidStripTECHits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfValidMuonHits"+colSuffix).c_str(), *privateData_->numberOfValidMuonHits, nCandString.c_str(), 0, "Reco");
     
 }
 
@@ -714,6 +717,7 @@ void CmsTrackFillerData::initialise() {
   numberOfValidStripTIDHits = new vector<int>;
   numberOfValidStripTOBHits = new vector<int>;
   numberOfValidStripTECHits = new vector<int>;
+  numberOfValidMuonHits = new vector<int>;  
 
 }
 
@@ -773,6 +777,7 @@ void CmsTrackFillerData::clearTrkVectors() {
   numberOfValidStripTIDHits->clear();
   numberOfValidStripTOBHits->clear();
   numberOfValidStripTECHits->clear();
+  numberOfValidMuonHits->clear();
 
 }
 

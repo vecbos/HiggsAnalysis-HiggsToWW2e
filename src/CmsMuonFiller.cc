@@ -111,7 +111,9 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->combinedTrackIndex;
 
   delete privateData_->muonId;
-  
+  delete privateData_->type;
+  delete privateData_->numberOfMatches;
+
   delete privateData_->  sumPt03;
   delete privateData_->  emEt03;
   delete privateData_->  hadEt03;
@@ -271,6 +273,8 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
       ( TMLastStationOptimizedLowPtLoose << 1 ) | TMLastStationOptimizedLowPtTight;
 
     privateData_->muonId->push_back(packed_sel);
+    privateData_->type->push_back(muon->type());
+    privateData_->numberOfMatches->push_back(muon->numberOfMatches());
 
     // default isolation variables 0.3
     MuonIsolation Iso03  = muon->isolationR03();
@@ -302,6 +306,8 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
   } else {
 
     privateData_->muonId->push_back(0);
+    privateData_->type->push_back(-1);
+    privateData_->numberOfMatches->push_back(-1);
     // default isolation variables 0.3
     privateData_->sumPt03->push_back(-1.);
     privateData_->emEt03->push_back(-1.);
@@ -334,6 +340,8 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
    
   // muon id 
   cmstree->column((colPrefix+"muonId"+colSuffix).c_str(), *privateData_->muonId, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"type"+colSuffix).c_str(), *privateData_->type, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"numberOfMatches"+colSuffix).c_str(), *privateData_->numberOfMatches, nCandString.c_str(), 0, "Reco");
 
   // isolation R=0.3
   cmstree->column((colPrefix+"sumPt03"+colSuffix).c_str(), *privateData_->sumPt03, nCandString.c_str(), 0, "Reco");
@@ -371,6 +379,8 @@ void CmsMuonFillerData::initialise() {
   combinedTrackIndex = new vector<int>;
 
   muonId = new vector<int>;
+  type = new vector<int>;
+  numberOfMatches = new vector<int>;
 
   sumPt03 = new vector<float>;
   emEt03 = new vector<float>;
@@ -404,6 +414,8 @@ void CmsMuonFillerData::clearTrkVectors() {
   combinedTrackIndex->clear();
  
   muonId->clear();
+  type->clear();
+  numberOfMatches->clear();
 
   sumPt03->clear();
   emEt03->clear();

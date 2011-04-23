@@ -61,6 +61,7 @@ struct CmsTrackFillerData {
   vector<int> *pixelHits, *expInnerLayers;
   vector<int> *numberOfValidPixelBarrelHits, *numberOfValidPixelEndcapHits;
   vector<int> *numberOfValidStripTIBHits, *numberOfValidStripTIDHits, *numberOfValidStripTOBHits, *numberOfValidStripTECHits;
+  vector<int> *numberOfValidMuonHits;
 
 public:
   void initialise();
