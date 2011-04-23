@@ -21,15 +21,36 @@ ak5PFJets.Rho_EtaMax=cms.double(4.5)
 
 offsetCorrection = cms.Sequence(kt6PFJets * ak5PFJets)
 
+############## PF jets PF no PU
+# produce PFnoPU jets
+from PhysicsTools.PFCandProducer.pfNoPileUp_cff import *
+from RecoJets.JetProducers.ak5PFJets_cfi import *
+ak5PFJetsNoPU = ak5PFJets.clone( src = 'pfNoPileUp' )
+
+# calculate rho from this
+from RecoJets.JetProducers.kt4PFJets_cfi import *
+kt6PFJetsNoPu = kt4PFJets.clone( src = 'pfNoPileUp', rParam = 0.6, doRhoFastjet = True )
+kt6PFJetsNoPu.Rho_EtaMax = cms.double(4.5)
+
+# uncorrected jet sequence
+FastjetForPFNoPU = cms.Sequence( pfPileUp * pfNoPileUp * kt6PFJetsNoPu * ak5PFJetsNoPU )
+
+# correct the PFnoPU jets
+ak5PFJetsNoPUL1FastL2L3 = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3'] )
+ak5PFJetsNoPUL1FastL2L3Residual = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3Residual'] )
+####################################
+
 # data sequences use residual corrections
 CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3Residual )                   
 PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL2L3Residual * offsetCorrection * ak5PFJetsL1FastL2L3Residual)
+PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3Residual)
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
-ourJetSequenceData = cms.Sequence( CaloJetSequenceData * PFJetAK5SequenceData )
+ourJetSequenceData = cms.Sequence( CaloJetSequenceData * PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
 
 # MC sequeces use only L2L3 corrections
 CaloJetSequenceMC = cms.Sequence( ak5CaloJetsL2L3 )
 PFJetAK5SequenceMC = cms.Sequence( ak5PFJetsL2L3 * offsetCorrection * ak5PFJetsL1FastL2L3 )
+PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
-ourJetSequenceMC = cms.Sequence( CaloJetSequenceMC * PFJetAK5SequenceMC )
+ourJetSequenceMC = cms.Sequence( CaloJetSequenceMC * PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC)
 
