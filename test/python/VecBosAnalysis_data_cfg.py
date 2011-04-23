@@ -16,6 +16,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagPFNoPUJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.dinamicAnnealingVertexing_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
@@ -35,12 +36,12 @@ else:
     process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
     process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3Residual'
     process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3Residual'
-    process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3Residual'
-    process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3Residual'
-    process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3Residual'
     process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
     process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
     process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
+    process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+    process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+    process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -118,7 +119,7 @@ process.source = cms.Source("PoolSource",
 process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
                        process.ourJetSequenceData *
                        process.offlinePrimaryVertices *
-                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
+                       process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence *
                        process.eIdSequence * process.FastjetForIsolation  *
                        process.ambiguityResolvedElectrons *
                        process.lumiAna # save lumi info by LS

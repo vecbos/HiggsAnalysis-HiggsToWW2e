@@ -17,6 +17,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagPFNoPUJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.dinamicAnnealingVertexing_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 
@@ -37,12 +38,12 @@ else:
     process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
     process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
     process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
-    process.newPFJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL2L3'
-    process.newPFJetsSoftElectronTagInfos.jets = 'ak5PFJetsL2L3'
-    process.newPFJetsSoftMuonTagInfos.jets = 'ak5PFJetsL2L3'
     process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
     process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
     process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+    process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3'
+    process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
+    process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
 
 
 # to correct calo met ---
@@ -73,7 +74,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
 process.treeDumper.jetCollection1 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
-process.treeDumper.PFjetCollection1 = 'ak5PFJetsL2L3'
+process.treeDumper.PFjetCollection1 = 'ak5PFJetsNoPUL1FastL2L3'
 if (useL1Offset == 1) :
     process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1L2L3'
     process.treeDumper.PFpuCorrJetCollection2 = 'ak5PFJetsL1L2L3'
@@ -125,7 +126,7 @@ process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters
                        process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.offlinePrimaryVertices *
                        process.ourJetSequenceMC *
-                       process.newBtaggingSequence * process.newPFJetBtaggingSequence * process.newPFPUcorrJetBtaggingSequence *
+                       process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence *
                        process.eIdSequence * process.FastjetForIsolation *
                        process.ambiguityResolvedElectrons )
 
