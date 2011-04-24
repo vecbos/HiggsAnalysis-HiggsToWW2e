@@ -34,6 +34,7 @@ cmsenv
 cvs co -r V04-4_1_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V06-04-07-01   TrackingTools/TrajectoryState
+cvs co -r V00-03-30      RecoEgamma/ElectronIdentification
 
 scram b
 
