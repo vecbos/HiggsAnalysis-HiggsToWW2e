@@ -23,7 +23,7 @@ offsetCorrection = cms.Sequence(kt6PFJets * ak5PFJets)
 
 ############## PF jets PF no PU
 # produce PFnoPU jets
-from PhysicsTools.PFCandProducer.pfNoPileUp_cff import *
+from CommonTools.ParticleFlow.pfNoPileUp_cff import *
 from RecoJets.JetProducers.ak5PFJets_cfi import *
 ak5PFJetsNoPU = ak5PFJets.clone( src = 'pfNoPileUp' )
 
