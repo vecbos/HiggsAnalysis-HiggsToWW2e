@@ -171,6 +171,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
   PFmetCollection_         = iConfig.getParameter<edm::InputTag>("PFmetCollection");
   genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
+  chargedMetCollection_    = iConfig.getParameter<edm::InputTag>("chargedMetCollection");
   mcTruthCollection_       = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
   electronMatchMap_        = iConfig.getParameter<edm::InputTag>("electronMatchMap");
   muonMatchMap_            = iConfig.getParameter<edm::InputTag>("muonMatchMap");
@@ -444,6 +445,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   //fill Primary Vertex and associated tracks
   if(dumpVertices_){
     CmsVertexFiller treeFillerVertices(tree_, true);
+    treeFillerVertices.setChargedMet(chargedMetCollection_);
     std::string prefix("");
     std::string suffix("PV");
     treeFillerVertices.writeCollectionToTree(vertexCollection_, iEvent, iSetup, prefix, suffix);

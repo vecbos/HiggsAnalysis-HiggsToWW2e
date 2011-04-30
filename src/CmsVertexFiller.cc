@@ -18,38 +18,17 @@
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DataFormats/METReco/interface/CaloMET.h"
-#include "DataFormats/METReco/interface/CaloMETCollection.h"
-#include "DataFormats/METReco/interface/GenMET.h"
-#include "DataFormats/METReco/interface/GenMETCollection.h"
 #include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/EgammaReco/interface/BasicCluster.h"
-#include "DataFormats/EgammaReco/interface/SuperCluster.h"
-#include "DataFormats/EgammaReco/interface/BasicClusterShapeAssociation.h"
-#include "DataFormats/DetId/interface/DetId.h"
-#include "DataFormats/Candidate/interface/CandMatchMap.h"
-#include "DataFormats/Common/interface/Ref.h"
-#include "DataFormats/Common/interface/RefProd.h"
-#include "DataFormats/Common/interface/RefVector.h"
-#include "DataFormats/Common/interface/RefToBase.h"
 #include "DataFormats/VertexReco/interface/VertexFwd.h"
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "RecoVertex/VertexPrimitives/interface/TransientVertex.h"
 #include "DataFormats/TrackReco/interface/TrackFwd.h"
 #include "DataFormats/TrackReco/interface/Track.h"
-#include "DataFormats/JetReco/interface/CaloJetCollection.h"
-#include "DataFormats/JetReco/interface/GenJet.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
+#include "RecoMET/METAlgorithms/interface/PFSpecificAlgo.h"
 
-
-#include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
-#include "DataFormats/RecoCandidate/interface/RecoEcalCandidate.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsVertexFiller.h"
-
-#include "DataFormats/VertexReco/interface/Vertex.h"
-#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include <TTree.h>
 #include <string>
@@ -95,6 +74,9 @@ CmsVertexFiller::~CmsVertexFiller() {
   delete privateData_->SumPt;
   delete privateData_->ndof;
   delete privateData_->chi2;
+  delete privateData_->pxChMet;
+  delete privateData_->pyChMet;
+  delete privateData_->pzChMet;
   delete privateData_->isFake;  
 }
 
@@ -115,7 +97,12 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
   try { iEvent.getByLabel(vtxcollectionTag, primaryVertex); }
   catch(cms::Exception& ex ) {edm::LogWarning("CmsVertexFiller") << "Can't get candidate collection: " << vtxcollectionTag; }
 
+  edm::Handle< edm::ValueMap<reco::PFMET> > chargedMets;
+  try { iEvent.getByLabel(ChargedMets_, chargedMets); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsVertexFiller") << "Can't get charged PFMET candidate collection: " << ChargedMets_; }
+
   if(primaryVertex->size() > 0) {
+    int ivtx=0;
     for(VertexCollection::const_iterator v = primaryVertex->begin();
 	v != primaryVertex->end(); ++v){
       float SumPt = 0.0;
@@ -128,6 +115,9 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	    SumPt += (**t).pt();
 	  }
 	}
+
+        reco::VertexRef vertexRef(primaryVertex, ivtx);
+        
 	privateData_->PVx->push_back((*v).x());
 	privateData_->PVy->push_back((*v).y());
 	privateData_->PVz->push_back((*v).z());
@@ -137,22 +127,29 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	privateData_->SumPt->push_back(SumPt);
 	privateData_->ndof->push_back((*v).ndof());
 	privateData_->chi2->push_back((*v).chi2());
+        privateData_->pxChMet->push_back(((*chargedMets)[vertexRef]).px());
+        privateData_->pyChMet->push_back(((*chargedMets)[vertexRef]).py());
+        privateData_->pzChMet->push_back(((*chargedMets)[vertexRef]).pz());
 	if ((*v).isFake())   privateData_->isFake->push_back(1);
 	if (!(*v).isFake())  privateData_->isFake->push_back(0);
 	nVtx++;
       }
+      ivtx++;
     }
   } else {
-    privateData_->PVx->push_back(-1.);
-    privateData_->PVy->push_back(-1.);
-    privateData_->PVz->push_back(-1.);
-    privateData_->PVErrx->push_back(-1.);
-    privateData_->PVErry->push_back(-1.);
-    privateData_->PVErrz->push_back(-1.);
-    privateData_->SumPt->push_back(-1.);
-    privateData_->ndof->push_back(-1.);
-    privateData_->chi2->push_back(-1.);
-    privateData_->isFake->push_back(-1.);
+    privateData_->PVx->push_back(-1000.);
+    privateData_->PVy->push_back(-1000.);
+    privateData_->PVz->push_back(-1000.);
+    privateData_->PVErrx->push_back(-1000.);
+    privateData_->PVErry->push_back(-1000.);
+    privateData_->PVErrz->push_back(-1000.);
+    privateData_->SumPt->push_back(-1000.);
+    privateData_->ndof->push_back(-1000.);
+    privateData_->chi2->push_back(-1000.);
+    privateData_->pxChMet->push_back(-1000.);
+    privateData_->pyChMet->push_back(-1000.);
+    privateData_->pzChMet->push_back(-1000.);
+    privateData_->isFake->push_back(-1000.);
   }
 
   *(privateData_->ncand) = nVtx;
@@ -180,6 +177,9 @@ void CmsVertexFiller::treeVertexInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"SumPt"+colSuffix).c_str(), *privateData_->SumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ndof"+colSuffix).c_str(), *privateData_->ndof, nCandString.c_str(), 0, "Reco");  
   cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pxChMet"+colSuffix).c_str(), *privateData_->pxChMet, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pyChMet"+colSuffix).c_str(), *privateData_->pyChMet, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pzChMet"+colSuffix).c_str(), *privateData_->pzChMet, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"isFake"+colSuffix).c_str(), *privateData_->isFake, nCandString.c_str(), 0, "Reco");
   
 }
@@ -195,6 +195,9 @@ void CmsVertexFillerData::initialise() {
   SumPt = new vector<float>;
   ndof = new vector<float>;
   chi2 = new vector<float>;
+  pxChMet = new vector<float>;
+  pyChMet = new vector<float>;
+  pzChMet = new vector<float>;
   isFake = new vector<int>;
 }
 
@@ -209,7 +212,9 @@ void CmsVertexFillerData::clearTrkVectors() {
   SumPt->clear();
   ndof->clear();
   chi2->clear();
+  pxChMet->clear();
+  pyChMet->clear();
+  pzChMet->clear();
   isFake->clear();
-
 }
 

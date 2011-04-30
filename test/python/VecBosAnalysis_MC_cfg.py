@@ -20,6 +20,8 @@ process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFNoPUJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.dinamicAnnealingVertexing_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
+process.load("WWAnalysis.Tools.chargedMetProducer_cfi")
+process.chargedMetProducer.collectionTag = "particleFlow"
 
 # do not use residual corrections in MC
 if (useL1Offset == 1) :
@@ -123,8 +125,9 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters *
-                       process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
+                       #process.genParticlesForJets * process.ak5GenJets * # added for re-recoed V9 Summer09 samples where the ak5GenJet collection was dropped
                        process.offlinePrimaryVertices *
+                       process.chargedMetProducer *
                        process.ourJetSequenceMC *
                        process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence *
                        process.eIdSequence * process.FastjetForIsolation *

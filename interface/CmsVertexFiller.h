@@ -34,6 +34,7 @@ struct CmsVertexFillerData : public CmsCandidateFillerData {
   std::vector<float> *PVx, *PVy, *PVz;
   std::vector<float> *PVErrx, *PVErry, *PVErrz;
   std::vector<float> *SumPt, *ndof, *chi2;
+  std::vector<float> *pxChMet, *pyChMet, *pzChMet;
   std::vector<int> *isFake;
 
 public:
@@ -68,12 +69,16 @@ public:
 			      const std::string &columnPrefix,
 			      const std::string &columnSuffix);
 
+  //! set the charged met collection associated to the PVs
+  void setChargedMet( edm::InputTag ChargedMets ) { ChargedMets_ = ChargedMets; }
+
 private:
   void treeVertexInfo(const std::string &colPrefix,
 		      const std::string &colSuffix);
 
   CmsVertexFillerData *privateData_;
   //    CmsVertexTracksFillerData *privateDatat_;
+  edm::InputTag ChargedMets_;
   std::string *trkIndexName_;
   CmsTree *cmstree;
 
