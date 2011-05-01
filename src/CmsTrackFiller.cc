@@ -202,7 +202,9 @@ void CmsTrackFiller::findHardestPrimaryVertex(const edm::Event& iEvent) {
   } else {
     float MaxSumPt = -1.;
     VertexCollection::const_iterator vMax = primaryVertex->begin();
+
     // calculate the vertex pT 
+    /*
     for(VertexCollection::const_iterator v = primaryVertex->begin();
 	v != primaryVertex->end(); ++v){
       float SumPt = 0.0;
@@ -222,6 +224,8 @@ void CmsTrackFiller::findHardestPrimaryVertex(const edm::Event& iEvent) {
 	vMax  = v;
       } 
     }
+    */
+
     bestPrimaryVertex_ = *vMax;
     x0 = vMax->x();
     y0 = vMax->y();
