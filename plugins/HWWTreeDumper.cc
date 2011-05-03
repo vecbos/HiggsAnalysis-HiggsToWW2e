@@ -56,6 +56,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsHcalNoiseFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
@@ -510,7 +511,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   if(dumpMet_) {
 
     // Calo MET
-    CmsCandidateFiller treeRecoFill1(tree_, true);
+    CmsMetFiller treeRecoFill1(tree_, true);
     std::string prefix("");
     std::string suffix("Met");
     treeRecoFill1.saveCand(saveCand_);
@@ -523,14 +524,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // treeRecoFill1bis.writeCollectionToTree(corrmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // Track-Corrected MET
-    CmsCandidateFiller treeRecoFill2(tree_, true);
+    CmsMetFiller treeRecoFill2(tree_, true);
     suffix = "TCMet";
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.writeCollectionToTree(TCmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // particle flow met
     if ( dumpParticleFlowObjects_ ) {
-      CmsCandidateFiller pfMetFiller(tree_, true);
+      CmsMetFiller pfMetFiller(tree_, true);
       suffix = "PFMet";
       pfMetFiller.saveCand(saveCand_);
       pfMetFiller.writeCollectionToTree(PFmetCollection_, iEvent, iSetup, prefix, suffix, false);
