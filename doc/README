@@ -31,7 +31,7 @@ setenv SCRAM_ARCH slc5_amd64_gcc434
 cmsrel CMSSW_4_1_5
 cd CMSSW_4_1_5/src
 cmsenv
-cvs co -r V06-04-01-04   DataFormats/PatCandidates
+cvs co -r V00-01-01-02   CommonTools/ParticleFlow                         
 cvs co -r V09-09-04      DataFormats/TrackReco
 cvs co -r V06-4_1_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
