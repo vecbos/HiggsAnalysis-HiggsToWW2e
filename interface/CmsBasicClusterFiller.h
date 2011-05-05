@@ -87,9 +87,9 @@ public:
 protected:
   
   // fraction of SC energy around closest problematic
-  float fractionAroundClosestProblematic( const edm::EventSetup & , const reco::CaloCluster & , const EcalRecHitCollection &,  const EcalChannelStatus &, const CaloTopology* topology );
+  float fractionAroundClosestProblematic( const reco::CaloCluster & , const EcalRecHitCollection &,  const EcalChannelStatus &, const CaloTopology* topology );
   // retrieve closest problematic channel and its severity wrt seed crystal using as distance sqrt(ieta^2+ieta^2+iphi^2+iphi^2). Return a null detId in case not found within a search region of 11 (ieta) x 51 (iphi)  
-  std::pair<DetId,int> closestProblematic( const edm::EventSetup & , const reco::CaloCluster & , const EcalRecHitCollection &,  const EcalChannelStatus &, const CaloTopology* topology );
+  std::pair<DetId,int> closestProblematic( const reco::CaloCluster & , const EcalRecHitCollection &,  const EcalChannelStatus &, const CaloTopology* topology );
 
 
   //return the distance in eta units between two EBDetId

@@ -28,9 +28,6 @@
 
 #include "MyAnalysis/IsolationTools/interface/SuperClusterHitsEcalIsolation.h"
 
-#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
-#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgoRcd.h"
-
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
 
@@ -361,7 +358,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->channelStatus->push_back(cStatusFlag);
 
       if( fabs(seedEta) < 1.479 ) {
-        float frac = fractionAroundClosestProblematic( iSetup, *cand, *rechits, *ch_status, topology);
+        float frac = fractionAroundClosestProblematic( *cand, *rechits, *ch_status, topology);
         privateData_->fracClosProbl->push_back(frac);
         if( closestProb_.null() ) {
           privateData_->idClosProbl->push_back(-1);
@@ -765,10 +762,10 @@ void CmsSuperClusterFiller::treePhotonInfo(const std::string colPrefix, const st
 }
 
 // copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
-float CmsSuperClusterFiller::fractionAroundClosestProblematic( const edm::EventSetup& iSetup, const reco::CaloCluster & cluster,
+float CmsSuperClusterFiller::fractionAroundClosestProblematic( const reco::CaloCluster & cluster,
                                                                const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus, const CaloTopology* topology )
 { 
-  DetId closestProb = closestProblematic(iSetup, cluster , recHits, chStatus, topology).first;
+  DetId closestProb = closestProblematic(cluster , recHits, chStatus, topology).first;
   //  std::cout << "%%%%%%%%%%% Closest prob is " << EBDetId(closestProb) << std::endl;
   if (closestProb.null())
     return 0.;
@@ -804,7 +801,7 @@ float CmsSuperClusterFiller::fractionAroundClosestProblematic( const edm::EventS
   return fraction;
 }
 
-std::pair <DetId,int> CmsSuperClusterFiller::closestProblematic(const edm::EventSetup& iSetup, const reco::CaloCluster & cluster, 
+std::pair <DetId,int> CmsSuperClusterFiller::closestProblematic(const reco::CaloCluster & cluster, 
                                                                 const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus , 
                                                                 const CaloTopology* topology )
 {
@@ -828,10 +825,7 @@ std::pair <DetId,int> CmsSuperClusterFiller::closestProblematic(const edm::Event
       if ( jrh == recHits.end() ) 
         continue;
       //Now checking rh flag
-      edm::ESHandle<EcalSeverityLevelAlgo> sevlv;
-      iSetup.get<EcalSeverityLevelAlgoRcd>().get(sevlv);
-
-      uint32_t sev = sevlv->severityLevel( jrh->id(), recHits );
+      uint32_t sev = EcalSeverityLevelAlgo::severityLevel( jrh->id(), recHits, chStatus );
       if (sev == EcalSeverityLevelAlgo::kGood)
         continue;
       //      std::cout << "[closestProblematic] Found a problematic channel " << EBDetId(*it) << " " << flag << std::endl;
