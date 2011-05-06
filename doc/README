@@ -37,6 +37,7 @@ cvs co -r V06-4_1_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToW
 cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r WW_414_SKIM_V05 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
 cvs co -r WW_414_SKIM_V05 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
+cvs co -r WW_414_SKIM_V05 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r V06-04-07-01   TrackingTools/TrajectoryState
 cvs co -r V01-04-07      RecoVertex/PrimaryVertexProducer
 cvs co -r V00-03-30      RecoEgamma/ElectronIdentification
