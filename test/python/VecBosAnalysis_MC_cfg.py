@@ -112,7 +112,6 @@ process.p = cms.Path ( process.mergedBasicClusters * process.mergedSuperClusters
                        process.chargedMetProducer *
                        process.ourJetSequenceMC *
                        process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence *
-                       process.eIdSequence * process.FastjetForIsolation *
-                       process.ambiguityResolvedElectrons )
+                       process.eIdSequence * process.FastjetForIsolation )
 
 process.q = cms.EndPath ( process.treeDumper )
