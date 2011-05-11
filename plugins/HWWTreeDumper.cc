@@ -121,7 +121,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpK0s_            = iConfig.getUntrackedParameter<bool>("dumpK0s", false);
   dumpCaloTowers_     = iConfig.getUntrackedParameter<bool>("dumpCaloTowers", false);
   dumpHcalNoiseFlags_ = iConfig.getUntrackedParameter<bool>("dumpHcalNoiseFlags", false);
-  aodHcalNoiseFlags_  = iConfig.getUntrackedParameter<bool>("AODHcalNoiseFlags", true);
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
@@ -599,7 +598,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeGenInfoToTree( gei );
 
   }
-  
   
   // dump Hcal noise flags
   if(dumpHcalNoiseFlags_) {
