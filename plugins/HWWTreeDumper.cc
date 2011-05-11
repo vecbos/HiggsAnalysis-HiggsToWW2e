@@ -37,7 +37,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFTauFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFPreIdFiller.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPhotonFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
@@ -56,7 +55,6 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsHcalNoiseFiller.h"
-#include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
@@ -106,7 +104,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpSignalKfactor_  = iConfig.getUntrackedParameter<bool>("dumpSignalKfactor", false);
   dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
-  dumpPhotons_        = iConfig.getUntrackedParameter<bool>("dumpPhotons", false);
   dumpPFlowElectrons_ = iConfig.getUntrackedParameter<bool>("dumpPFlowElectrons", false);
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
   dumpBCs_            = iConfig.getUntrackedParameter<bool>("dumpBCs", false);
@@ -124,7 +121,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpK0s_            = iConfig.getUntrackedParameter<bool>("dumpK0s", false);
   dumpCaloTowers_     = iConfig.getUntrackedParameter<bool>("dumpCaloTowers", false);
   dumpHcalNoiseFlags_ = iConfig.getUntrackedParameter<bool>("dumpHcalNoiseFlags", false);
-  aodHcalNoiseFlags_  = iConfig.getUntrackedParameter<bool>("AODHcalNoiseFlags", true);
 
   // Particle Flow objects
   dumpParticleFlowObjects_ = iConfig.getUntrackedParameter<bool>("dumpParticleFlowObjects",false);
@@ -172,7 +168,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
   PFmetCollection_         = iConfig.getParameter<edm::InputTag>("PFmetCollection");
   genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
-  chargedMetCollection_    = iConfig.getParameter<edm::InputTag>("chargedMetCollection");
   mcTruthCollection_       = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
   electronMatchMap_        = iConfig.getParameter<edm::InputTag>("electronMatchMap");
   muonMatchMap_            = iConfig.getParameter<edm::InputTag>("muonMatchMap");
@@ -235,7 +230,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   if(dumpMCTruth_) {
 
-    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent, 100 );
+    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent, 1000 );
 
   }
 
@@ -329,17 +324,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeCollectionToTree(PFpreIdCollection_, trackCollection_, iEvent, iSetup, prefix, suffix, false);  
   }
 
-  // fill Electrons block
-  if(dumpPhotons_) {
-
-    CmsPhotonFiller treeFill(tree_, true);
-    std::string prefix("");
-    std::string suffix("Pho");
-    treeFill.saveCand(saveCand_);
-    treeFill.setEcalBarrelSuperClusters(ecalBarrelSCCollection_);
-    treeFill.setEcalEndcapSuperClusters(ecalEndcapSCCollection_);
-    treeFill.writeCollectionToTree(photonCollection_, iEvent, iSetup, prefix, suffix, false);
-  }
 
   // fill SC block
   if (dumpSCs_) {
@@ -446,7 +430,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   //fill Primary Vertex and associated tracks
   if(dumpVertices_){
     CmsVertexFiller treeFillerVertices(tree_, true);
-    treeFillerVertices.setChargedMet(chargedMetCollection_);
     std::string prefix("");
     std::string suffix("PV");
     treeFillerVertices.writeCollectionToTree(vertexCollection_, iEvent, iSetup, prefix, suffix);
@@ -511,7 +494,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   if(dumpMet_) {
 
     // Calo MET
-    CmsMetFiller treeRecoFill1(tree_, true);
+    CmsCandidateFiller treeRecoFill1(tree_, true);
     std::string prefix("");
     std::string suffix("Met");
     treeRecoFill1.saveCand(saveCand_);
@@ -524,14 +507,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // treeRecoFill1bis.writeCollectionToTree(corrmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // Track-Corrected MET
-    CmsMetFiller treeRecoFill2(tree_, true);
+    CmsCandidateFiller treeRecoFill2(tree_, true);
     suffix = "TCMet";
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.writeCollectionToTree(TCmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // particle flow met
     if ( dumpParticleFlowObjects_ ) {
-      CmsMetFiller pfMetFiller(tree_, true);
+      CmsCandidateFiller pfMetFiller(tree_, true);
       suffix = "PFMet";
       pfMetFiller.saveCand(saveCand_);
       pfMetFiller.writeCollectionToTree(PFmetCollection_, iEvent, iSetup, prefix, suffix, false);
@@ -615,7 +598,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeGenInfoToTree( gei );
 
   }
-  
   
   // dump Hcal noise flags
   if(dumpHcalNoiseFlags_) {
