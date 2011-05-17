@@ -38,6 +38,7 @@ struct CmsPhotonFillerData : public CmsCandidateFillerData {
   vector<float> *hOverE, *dr03TkSumPt, *dr03HollowTkSumPt, *dr03EcalRecHitSumEt, *dr03HcalTowerSumEt,
     *dr04TkSumPt, *dr04HollowTkSumPt, *dr04EcalRecHitSumEt, *dr04HcalTowerSumEt;
   vector<float> *chargedHadronIso, *neutralHadronIso, *photonIso;
+  vector<int> *hasPixelSeed;
 
   void initialise();
   void clearTrkVectors();

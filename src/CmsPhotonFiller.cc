@@ -83,6 +83,7 @@ CmsPhotonFiller::~CmsPhotonFiller() {
   delete privateData_->chargedHadronIso;
   delete privateData_->neutralHadronIso;
   delete privateData_->photonIso;
+  delete privateData_->hasPixelSeed;
 
   delete privateData_->ncand;
 
@@ -242,6 +243,7 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     privateData_->chargedHadronIso->push_back(photonRef->chargedHadronIso());
     privateData_->neutralHadronIso->push_back(photonRef->neutralHadronIso());
     privateData_->photonIso->push_back(photonRef->photonIso());
+    privateData_->hasPixelSeed->push_back(int(photonRef->hasPixelSeed()));
 
   } else {
     privateData_->fiducialFlags->push_back(-1);
@@ -261,6 +263,7 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     privateData_->chargedHadronIso->push_back(-999.);
     privateData_->neutralHadronIso->push_back(-999.);
     privateData_->photonIso->push_back(-999.);
+    privateData_->hasPixelSeed->push_back(0);
 
   }
 
@@ -285,6 +288,7 @@ void CmsPhotonFiller::treeEcalInfo(const std::string &colPrefix, const std::stri
   cmstree->column((colPrefix+"chargedHadronIso"+colSuffix).c_str(), *privateData_->chargedHadronIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"neutralHadronIso"+colSuffix).c_str(), *privateData_->neutralHadronIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"photonIso"+colSuffix).c_str(), *privateData_->photonIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hasPixelSeed"+colSuffix).c_str(), *privateData_->hasPixelSeed, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -313,6 +317,7 @@ void CmsPhotonFillerData::initialise() {
   chargedHadronIso         = new vector<float>;
   neutralHadronIso         = new vector<float>;
   photonIso                = new vector<float>;
+  hasPixelSeed             = new vector<int>;
 
 }
 
@@ -338,5 +343,6 @@ void CmsPhotonFillerData::clearTrkVectors() {
   chargedHadronIso         ->clear();
   neutralHadronIso         ->clear();
   photonIso         ->clear();
+  hasPixelSeed         ->clear();
 
 }
