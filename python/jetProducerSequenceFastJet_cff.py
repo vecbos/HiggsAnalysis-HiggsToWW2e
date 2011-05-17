@@ -9,6 +9,8 @@ from JetMETCorrections.Configuration.DefaultJEC_cff import *
 from HiggsAnalysis.HiggsToWW2e.jptL2L3Corrections_cff import *
 
 from RecoJets.Configuration.RecoPFJets_cff import *
+from RecoJets.Configuration.RecoJets_cff   import *
+
 from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import *
 from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 
@@ -18,8 +20,11 @@ kt6PFJets.Rho_EtaMax=cms.double(4.5)
 ##-------------------- Turn-on the FastJet jet area calculation for your favorite algorithm -----------------------
 ak5PFJets.doAreaFastjet = True
 ak5PFJets.Rho_EtaMax=cms.double(4.5)
+ak5CaloJets.doAreaFastjet = True
+ak5CaloJets.Rho_EtaMax=cms.double(4.5)
 
 offsetCorrection = cms.Sequence(kt6PFJets * ak5PFJets)
+offsetCaloCorrection = cms.Sequence(kt6PFJets * ak5CaloJets)
 
 ############## PF jets PF no PU
 # produce PFnoPU jets
@@ -41,14 +46,14 @@ ak5PFJetsNoPUL1FastL2L3Residual = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', co
 ####################################
 
 # data sequences use residual corrections
-CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3Residual )                   
+CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3Residual* offsetCaloCorrection* ak5CaloJetsL1FastL2L3Residual )                   
 PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL2L3Residual * offsetCorrection * ak5PFJetsL1FastL2L3Residual)
 PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3Residual)
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 ourJetSequenceData = cms.Sequence( CaloJetSequenceData * PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
 
 # MC sequeces use only L2L3 corrections
-CaloJetSequenceMC = cms.Sequence( ak5CaloJetsL2L3 )
+CaloJetSequenceMC = cms.Sequence( ak5CaloJetsL2L3* offsetCaloCorrection* ak5CaloJetsL1FastL2L3 )
 PFJetAK5SequenceMC = cms.Sequence( ak5PFJetsL2L3 * offsetCorrection * ak5PFJetsL1FastL2L3 )
 PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
