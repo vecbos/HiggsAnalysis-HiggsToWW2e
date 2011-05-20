@@ -8,7 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR_R_311_V2::All'
+process.GlobalTag.globaltag = 'GR_R_42_V14::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -22,15 +22,25 @@ process.load("WWAnalysis.Tools.chargedMetProducer_cfi")
 process.chargedMetProducer.collectionTag = "particleFlow"
 
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
-process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
-process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3Residual'
-process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3Residual'
-process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
-process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
-process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
-process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
-process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
-process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+# NOT YET IN GLOBALTAG
+#process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
+#process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+#process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+#process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
+#process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
+#process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
+#process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+#process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+#process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
+process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
+process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
+process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
+process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3'
+process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
+process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -55,6 +65,11 @@ process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_data.root'
+# RESIDUAL NOT YET IN GLOBALTAG
+process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
+process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
+process.treeDumper.PFjetCollection1 = 'ak5PFJetsNoPUL1FastL2L3'
+process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = False
@@ -93,7 +108,7 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_Run2011A.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root')
                             )
 
 process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *

@@ -326,6 +326,7 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
 {
   if ( theTauJetIndex != -1 ) {
     reco::PFTauRef theTauJetRef(tauCollection, theTauJetIndex);
+    if(theTauJetRef.isNonnull()) {
     privateData_->theTauDiscrByLeadTrackFinding->push_back((*tauDiscrByLeadTrackFinding)[theTauJetRef]);
     privateData_->theTauDiscrByLeadTrackPtCut->push_back((*tauDiscrByLeadTrackPtCut)[theTauJetRef]);
     // privateData_->theTauDiscrByNProngs->push_back((*tauDiscrByNProngs)[theTauJetRef]);
@@ -338,6 +339,20 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
 //     privateData_->theTauDiscrByTaNCfrOnePercent->push_back((*tauDiscrByTaNCfrOnePercent)[theTauJetRef]);
 //     privateData_->theTauDiscrByTaNCfrQuarterPercent->push_back((*tauDiscrByTaNCfrQuarterPercent)[theTauJetRef]);
 //     privateData_->theTauDiscrByTaNCfrTenthPercent->push_back((*tauDiscrByTaNCfrTenthPercent)[theTauJetRef]);
+    } else {
+      privateData_->theTauDiscrByLeadTrackFinding->push_back(-1);
+      privateData_->theTauDiscrByLeadTrackPtCut->push_back(-1);
+      // privateData_->theTauDiscrByNProngs->push_back(-1);
+      privateData_->theTauDiscrByTrackIso->push_back(-1);
+      privateData_->theTauDiscrByEcalIso->push_back(-1);
+      privateData_->theTauDiscrAgainstMuons->push_back(-1);
+      privateData_->theTauDiscrAgainstElectrons->push_back(-1);
+      //     privateData_->theTauDiscrByTaNC->push_back(-1);
+      //     privateData_->theTauDiscrByTaNCfrHalfPercent->push_back(-1);
+      //     privateData_->theTauDiscrByTaNCfrOnePercent->push_back(-1);
+      //     privateData_->theTauDiscrByTaNCfrQuarterPercent->push_back(-1);
+      //     privateData_->theTauDiscrByTaNCfrTenthPercent->push_back(-1);      
+    }
   } else {
     privateData_->theTauDiscrByLeadTrackFinding->push_back(-1);
     privateData_->theTauDiscrByLeadTrackPtCut->push_back(-1);

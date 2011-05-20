@@ -46,14 +46,21 @@ ak5PFJetsNoPUL1FastL2L3Residual = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', co
 ####################################
 
 # data sequences use residual corrections
-CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3Residual* offsetCaloCorrection* ak5CaloJetsL1FastL2L3Residual )                   
-PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL2L3Residual * offsetCorrection * ak5PFJetsL1FastL2L3Residual)
-PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3Residual)
-JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
+# ak5CaloJetsL1FastL2L3Residual not yet in GlobalTag
+#CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3Residual* offsetCaloCorrection* ak5CaloJetsL1FastL2L3Residual)                   
+#PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL2L3Residual * offsetCorrection * ak5PFJetsL1FastL2L3Residual)
+#PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3Residual)
+#JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
+
+CaloJetSequenceData = cms.Sequence( ak5CaloJetsL2L3* offsetCaloCorrection* ak5CaloJetsL1FastL2L3)                   
+PFJetAK5SequenceData = cms.Sequence( ak5PFJetsL2L3 * offsetCorrection * ak5PFJetsL1FastL2L3)
+PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3)
+JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
+
 ourJetSequenceData = cms.Sequence( CaloJetSequenceData * PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
 
 # MC sequeces use only L2L3 corrections
-CaloJetSequenceMC = cms.Sequence( ak5CaloJetsL2L3* offsetCaloCorrection* ak5CaloJetsL1FastL2L3 )
+CaloJetSequenceMC = cms.Sequence( ak5CaloJetsL2L3* offsetCaloCorrection* ak5CaloJetsL1FastL2L3)
 PFJetAK5SequenceMC = cms.Sequence( ak5PFJetsL2L3 * offsetCorrection * ak5PFJetsL1FastL2L3 )
 PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment

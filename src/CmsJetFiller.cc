@@ -321,27 +321,27 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
             rawEnergy = uncorrectedRecoJet->energy();
 
             if(saveJetExtras_) { // jet ID has to be done on uncorrected jets
-              unsigned int idx = cand2 - uncorrectedCollection->begin();
-              edm::RefToBase<reco::CaloJet> jetRef = uncorrectedCollection->refAt(idx);
-              reco::JetID const & jetId = (*hJetIDMap)[ jetRef ];
+//               unsigned int idx = cand2 - uncorrectedCollection->begin();
+//               edm::RefToBase<reco::CaloJet> jetRef = uncorrectedCollection->refAt(idx);
+//               reco::JetID const & jetId = (*hJetIDMap)[ jetRef ];
 
-              fHPD = jetId.fHPD;
-              fLS = jetId.fLS;
-              fOOT = jetId.fHFOOT;
-              nHit = jetIDFunctorPURE1.count_hits( cand2->getCaloConstituents() );
-              nHit90 = jetId.n90Hits;
-              covEtaEta = cand2->etaetaMoment();
-              covPhiPhi = cand2->phiphiMoment();
+//               fHPD = jetId.fHPD;
+//               fLS = jetId.fLS;
+//               fOOT = jetId.fHFOOT;
+//               nHit = jetIDFunctorPURE1.count_hits( cand2->getCaloConstituents() );
+//               nHit90 = jetId.n90Hits;
+//               covEtaEta = cand2->etaetaMoment();
+//               covPhiPhi = cand2->phiphiMoment();
 
-              int passedPURE1 = ( jetIDFunctorPURE1( *cand2, jetId ) ) ? 1 : 0;
-              int passedPURE2 = ( jetIDFunctorPURE2( *cand2, jetId ) ) ? 1 : 0;
-              int passedPURE3 = ( jetIDFunctorPURE3( *cand2, jetId ) ) ? 1 : 0;
-              int passedDQM1 = ( jetIDFunctorDQM1( *cand2, jetId ) ) ? 1 : 0;
-              int passedDQM2 = ( jetIDFunctorDQM2( *cand2, jetId ) ) ? 1 : 0;
-              int passedDQM3 = ( jetIDFunctorDQM3( *cand2, jetId ) ) ? 1 : 0;
+//               int passedPURE1 = ( jetIDFunctorPURE1( *cand2, jetId ) ) ? 1 : 0;
+//               int passedPURE2 = ( jetIDFunctorPURE2( *cand2, jetId ) ) ? 1 : 0;
+//               int passedPURE3 = ( jetIDFunctorPURE3( *cand2, jetId ) ) ? 1 : 0;
+//               int passedDQM1 = ( jetIDFunctorDQM1( *cand2, jetId ) ) ? 1 : 0;
+//               int passedDQM2 = ( jetIDFunctorDQM2( *cand2, jetId ) ) ? 1 : 0;
+//               int passedDQM3 = ( jetIDFunctorDQM3( *cand2, jetId ) ) ? 1 : 0;
 
-              Id = ( passedPURE3 << 5 ) | ( passedPURE2 << 4 ) | ( passedPURE1 << 3 ) |
-                ( passedDQM3 << 2 ) | ( passedDQM2 << 1 ) | passedDQM1; 
+//               Id = ( passedPURE3 << 5 ) | ( passedPURE2 << 4 ) | ( passedPURE1 << 3 ) |
+//                 ( passedDQM3 << 2 ) | ( passedDQM2 << 1 ) | passedDQM1; 
 
             }
             break;

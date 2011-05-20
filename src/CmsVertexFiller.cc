@@ -127,9 +127,15 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	privateData_->SumPt->push_back(SumPt);
 	privateData_->ndof->push_back((*v).ndof());
 	privateData_->chi2->push_back((*v).chi2());
-        privateData_->pxChMet->push_back(((*chargedMets)[vertexRef]).px());
-        privateData_->pyChMet->push_back(((*chargedMets)[vertexRef]).py());
-        privateData_->pzChMet->push_back(((*chargedMets)[vertexRef]).pz());
+        if(vertexRef.isNonnull()) {
+          privateData_->pxChMet->push_back(((*chargedMets)[vertexRef]).px());
+          privateData_->pyChMet->push_back(((*chargedMets)[vertexRef]).py());
+          privateData_->pzChMet->push_back(((*chargedMets)[vertexRef]).pz());
+        } else {
+          privateData_->pxChMet->push_back(-1000.);
+          privateData_->pyChMet->push_back(-1000.);
+          privateData_->pzChMet->push_back(-1000.);          
+        }
 	if ((*v).isFake())   privateData_->isFake->push_back(1);
 	if (!(*v).isFake())  privateData_->isFake->push_back(0);
 	nVtx++;
