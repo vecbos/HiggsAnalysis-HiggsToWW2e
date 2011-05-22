@@ -12,7 +12,7 @@ cvs co -r V05-05-03 RecoJets/JetProducers
 cvs co -r WW_414_SKIM_V05 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
 cvs co -r edm-20May2011   -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r WW_414_SKIM_V05 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
-cvs co -r V00-01-01-02   CommonTools/ParticleFlow
+cvs co -r V00-03-30      RecoEgamma/ElectronIdentification
 
 scram b
 
