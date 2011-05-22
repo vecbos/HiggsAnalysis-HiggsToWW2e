@@ -9,8 +9,8 @@ cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/Is
 cvs co -r V02-04-16 RecoJets/Configuration
 cvs co -r V04-01-00 RecoJets/JetAlgorithms
 cvs co -r V05-05-03 RecoJets/JetProducers
-cvs co -r WW_414_SKIM_V05 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
-cvs co -r edm-20May2011   -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
+cvs co -r edm-20May2011 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
+cvs co -r WW_414_SKIM_V05 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r WW_414_SKIM_V05 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r V00-03-30      RecoEgamma/ElectronIdentification
 
