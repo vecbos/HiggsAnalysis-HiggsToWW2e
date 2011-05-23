@@ -90,7 +90,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   savePFEleBasic_  = iConfig.getUntrackedParameter<bool>("savePFEleBasic",  true);
   savePFEleIsoDep_ = iConfig.getUntrackedParameter<bool>("savePFEleIsoDep", true);
 
-  //tau pflow                                                                                                                                                                                                                              
+  //tau pflow
   savePFTauBasic_  = iConfig.getUntrackedParameter<bool>("savePFTauBasic", false);
   saveLeadPFCand_  = iConfig.getUntrackedParameter<bool>("saveLeadPFCand", false);
   savePFTauDiscriminators_ = iConfig.getUntrackedParameter<bool>("savePFTauDiscriminators", false);
@@ -115,6 +115,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpMuonTracks_     = iConfig.getUntrackedParameter<bool>("dumpMuonTracks", false);
   dumpMuons_          = iConfig.getUntrackedParameter<bool>("dumpMuons", false);
   dumpPFTaus_         = iConfig.getUntrackedParameter<bool>("dumpPFTaus", false);
+  dumphpsPFTaus_      = iConfig.getUntrackedParameter<bool>("dumphpsPFTaus", false);
+  dumphpsTancTaus_    = iConfig.getUntrackedParameter<bool>("dumphpsTancTaus", false);
   dumpJets_           = iConfig.getUntrackedParameter<bool>("dumpJets", false);
   dumpGenJets_        = iConfig.getUntrackedParameter<bool>("dumpGenJets", false);
   dumpPUcorrPFJet_    = iConfig.getUntrackedParameter<bool>("dumpPUcorrPFJet", false);
@@ -138,6 +140,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   photonCollection_        = iConfig.getParameter<edm::InputTag>("photonCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
   pfTauCollection_         = iConfig.getParameter<edm::InputTag>("pfTauCollection");
+  hpspfTauCollection_      = iConfig.getParameter<edm::InputTag>("hpspfTauCollection");
+  hpsTancTausCollection_   = iConfig.getParameter<edm::InputTag>("hpsTancTausCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
   ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
@@ -194,18 +198,54 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hltParms_            = iConfig.getUntrackedParameter<edm::ParameterSet>("HLTObjectsInfo");
 
   // PFTau Discriminators
-  tauDiscrByLeadTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadTrackFindingTag");
-  tauDiscrByLeadTrackPtCutTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadTrackPtCutTag");
-  //  tauDiscrByNProngsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByNProngsTag");
-  tauDiscrByTrackIsoTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTrackIsoTag");
-  tauDiscrByEcalIsoTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByEcalIsoTag");
-  tauDiscrAgainstMuonsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstMuonsTag");
-  tauDiscrAgainstElectronsTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstElectronsTag");
-//   tauDiscrByTaNCTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCTag");
-//   tauDiscrByTaNCfrHalfPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrHalfPercentTag");
-//   tauDiscrByTaNCfrOnePercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrOnePercentTag");
-//   tauDiscrByTaNCfrQuarterPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrQuarterPercentTag");
-//   tauDiscrByTaNCfrTenthPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrTenthPercentTag");
+  tauDiscrByLeadingTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadingTrackFindingTag");
+  tauDiscrByLeadingTrackPtCutTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadingTrackPtCutTag");
+  tauDiscrByLeadingPionPtCutTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadingPionPtCutTag");
+  tauDiscrByIsolationTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByIsolationTag");
+  tauDiscrByIsolationUsingLeadingPionTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByIsolationUsingLeadingPionTag");
+  tauDiscrByTrackIsolationTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTrackIsolationTag");
+  tauDiscrByTrackIsolationUsingLeadingPionTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTrackIsolationUsingLeadingPionTag");
+  tauDiscrByECALIsolationTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByECALIsolationTag");
+  tauDiscrByECALIsolationUsingLeadingPionTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByECALIsolationUsingLeadingPionTag");
+  tauDiscrAgainstMuonTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstMuonTag");
+  tauDiscrAgainstElectronTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrAgainstElectronTag");
+  tauDiscrByTaNCTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCTag");
+  tauDiscrByTaNCfrHalfPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrHalfPercentTag");
+  tauDiscrByTaNCfrOnePercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrOnePercentTag");
+  tauDiscrByTaNCfrQuarterPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrQuarterPercentTag");
+  tauDiscrByTaNCfrTenthPercentTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByTaNCfrTenthPercentTag");
+  // HPS PFTau Discriminators
+  hpsTauDiscrByLooseElectronRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByLooseElectronRejectionTag");
+  hpsTauDiscrByMediumElectronRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByMediumElectronRejectionTag");
+  hpsTauDiscrByTightElectronRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByTightElectronRejectionTag");
+  hpsTauDiscrByLooseMuonRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByLooseMuonRejectionTag");
+  hpsTauDiscrByTightMuonRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByTightMuonRejectionTag");
+  hpsTauDiscrByDecayModeFindingTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByDecayModeFindingTag");
+  hpsTauDiscrByVLooseIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByVLooseIsolationTag");
+  hpsTauDiscrByLooseIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByLooseIsolationTag");
+  hpsTauDiscrByMediumIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByMediumIsolationTag");
+  hpsTauDiscrByTightIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByTightIsolationTag");
+  // HPS Tanc Tau Discriminators
+  hpsTancTausDiscrByLeadingTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLeadingTrackFindingTag");
+  hpsTancTausDiscrByLeadingTrackPtCutTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLeadingTrackPtCutTag");
+  hpsTancTausDiscrByLeadingPionPtCutTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLeadingPionPtCutTag");
+  hpsTancTausDiscrByTancTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTancTag");
+  hpsTancTausDiscrByTancRawTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTancRawTag");
+  hpsTancTausDiscrByTancVLooseTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTancVLooseTag");
+  hpsTancTausDiscrByTancLooseTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTancLooseTag");
+  hpsTancTausDiscrByTancMediumTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTancMediumTag");
+  hpsTancTausDiscrByTancTightTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTancTightTag");
+  hpsTancTausDiscrByLooseElectronRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLooseElectronRejectionTag");
+  hpsTancTausDiscrByMediumElectronRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByMediumElectronRejectionTag");
+  hpsTancTausDiscrByTightElectronRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTightElectronRejectionTag");
+  hpsTancTausDiscrByLooseMuonRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLooseMuonRejectionTag");
+  hpsTancTausDiscrByTightMuonRejectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTightMuonRejectionTag");
+  hpsTancTausDiscrByDecayModeSelectionTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByDecayModeSelectionTag");
+  hpsTancTausDiscrByVLooseIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByVLooseIsolationTag");
+  hpsTancTausDiscrByLooseIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLooseIsolationTag");
+  hpsTancTausDiscrByMediumIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByMediumIsolationTag");
+  hpsTancTausDiscrByTightIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTightIsolationTag");
+  hpsTancTausDiscrByFlightPathTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByFlightPathTag");
 
   // Hcal collections
   hcalNoiseSummaryLabel_ = iConfig.getParameter<edm::InputTag>("hcalNoiseSummary");
@@ -479,7 +519,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   }
 
-  // fill PFTau block                                                                                                                                                                                                                      
+  // fill PFTau block
   if(dumpPFTaus_)
     {
       CmsPFTauFiller treeFill(tree_, true);
@@ -488,14 +528,76 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.savePFTauBasic(savePFTauBasic_);
       treeFill.saveLeadPFCand(saveLeadPFCand_);
       treeFill.writeCollectionToTree(pfTauCollection_, iEvent, iSetup, prefix, suffix,
-                                     tauDiscrByLeadTrackFindingTag_, tauDiscrByLeadTrackPtCutTag_, //tauDiscrByNProngsTag_,
-                                     tauDiscrByTrackIsoTag_, tauDiscrByEcalIsoTag_, tauDiscrAgainstMuonsTag_, tauDiscrAgainstElectronsTag_,
-//                                      tauDiscrByTaNCTag_,
-//                                      tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
-//                                      tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_,
+ 				     tauDiscrByLeadingTrackFindingTag_,
+ 				     tauDiscrByLeadingTrackPtCutTag_,
+ 				     tauDiscrByLeadingPionPtCutTag_,
+ 				     tauDiscrByIsolationTag_,
+ 				     tauDiscrByIsolationUsingLeadingPionTag_,
+ 				     tauDiscrByTrackIsolationTag_,
+ 				     tauDiscrByTrackIsolationUsingLeadingPionTag_,
+ 				     tauDiscrByECALIsolationTag_,
+ 				     tauDiscrByECALIsolationUsingLeadingPionTag_, 
+ 				     tauDiscrAgainstMuonTag_,
+ 				     tauDiscrAgainstElectronTag_,
+ 				     tauDiscrByTaNCTag_,
+ 				     tauDiscrByTaNCfrHalfPercentTag_,
+ 				     tauDiscrByTaNCfrOnePercentTag_,
+ 				     tauDiscrByTaNCfrQuarterPercentTag_,
+ 				     tauDiscrByTaNCfrTenthPercentTag_,
                                      false);
     }
 
+  if(dumphpsPFTaus_)
+    {
+      CmsPFTauFiller treeFill(tree_, true);
+      std::string prefix("");
+      std::string suffix("PFTau");
+      treeFill.savePFTauBasic(savePFTauBasic_);
+      treeFill.saveLeadPFCand(saveLeadPFCand_);
+      treeFill.writeCollectionToTree(hpspfTauCollection_, iEvent, iSetup, prefix, suffix,
+                                     hpsTauDiscrByLooseElectronRejectionTag_,
+                                     hpsTauDiscrByMediumElectronRejectionTag_,
+                                     hpsTauDiscrByTightElectronRejectionTag_,
+                                     hpsTauDiscrByLooseMuonRejectionTag_,
+                                     hpsTauDiscrByTightMuonRejectionTag_,
+                                     hpsTauDiscrByDecayModeFindingTag_,
+                                     hpsTauDiscrByVLooseIsolationTag_,
+                                     hpsTauDiscrByLooseIsolationTag_,
+                                     hpsTauDiscrByMediumIsolationTag_,
+                                     hpsTauDiscrByTightIsolationTag_,
+                                     false);
+    }
+
+  if(dumphpsTancTaus_)
+    {
+      CmsPFTauFiller treeFill(tree_, true);
+      std::string prefix("");
+      std::string suffix("PFTau");
+      treeFill.savePFTauBasic(savePFTauBasic_);
+      treeFill.saveLeadPFCand(saveLeadPFCand_);
+      treeFill.writeCollectionToTree(hpsTancTausCollection_, iEvent, iSetup, prefix, suffix,
+				     hpsTancTausDiscrByLeadingTrackFindingTag_,
+				     hpsTancTausDiscrByLeadingTrackPtCutTag_,
+				     hpsTancTausDiscrByLeadingPionPtCutTag_,
+				     hpsTancTausDiscrByTancTag_,
+				     hpsTancTausDiscrByTancRawTag_,
+				     hpsTancTausDiscrByTancVLooseTag_,
+				     hpsTancTausDiscrByTancLooseTag_,
+				     hpsTancTausDiscrByTancMediumTag_,
+				     hpsTancTausDiscrByTancTightTag_,
+				     hpsTancTausDiscrByLooseElectronRejectionTag_,
+				     hpsTancTausDiscrByMediumElectronRejectionTag_,
+				     hpsTancTausDiscrByTightElectronRejectionTag_,
+				     hpsTancTausDiscrByLooseMuonRejectionTag_,
+				     hpsTancTausDiscrByTightMuonRejectionTag_,
+				     hpsTancTausDiscrByDecayModeSelectionTag_,
+				     hpsTancTausDiscrByVLooseIsolationTag_,
+				     hpsTancTausDiscrByLooseIsolationTag_,
+				     hpsTancTausDiscrByMediumIsolationTag_,
+				     hpsTancTausDiscrByTightIsolationTag_,
+				     hpsTancTausDiscrByFlightPathTag_,
+				     false);
+    }
 
   // fill CaloTower block
   if(dumpCaloTowers_){

@@ -75,7 +75,7 @@ private:
   //! dump muon block
   bool dumpMuons_;
   //! dump pftau block
-  bool dumpPFTaus_;
+  bool dumpPFTaus_, dumphpsPFTaus_, dumphpsTancTaus_;
   //! dump reco / generated / PU corrected jets block
   bool dumpJets_, dumpGenJets_, dumpPUcorrPFJet_;
   //! dump reco / generated MET block
@@ -120,7 +120,7 @@ private:
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;
   //! taus
-  edm::InputTag pfTauCollection_;
+  edm::InputTag pfTauCollection_, hpspfTauCollection_, hpsTancTausCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalPFClusterCollection_;
@@ -143,11 +143,31 @@ private:
   //! PF electrons pre-identification
   edm::InputTag PFpreIdCollection_;
   //! PF Tau Discriminators
-  edm::InputTag tauDiscrByLeadTrackFindingTag_, tauDiscrByLeadTrackPtCutTag_,// tauDiscrByNProngsTag_,
-    tauDiscrByTrackIsoTag_, tauDiscrByEcalIsoTag_, tauDiscrAgainstMuonsTag_, tauDiscrAgainstElectronsTag_;
-//     tauDiscrByTaNCTag_,
-//     tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
-//     tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_;
+  edm::InputTag tauDiscrByLeadingTrackFindingTag_, tauDiscrByLeadingTrackPtCutTag_, tauDiscrByLeadingPionPtCutTag_, 
+    tauDiscrByIsolationTag_, tauDiscrByIsolationUsingLeadingPionTag_,
+    tauDiscrByTrackIsolationUsingLeadingPionTag_, tauDiscrByTrackIsolationTag_,
+    tauDiscrByECALIsolationTag_, tauDiscrByECALIsolationUsingLeadingPionTag_, 
+    tauDiscrAgainstMuonTag_, tauDiscrAgainstElectronTag_,
+    tauDiscrByTaNCTag_,
+    tauDiscrByTaNCfrHalfPercentTag_, tauDiscrByTaNCfrOnePercentTag_,
+    tauDiscrByTaNCfrQuarterPercentTag_, tauDiscrByTaNCfrTenthPercentTag_;
+  //! HPS PF Tau Discriminators
+  edm::InputTag hpsTauDiscrByLooseElectronRejectionTag_, hpsTauDiscrByMediumElectronRejectionTag_, hpsTauDiscrByTightElectronRejectionTag_,
+    hpsTauDiscrByLooseMuonRejectionTag_, hpsTauDiscrByTightMuonRejectionTag_,
+    hpsTauDiscrByDecayModeFindingTag_,
+    hpsTauDiscrByVLooseIsolationTag_, hpsTauDiscrByLooseIsolationTag_,
+    hpsTauDiscrByMediumIsolationTag_, hpsTauDiscrByTightIsolationTag_;
+  //! HPS Tanc Tau Discriminators
+  edm::InputTag hpsTancTausDiscrByLeadingTrackFindingTag_, hpsTancTausDiscrByLeadingTrackPtCutTag_, hpsTancTausDiscrByLeadingPionPtCutTag_,
+    hpsTancTausDiscrByTancTag_, hpsTancTausDiscrByTancRawTag_,
+    hpsTancTausDiscrByTancVLooseTag_, hpsTancTausDiscrByTancLooseTag_, hpsTancTausDiscrByTancMediumTag_, hpsTancTausDiscrByTancTightTag_,
+    hpsTancTausDiscrByLooseElectronRejectionTag_, hpsTancTausDiscrByMediumElectronRejectionTag_, hpsTancTausDiscrByTightElectronRejectionTag_,
+    hpsTancTausDiscrByLooseMuonRejectionTag_, hpsTancTausDiscrByTightMuonRejectionTag_,
+    hpsTancTausDiscrByDecayModeSelectionTag_,
+    hpsTancTausDiscrByVLooseIsolationTag_, hpsTancTausDiscrByLooseIsolationTag_,
+    hpsTancTausDiscrByMediumIsolationTag_, hpsTancTausDiscrByTightIsolationTag_,
+    hpsTancTausDiscrByFlightPathTag_;
+
   //! Hcal noise summary object
   edm::InputTag hcalNoiseSummaryLabel_;
   //! ROOT file with the plain ROOT tree inside
