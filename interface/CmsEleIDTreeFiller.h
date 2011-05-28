@@ -52,7 +52,6 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *dr03HcalTowerSumEtFullCone, *dr04HcalTowerSumEtFullCone;
 
   vector<float> *eleLik, *pflowMVA;
-  vector<int> *eleIdCuts, *eleIdCutsHWW;
 
 public:
   void initialise();

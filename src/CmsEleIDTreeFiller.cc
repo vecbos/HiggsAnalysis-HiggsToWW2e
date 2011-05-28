@@ -71,8 +71,6 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->scBasedEcalSum04;
   delete privateData_->dr03HcalTowerSumEtFullCone;
   delete privateData_->dr04HcalTowerSumEtFullCone;
-  delete privateData_->eleIdCuts;
-  delete privateData_->eleIdCutsHWW;
   delete privateData_->eleLik;
   delete privateData_->pflowMVA;
 }
@@ -111,25 +109,9 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
     
-    eleIdResults_ = new eleIdContainer(17);
+    eleIdResults_ = new eleIdContainer(1);
 
     iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[0] );
-
-    iEvent.getByLabel( "eidVeryLoose", (*eleIdResults_)[1] );
-    iEvent.getByLabel( "eidLoose", (*eleIdResults_)[2] );
-    iEvent.getByLabel( "eidMedium", (*eleIdResults_)[3] );
-    iEvent.getByLabel( "eidTight", (*eleIdResults_)[4] );
-    iEvent.getByLabel( "eidSuperTight", (*eleIdResults_)[5] );
-    iEvent.getByLabel( "eidHyperTight1", (*eleIdResults_)[6] );
-
-    iEvent.getByLabel( "eidHWWVeryLoose", (*eleIdResults_)[7] );
-    iEvent.getByLabel( "eidHWWLoose", (*eleIdResults_)[8] );
-    iEvent.getByLabel( "eidHWWMedium", (*eleIdResults_)[9] );
-    iEvent.getByLabel( "eidHWWTight", (*eleIdResults_)[10] );
-    iEvent.getByLabel( "eidHWWSuperTight", (*eleIdResults_)[11] );
-    iEvent.getByLabel( "eidHWWHyperTight1", (*eleIdResults_)[12] );
-    iEvent.getByLabel( "eidHWWHyperTight2", (*eleIdResults_)[13] );
-    iEvent.getByLabel( "eidHWWHyperTight3", (*eleIdResults_)[14] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -204,47 +186,6 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   // results of standard electron ID sequences
   const eleIdMap & eleIdLikelihoodVal = *( (*eleIdResults_)[0] );
 
-  const eleIdMap & eleIdVeryLooseVal = *( (*eleIdResults_)[1] );
-  const eleIdMap & eleIdLooseVal = *( (*eleIdResults_)[2] );
-  const eleIdMap & eleIdMediumVal = *( (*eleIdResults_)[3] );
-  const eleIdMap & eleIdTightVal = *( (*eleIdResults_)[4] );
-  const eleIdMap & eleIdSuperTightVal = *( (*eleIdResults_)[5] );
-  const eleIdMap & eleIdHyperTight1Val = *( (*eleIdResults_)[6] );
-
-  const eleIdMap & eleIdHWWVeryLooseVal = *( (*eleIdResults_)[7] );
-  const eleIdMap & eleIdHWWLooseVal = *( (*eleIdResults_)[8] );
-  const eleIdMap & eleIdHWWMediumVal = *( (*eleIdResults_)[9] );
-  const eleIdMap & eleIdHWWTightVal = *( (*eleIdResults_)[10] );
-  const eleIdMap & eleIdHWWSuperTightVal = *( (*eleIdResults_)[11] );
-  const eleIdMap & eleIdHWWHyperTight1Val = *( (*eleIdResults_)[12] );
-  const eleIdMap & eleIdHWWHyperTight2Val = *( (*eleIdResults_)[13] );
-  const eleIdMap & eleIdHWWHyperTight3Val = *( (*eleIdResults_)[14] );
-
-  int packed_sel = -1;
-  int eleIdVeryLoose = eleIdVeryLooseVal[electronRef];
-  int eleIdLoose = eleIdLooseVal[electronRef];
-  int eleIdMedium = eleIdMediumVal[electronRef];
-  int eleIdTight = eleIdTightVal[electronRef];
-  int eleIdSuperTight = eleIdSuperTightVal[electronRef];
-  int eleIdHyperTight1 = eleIdHyperTight1Val[electronRef];
-
-  int packed_selHWW = -1;
-  int eleIdHWWVeryLoose = eleIdHWWVeryLooseVal[electronRef];
-  int eleIdHWWLoose = eleIdHWWLooseVal[electronRef];
-  int eleIdHWWMedium = eleIdHWWMediumVal[electronRef];
-  int eleIdHWWTight = eleIdHWWTightVal[electronRef];
-  int eleIdHWWSuperTight = eleIdHWWSuperTightVal[electronRef];
-  int eleIdHWWHyperTight1 = eleIdHWWHyperTight1Val[electronRef];
-  int eleIdHWWHyperTight2 = eleIdHWWHyperTight2Val[electronRef];
-  int eleIdHWWHyperTight3 = eleIdHWWHyperTight3Val[electronRef];
-
-  packed_sel = ( eleIdVeryLoose << 20 ) | ( eleIdLoose << 16 ) | ( eleIdMedium << 12 ) | ( eleIdTight << 8 ) |
-    ( eleIdSuperTight << 4 ) | eleIdHyperTight1;
-  packed_selHWW = ( eleIdHWWVeryLoose << 28 ) | ( eleIdHWWLoose << 24 ) | ( eleIdHWWMedium << 20 ) | ( eleIdHWWTight << 16 ) |
-    ( eleIdHWWSuperTight << 12 ) | ( eleIdHWWHyperTight1 << 8 ) | ( eleIdHWWHyperTight2 << 4) | eleIdHWWHyperTight3;
-
-  privateData_->eleIdCuts->push_back( packed_sel );
-  privateData_->eleIdCutsHWW->push_back( packed_selHWW );
   privateData_->eleLik->push_back( eleIdLikelihoodVal[electronRef] );  
   privateData_->pflowMVA->push_back( electronRef->mva() );
 
@@ -309,8 +250,6 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"scBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr03HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr03HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr04HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdCuts"+colSuffix).c_str(), *privateData_->eleIdCuts, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"eleIdCutsHWW"+colSuffix).c_str(), *privateData_->eleIdCutsHWW, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
 }
@@ -341,8 +280,6 @@ void CmsEleIDTreeFillerData::initialise() {
   scBasedEcalSum04         = new vector<float>;
   dr03HcalTowerSumEtFullCone = new vector<float>;
   dr04HcalTowerSumEtFullCone = new vector<float>;
-  eleIdCuts                = new vector<int>;
-  eleIdCutsHWW             = new vector<int>;
   eleLik                   = new vector<float>;
   pflowMVA                 = new vector<float>;
 }
@@ -370,8 +307,6 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   scBasedEcalSum04         ->clear();
   dr03HcalTowerSumEtFullCone -> clear();
   dr04HcalTowerSumEtFullCone -> clear();
-  eleIdCuts                ->clear();
-  eleIdCutsHWW             ->clear();
   eleLik                   ->clear();
   pflowMVA                 ->clear();
 }
