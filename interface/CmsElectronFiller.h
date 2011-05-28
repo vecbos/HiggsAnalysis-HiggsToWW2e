@@ -84,7 +84,7 @@ class CmsElectronFiller : public CmsCandidateFiller {
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
 
-  //! set the general tracks
+  //! set the general tracks (reduced collection)
   void setGeneralTracks( edm::InputTag generalTracks) { generalTracks_ = generalTracks; }
   //! set the superclusters for ECAL barrel
   void setEcalBarrelSuperClusters( edm::InputTag EcalBarrelSuperClusters) { EcalBarrelSuperClusters_ = EcalBarrelSuperClusters; }
@@ -144,7 +144,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
   edm::InputTag tracksProducer_;
   edm::InputTag calotowersProducer_;
 
-  edm::Handle< reco::TrackCollection > h_tracks;
+  edm::Handle< reco::TrackRefVector > h_tracks;
+  edm::Handle< reco::TrackCollection > h_tracksTot;
 
   int barrelSuperClustersSize;
 

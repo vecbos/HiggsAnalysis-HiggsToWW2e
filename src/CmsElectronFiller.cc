@@ -229,9 +229,13 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
-    // for conversions
+    // for track link
     try { iEvent.getByLabel(generalTracks_, h_tracks); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
+
+    // for conversions
+    try { iEvent.getByLabel("generalTracks", h_tracksTot); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: generalTracks"; }
 
     for(int index = 0; index < (int)collection->size(); index++) {
 
@@ -302,15 +306,21 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
 
     privateData_->gsfTrackIndex->push_back(trkRef.key());
 
+    int ctfTrackLink=-1;
     reco::TrackRef closeCtfTrack = electronRef->closestCtfTrackRef();
     if ( closeCtfTrack.isNonnull() ) {
-      privateData_->trackIndex->push_back(closeCtfTrack.key());
+      if(h_tracks.isValid()) {
+        for(int itrk=0; itrk<(int)h_tracks->size(); itrk++) {
+          reco::TrackRef iTrackRef = h_tracks->at(itrk);
+          if(closeCtfTrack.key() == iTrackRef.key()) ctfTrackLink = itrk;
+        }
+      }
+      privateData_->trackIndex->push_back(ctfTrackLink);
       privateData_->scPixCharge->push_back(electronRef->scPixCharge());
     } else {
       privateData_->trackIndex->push_back( -1 );
       privateData_->scPixCharge->push_back( -999. );
     }
-
 
     // for conversion rejection
     if( h_tracks.isValid() ) {
@@ -321,7 +331,7 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
       GlobalPoint origin(0.,0.,0.);
       ConversionFinder finder;
       ConversionInfo convInfo = finder.getConversionInfo(*electronRef,
-                                                         h_tracks,
+                                                         h_tracksTot,
                                                          (magField->inTesla(origin)).mag());
       
       privateData_->convDist->push_back(convInfo.dist());

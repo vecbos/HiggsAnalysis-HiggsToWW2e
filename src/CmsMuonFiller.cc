@@ -184,6 +184,10 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
     *(privateData_->ncand) = collection->size();
 
+    // for track link
+    try { iEvent.getByLabel(generalTracks_, h_tracks); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
+
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       // fill basic kinematics
@@ -227,7 +231,17 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
     TrackRef standAloneTrack = muon->standAloneMuon();
     TrackRef combinedTrack = muon->combinedMuon();
     
-    privateData_->trackIndex->push_back(track.key());
+    int ctfTrackLink=-1;
+    if ( track.isNonnull() ) {
+      if(h_tracks.isValid()) {
+        for(int itrk=0; itrk<(int)h_tracks->size(); itrk++) {
+          reco::TrackRef iTrackRef = h_tracks->at(itrk);
+          if(track.key() == iTrackRef.key()) ctfTrackLink = itrk;
+        }
+      }
+    }
+
+    privateData_->trackIndex->push_back(ctfTrackLink);
     privateData_->standAloneTrackIndex->push_back(standAloneTrack.key());
     privateData_->combinedTrackIndex->push_back(combinedTrack.key());
   }

@@ -75,6 +75,8 @@ class CmsMuonFiller : public CmsCandidateFiller {
   // Destructor
   virtual ~CmsMuonFiller();
 
+  //! set the general tracks (reduced collection)
+  void setGeneralTracks( edm::InputTag generalTracks) { generalTracks_ = generalTracks; }
   //! dump more  variables
   void saveMuonExtras(bool );
   //! dump tracking related variables
@@ -114,6 +116,8 @@ class CmsMuonFiller : public CmsCandidateFiller {
   CmsMuonFillerData *privateData_;
   edm::InputTag matchMap_;
 
+  edm::InputTag generalTracks_;
+
   CmsTree *cmstree;
 
   // Geometry
@@ -125,6 +129,7 @@ class CmsMuonFiller : public CmsCandidateFiller {
 
 
   CachedTrajectory cachedTrajectory_;
+  edm::Handle< reco::TrackRefVector > h_tracks;
   edm::ESHandle<MagneticField> bField;
   edm::ESHandle<CaloGeometry> theCaloGeometry_;
   edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry_;
