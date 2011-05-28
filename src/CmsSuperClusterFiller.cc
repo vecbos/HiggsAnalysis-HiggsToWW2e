@@ -184,7 +184,7 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       try { iEvent.getByType(theBeamSpot_); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get beam spot "; }
 
-      try { iEvent.getByLabel("offlinePrimaryVertices", hVtx_); }
+      try { iEvent.getByLabel("offlinePrimaryVerticesWithBS", hVtx_); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary vertex collection: offlinePrimaryVertices"; }
 
       try { iEvent.getByLabel(Calotowers_, calotowers_); }
