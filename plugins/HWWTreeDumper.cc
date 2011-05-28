@@ -57,6 +57,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsHcalNoiseFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
@@ -142,6 +143,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   pfTauCollection_         = iConfig.getParameter<edm::InputTag>("pfTauCollection");
   hpspfTauCollection_      = iConfig.getParameter<edm::InputTag>("hpspfTauCollection");
   hpsTancTausCollection_   = iConfig.getParameter<edm::InputTag>("hpsTancTausCollection");
+  PFCandidateCollection_   = iConfig.getParameter<edm::InputTag>("PFCandidateCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
   ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
@@ -196,6 +198,9 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpTriggerResults_  = iConfig.getUntrackedParameter<bool>("dumpTriggerResults");
   dumpHLTObject_       = iConfig.getUntrackedParameter<bool>("dumpHLTObjects");
   hltParms_            = iConfig.getUntrackedParameter<edm::ParameterSet>("HLTObjectsInfo");
+
+  // dump PFCandidates
+  dumpPFCandidates_  = iConfig.getUntrackedParameter<bool>("dumpPFCandidates");
 
   // PFTau Discriminators
   tauDiscrByLeadingTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("tauDiscrByLeadingTrackFindingTag");
@@ -600,6 +605,16 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 				     false);
     }
 
+  // PF candidates
+  if(dumpPFCandidates_) {
+    CmsPFCandidateFiller treeFill(tree_);
+    std::string prefix("");
+    std::string suffix("PFCand");
+    treeFill.saveCand(saveCand_);
+    treeFill.setGeneralTracks(trackCollection_);
+    treeFill.writeCollectionToTree(PFCandidateCollection_, iEvent, iSetup, prefix, suffix, false);
+  }
+
   // fill CaloTower block
   if(dumpCaloTowers_){
     CmsCaloTowerFiller treeFill(tree_, hbheLabel_, hoLabel_, hfLabel_, ecalLabels_, true);
@@ -706,7 +721,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   }
   
-
 
   // dump infos on MC production 
   if (dumpGenInfo_) {

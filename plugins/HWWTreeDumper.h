@@ -76,6 +76,8 @@ private:
   bool dumpMuons_;
   //! dump pftau block
   bool dumpPFTaus_, dumphpsPFTaus_, dumphpsTancTaus_;
+  //! dump PFCandidates
+  bool dumpPFCandidates_;
   //! dump reco / generated / PU corrected jets block
   bool dumpJets_, dumpGenJets_, dumpPUcorrPFJet_;
   //! dump reco / generated MET block
@@ -121,6 +123,8 @@ private:
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;
   //! taus
   edm::InputTag pfTauCollection_, hpspfTauCollection_, hpsTancTausCollection_;
+  //! PF candidates
+  edm::InputTag PFCandidateCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
   edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalPFClusterCollection_;
