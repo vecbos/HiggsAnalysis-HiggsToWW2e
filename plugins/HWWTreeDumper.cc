@@ -507,6 +507,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     CmsMuonFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("Muon");
+    treeFill.setGeneralTracks(trackCollection_);
     treeFill.saveCand(saveCand_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.setMatchMap(muonMatchMap_);
