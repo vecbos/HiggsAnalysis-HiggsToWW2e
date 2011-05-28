@@ -23,8 +23,8 @@ ak5PFJets.Rho_EtaMax=cms.double(4.5)
 ak5CaloJets.doAreaFastjet = True
 ak5CaloJets.Rho_EtaMax=cms.double(4.5)
 
-offsetCorrection = cms.Sequence(kt6PFJets * ak5PFJets)
-offsetCaloCorrection = cms.Sequence(kt6PFJets * ak5CaloJets)
+offsetCorrection = cms.Sequence(kt6PFJets)
+offsetCaloCorrection = cms.Sequence(kt6PFJets)
 
 ############## PF jets PF no PU
 # produce PFnoPU jets
