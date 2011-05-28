@@ -232,15 +232,16 @@ void CmsMuonFiller::writeTrkInfo(const Candidate *cand,
     TrackRef combinedTrack = muon->combinedMuon();
     
     int ctfTrackLink=-1;
-    if ( track.isNonnull() ) {
-      if(h_tracks.isValid()) {
-        for(int itrk=0; itrk<(int)h_tracks->size(); itrk++) {
-          reco::TrackRef iTrackRef = h_tracks->at(itrk);
-          if(track.key() == iTrackRef.key()) ctfTrackLink = itrk;
+    if ( track.isNonnull() && h_tracks.isValid() ) {
+      for(int itrk=0; itrk<(int)h_tracks->size(); itrk++) {
+        reco::TrackRef iTrackRef = h_tracks->at(itrk);
+        if(track.key() == iTrackRef.key()) {
+          ctfTrackLink = itrk;
+          break;
         }
       }
     }
-
+    
     privateData_->trackIndex->push_back(ctfTrackLink);
     privateData_->standAloneTrackIndex->push_back(standAloneTrack.key());
     privateData_->combinedTrackIndex->push_back(combinedTrack.key());

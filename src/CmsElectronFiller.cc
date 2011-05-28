@@ -308,11 +308,12 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
 
     int ctfTrackLink=-1;
     reco::TrackRef closeCtfTrack = electronRef->closestCtfTrackRef();
-    if ( closeCtfTrack.isNonnull() ) {
-      if(h_tracks.isValid()) {
-        for(int itrk=0; itrk<(int)h_tracks->size(); itrk++) {
-          reco::TrackRef iTrackRef = h_tracks->at(itrk);
-          if(closeCtfTrack.key() == iTrackRef.key()) ctfTrackLink = itrk;
+    if ( closeCtfTrack.isNonnull() && h_tracks.isValid() ) {
+      for(int itrk=0; itrk<(int)h_tracks->size(); itrk++) {
+        reco::TrackRef iTrackRef = h_tracks->at(itrk);
+        if(closeCtfTrack.key() == iTrackRef.key()) {
+          ctfTrackLink = itrk;
+          break;
         }
       }
       privateData_->trackIndex->push_back(ctfTrackLink);
