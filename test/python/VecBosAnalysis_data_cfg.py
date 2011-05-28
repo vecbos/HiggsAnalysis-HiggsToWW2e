@@ -20,6 +20,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.dinamicAnnealingVertexing_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 process.load("WWAnalysis.Tools.chargedMetProducer_cfi")
 process.chargedMetProducer.collectionTag = "particleFlow"
+process.chargedMetProducer.vertexTag = "offlinePrimaryVerticesWithBS"
 
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 # NOT YET IN GLOBALTAG
@@ -49,6 +50,9 @@ process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
 #process.metMuonJESCorAK5.inputUncorMetLabel = "met"
 #process.metMuonJESCorAK5.useTypeII = True
 #process.metMuonJESCorAK5.hasMuonsCorr = False
+
+# --- track sequences ---
+process.load("HiggsAnalysis.HiggsToWW2e.leptonLinkedTracks_cfi")
 
 # --- electron sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
@@ -111,12 +115,13 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root')
                             )
 
-process.p = cms.Path ( process.mergedSuperClusters * process.mergedBasicClusters *
-                       process.offlinePrimaryVertices *
-                       process.chargedMetProducer *
-                       process.ourJetSequenceData *
-                       process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence *
-                       process.eIdSequence * process.FastjetForIsolation
+process.p = cms.Path ( process.leptonLinkedTracks
+                       * process.mergedSuperClusters 
+                       * process.chargedMetProducer 
+                       * process.ourJetSequenceData 
+                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence
+                       * process.eIdSequence
+                       * process.FastjetForIsolation
                        )
 
 process.q = cms.EndPath ( process.treeDumper )
