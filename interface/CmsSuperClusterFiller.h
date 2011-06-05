@@ -61,9 +61,6 @@ struct CmsSuperClusterFillerData {
   vector<int> *trackIndex, *gsfTrackIndex;
   vector<float> *trackDeltaR, *trackDeltaPhi, *trackDeltaEta, *gsfTrackDeltaR, *gsfTrackDeltaPhi, *gsfTrackDeltaEta;
   vector<float> *pxVtxPropagatedNegCharge, *pyVtxPropagatedNegCharge, *pzVtxPropagatedNegCharge, *pxVtxPropagatedPosCharge, *pyVtxPropagatedPosCharge, *pzVtxPropagatedPosCharge;
-  vector<float> *scBasedEcalSum03, *scBasedEcalSum04;
-  vector<float> *ecalRecHitSumEtConeDR03, *hcalTowerSumEtConeDR03, *trkSumPtSolidConeDR03,
-    *ecalRecHitSumEtConeDR04, *hcalTowerSumEtConeDR04, *trkSumPtSolidConeDR04;
   int *nSC;
 
 public:
@@ -92,8 +89,7 @@ public:
   virtual void writeCollectionToTree(edm::InputTag collectionTag,
 				     const edm::Event&, const edm::EventSetup&,
 				     const std::string &columnPrefix, const std::string &columnSuffix,
-				     bool dumpData=false,
-                                     edm::InputTag PhotonTag=edm::InputTag("",""));
+				     bool dumpData=false);
 
   //! set the track collection (to match the superclusters as hand-made electrons)
   void setTracks( edm::InputTag Tracks ) { Tracks_ = Tracks; }
@@ -136,13 +132,9 @@ protected:
                               const edm::Event&, const edm::EventSetup&,
                               const reco::GsfTrackCollection *theTracks, int trackType);
 
-  virtual void writePhotonInfo(const reco::SuperCluster *cand, 
-                               const edm::View<reco::Candidate> *photonCollection);
-
   virtual void treeSCInfo(const std::string colPrefix, const std::string colSuffix);
   virtual void treeTrackInfo(const std::string colPrefix, const std::string colSuffix);
   virtual void treeSCVtxPropagationInfo(const std::string colPrefix, const std::string colSuffix);
-  virtual void treePhotonInfo(const std::string colPrefix, const std::string colSuffix);
   
   // Friends
 
