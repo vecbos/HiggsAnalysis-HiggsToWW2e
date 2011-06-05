@@ -50,15 +50,7 @@
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrack.h"
 
-#include "RecoVertex/KinematicFitPrimitives/interface/ParticleMass.h"
-#include "RecoVertex/KinematicFitPrimitives/interface/MultiTrackKinematicConstraint.h"
-#include "RecoVertex/KinematicFitPrimitives/interface/KinematicParticleFactoryFromTransientTrack.h"
-#include "RecoVertex/KinematicFit/interface/KinematicConstrainedVertexFitter.h"
-#include "RecoVertex/KinematicFit/interface/TwoTrackMassKinematicConstraint.h"
-#include "RecoVertex/KinematicFit/interface/KinematicParticleVertexFitter.h"
-#include "RecoVertex/KinematicFit/interface/KinematicParticleFitter.h"
-#include "RecoVertex/KinematicFit/interface/MassKinematicConstraint.h"
-#include "RecoVertex/KinematicFit/interface/ColinearityKinematicConstraint.h"
+#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsEleIDTreeFiller.h"
@@ -152,6 +144,7 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->convDcot;
   delete privateData_->convRadius;
   delete privateData_->convTrackIndex;
+  delete privateData_->hasMatchedConversion;
 
   delete privateData_->ncand;
 
@@ -233,9 +226,15 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(generalTracks_, h_tracks); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
 
-    // for conversions
+    // for conversions with partner track
     try { iEvent.getByLabel("generalTracks", h_tracksTot); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: generalTracks"; }
+
+    // for conversions with full vertex fit
+    iEvent.getByLabel("offlineBeamSpot", bsHandle);
+
+    try { iEvent.getByLabel(conversionsProducer_, hConversions); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get conversions collection " << conversionsProducer_; }
 
     for(int index = 0; index < (int)collection->size(); index++) {
 
@@ -350,6 +349,9 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
       privateData_->convTrackIndex->push_back(-1);
     }
 
+    bool matchesConv = ConversionTools::hasMatchedConversion(*electronRef,hConversions,bsHandle->position());
+    privateData_->hasMatchedConversion->push_back(matchesConv);
+
   } else {
     privateData_->gsfTrackIndex->push_back( -1 );
     privateData_->trackIndex->push_back( -1 );
@@ -357,6 +359,7 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
     privateData_->convDcot->push_back(999);
     privateData_->convRadius->push_back(999);
     privateData_->convTrackIndex->push_back(-1);
+    privateData_->hasMatchedConversion->push_back(false);
   }
     
 }
@@ -374,6 +377,7 @@ void CmsElectronFiller::treeTrkInfo(const std::string &colPrefix, const std::str
   cmstree->column((colPrefix+"convRadius"+colSuffix).c_str(),  *privateData_->convRadius, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"convTrackIndex"+colSuffix).c_str(),  *privateData_->convTrackIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scPixCharge"+colSuffix).c_str(),  *privateData_->scPixCharge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hasMatchedConversion"+colSuffix).c_str(),  *privateData_->hasMatchedConversion, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -473,6 +477,7 @@ void CmsElectronFillerData::initialise() {
   convDcot = new vector<float>;
   convRadius = new vector<float>;
   convTrackIndex = new vector<int>;
+  hasMatchedConversion = new vector<bool>;
 
   scPixCharge = new vector<int>;
 
@@ -494,6 +499,7 @@ void CmsElectronFillerData::clearTrkVectors() {
   convDcot->clear();
   convRadius->clear();
   convTrackIndex->clear();
+  hasMatchedConversion->clear();
   
   scPixCharge->clear();
 

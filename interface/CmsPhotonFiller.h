@@ -39,6 +39,7 @@ struct CmsPhotonFillerData : public CmsCandidateFillerData {
     *dr04TkSumPt, *dr04HollowTkSumPt, *dr04EcalRecHitSumEt, *dr04HcalTowerSumEt;
   vector<float> *chargedHadronIso, *neutralHadronIso, *photonIso;
   vector<int> *hasPixelSeed;
+  vector<bool> *hasMatchedConversion;
 
   void initialise();
   void clearTrkVectors();
@@ -67,6 +68,8 @@ class CmsPhotonFiller : public CmsCandidateFiller {
   void setEcalBarrelSuperClusters( edm::InputTag EcalBarrelSuperClusters) { EcalBarrelSuperClusters_ = EcalBarrelSuperClusters; }
   //! set the superclusters for ECAL endcap
   void setEcalEndcapSuperClusters( edm::InputTag EcalEndcapSuperClusters) { EcalEndcapSuperClusters_ = EcalEndcapSuperClusters; }
+  //! set conversions collection
+  void setConversionsProdcer(  edm::InputTag conversionsProducer ) { conversionsProducer_ = conversionsProducer; }
 
  private:
   
@@ -85,6 +88,10 @@ class CmsPhotonFiller : public CmsCandidateFiller {
   edm::InputTag matchMap_;
 
   edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;
+  edm::InputTag conversionsProducer_;
+
+  edm::Handle<reco::ConversionCollection> hConversions;
+  edm::Handle<reco::BeamSpot> bsHandle;
 
   int barrelSuperClustersSize;
 

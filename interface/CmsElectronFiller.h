@@ -43,6 +43,7 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
 
   vector<float> *convDist, *convDcot, *convRadius;
   vector<int> *convTrackIndex;
+  vector<bool> *hasMatchedConversion;
 
 public:
   void initialise();
@@ -102,7 +103,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void setTracksProducer( edm::InputTag tracksProducer ) { tracksProducer_ = tracksProducer; }
   //! set the calotower producer for calorimetric isolation
   void setCalotowersProducer( edm::InputTag calotowersProducer ) { calotowersProducer_ = calotowersProducer; }
-
+  //! set conversions collection
+  void setConversionsProdcer(  edm::InputTag conversionsProducer ) { conversionsProducer_ = conversionsProducer; }
 
  private:
   
@@ -143,9 +145,13 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
   edm::InputTag tracksProducer_;
   edm::InputTag calotowersProducer_;
+  edm::InputTag conversionsProducer_;
 
   edm::Handle< reco::TrackRefVector > h_tracks;
   edm::Handle< reco::TrackCollection > h_tracksTot;
+
+  edm::Handle<reco::ConversionCollection> hConversions;
+  edm::Handle<reco::BeamSpot> bsHandle;
 
   int barrelSuperClustersSize;
 

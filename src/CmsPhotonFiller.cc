@@ -20,6 +20,8 @@
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/DetId/interface/DetId.h"
 
+#include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPhotonFiller.h"
 
 #include <TTree.h>
@@ -84,6 +86,7 @@ CmsPhotonFiller::~CmsPhotonFiller() {
   delete privateData_->neutralHadronIso;
   delete privateData_->photonIso;
   delete privateData_->hasPixelSeed;
+  delete privateData_->hasMatchedConversion;
 
   delete privateData_->ncand;
 
@@ -135,6 +138,12 @@ void CmsPhotonFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsPhotonFiller") << "Can't get ECAL endcap supercluster Collection" << EcalEndcapSuperClusters_; }
     
     barrelSuperClustersSize = EcalBarrelSuperClusters->size();
+
+    // for conversions with full vertex fit
+    iEvent.getByLabel("offlineBeamSpot", bsHandle);
+
+    try { iEvent.getByLabel(conversionsProducer_, hConversions); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPhotonFiller") << "Can't get conversions collection " << conversionsProducer_; }
 
     for(int index = 0; index < (int)collection->size(); index++) {
 
@@ -206,7 +215,7 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
 
     privateData_->fiducialFlags->push_back(packed_sel);
 
-    int packed_reco; // the following available only in > 420
+    //    int packed_reco; // the following available only in > 420
     //    int isStdPho = ( photonRef->isStandardPhoton() ) ? 1 : 0;
     //    int isPFPho = ( photonRef->isPFlowPhoton() ) ? 1 : 0;
     //    packed_reco = ( isStdPho << 1 ) | isPFPho;
@@ -245,6 +254,10 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     privateData_->photonIso->push_back(photonRef->photonIso());
     privateData_->hasPixelSeed->push_back(int(photonRef->hasPixelSeed()));
 
+    // conversion rejection
+    bool matchesConv = ConversionTools::hasMatchedConversion(*sclusRef,hConversions,bsHandle->position());
+    privateData_->hasMatchedConversion->push_back(matchesConv);
+
   } else {
     privateData_->fiducialFlags->push_back(-1);
     privateData_->recoFlags->push_back(-1);
@@ -264,6 +277,7 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     privateData_->neutralHadronIso->push_back(-999.);
     privateData_->photonIso->push_back(-999.);
     privateData_->hasPixelSeed->push_back(0);
+    privateData_->hasMatchedConversion->push_back(false);
 
   }
 
@@ -289,6 +303,7 @@ void CmsPhotonFiller::treeEcalInfo(const std::string &colPrefix, const std::stri
   cmstree->column((colPrefix+"neutralHadronIso"+colSuffix).c_str(), *privateData_->neutralHadronIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"photonIso"+colSuffix).c_str(), *privateData_->photonIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hasPixelSeed"+colSuffix).c_str(), *privateData_->hasPixelSeed, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hasMatchedConversion"+colSuffix).c_str(),  *privateData_->hasMatchedConversion, nCandString.c_str(), 0, "Reco");
 
 }
 
@@ -318,6 +333,7 @@ void CmsPhotonFillerData::initialise() {
   neutralHadronIso         = new vector<float>;
   photonIso                = new vector<float>;
   hasPixelSeed             = new vector<int>;
+  hasMatchedConversion     = new vector<bool>;
 
 }
 
@@ -342,7 +358,8 @@ void CmsPhotonFillerData::clearTrkVectors() {
   
   chargedHadronIso         ->clear();
   neutralHadronIso         ->clear();
-  photonIso         ->clear();
-  hasPixelSeed         ->clear();
+  photonIso                ->clear();
+  hasPixelSeed             ->clear();
+  hasMatchedConversion     ->clear();
 
 }
