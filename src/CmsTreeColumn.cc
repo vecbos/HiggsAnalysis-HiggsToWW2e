@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //---------------------------------------------------------------------------------
 //
-// $Id: CmsTreeColumn.cc,v 1.1 2007/07/20 15:48:13 govoni Exp $
+// $Id: CmsTreeColumn.cc,v 1.2 2010/08/16 16:03:12 emanuele Exp $
 //
 // Description:
 //    Class CmsTreeColumn
@@ -30,7 +30,7 @@ BoolCmsTreeColumn::BoolCmsTreeColumn( const char* l, const bool & v, const bool 
   pointer= new char;
   *(char*)pointer= v;
   std::string leafs( l ) ;
-  leafs+= "/b";
+  leafs+= "/O";
   brp= tp->Branch( label.c_str(), pointer, leafs.c_str(), 8000 );
 
 }
@@ -49,7 +49,7 @@ BoolArrCmsTreeColumn::BoolArrCmsTreeColumn( const char* l,
   char buf[33];
   sprintf( buf, "%i", nmax );
   leafs+= buf;
-  leafs+= "]/b";
+  leafs+= "]/O";
   brp= tp->Branch( label.c_str(), &bp[0], leafs.c_str(), 8000 );
 
 }
@@ -80,7 +80,7 @@ BoolDynArrCmsTreeColumn::BoolDynArrCmsTreeColumn( const char* l,
   std::string leafs( label.c_str() );
   leafs+= "[";
   leafs+= indexp->getLabel();
-  leafs+= "]/b";
+  leafs+= "]/O";
   brp= tp->Branch( label.c_str(), &bp[0], leafs.c_str(), 8000 );
 
 }
