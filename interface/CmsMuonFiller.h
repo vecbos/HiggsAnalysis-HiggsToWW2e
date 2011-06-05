@@ -24,6 +24,7 @@
 #include "DataFormats/MuonReco/interface/Muon.h"
 #include "DataFormats/MuonReco/interface/MuonFwd.h"
 #include "DataFormats/MuonReco/interface/MuonSegmentMatch.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
@@ -46,6 +47,8 @@ struct CmsMuonFillerData : public CmsCandidateFillerData {
   vector<float> *sumPt03, *emEt03, *hadEt03, *hoEt03, *nTrk03, *nJets03;
   vector<float> *sumPt05, *emEt05, *hadEt05, *hoEt05, *nTrk05, *nJets05;
   vector<int> *muonId, *type, *numberOfMatches;
+  vector<float> *pfChargedIso, *pfNeutralIso, *pfPhotonIso, *pfGenericChargedIso, *pfGenericNeutralIso, *pfGenericPhotonIso,
+    *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso;
 
   vector<float> *EcalExpDepo, *HcalExpDepo, *HoExpDepo, *emS9, *hadS9, *hoS9, *CaloComp;
 
@@ -100,7 +103,7 @@ class CmsMuonFiller : public CmsCandidateFiller {
   void writeTrkInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, const reco::Muon *muon);
   void treeTrkInfo(const std::string &colPrefix, const std::string &colSuffix);
 
-  void writeMuonInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, const reco::Muon *muon);
+  void writeMuonInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, const reco::Muon *muon, const reco::MuonRef muonRef);
   void treeMuonInfo(const std::string &colPrefix, const std::string &colSuffix);
 
   bool saveMuonExtras_;
@@ -133,6 +136,10 @@ class CmsMuonFiller : public CmsCandidateFiller {
   edm::ESHandle<MagneticField> bField;
   edm::ESHandle<CaloGeometry> theCaloGeometry_;
   edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry_;
+
+  typedef edm::ValueMap<double> isoFromDepositsMap;
+  typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
+  isoContainer *eIsoFromDepsValueMap_;
 
 };
 

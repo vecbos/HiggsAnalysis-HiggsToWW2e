@@ -73,6 +73,15 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->dr04HcalTowerSumEtFullCone;
   delete privateData_->eleLik;
   delete privateData_->pflowMVA;
+  delete privateData_->pfChargedIso;
+  delete privateData_->pfNeutralIso;
+  delete privateData_->pfPhotonIso;
+  delete privateData_->pfGenericChargedIso;
+  delete privateData_->pfGenericNeutralIso;
+  delete privateData_->pfGenericPhotonIso;
+  delete privateData_->pfGenericNoOverChargedIso;
+  delete privateData_->pfGenericNoOverNeutralIso;
+  delete privateData_->pfGenericNoOverPhotonIso;
 }
 
 
@@ -113,6 +122,18 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[0] );
 
+    //read the PF isolation with iso deposits
+    eIsoFromDepsValueMap_ = new isoContainer(9);
+    iEvent.getByLabel( "electronPfChargedDeps", (*eIsoFromDepsValueMap_)[0] ); 
+    iEvent.getByLabel( "electronPfNeutralDeps", (*eIsoFromDepsValueMap_)[1] ); 
+    iEvent.getByLabel( "electronPfPhotonDeps", (*eIsoFromDepsValueMap_)[2] ); 
+    iEvent.getByLabel( "electronPfGenericChargedDeps", (*eIsoFromDepsValueMap_)[3] ); 
+    iEvent.getByLabel( "electronPfGenericNeutralDeps", (*eIsoFromDepsValueMap_)[4] ); 
+    iEvent.getByLabel( "electronPfGenericPhotonDeps", (*eIsoFromDepsValueMap_)[5] ); 
+    iEvent.getByLabel( "electronPfGenericNoOverChargedDeps", (*eIsoFromDepsValueMap_)[6] ); 
+    iEvent.getByLabel( "electronPfGenericNoOverNeutralDeps", (*eIsoFromDepsValueMap_)[7] ); 
+    iEvent.getByLabel( "electronPfGenericNoOverPhotonDeps", (*eIsoFromDepsValueMap_)[8] ); 
+
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
     catch (  cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracks product" << tracksProducer_; }
@@ -140,6 +161,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     }
 
     delete eleIdResults_;
+    delete eIsoFromDepsValueMap_;
 
   }
 
@@ -221,6 +243,26 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   privateData_->dr03HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt03+hcalDepth2TowerSumEt03);
   privateData_->dr04HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt04+hcalDepth2TowerSumEt04);
 
+  // PF isolation
+  const isoFromDepositsMap & electronsPfChargedIsoVal = *( (*eIsoFromDepsValueMap_)[0] );
+  const isoFromDepositsMap & electronsPfNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[1] );
+  const isoFromDepositsMap & electronsPfPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[2] );
+  const isoFromDepositsMap & electronsPfGenericChargedIsoVal = *( (*eIsoFromDepsValueMap_)[3] );
+  const isoFromDepositsMap & electronsPfGenericNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[4] );
+  const isoFromDepositsMap & electronsPfGenericPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[5] );
+  const isoFromDepositsMap & electronsPfGenericNoOverChargedIsoVal = *( (*eIsoFromDepsValueMap_)[6] );
+  const isoFromDepositsMap & electronsPfGenericNoOverNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[7] );
+  const isoFromDepositsMap & electronsPfGenericNoOverPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[8] );
+
+  privateData_->pfChargedIso->push_back( electronsPfChargedIsoVal[electronRef] );
+  privateData_->pfNeutralIso->push_back( electronsPfNeutralIsoVal[electronRef] );
+  privateData_->pfPhotonIso->push_back( electronsPfPhotonIsoVal[electronRef] );
+  privateData_->pfGenericChargedIso->push_back( electronsPfGenericChargedIsoVal[electronRef] );
+  privateData_->pfGenericNeutralIso->push_back( electronsPfGenericNeutralIsoVal[electronRef] );
+  privateData_->pfGenericPhotonIso->push_back( electronsPfGenericPhotonIsoVal[electronRef] );
+  privateData_->pfGenericNoOverChargedIso->push_back( electronsPfGenericNoOverChargedIsoVal[electronRef] );
+  privateData_->pfGenericNoOverNeutralIso->push_back( electronsPfGenericNoOverNeutralIsoVal[electronRef] );
+  privateData_->pfGenericNoOverPhotonIso->push_back( electronsPfGenericNoOverPhotonIsoVal[electronRef] );
 
 }
 
@@ -252,6 +294,16 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"dr04HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfChargedIso"+colSuffix).c_str(), *privateData_->pfChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfNeutralIso"+colSuffix).c_str(), *privateData_->pfNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfPhotonIso"+colSuffix).c_str(), *privateData_->pfPhotonIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericChargedIso"+colSuffix).c_str(), *privateData_->pfGenericChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericPhotonIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNoOverChargedIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNoOverNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNoOverPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericNoOverPhotonIso, nCandString.c_str(), 0, "Reco");
+  
 }
 
 
@@ -282,6 +334,15 @@ void CmsEleIDTreeFillerData::initialise() {
   dr04HcalTowerSumEtFullCone = new vector<float>;
   eleLik                   = new vector<float>;
   pflowMVA                 = new vector<float>;
+  pfChargedIso             = new vector<float>;
+  pfNeutralIso             = new vector<float>;
+  pfPhotonIso              = new vector<float>;
+  pfGenericChargedIso      = new vector<float>;
+  pfGenericNeutralIso      = new vector<float>;
+  pfGenericPhotonIso       = new vector<float>;
+  pfGenericNoOverChargedIso  = new vector<float>;
+  pfGenericNoOverNeutralIso  = new vector<float>;
+  pfGenericNoOverPhotonIso   = new vector<float>;
 }
 
 void CmsEleIDTreeFillerData::clearTrkVectors() {
@@ -309,6 +370,15 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   dr04HcalTowerSumEtFullCone -> clear();
   eleLik                   ->clear();
   pflowMVA                 ->clear();
+  pfChargedIso             ->clear();
+  pfNeutralIso             ->clear();
+  pfPhotonIso              ->clear();
+  pfGenericChargedIso      ->clear();
+  pfGenericNeutralIso      ->clear();
+  pfGenericPhotonIso       ->clear();
+  pfGenericNoOverChargedIso  ->clear();
+  pfGenericNoOverNeutralIso  ->clear();
+  pfGenericNoOverPhotonIso   ->clear();
 }
 
 int CmsEleIDTreeFiller::stdEleIdClassify(const GsfElectron* electron) {

@@ -136,6 +136,16 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->hoS9;
   delete privateData_->CaloComp;
 
+  delete privateData_->pfChargedIso;
+  delete privateData_->pfNeutralIso;
+  delete privateData_->pfPhotonIso;
+  delete privateData_->pfGenericChargedIso;
+  delete privateData_->pfGenericNeutralIso;
+  delete privateData_->pfGenericPhotonIso;
+  delete privateData_->pfGenericNoOverChargedIso;
+  delete privateData_->pfGenericNoOverNeutralIso;
+  delete privateData_->pfGenericNoOverPhotonIso;
+
   delete privateData_->ncand;
 
 }
@@ -188,6 +198,19 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(generalTracks_, h_tracks); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
 
+    //read the PF isolation with iso deposits
+    eIsoFromDepsValueMap_ = new isoContainer(9);
+    iEvent.getByLabel( "muonPfChargedDeps", (*eIsoFromDepsValueMap_)[0] ); 
+    iEvent.getByLabel( "muonPfNeutralDeps", (*eIsoFromDepsValueMap_)[1] ); 
+    iEvent.getByLabel( "muonPfPhotonDeps", (*eIsoFromDepsValueMap_)[2] ); 
+    iEvent.getByLabel( "muonPfGenericChargedDeps", (*eIsoFromDepsValueMap_)[3] ); 
+    iEvent.getByLabel( "muonPfGenericNeutralDeps", (*eIsoFromDepsValueMap_)[4] ); 
+    iEvent.getByLabel( "muonPfGenericPhotonDeps", (*eIsoFromDepsValueMap_)[5] ); 
+    iEvent.getByLabel( "muonPfGenericNoOverChargedDeps", (*eIsoFromDepsValueMap_)[6] ); 
+    iEvent.getByLabel( "muonPfGenericNoOverNeutralDeps", (*eIsoFromDepsValueMap_)[7] ); 
+    iEvent.getByLabel( "muonPfGenericNoOverPhotonDeps", (*eIsoFromDepsValueMap_)[8] ); 
+
+    int imu=0;
     edm::View<reco::Candidate>::const_iterator cand;
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       // fill basic kinematics
@@ -195,11 +218,13 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
       // fill muon extra information
       const reco::Muon *muon = dynamic_cast< const reco::Muon *> ( &(*cand));
-      if(saveMuonExtras_) writeMuonInfo(&(*cand),iEvent,iSetup,&(*muon));
+      const reco::MuonRef muonRef = collection->refAt(imu).castTo<reco::MuonRef>();
+
+      if(saveMuonExtras_) writeMuonInfo(&(*cand),iEvent,iSetup,&(*muon),muonRef);
 
       // fill tracks extra informations (only if the muon has a tracker track)
       if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,&(*muon));
-
+      imu++;
     }
   }
   else {
@@ -260,7 +285,7 @@ void CmsMuonFiller::treeTrkInfo(const std::string &colPrefix, const std::string 
 }
 
 void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEvent, 
-				  const edm::EventSetup& iSetup, const Muon *muon) {
+				  const edm::EventSetup& iSetup, const Muon *muon, const reco::MuonRef muonRef) {
   if(muon) {
 
     // now put muon ID codified:
@@ -309,6 +334,27 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->nTrk05->push_back(Iso05.nTracks);
     privateData_->nJets05->push_back(Iso05.nJets);
 
+    // PF isolation
+    const isoFromDepositsMap & muonsPfChargedIsoVal = *( (*eIsoFromDepsValueMap_)[0] );
+    const isoFromDepositsMap & muonsPfNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[1] );
+    const isoFromDepositsMap & muonsPfPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[2] );
+    const isoFromDepositsMap & muonsPfGenericChargedIsoVal = *( (*eIsoFromDepsValueMap_)[3] );
+    const isoFromDepositsMap & muonsPfGenericNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[4] );
+    const isoFromDepositsMap & muonsPfGenericPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[5] );
+    const isoFromDepositsMap & muonsPfGenericNoOverChargedIsoVal = *( (*eIsoFromDepsValueMap_)[6] );
+    const isoFromDepositsMap & muonsPfGenericNoOverNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[7] );
+    const isoFromDepositsMap & muonsPfGenericNoOverPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[8] );
+    
+    privateData_->pfChargedIso->push_back( muonsPfChargedIsoVal[muonRef] );
+    privateData_->pfNeutralIso->push_back( muonsPfNeutralIsoVal[muonRef] );
+    privateData_->pfPhotonIso->push_back( muonsPfPhotonIsoVal[muonRef] );
+    privateData_->pfGenericChargedIso->push_back( muonsPfGenericChargedIsoVal[muonRef] );
+    privateData_->pfGenericNeutralIso->push_back( muonsPfGenericNeutralIsoVal[muonRef] );
+    privateData_->pfGenericPhotonIso->push_back( muonsPfGenericPhotonIsoVal[muonRef] );
+    privateData_->pfGenericNoOverChargedIso->push_back( muonsPfGenericNoOverChargedIsoVal[muonRef] );
+    privateData_->pfGenericNoOverNeutralIso->push_back( muonsPfGenericNoOverNeutralIsoVal[muonRef] );
+    privateData_->pfGenericNoOverPhotonIso->push_back( muonsPfGenericNoOverPhotonIsoVal[muonRef] );
+    
     // Expected deposits in CALO
     privateData_->EcalExpDepo->push_back(muon->calEnergy().em);
     privateData_->HcalExpDepo->push_back(muon->calEnergy().had);
@@ -337,6 +383,16 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->hoEt05->push_back(-1.);
     privateData_->nTrk05->push_back(-1.);
     privateData_->nJets05->push_back(-1.);
+
+    privateData_->pfChargedIso->push_back( -1 );
+    privateData_->pfNeutralIso->push_back( -1 );
+    privateData_->pfPhotonIso->push_back( -1 );
+    privateData_->pfGenericChargedIso->push_back( -1 );
+    privateData_->pfGenericNeutralIso->push_back( -1 );
+    privateData_->pfGenericPhotonIso->push_back( -1 );
+    privateData_->pfGenericNoOverChargedIso->push_back( -1 );
+    privateData_->pfGenericNoOverNeutralIso->push_back( -1 );
+    privateData_->pfGenericNoOverPhotonIso->push_back( -1 );
 
     // Expected deposits in CALO
     privateData_->EcalExpDepo->push_back(-1.);
@@ -374,6 +430,16 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"nTrk05"+colSuffix).c_str(), *privateData_->nTrk05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nJets05"+colSuffix).c_str(), *privateData_->nJets05, nCandString.c_str(), 0, "Reco");
 
+  cmstree->column((colPrefix+"pfChargedIso"+colSuffix).c_str(), *privateData_->pfChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfNeutralIso"+colSuffix).c_str(), *privateData_->pfNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfPhotonIso"+colSuffix).c_str(), *privateData_->pfPhotonIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericChargedIso"+colSuffix).c_str(), *privateData_->pfGenericChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericPhotonIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNoOverChargedIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNoOverNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfGenericNoOverPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericNoOverPhotonIso, nCandString.c_str(), 0, "Reco");
+
   //  Expected deposits in CALO
   cmstree->column((colPrefix+"EcalExpDepo"+colSuffix).c_str(), *privateData_->EcalExpDepo, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"HcalExpDepo"+colSuffix).c_str(), *privateData_->HcalExpDepo, nCandString.c_str(), 0, "Reco");
@@ -410,6 +476,16 @@ void CmsMuonFillerData::initialise() {
   nTrk05 = new vector<float>;
   nJets05 = new vector<float>;
 
+  pfChargedIso             = new vector<float>;
+  pfNeutralIso             = new vector<float>;
+  pfPhotonIso              = new vector<float>;
+  pfGenericChargedIso      = new vector<float>;
+  pfGenericNeutralIso      = new vector<float>;
+  pfGenericPhotonIso       = new vector<float>;
+  pfGenericNoOverChargedIso  = new vector<float>;
+  pfGenericNoOverNeutralIso  = new vector<float>;
+  pfGenericNoOverPhotonIso   = new vector<float>;
+
   EcalExpDepo = new vector<float>;
   HcalExpDepo = new vector<float>;
   HoExpDepo = new vector<float>;
@@ -445,6 +521,16 @@ void CmsMuonFillerData::clearTrkVectors() {
   hoEt05->clear();
   nTrk05->clear();
   nJets05->clear();
+
+  pfChargedIso             ->clear();
+  pfNeutralIso             ->clear();
+  pfPhotonIso              ->clear();
+  pfGenericChargedIso      ->clear();
+  pfGenericNeutralIso      ->clear();
+  pfGenericPhotonIso       ->clear();
+  pfGenericNoOverChargedIso  ->clear();
+  pfGenericNoOverNeutralIso  ->clear();
+  pfGenericNoOverPhotonIso   ->clear();
 
   EcalExpDepo->clear();
   HcalExpDepo->clear();
