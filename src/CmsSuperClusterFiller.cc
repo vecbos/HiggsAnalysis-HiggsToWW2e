@@ -60,9 +60,6 @@ CmsSuperClusterFiller::CmsSuperClusterFiller(CmsTree *cmsTree, int maxSC):  priv
   trkIndexName_ = new std::string("n");
   maxSC_=maxSC;
   privateData_->initialiseCandidate();
-  closestProb_ = DetId(0);
-  severityClosestProb_ = -1;
-  doTrackProp_ = false;
 
 }
 
@@ -101,27 +98,9 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->e1x5;
   delete privateData_->e2x5Max;
   delete privateData_->e4SwissCross;
-  delete privateData_->trackIndex;
-  delete privateData_->trackDeltaR;
-  delete privateData_->trackDeltaPhi;
-  delete privateData_->trackDeltaEta;
-  delete privateData_->gsfTrackIndex;
-  delete privateData_->gsfTrackDeltaR;
-  delete privateData_->gsfTrackDeltaPhi;
-  delete privateData_->gsfTrackDeltaEta;
-  delete privateData_->pxVtxPropagatedNegCharge;
-  delete privateData_->pyVtxPropagatedNegCharge;
-  delete privateData_->pzVtxPropagatedNegCharge;
-  delete privateData_->pxVtxPropagatedPosCharge;
-  delete privateData_->pyVtxPropagatedPosCharge;
-  delete privateData_->pzVtxPropagatedPosCharge;
   delete privateData_->time;
   delete privateData_->chi2;
   delete privateData_->recoFlag;
-  delete privateData_->channelStatus;
-  delete privateData_->sevClosProbl;
-  delete privateData_->idClosProbl;
-  delete privateData_->fracClosProbl;
 
 }
 
@@ -158,19 +137,6 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       
       *(privateData_->nSC) = collection->size();
   
-      // to match track-SC
-      try { iEvent.getByLabel(Tracks_, tracks_); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get track collection" << Tracks_; }
-
-      try { iEvent.getByLabel(GsfTracks_, gsfTracks_); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get GSF track collection" << GsfTracks_; }
-
-      try { iEvent.getByType(theBeamSpot_); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get beam spot "; }
-
-      try { iEvent.getByLabel("offlinePrimaryVerticesWithBS", hVtx_); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary vertex collection: offlinePrimaryVertices"; }
-
       try { iEvent.getByLabel(Calotowers_, calotowers_); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary calotowers collection" << Calotowers_; }
 
@@ -189,15 +155,6 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       for(cand=collection->begin(); cand!=collection->end(); cand++) {
         // fill basic kinematics
         writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
-        // fill track-match variables
-        if ( doTrackProp_ ) {
-          // fill CTF track - SC match
-          writeTrackInfo(&(*cand),iEvent,iSetup,&(*tracks_),track);
-          // fill GSF track - SC match
-          writeTrackInfo(&(*cand),iEvent,iSetup,&(*gsfTracks_),gsftrack);
-          // fill trajectory propagation at vertex
-          writeSCVtxPropagationInfo(&(*cand),iEvent,iSetup);
-        }
       }
     }
   else {
@@ -214,10 +171,6 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
   treeSCInfo(columnPrefix,columnSuffix);
-  if ( doTrackProp_ ) {
-    treeTrackInfo(columnPrefix,columnSuffix);
-    treeSCVtxPropagationInfo(columnPrefix,columnSuffix);
-  }
 
   if(dumpData) cmstree->dumpData();
 
@@ -325,39 +278,6 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
         privateData_->seedY->push_back(id.iy());        
       }
 
-      // channel status
-      edm::ESHandle<EcalChannelStatus> pChannelStatus;
-      iSetup.get<EcalChannelStatusRcd>().get(pChannelStatus);
-      const EcalChannelStatus *ch_status = pChannelStatus.product();
-
-      EcalChannelStatusMap::const_iterator chit = pChannelStatus->find( seedCrystalId );
-      EcalChannelStatusCode chStatusCode = 1;
-      if ( chit != pChannelStatus->end() ) {
-	chStatusCode = *chit;
-      } else {
-	edm::LogError("EcalRecHitProducerError") << "No channel status found for xtal "
-						 << "! something wrong with EcalChannelStatus in your DB? ";
-      }
-      int cStatusFlag = (int)(chStatusCode.getStatusCode() & 0x001F);
-      privateData_->channelStatus->push_back(cStatusFlag);
-
-      if( fabs(seedEta) < 1.479 ) {
-        float frac = fractionAroundClosestProblematic( iSetup, *cand, *rechits, *ch_status, topology);
-        privateData_->fracClosProbl->push_back(frac);
-        if( closestProb_.null() ) {
-          privateData_->idClosProbl->push_back(-1);
-          privateData_->sevClosProbl->push_back(-1);
-        } else {
-          privateData_->idClosProbl->push_back(closestProb_.rawId());
-          privateData_->sevClosProbl->push_back(severityClosestProb_);
-        }
-      } else {
-        privateData_->fracClosProbl->push_back(-1);
-        privateData_->idClosProbl->push_back(-1);
-        privateData_->idClosProbl->push_back(-1);
-        privateData_->sevClosProbl->push_back(-1);
-      }
-
   } else {
     privateData_->e3x3->push_back(-1.);
     privateData_->e5x5->push_back(-1.);
@@ -376,12 +296,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->time->push_back(-999.);
     privateData_->chi2->push_back(-999.);
     privateData_->recoFlag->push_back(-1);
-    privateData_->channelStatus->push_back(-1);
     privateData_->seedEnergy->push_back(-1.);
-    privateData_->fracClosProbl->push_back(-1);
-    privateData_->idClosProbl->push_back(-1);
-    privateData_->idClosProbl->push_back(-1);
-    privateData_->sevClosProbl->push_back(-1);
   }
 
   // calculate H/E
@@ -400,226 +315,6 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
   delete towerIso2;
 
 }
-
-void CmsSuperClusterFiller::writeTrackInfo(const reco::SuperCluster *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup,
-                                           const reco::TrackCollection *theTracks, int trackType) {
-
-  math::XYZPoint xyzVertexPos;
-  GlobalPoint gpVertexPos;
-  GlobalPoint origin;
-
-  if ( hVtx_->size()>0 ){ 
-    float theMaxPt  = -999.;
-    VertexCollection::const_iterator thisVertex;
-    for(thisVertex = hVtx_->begin(); thisVertex != hVtx_->end(); ++thisVertex){      
-      float SumPt = 0.0;
-      if((*thisVertex).tracksSize() > 0){
-        std::vector<TrackBaseRef >::const_iterator thisTrack;
-        for( thisTrack=(*thisVertex).tracks_begin(); thisTrack!=(*thisVertex).tracks_end(); thisTrack++){
-          // if((**thisTrack).charge()==-1 || (**thisTrack).charge()==1) SumPt += (**thisTrack).pt();
-          SumPt += (**thisTrack).pt();
-        }}
-      if (SumPt>theMaxPt){ 
-        theMaxPt = SumPt; 
-        gpVertexPos  = GlobalPoint((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
-        xyzVertexPos = math::XYZVector((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
-      }}
-  }
-  else{
-    gpVertexPos  = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
-    xyzVertexPos = math::XYZVector(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
-  }  
-  origin = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
-
-  // magnetic field
-  edm::ESHandle<MagneticField> theMagField;
-  iSetup.get<IdealMagneticFieldRecord>().get(theMagField);
-  
-  float bestDeltaR = 999.;
-  float bestDeltaPhi = 999.;
-  float bestDeltaEta = 999.;
-  int bestTrack = -1;
-
-  int trackIndex=0;
-  TrackCollection::const_iterator trIter;      
-  for (trIter=theTracks->begin(); trIter!=theTracks->end(); trIter++) {
-    
-    int trackQ          = trIter->charge();
-    float trackPt       = trIter->p()*sin(trIter->theta());
-    
-    if (trackPt > 1) {
-
-      // preso da HLTrigger/Egamma/src/HLTElectronDetaDphiFilter.cc
-      const math::XYZVector trackMom = trIter->momentum();
-      math::XYZPoint SCcorrPosition(cand->x()-gpVertexPos.x(), cand->y()-gpVertexPos.y(), cand->z()-gpVertexPos.z());
-      float etaScCorr = SCcorrPosition.eta();                                                            // eta sc va corretto per il beam spot / vertex
-      float deltaEta  = fabs(etaScCorr - trIter->eta());                                           // eta traccia al vtx non va corretto x beam spot (gia' incluso nel fit)
-      // eta traccia non va propagato al calorimetro tanto non curva 
-      ECALPositionCalculator posCalc;
-      float phiTrCorr = posCalc.ecalPhi(&(*theMagField), trackMom, xyzVertexPos, trackQ);          // phi traccia al vtx non va corretto x beam spot (gia' incluso nel fit)
-      // ma phi traccia va propagato al calo e qui serve il constraint del vtx 
-      float deltaPhi  = fabs(cand->phi() - phiTrCorr);
-      if(deltaPhi>6.283185308) deltaPhi -= 6.283185308;
-      if(deltaPhi>3.141592654) deltaPhi = 6.283185308-deltaPhi;
-      float deltaR = sqrt (deltaEta*deltaEta + deltaPhi*deltaPhi);
-
-      if (deltaR < bestDeltaR){
-        bestDeltaPhi    = deltaPhi;
-        bestDeltaEta    = deltaEta;
-        bestDeltaR      = deltaR;
-        bestTrack = trackIndex;
-      }
-    }
-    trackIndex++;
-  }
-
-  if ( trackType == track ) {
-    privateData_->trackIndex->push_back(bestTrack);
-    privateData_->trackDeltaR->push_back(bestDeltaR);
-    privateData_->trackDeltaPhi->push_back(bestDeltaPhi);
-    privateData_->trackDeltaEta->push_back(bestDeltaEta);
-  } else if ( trackType == gsftrack ) {
-    privateData_->gsfTrackIndex->push_back(bestTrack);
-    privateData_->gsfTrackDeltaR->push_back(bestDeltaR);
-    privateData_->gsfTrackDeltaPhi->push_back(bestDeltaPhi);
-    privateData_->gsfTrackDeltaEta->push_back(bestDeltaEta);
-  }
-
-}
-
-void CmsSuperClusterFiller::writeTrackInfo(const reco::SuperCluster *cand, const edm::Event& iEvent, const edm::EventSetup& iSetup,
-                                           const reco::GsfTrackCollection *theTracks, int trackType) {
-
-  math::XYZPoint xyzVertexPos;
-  GlobalPoint gpVertexPos;
-  GlobalPoint origin;
-
-  if ( hVtx_->size()>0 ){ 
-    float theMaxPt  = -999.;
-    VertexCollection::const_iterator thisVertex;
-    for(thisVertex = hVtx_->begin(); thisVertex != hVtx_->end(); ++thisVertex){      
-      float SumPt = 0.0;
-      if((*thisVertex).tracksSize() > 0){
-        std::vector<TrackBaseRef >::const_iterator thisTrack;
-        for( thisTrack=(*thisVertex).tracks_begin(); thisTrack!=(*thisVertex).tracks_end(); thisTrack++){
-          // if((**thisTrack).charge()==-1 || (**thisTrack).charge()==1) SumPt += (**thisTrack).pt();
-          SumPt += (**thisTrack).pt();
-        }}
-      if (SumPt>theMaxPt){ 
-        theMaxPt = SumPt; 
-        gpVertexPos  = GlobalPoint((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
-        xyzVertexPos = math::XYZVector((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
-      }}
-  }
-  else{
-    gpVertexPos  = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
-    xyzVertexPos = math::XYZVector(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
-  }  
-  origin = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
-
-  // magnetic field
-  edm::ESHandle<MagneticField> theMagField;
-  iSetup.get<IdealMagneticFieldRecord>().get(theMagField);
-  
-  float bestDeltaR = 999.;
-  float bestDeltaPhi = 999.;
-  float bestDeltaEta = 999.;
-  int bestTrack = -1;
-
-  int trackIndex=0;
-  GsfTrackCollection::const_iterator trIter;      
-  for (trIter=theTracks->begin(); trIter!=theTracks->end(); trIter++) {
-    
-    int trackQ          = trIter->charge();
-    float trackPt       = trIter->p()*sin(trIter->theta());
-    
-    if (trackPt > 1) {
-
-      // preso da HLTrigger/Egamma/src/HLTElectronDetaDphiFilter.cc
-      const math::XYZVector trackMom = trIter->momentum();
-      math::XYZPoint SCcorrPosition(cand->x()-gpVertexPos.x(), cand->y()-gpVertexPos.y(), cand->z()-gpVertexPos.z());
-      float etaScCorr = SCcorrPosition.eta();                                                            // eta sc va corretto per il beam spot / vertex
-      float deltaEta  = fabs(etaScCorr - trIter->eta());                                           // eta traccia al vtx non va corretto x beam spot (gia' incluso nel fit)
-      // eta traccia non va propagato al calorimetro tanto non curva 
-      ECALPositionCalculator posCalc;
-      float phiTrCorr = posCalc.ecalPhi(&(*theMagField), trackMom, xyzVertexPos, trackQ);          // phi traccia al vtx non va corretto x beam spot (gia' incluso nel fit)
-      // ma phi traccia va propagato al calo e qui serve il constraint del vtx 
-      float deltaPhi  = fabs(cand->phi() - phiTrCorr);
-      if(deltaPhi>6.283185308) deltaPhi -= 6.283185308;
-      if(deltaPhi>3.141592654) deltaPhi = 6.283185308-deltaPhi;
-      float deltaR = sqrt (deltaEta*deltaEta + deltaPhi*deltaPhi);
-
-      if (deltaR < bestDeltaR){
-        bestDeltaPhi    = deltaPhi;
-        bestDeltaEta    = deltaEta;
-        bestDeltaR      = deltaR;
-        bestTrack = trackIndex;
-      }
-    }
-    trackIndex++;
-  }
-
-  if ( trackType == track ) {
-    privateData_->trackIndex->push_back(bestTrack);
-    privateData_->trackDeltaR->push_back(bestDeltaR);
-    privateData_->trackDeltaPhi->push_back(bestDeltaPhi);
-    privateData_->trackDeltaEta->push_back(bestDeltaEta);
-  } else if ( trackType == gsftrack ) {
-    privateData_->gsfTrackIndex->push_back(bestTrack);
-    privateData_->gsfTrackDeltaR->push_back(bestDeltaR);
-    privateData_->gsfTrackDeltaPhi->push_back(bestDeltaPhi);
-    privateData_->gsfTrackDeltaEta->push_back(bestDeltaEta);
-  }
-
-}
-
-void CmsSuperClusterFiller::writeSCVtxPropagationInfo(const reco::SuperCluster *cand,
-                                                      const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-
-  GlobalPoint vertexPos;
-
-  // choose the Highest pT primary vertex
-  if ( hVtx_->size()>0 ){ 
-    float theMaxPt  = -999.;
-    VertexCollection::const_iterator thisVertex;
-    for(thisVertex = hVtx_->begin(); thisVertex != hVtx_->end(); ++thisVertex){      
-      float SumPt = 0.0;
-      if((*thisVertex).tracksSize() > 0){
-        std::vector<TrackBaseRef >::const_iterator thisTrack;
-        for( thisTrack=(*thisVertex).tracks_begin(); thisTrack!=(*thisVertex).tracks_end(); thisTrack++){
-          SumPt += (**thisTrack).pt();
-        }}
-      if (SumPt>theMaxPt){ 
-        theMaxPt = SumPt; 
-        vertexPos  = GlobalPoint((*thisVertex).x(), (*thisVertex).y(), (*thisVertex).z()); 
-      }
-    }
-  } else {
-    vertexPos  = GlobalPoint(theBeamSpot_->position().x(),theBeamSpot_->position().y(),theBeamSpot_->position().z());
-  }
-
-  // magnetic field
-  edm::ESHandle<MagneticField> theMagField;
-  iSetup.get<IdealMagneticFieldRecord>().get(theMagField);
-
-  // propagate the SC to the primary vertex
-  const GlobalPoint clusterPos(cand->position().x(), cand->position().y(), cand->position().z());    
-
-  float clusterEnergy = cand->energy();
-  // electron hypothesis
-  FreeTrajectoryState ftsElectron = myFTS(&(*theMagField), clusterPos, vertexPos, clusterEnergy, 1);    
-  // positron hypothesis
-  FreeTrajectoryState ftsPositron = myFTS(&(*theMagField), clusterPos, vertexPos, clusterEnergy, -1);    
-  
-  privateData_->pxVtxPropagatedNegCharge->push_back(ftsElectron.momentum().x());
-  privateData_->pyVtxPropagatedNegCharge->push_back(ftsElectron.momentum().y());
-  privateData_->pzVtxPropagatedNegCharge->push_back(ftsElectron.momentum().z());
-  privateData_->pxVtxPropagatedPosCharge->push_back(ftsPositron.momentum().x());
-  privateData_->pyVtxPropagatedPosCharge->push_back(ftsPositron.momentum().y());
-  privateData_->pzVtxPropagatedPosCharge->push_back(ftsPositron.momentum().z());
-
-}
-
 
 void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::string colSuffix) 
 {
@@ -650,144 +345,12 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"alpha"+colSuffix).c_str(), *privateData_->alpha, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hOverE"+colSuffix).c_str(), *privateData_->hOverE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlag"+colSuffix).c_str(), *privateData_->recoFlag, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"channelStatus"+colSuffix).c_str(), *privateData_->channelStatus, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedX"+colSuffix).c_str(), *privateData_->seedX, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedY"+colSuffix).c_str(), *privateData_->seedY, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"fracClosProbl"+colSuffix).c_str(), *privateData_->fracClosProbl, nCandString.c_str(), 0, "Reco");
 }
-
-
-void CmsSuperClusterFiller::treeTrackInfo(const std::string colPrefix, const std::string colSuffix)
-{
-  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
-  cmstree->column((colPrefix+"trackIndex"+colSuffix).c_str(), *privateData_->trackIndex, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDeltaR"+colSuffix).c_str(), *privateData_->trackDeltaR, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDeltaPhi"+colSuffix).c_str(), *privateData_->trackDeltaPhi, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackDeltaEta"+colSuffix).c_str(), *privateData_->trackDeltaEta, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"gsfTrackIndex"+colSuffix).c_str(), *privateData_->gsfTrackIndex, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"gsfTrackDeltaR"+colSuffix).c_str(), *privateData_->gsfTrackDeltaR, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"gsfTrackDeltaPhi"+colSuffix).c_str(), *privateData_->gsfTrackDeltaPhi, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"gsfTrackDeltaEta"+colSuffix).c_str(), *privateData_->gsfTrackDeltaEta, nCandString.c_str(), 0, "Reco");
-}
-
-void CmsSuperClusterFiller::treeSCVtxPropagationInfo(const std::string colPrefix, const std::string colSuffix) 
-{
-  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
-  cmstree->column((colPrefix+"pxVtxPropagatedNegCharge"+colSuffix).c_str(), *privateData_->pxVtxPropagatedNegCharge, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pyVtxPropagatedNegCharge"+colSuffix).c_str(), *privateData_->pyVtxPropagatedNegCharge, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pzVtxPropagatedNegCharge"+colSuffix).c_str(), *privateData_->pzVtxPropagatedNegCharge, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pxVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pxVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pyVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pyVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pzVtxPropagatedPosCharge"+colSuffix).c_str(), *privateData_->pzVtxPropagatedPosCharge, nCandString.c_str(), 0, "Reco");
-}
-
-// copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
-float CmsSuperClusterFiller::fractionAroundClosestProblematic( const edm::EventSetup& iSetup, const reco::CaloCluster & cluster,
-                                                               const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus, const CaloTopology* topology )
-{ 
-  DetId closestProb = closestProblematic(iSetup, cluster , recHits, chStatus, topology).first;
-  //  std::cout << "%%%%%%%%%%% Closest prob is " << EBDetId(closestProb) << std::endl;
-  if (closestProb.null())
-    return 0.;
-
-  std::vector<DetId> neighbours = topology->getWindow(closestProb,3,3);
-  std::vector<DetId>::const_iterator itn;
-
-  std::vector< std::pair<DetId, float> > hitsAndFracs = cluster.hitsAndFractions();
-  std::vector< std::pair<DetId, float> >::const_iterator it;
-
-  float fraction = 0.;
-
-  for ( itn = neighbours.begin(); itn != neighbours.end(); ++itn )
-    { 
-      //      std::cout << "Checking detId " << EBDetId((*itn)) << std::endl;
-      for ( it = hitsAndFracs.begin(); it != hitsAndFracs.end(); ++it )
-        { 
-          DetId id = (*it).first;
-          if ( id != (*itn) )
-            continue;
-          //      std::cout << "Is in cluster detId " << EBDetId(id) << std::endl;
-          EcalRecHitCollection::const_iterator jrh = recHits.find( id );
-          if ( jrh == recHits.end() )
-            { 
-              edm::LogError("EcalClusterSeverityLevelAlgo") << "The cluster DetId " << id.rawId() << " is not in the recHit collection!!";
-              return -1;
-            }
-
-          fraction += (*jrh).energy() * (*it).second  / cluster.energy();
-        }
-    }
-  //  std::cout << "%%%%%%%%%%% Fraction is " << fraction << std::endl;
-  return fraction;
-}
-
-std::pair <DetId,int> CmsSuperClusterFiller::closestProblematic(const edm::EventSetup& iSetup, const reco::CaloCluster & cluster, 
-                                                                const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus , 
-                                                                const CaloTopology* topology )
-{
-  DetId seed=EcalClusterTools::getMaximum(cluster,&recHits).first;
-  if ( (seed.det() != DetId::Ecal) || 
-       (EcalSubdetector(seed.subdetId()) != EcalBarrel) )
-    {
-      //method not supported if not in Barrel
-      edm::LogError("EcalClusterSeverityLevelAlgo") << "The cluster seed is not in the BARREL";
-      return std::make_pair<DetId,int>(DetId(0),-1);
-    }
-
-  int minDist=9999; DetId closestProb(0);   
-  int severityClosestProb=-1;
-  //Get a window of DetId around the seed crystal
-  std::vector<DetId> neighbours = topology->getWindow(seed,51,11);
-
-  for ( std::vector<DetId>::const_iterator it = neighbours.begin(); it != neighbours.end(); ++it ) 
-    {
-      EcalRecHitCollection::const_iterator jrh = recHits.find(*it);
-      if ( jrh == recHits.end() ) 
-        continue;
-      //Now checking rh flag
-      edm::ESHandle<EcalSeverityLevelAlgo> sevlv;
-      iSetup.get<EcalSeverityLevelAlgoRcd>().get(sevlv);
-
-      uint32_t sev = sevlv->severityLevel( jrh->id(), recHits );
-      if (sev == EcalSeverityLevelAlgo::kGood)
-        continue;
-      //      std::cout << "[closestProblematic] Found a problematic channel " << EBDetId(*it) << " " << flag << std::endl;
-      //Find the closest DetId in eta,phi space (distance defined by deta^2 + dphi^2)
-      int deta=distanceEta(EBDetId(seed),EBDetId(*it));
-      int dphi=distancePhi(EBDetId(seed),EBDetId(*it));
-      if (sqrt(deta*deta + dphi*dphi) < minDist) {
-        closestProb = *it;
-        severityClosestProb = sev;
-      }
-    }
-  
-  closestProb_ = closestProb;
-  severityClosestProb_ = severityClosestProb;
-  
-  return std::make_pair<DetId,int>(closestProb,severityClosestProb);
-}
-
-int CmsSuperClusterFiller::distanceEta(const EBDetId& a,const EBDetId& b)
-{
-  if (a.ieta() * b.ieta() > 0)
-    return abs(a.ieta()-b.ieta());
-  else
-    return abs(a.ieta()-b.ieta())-1;
-}
-
-int CmsSuperClusterFiller::distancePhi(const EBDetId& a,const EBDetId& b)
-{
-  if (abs(a.iphi() -b.iphi()) > 180)
-    return abs(a.iphi() - b.iphi()) - 180;
-  else
-    return abs(a.iphi()-b.iphi());
-}
-
 
 
 void CmsSuperClusterFillerData::initialiseCandidate() 
@@ -817,30 +380,12 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   sMaj = new vector<float>;
   sMin = new vector<float>;
   alpha = new vector<float>;
-  trackIndex = new vector<int>;
-  trackDeltaR = new vector<float>;
-  trackDeltaPhi = new vector<float>;
-  trackDeltaEta = new vector<float>;
-  gsfTrackIndex = new vector<int>;
-  gsfTrackDeltaR = new vector<float>;
-  gsfTrackDeltaPhi = new vector<float>;
-  gsfTrackDeltaEta = new vector<float>;
-  pxVtxPropagatedNegCharge = new vector<float>;
-  pyVtxPropagatedNegCharge = new vector<float>;
-  pzVtxPropagatedNegCharge = new vector<float>;
-  pxVtxPropagatedPosCharge = new vector<float>;
-  pyVtxPropagatedPosCharge = new vector<float>;
-  pzVtxPropagatedPosCharge = new vector<float>;
   recoFlag = new vector<int>;
-  channelStatus = new vector<int>;
   time = new vector<float>;
   chi2 = new vector<float>;
   seedEnergy = new vector<float>;
   seedX = new vector<float>;
   seedY = new vector<float>;
-  idClosProbl = new vector<int>;
-  sevClosProbl = new vector<int>;
-  fracClosProbl = new vector<float>;
   nSC =  new int;
 }
 
@@ -871,28 +416,10 @@ void CmsSuperClusterFillerData::clear()
   sMaj->clear();
   sMin->clear();
   alpha->clear();
-  trackIndex->clear();
-  trackDeltaR->clear();
-  trackDeltaPhi->clear();
-  trackDeltaEta->clear();
-  gsfTrackIndex->clear();
-  gsfTrackDeltaR->clear();
-  gsfTrackDeltaPhi->clear();
-  gsfTrackDeltaEta->clear();
-  pxVtxPropagatedNegCharge->clear();
-  pyVtxPropagatedNegCharge->clear();
-  pzVtxPropagatedNegCharge->clear();
-  pxVtxPropagatedPosCharge->clear();
-  pyVtxPropagatedPosCharge->clear();
-  pzVtxPropagatedPosCharge->clear();
   recoFlag->clear();
-  channelStatus->clear();
   time->clear();
   chi2->clear();
   seedEnergy->clear();
   seedX->clear();
   seedY->clear();
-  idClosProbl->clear();
-  sevClosProbl->clear();
-  fracClosProbl->clear();
 }
