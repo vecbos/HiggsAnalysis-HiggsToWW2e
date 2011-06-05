@@ -152,6 +152,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
+  conversions_             = iConfig.getParameter<edm::InputTag>("conversionCollection");
   trackCollection_         = iConfig.getParameter<edm::InputTag>("trackCollection");
   refittedForDeDxTrackCollection_ = iConfig.getParameter<edm::InputTag>("refittedForDeDxTrackCollection");
   gsfTrackCollection_      = iConfig.getParameter<edm::InputTag>("gsfTrackCollection");
@@ -348,6 +349,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
+    // for full vertex fit conversion veto
+    treeFill.setConversionsProdcer(conversions_);
 
     treeFill.writeCollectionToTree(electronCollection_, iEvent, iSetup, prefix, suffix, false);
     if(doMCEleMatch_) {
@@ -383,6 +386,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveCand(saveCand_);
     treeFill.setEcalBarrelSuperClusters(ecalBarrelSCCollection_);
     treeFill.setEcalEndcapSuperClusters(ecalEndcapSCCollection_);
+    // for full vertex fit conversion veto
+    treeFill.setConversionsProdcer(conversions_);
     treeFill.writeCollectionToTree(photonCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 
@@ -394,20 +399,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       std::string suffix("SC");
       treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
-      treeFill.setTracks(trackCollection_);
-      treeFill.setGsfTracks(gsfTrackCollection_);
       treeFill.setCalotowers(calotowersForIsolationProducer_);
-      treeFill.doTrackBwdPropagation(false);
       treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, suffix, false);
 
       CmsSuperClusterFiller treeFillPF(tree_, 1000);
       suffix = "PFSC";
       treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
-      treeFillPF.setTracks(trackCollection_);
-      treeFillPF.setGsfTracks(gsfTrackCollection_);
       treeFillPF.setCalotowers(calotowersForIsolationProducer_);
-      treeFillPF.doTrackBwdPropagation(false);
       treeFillPF.writeCollectionToTree(ecalPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
 
   }
@@ -679,8 +678,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     caloJetFiller.saveJetBTag(saveJetBTag_);
     caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_);
 
-
-//     // particle flow jets
+    // particle flow jets
 //     if ( dumpParticleFlowObjects_ ) {  
 //       CmsPFJetFiller pfJetFiller(tree_, true);
 //       suffix = "AK5PFJet";
