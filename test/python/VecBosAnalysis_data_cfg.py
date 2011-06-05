@@ -30,6 +30,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 #process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
 #process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
 #process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
+#process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+#process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
+#process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
 process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
 process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
 process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
@@ -114,7 +117,7 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters 
                        * process.chargedMetProducer
                        * process.pfIsolationAllSequence
-                       * process.ourJetSequenceData 
+                       * process.ourJetSequenceDataReduced
                        * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
