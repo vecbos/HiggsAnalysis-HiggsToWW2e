@@ -28,7 +28,6 @@ offsetCaloCorrection = cms.Sequence(kt6PFJets)
 
 ############## PF jets PF no PU
 # produce PFnoPU jets
-from CommonTools.ParticleFlow.pfNoPileUp_cff import *
 from RecoJets.JetProducers.ak5PFJets_cfi import *
 ak5PFJetsNoPU = ak5PFJets.clone( src = 'pfNoPileUp' )
 
@@ -38,7 +37,7 @@ kt6PFJetsNoPu = kt4PFJets.clone( src = 'pfNoPileUp', rParam = 0.6, doRhoFastjet 
 kt6PFJetsNoPu.Rho_EtaMax = cms.double(4.5)
 
 # uncorrected jet sequence
-FastjetForPFNoPU = cms.Sequence( pfPileUp * pfNoPileUp * kt6PFJetsNoPu * ak5PFJetsNoPU )
+FastjetForPFNoPU = cms.Sequence( kt6PFJetsNoPu * ak5PFJetsNoPU )
 
 # correct the PFnoPU jets
 ak5PFJetsNoPUL1FastL2L3 = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3'] )
