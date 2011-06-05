@@ -30,18 +30,12 @@ process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 #process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
 #process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
 #process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
-#process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
-#process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
-#process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
 process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
 process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
 process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
 process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3'
-process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
-process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -55,10 +49,10 @@ process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
 process.load("HiggsAnalysis.HiggsToWW2e.leptonLinkedTracks_cfi")
 
 # --- electron sequences ---
-process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
-process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
-process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
+
+# --- pf isolation sequence ---
+process.load("HiggsAnalysis.HiggsToWW2e.leptonPFIsoSequence_cff")
 
 # --- calotowers sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
@@ -88,6 +82,7 @@ process.treeDumper.dumpBCs = False
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
+process.treeDumper.dumpPFCandidates = False
 process.treeDumper.dumpTree = True
 if (runOnAOD == 1) :
     process.treeDumper.saveFatTrk = False
@@ -117,9 +112,10 @@ process.source = cms.Source("PoolSource",
 
 process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters 
-                       * process.chargedMetProducer 
+                       * process.chargedMetProducer
+                       * process.pfIsolationAllSequence
                        * process.ourJetSequenceData 
-                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence
+                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
                        )

@@ -31,9 +31,6 @@ process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
 process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3'
-process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
-process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -47,19 +44,16 @@ process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3'
 process.load("HiggsAnalysis.HiggsToWW2e.leptonLinkedTracks_cfi")
 
 # --- electron sequences ---
-process.load("HiggsAnalysis.HiggsToWW2e.ambiguityResolvedElectrons_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
+
+# --- pf isolation sequence ---
+process.load("HiggsAnalysis.HiggsToWW2e.leptonPFIsoSequence_cff")
 
 # --- calotowers sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
 # --- ECAL clusters merging in a unique collection ---
-process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
-
-# --- to recover the ak5 GenJets that are not re-recoed in 33X samples ---
-process.load('RecoJets.Configuration.GenJetParticles_cff')
-process.load("RecoJets.Configuration.RecoGenJets_cff")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
@@ -81,6 +75,7 @@ process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
 process.treeDumper.dumpParticleFlowObjects = True
+process.treeDumper.dumpPFCandidates = False
 process.treeDumper.dumpTree = True
 if (runOnAOD == 1) :
     process.treeDumper.saveFatTrk = False
@@ -112,8 +107,9 @@ process.source = cms.Source("PoolSource",
 process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters
                        * process.chargedMetProducer
-                       * process.ourJetSequenceMC
-                       * process.newPFPUcorrJetBtaggingSequence * process.newPFJetNoPUBtaggingSequence
+                       * process.pfIsolationAllSequence
+                       * process.ourJetSequenceMCReduced
+                       * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation )
 
