@@ -1,5 +1,5 @@
 #!/bin/bash -f
-# usage createGoodList.sh castordir outputdir
+# usage createGoodList.sh outputdir castordir
 
 crabdir=$1
 castordir=$2
