@@ -19,6 +19,7 @@
 #include "DataFormats/EgammaReco/interface/BasicCluster.h"
 #include "DataFormats/EgammaReco/interface/SuperCluster.h"
 #include "DataFormats/DetId/interface/DetId.h"
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 
 #include "RecoEgamma/EgammaTools/interface/ConversionTools.h"
 
