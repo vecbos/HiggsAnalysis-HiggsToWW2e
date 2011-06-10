@@ -20,8 +20,8 @@ kt6PFJets.doRhoFastjet = True
 ak5PFJets.doAreaFastjet = True
 ak5CaloJets.doAreaFastjet = True
 
-offsetCorrection = cms.Sequence(kt6PFJets)
-offsetCaloCorrection = cms.Sequence(kt6PFJets)
+offsetCorrection = cms.Sequence(kt6PFJets * ak5PFJets)
+offsetCaloCorrection = cms.Sequence(kt6PFJets * ak5CaloJets)
 
 ############## PF jets PF no PU
 # produce PFnoPU jets
