@@ -20,7 +20,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.dinamicAnnealingVertexing_cff")
 #process.load("HiggsAnalysis.HiggsToWW2e.btagJPTJetsProducerSequence_cff")
 process.load("WWAnalysis.Tools.chargedMetProducer_cfi")
 process.chargedMetProducer.collectionTag = "particleFlow"
-process.chargedMetProducer.vertexTag = "offlinePrimaryVerticesWithBS"
+process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 # NOT YET IN GLOBALTAG
