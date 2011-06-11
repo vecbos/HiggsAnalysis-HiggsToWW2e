@@ -114,6 +114,7 @@ process.source = cms.Source("PoolSource",
                             )
 
 process.p = cms.Path ( process.leptonLinkedTracks
+                       * process.vertexingSequence
                        * process.mergedSuperClusters 
                        * process.chargedMetProducer
                        * process.pfIsolationAllSequence

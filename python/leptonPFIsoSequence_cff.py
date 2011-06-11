@@ -253,6 +253,15 @@ electronPfGenericNoOverPhotonDeps.deposits[-1].deltaR = 0.4
 electronPfGenericNoOverPhotonDeps.deposits[-1].vetos  = [ 'RectangularEtaPhiVeto(-0.025,0.025,-0.5,0.5)' ]
 electronPfGenericNoOverPhotonDeps.deposits[-1].vetos += [ 'goodMuons:0.01','goodElectrons:0.01' ]
 
+# this is the simplest PF isolation (combined)
+import WWAnalysis.Tools.electronPFIsoMapProd_cfi
+electronCombinedPFIsoMapProducer = WWAnalysis.Tools.electronPFIsoMapProd_cfi.electronPFIsoMapProd.clone()
+electronCombinedPFIsoMapProducer.vtxLabel = 'offlinePrimaryVertices' # if the event has the first vertex bad, will be discarded offline.
+
+import WWAnalysis.Tools.muonPFIsoMapProd_cfi
+muonCombinedPFIsoMapProducer = WWAnalysis.Tools.muonPFIsoMapProd_cfi.muonPFIsoMapProd.clone()
+muonCombinedPFIsoMapProducer.vtxLabel = 'offlinePrimaryVertices' # if the event has the first vertex bad, will be discarded offline.
+
 from CommonTools.ParticleFlow.pfNoPileUp_cff import *
 pfPUSequence = cms.Sequence( pfPileUp * pfNoPileUp )
 
@@ -267,7 +276,7 @@ pfIsolationGenericDefault = cms.Sequence( muonPfGenericChargedDeps * muonPfGener
 pfIsolationGenericNoOverlapDefault = cms.Sequence( muonPfGenericNoOverChargedDeps * muonPfGenericNoOverNeutralDeps * muonPfGenericNoOverPhotonDeps *
                                                    electronPfGenericNoOverChargedDeps * electronPfGenericNoOverNeutralDeps * electronPfGenericNoOverPhotonDeps )
 
+pfIsolationCombined = cms.Sequence( electronCombinedPFIsoMapProducer * muonCombinedPFIsoMapProducer )
 
-
-pfIsolationAllSequence = cms.Sequence( pfPUSequence * pfIsoStdSequence * pfIsolationsDefault * pfIsolationGenericDefault * pfIsolationGenericNoOverlapDefault )
+pfIsolationAllSequence = cms.Sequence( pfPUSequence * pfIsoStdSequence * pfIsolationsDefault * pfIsolationGenericDefault * pfIsolationGenericNoOverlapDefault * pfIsolationCombined )
 

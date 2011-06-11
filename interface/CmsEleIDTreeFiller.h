@@ -51,7 +51,7 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *scBasedEcalSum03, *scBasedEcalSum04;
   vector<float> *dr03HcalTowerSumEtFullCone, *dr04HcalTowerSumEtFullCone;
   vector<float> *pfChargedIso, *pfNeutralIso, *pfPhotonIso, *pfGenericChargedIso, *pfGenericNeutralIso, *pfGenericPhotonIso,
-    *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso;
+    *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso, *pfCombinedIso;
 
   vector<float> *eleLik, *pflowMVA;
 
@@ -129,6 +129,10 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   typedef edm::ValueMap<double> isoFromDepositsMap;
   typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
   isoContainer *eIsoFromDepsValueMap_;
+
+  typedef edm::ValueMap<float> isoFromPFCandsMap;
+  typedef std::vector< edm::Handle<isoFromPFCandsMap> > isoContainer2;
+  isoContainer2 *eIsoFromPFCandsValueMap_;
 
   edm::Handle<CaloTowerCollection> m_calotowers;
   edm::Handle<reco::TrackCollection> m_tracks;
