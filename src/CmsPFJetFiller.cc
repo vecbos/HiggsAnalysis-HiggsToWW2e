@@ -98,6 +98,7 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
   delete privateData_->uncorrEnergy;
+  delete privateData_->area;
 
   // for backward compatibility with existing trees
   delete privateData_->chargedEmEnergy;
@@ -221,6 +222,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         // for backward compatibility with existing trees
         privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
         privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
+        privateData_->area->push_back( thisPFJet->jetArea() );
 
         // compute marini's variables
         QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
@@ -346,6 +348,7 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"muonMultiplicity"+colSuffix).c_str(), *privateData_->muonMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"HFHadronMultiplicity"+colSuffix).c_str(), *privateData_->HFHadronMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"HFEMMultiplicity"+colSuffix).c_str(), *privateData_->HFEMMultiplicity, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"area"+colSuffix).c_str(), *privateData_->area, nCandString.c_str(), 0, "Reco");
 
   // for backward compatibility with existing trees 
   cmstree->column((colPrefix+"chargedEmEnergy"+colSuffix).c_str(), *privateData_->chargedEmEnergy, nCandString.c_str(), 0, "Reco");
@@ -414,6 +417,7 @@ void CmsPFJetFillerData::initialise() {
   trackCountingHighPurBJetTags = new vector<float>;
   trackCountingHighEffBJetTags = new vector<float>;
   uncorrEnergy = new vector<float>;
+  area = new vector<float>;
   ptD = new vector<float>;
   rmsCand = new vector<float>;
 
@@ -453,6 +457,7 @@ void CmsPFJetFillerData::clearTrkVectors() {
   trackCountingHighPurBJetTags->clear();
   trackCountingHighEffBJetTags->clear();
   uncorrEnergy->clear();
+  area->clear();
   ptD->clear();
   rmsCand->clear();
 

@@ -141,6 +141,7 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
   delete privateData_->uncorrEnergy;
+  delete privateData_->area;
 
 }
 
@@ -253,15 +254,18 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	if( thisRecoJet != 0 ) { 
 	  privateData_->emFrac->push_back( thisRecoJet->emEnergyFraction() );
 	  privateData_->hadFrac->push_back( thisRecoJet->energyFractionHadronic() );
+          privateData_->area->push_back( thisRecoJet->jetArea() );
 	}
 	else {
 	  privateData_->emFrac->push_back( -1.);
 	  privateData_->hadFrac->push_back( -1.);
+          privateData_->area->push_back( -1. );
 	}
       }
       else {
 	privateData_->emFrac->push_back( -1. );
 	privateData_->hadFrac->push_back( -1. );
+        privateData_->area->push_back( -1. );
       }
       // fill the btag algorithms output
       if(saveJetBTag_) {
@@ -391,6 +395,7 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"emFrac"+colSuffix).c_str(), *privateData_->emFrac, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hadFrac"+colSuffix).c_str(), *privateData_->hadFrac, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"area"+colSuffix).c_str(), *privateData_->area, nCandString.c_str(), 0, "Reco");
   if(saveJetExtras_) {
     cmstree->column((colPrefix+"Id"+colSuffix).c_str(), *privateData_->Id, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"nHit"+colSuffix).c_str(), *privateData_->nHit, nCandString.c_str(), 0, "Reco");
@@ -432,6 +437,7 @@ void CmsJetFillerData::initialise() {
   initialiseCandidate();
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
+  area = new vector<float>;
   Id = new vector<int>;
   nHit = new vector<int>;
   nHit90 = new vector<int>;
@@ -465,6 +471,7 @@ void CmsJetFillerData::clearTrkVectors() {
   clearTrkVectorsCandidate();
   emFrac->clear();
   hadFrac->clear();
+  area->clear();
   Id->clear();
   nHit->clear();
   nHit90->clear();
