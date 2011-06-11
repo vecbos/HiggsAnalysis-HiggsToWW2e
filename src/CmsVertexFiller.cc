@@ -72,6 +72,7 @@ CmsVertexFiller::~CmsVertexFiller() {
   delete privateData_->PVErry;
   delete privateData_->PVErrz;
   delete privateData_->SumPt;
+  delete privateData_->rho;
   delete privateData_->ndof;
   delete privateData_->chi2;
   delete privateData_->pxChMet;
@@ -125,6 +126,7 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	privateData_->PVErry->push_back((*v).yError());
 	privateData_->PVErrz->push_back((*v).zError());
 	privateData_->SumPt->push_back(SumPt);
+	privateData_->rho->push_back((*v).position().Rho());
 	privateData_->ndof->push_back((*v).ndof());
 	privateData_->chi2->push_back((*v).chi2());
         if(vertexRef.isNonnull()) {
@@ -150,6 +152,7 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
     privateData_->PVErry->push_back(-1000.);
     privateData_->PVErrz->push_back(-1000.);
     privateData_->SumPt->push_back(-1000.);
+    privateData_->rho->push_back(-1000.);
     privateData_->ndof->push_back(-1000.);
     privateData_->chi2->push_back(-1000.);
     privateData_->pxChMet->push_back(-1000.);
@@ -181,6 +184,7 @@ void CmsVertexFiller::treeVertexInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"PVErry"+colSuffix).c_str(), *privateData_->PVErry, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PVErrz"+colSuffix).c_str(), *privateData_->PVErrz, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"SumPt"+colSuffix).c_str(), *privateData_->SumPt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"rho"+colSuffix).c_str(), *privateData_->rho, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ndof"+colSuffix).c_str(), *privateData_->ndof, nCandString.c_str(), 0, "Reco");  
   cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pxChMet"+colSuffix).c_str(), *privateData_->pxChMet, nCandString.c_str(), 0, "Reco");
@@ -199,6 +203,7 @@ void CmsVertexFillerData::initialise() {
   PVErry = new vector<float>;
   PVErrz = new vector<float>;
   SumPt = new vector<float>;
+  rho = new vector<float>;
   ndof = new vector<float>;
   chi2 = new vector<float>;
   pxChMet = new vector<float>;
@@ -216,6 +221,7 @@ void CmsVertexFillerData::clearTrkVectors() {
   PVErry->clear();
   PVErrz->clear();
   SumPt->clear();
+  rho->clear();
   ndof->clear();
   chi2->clear();
   pxChMet->clear();
