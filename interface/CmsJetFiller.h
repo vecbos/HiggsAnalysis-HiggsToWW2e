@@ -25,7 +25,7 @@
 
 struct CmsJetFillerData : public CmsCandidateFillerData {
 
-  std::vector<float> *emFrac, *hadFrac;
+  std::vector<float> *emFrac, *hadFrac, *area;
   std::vector<int> *Id;
   std::vector<int> *nHit, *nHit90;
   std::vector<float> *fHPD, *covEtaEta, *covPhiPhi, *fLS, *fOOT;
@@ -43,7 +43,7 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
     *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags;
-  std::vector<float> *uncorrEnergy;
+  std::vector<float> *uncorrEnergy, *L2L3CorrEnergy;
 
 public:
   void initialise();
@@ -84,7 +84,8 @@ class CmsJetFiller : public CmsCandidateFiller {
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false,
-                             edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""));
+                             edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""),
+                             edm::InputTag L2L3correctedCollectionTag=edm::InputTag("",""));
 
  private:
   
@@ -99,7 +100,7 @@ class CmsJetFiller : public CmsCandidateFiller {
   int maxTracks_;
   int maxMCTracks_;
 
-  bool dumpUncorrEnergy_;
+  bool dumpUncorrEnergy_, dumpL2L3CorrEnergy_;
 
   std::string *trkIndexName_;
 

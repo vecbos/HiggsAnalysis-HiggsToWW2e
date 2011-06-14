@@ -33,7 +33,7 @@ using namespace reco;
 struct CmsVertexFillerData : public CmsCandidateFillerData {
   std::vector<float> *PVx, *PVy, *PVz;
   std::vector<float> *PVErrx, *PVErry, *PVErrz;
-  std::vector<float> *SumPt, *ndof, *chi2;
+  std::vector<float> *SumPt, *ndof, *chi2, *rho;
   std::vector<float> *pxChMet, *pyChMet, *pzChMet;
   std::vector<int> *isFake;
 

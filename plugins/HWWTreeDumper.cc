@@ -163,10 +163,12 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
   jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
+  jetCollection3_          = iConfig.getParameter<edm::InputTag>("jetCollection3");
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
   PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
   PFpuCorrJetCollection1_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection1");
   PFpuCorrJetCollection2_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection2");
+  PFpuCorrJetCollection3_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection3");
   JPTjetCollection1_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection1");
   JPTjetCollection2_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection2");
 
@@ -676,7 +678,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     caloJetFiller.saveCand(saveCand_);
     caloJetFiller.saveJetExtras(true);
     caloJetFiller.saveJetBTag(saveJetBTag_);
-    caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_);
+    caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_, jetCollection3_);
 
     // particle flow jets
 //     if ( dumpParticleFlowObjects_ ) {  
@@ -696,7 +698,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       pfPUcorrJetFiller.saveCand(saveCand_);
       pfPUcorrJetFiller.saveJetBTag(saveJetBTag_);
       pfPUcorrJetFiller.setBTags(PFPUcorrJetsBTags_);
-      pfPUcorrJetFiller.writeCollectionToTree(PFpuCorrJetCollection1_, iEvent, iSetup, prefix, suffix, false,PFpuCorrJetCollection2_);
+      pfPUcorrJetFiller.writeCollectionToTree(PFpuCorrJetCollection1_, iEvent, iSetup, prefix, suffix, false, PFpuCorrJetCollection2_, PFpuCorrJetCollection3_);
     }
 
     // Jet Plus Tracks jets

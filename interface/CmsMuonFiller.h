@@ -48,7 +48,7 @@ struct CmsMuonFillerData : public CmsCandidateFillerData {
   vector<float> *sumPt05, *emEt05, *hadEt05, *hoEt05, *nTrk05, *nJets05;
   vector<int> *muonId, *type, *numberOfMatches;
   vector<float> *pfChargedIso, *pfNeutralIso, *pfPhotonIso, *pfGenericChargedIso, *pfGenericNeutralIso, *pfGenericPhotonIso,
-    *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso;
+    *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso, *pfCombinedIso;
 
   vector<float> *EcalExpDepo, *HcalExpDepo, *HoExpDepo, *emS9, *hadS9, *hoS9, *CaloComp;
 
@@ -140,6 +140,10 @@ class CmsMuonFiller : public CmsCandidateFiller {
   typedef edm::ValueMap<double> isoFromDepositsMap;
   typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
   isoContainer *eIsoFromDepsValueMap_;
+
+  typedef edm::ValueMap<float> isoFromPFCandsMap;
+  typedef std::vector< edm::Handle<isoFromPFCandsMap> > isoContainer2;
+  isoContainer2 *eIsoFromPFCandsValueMap_;
 
 };
 

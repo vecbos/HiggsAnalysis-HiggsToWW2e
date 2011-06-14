@@ -107,8 +107,8 @@ private:
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_,pflowElectronCollection_;
   edm::InputTag photonCollection_;
-  edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
-  edm::InputTag PFpuCorrJetCollection1_, PFpuCorrJetCollection2_;
+  edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_, jetCollection3_;
+  edm::InputTag PFpuCorrJetCollection1_, PFpuCorrJetCollection2_, PFpuCorrJetCollection3_;
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
   // edm::InputTag corrmetCollection_;
   edm::InputTag vertexCollection_;
