@@ -33,9 +33,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 #process.newPFJetNoPUTracksAssociatorAtVertex.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
 #process.newPFJetsNoPUSoftElectronTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
 #process.newPFJetsNoPUSoftMuonTagInfos.jets = 'ak5PFJetsNoPUL1FastL2L3Residual'
-process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
-process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
-process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
+process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
+process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
+process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
 process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
@@ -68,9 +68,11 @@ process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_data.root'
 # RESIDUAL NOT YET IN GLOBALTAG
 process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
+process.treeDumper.jetCollection3 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
 process.treeDumper.PFjetCollection1 = 'ak5PFJetsNoPUL1FastL2L3'
 process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
+process.treeDumper.PFpuCorrJetCollection3 = 'ak5PFJetsL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = False

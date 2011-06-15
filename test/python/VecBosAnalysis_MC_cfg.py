@@ -25,9 +25,9 @@ process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 # do not use residual corrections in MC
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
-process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3'
-process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3'
-process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3'
+process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
+process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
+process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
 process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
@@ -58,10 +58,13 @@ process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
-process.treeDumper.jetCollection1 = 'ak5CaloJetsL2L3'
+process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
+process.treeDumper.jetCollection2 = 'ak5CaloJets::REDIGI311X' # this is peculiar of 41X Spring11 MC samples
+process.treeDumper.jetCollection3 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
 process.treeDumper.PFjetCollection1 = 'ak5PFJetsNoPUL1FastL2L3'
 process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
+process.treeDumper.PFpuCorrJetCollection3 = 'ak5PFJetsL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
@@ -110,7 +113,7 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.chargedMetProducer
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceMCReduced
-                       * process.newPFPUcorrJetBtaggingSequence
+                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation )
 

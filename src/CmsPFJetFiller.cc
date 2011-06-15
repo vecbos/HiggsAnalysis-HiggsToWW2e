@@ -98,6 +98,7 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
   delete privateData_->uncorrEnergy;
+  delete privateData_->L2L3CorrEnergy;
   delete privateData_->area;
 
   // for backward compatibility with existing trees
@@ -126,7 +127,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
                                            const edm::Event& iEvent, const edm::EventSetup& iSetup,
                                            const std::string &columnPrefix, const std::string &columnSuffix,
                                            bool dumpData,
-                                           edm::InputTag uncorrectedCollectionTag) {
+                                           edm::InputTag uncorrectedCollectionTag, edm::InputTag L2L3correctedCollectionTag) {
 
   edm::Handle< edm::View<reco::Candidate> > collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
@@ -137,8 +138,16 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   if(uncorrectedCollectionTag.label() != std::string("")) {
     edm::Handle< edm::View<reco::Candidate> > uncorrectedCollectionHandle;
     try { iEvent.getByLabel(uncorrectedCollectionTag, uncorrectedCollectionHandle); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << collectionTag; }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << uncorrectedCollectionTag; }
     uncorrectedCollection = uncorrectedCollectionHandle.product();
+  }
+
+  const edm::View<reco::Candidate> *L2L3correctedCollection = 0;
+  if(L2L3correctedCollectionTag.label() != std::string("")) {
+    edm::Handle< edm::View<reco::Candidate> > L2L3correctedCollectionHandle;
+    try { iEvent.getByLabel(L2L3correctedCollectionTag, L2L3correctedCollectionHandle); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << L2L3correctedCollectionTag; }
+    L2L3correctedCollection = L2L3correctedCollectionHandle.product();
   }
 
   privateData_->clearTrkVectors();
@@ -288,20 +297,29 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
           const PFJet *uncorrectedPFJet = dynamic_cast< const PFJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
-          std::vector <reco::PFCandidatePtr> candConstituents = thisPFJet->getPFConstituents();
-          std::vector <reco::PFCandidatePtr> cand2Constituents = uncorrectedPFJet->getPFConstituents();
-          reco::PFCandidatePtr candFirstCT = candConstituents.at(0);
-          reco::PFCandidatePtr candLastCT = candConstituents.at(candConstituents.size()-1);
-          reco::PFCandidatePtr cand2FirstCT = cand2Constituents.at(0);
-          reco::PFCandidatePtr cand2LastCT = cand2Constituents.at(cand2Constituents.size()-1);
-          if(  thisPFJet->eta() == uncorrectedPFJet->eta() && thisPFJet->phi() == uncorrectedPFJet->phi() && 
-              candConstituents.size() == cand2Constituents.size() && candFirstCT == cand2FirstCT && candLastCT == cand2LastCT ) {
+          if(  thisPFJet->jetArea() == uncorrectedPFJet->jetArea() ) {
             rawEnergy = uncorrectedPFJet->energy();
             break;
           }
         }
         privateData_->uncorrEnergy->push_back(rawEnergy);
       } else dumpUncorrEnergy_ = false;
+
+      // if an L2L3corrected jet collection is provided, save also the L2L3corrected energy
+      if(L2L3correctedCollection) {
+        dumpL2L3CorrEnergy_ = true;
+        float L2L3Energy = -999.;
+        edm::View<reco::Candidate>::const_iterator cand2;
+        for(cand2=L2L3correctedCollection->begin(); cand2!=L2L3correctedCollection->end(); cand2++) {
+          const PFJet *L2L3correctedPFJet = dynamic_cast< const PFJet * > ( &(*cand2) );
+          // corrected and uncorrected jets differ only for jet PT 
+          if(  thisPFJet->jetArea() == L2L3correctedPFJet->jetArea() ) {
+            L2L3Energy = L2L3correctedPFJet->energy();
+            break;
+          }
+        }
+        privateData_->L2L3CorrEnergy->push_back(L2L3Energy);
+      } else dumpL2L3CorrEnergy_ = false;
       index++; 
     }
   }
@@ -372,6 +390,9 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   if(dumpUncorrEnergy_) {
     cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
   }
+  if(dumpL2L3CorrEnergy_) {
+    cmstree->column((colPrefix+"L2L3CorrEnergy"+colSuffix).c_str(), *privateData_->L2L3CorrEnergy, nCandString.c_str(), 0, "Reco");
+  }
   cmstree->column((colPrefix+"rmsCand"+colSuffix).c_str(), *privateData_->rmsCand, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ptD"+colSuffix).c_str(), *privateData_->ptD, nCandString.c_str(), 0, "Reco");
 
@@ -417,6 +438,7 @@ void CmsPFJetFillerData::initialise() {
   trackCountingHighPurBJetTags = new vector<float>;
   trackCountingHighEffBJetTags = new vector<float>;
   uncorrEnergy = new vector<float>;
+  L2L3CorrEnergy = new vector<float>;
   area = new vector<float>;
   ptD = new vector<float>;
   rmsCand = new vector<float>;
@@ -457,6 +479,7 @@ void CmsPFJetFillerData::clearTrkVectors() {
   trackCountingHighPurBJetTags->clear();
   trackCountingHighEffBJetTags->clear();
   uncorrEnergy->clear();
+  L2L3CorrEnergy->clear();
   area->clear();
   ptD->clear();
   rmsCand->clear();
