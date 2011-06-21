@@ -1,4 +1,5 @@
 <use   name="HiggsAnalysis/HiggsToWW2e"/>
+<use   name="RecoMET/METAlgorithms"/>
 <library   file="*.cc" name="HiggsAnalysisHiggsToWW2ePlugins">
   <flags   EDM_PLUGIN="1"/>
 </library>

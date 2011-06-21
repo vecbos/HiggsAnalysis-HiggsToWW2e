@@ -119,6 +119,7 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.vertexingSequence
                        * process.mergedSuperClusters 
                        * process.chargedMetProducer
+                       * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceDataReduced
                        * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
