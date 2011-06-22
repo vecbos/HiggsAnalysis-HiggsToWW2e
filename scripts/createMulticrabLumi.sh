@@ -12,7 +12,8 @@ while read LINE ; do
     N=$((N+1))
     echo "Processing $LINE"
     tasks[${N}]=$LINE
-    grep -R default_data.root $LINE/res/ | awk -F"-> " '{print $2}' | awk -F "/" '{print "'"$castordir"'" "/" "'"$LINE"'" "/" $NF}' | uniq | sort > $LINE.list
+    lumiCalc.py -c frontier://LumiCalc/CMS_LUMI_PROD -i $LINE/res/lumiSummary.json --nowarning overview >&! $LINE.lumi & 
+#    grep -R default_data.root $LINE/res/ | awk -F"-> " '{print $2}' | awk -F "/" '{print "'"$castordir"'" "/" "'"$LINE"'" "/" $NF}' | uniq | sort > $LINE.list
 done < tasks.txt
 
 rm -f tasks.txt

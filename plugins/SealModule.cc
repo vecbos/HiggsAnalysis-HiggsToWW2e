@@ -8,6 +8,8 @@
 #include "RecoMuon/TrackerSeedGenerator/plugins/CollectionCombiner.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWEleAmbiguityResolve.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/LeptonTrackFilter.h"
+#include "HiggsAnalysis/HiggsToWW2e/plugins/LeptonCandidateFilter.h"
+#include "HiggsAnalysis/HiggsToWW2e/plugins/ChargedPFMetProducer.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
@@ -19,11 +21,17 @@ typedef ObjectSelector< LeptonTrackFilter,
 			reco::TrackRefVector
 			> leptonTrackFilter ;
 
+typedef ObjectSelector< LeptonCandidateFilter, 
+			reco::CandidateCollection
+			> leptonCandidateFilter ;
+
 typedef CollectionCombiner< reco::SuperClusterCollection > SuperClusterCombiner;
 typedef CollectionCombiner< reco::BasicClusterCollection > BasicClusterCombiner;
 
 DEFINE_FWK_MODULE (AmbResolver) ;
 DEFINE_FWK_MODULE (leptonTrackFilter);
+DEFINE_FWK_MODULE (leptonCandidateFilter);
+DEFINE_FWK_MODULE (ChargedPFMetProducer);
 DEFINE_FWK_MODULE(SuperClusterCombiner);
 DEFINE_FWK_MODULE(BasicClusterCombiner);
 DEFINE_FWK_MODULE (HWWTreeDumper);  

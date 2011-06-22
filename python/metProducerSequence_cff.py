@@ -1,12 +1,21 @@
 import FWCore.ParameterSet.Config as cms
 
-from RecoMET.Configuration.GenMETParticles_cff import *
-from RecoMET.Configuration.RecoGenMET_cff import *
-from JetMETCorrections.Type1MET.MetType1Corrections_cff import *
+# produces  a collection with all the charged candidates to be used for chMET
+reducedPFCands = cms.EDProducer("ReducedCandidatesProducer",
+                                srcCands = cms.InputTag("particleFlow"),
+                                srcVertices = cms.InputTag("offlinePrimaryVertices"),
+                                dz = cms.double(0.1)
+                                )
 
-pfMET = cms.EDProducer("PFMET",
-                       PFCandidates = cms.InputTag("particleFlow"),
-                       verbose = cms.untracked.bool(False)
-                       )
+# produces the reduced collection, subset of the above, of all the candidates in a cone 0.1 from reco leptons (to be removed offline from the chMET)
+reducedPFCandsToSave = cms.EDFilter("leptonCandidateFilter",
+                                    src = cms.InputTag("reducedPFCands"),
+                                    ElectronLabel = cms.InputTag("gsfElectrons"),
+                                    MuonLabel = cms.InputTag("muons")
+                                    )
 
-metSequence = cms.Sequence ( pfMET )
+ourChPFMet = cms.EDProducer("ChargedPFMetProducer",
+                            collectionTag = cms.InputTag("reducedPFCands")
+                            )
+
+metSequence = cms.Sequence ( reducedPFCands * ourChPFMet * reducedPFCandsToSave )

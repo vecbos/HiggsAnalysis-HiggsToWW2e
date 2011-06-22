@@ -180,6 +180,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   // corrmetCollection_       = iConfig.getParameter<edm::InputTag>("corrmetCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
   PFmetCollection_         = iConfig.getParameter<edm::InputTag>("PFmetCollection");
+  PFChMetCollection_       = iConfig.getParameter<edm::InputTag>("PFChMetCollection");                       
+  leptonLinkedPFCandidates_ = iConfig.getParameter<edm::InputTag>("leptonLinkedPFCandidates");
   genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
   chargedMetCollection_    = iConfig.getParameter<edm::InputTag>("chargedMetCollection");
   mcTruthCollection_       = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
@@ -535,23 +537,24 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.savePFTauBasic(savePFTauBasic_);
       treeFill.saveLeadPFCand(saveLeadPFCand_);
       treeFill.writeCollectionToTree(pfTauCollection_, iEvent, iSetup, prefix, suffix,
- 				     tauDiscrByLeadingTrackFindingTag_,
- 				     tauDiscrByLeadingTrackPtCutTag_,
- 				     tauDiscrByLeadingPionPtCutTag_,
- 				     tauDiscrByIsolationTag_,
- 				     tauDiscrByIsolationUsingLeadingPionTag_,
- 				     tauDiscrByTrackIsolationTag_,
- 				     tauDiscrByTrackIsolationUsingLeadingPionTag_,
- 				     tauDiscrByECALIsolationTag_,
- 				     tauDiscrByECALIsolationUsingLeadingPionTag_, 
- 				     tauDiscrAgainstMuonTag_,
- 				     tauDiscrAgainstElectronTag_,
- 				     tauDiscrByTaNCTag_,
- 				     tauDiscrByTaNCfrHalfPercentTag_,
- 				     tauDiscrByTaNCfrOnePercentTag_,
- 				     tauDiscrByTaNCfrQuarterPercentTag_,
- 				     tauDiscrByTaNCfrTenthPercentTag_,
+                                     tauDiscrByLeadingTrackFindingTag_,
+                                     tauDiscrByLeadingTrackPtCutTag_,
+                                     tauDiscrByLeadingPionPtCutTag_,
+                                     tauDiscrByIsolationTag_,
+                                     tauDiscrByIsolationUsingLeadingPionTag_,
+                                     tauDiscrByTrackIsolationTag_,
+                                     tauDiscrByTrackIsolationUsingLeadingPionTag_,
+                                     tauDiscrByECALIsolationTag_,
+                                     tauDiscrByECALIsolationUsingLeadingPionTag_, 
+                                     tauDiscrAgainstMuonTag_,
+                                     tauDiscrAgainstElectronTag_,
+                                     tauDiscrByTaNCTag_,
+                                     tauDiscrByTaNCfrHalfPercentTag_,
+                                     tauDiscrByTaNCfrOnePercentTag_,
+                                     tauDiscrByTaNCfrQuarterPercentTag_,
+                                     tauDiscrByTaNCfrTenthPercentTag_,
                                      false);
+
     }
 
   if(dumphpsPFTaus_)
@@ -616,6 +619,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeCollectionToTree(PFCandidateCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 
+  // PF candidates. Only the ones in a cone 0.1 from leptons to correct ChMET. In Candidate format to save space
+  if(dumpParticleFlowObjects_) {
+    CmsCandidateFiller treeFill(tree_);
+    std::string prefix("");
+    std::string suffix("ReducedPFCand");
+    treeFill.writeCollectionToTree(leptonLinkedPFCandidates_, iEvent, iSetup, prefix, suffix, false);
+  }
+
   // fill CaloTower block
   if(dumpCaloTowers_){
     CmsCaloTowerFiller treeFill(tree_, hbheLabel_, hoLabel_, hfLabel_, ecalLabels_, true);
@@ -654,6 +665,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       suffix = "PFMet";
       pfMetFiller.saveCand(saveCand_);
       pfMetFiller.writeCollectionToTree(PFmetCollection_, iEvent, iSetup, prefix, suffix, false);
+
+      // charged PF MET HWW version
+      CmsMetFiller treeRecoFill1(tree_, true);
+      std::string prefix("");
+      std::string suffix("PFChMet");
+      treeRecoFill1.saveCand(saveCand_);
+      treeRecoFill1.writeCollectionToTree(PFChMetCollection_, iEvent, iSetup, prefix, suffix, false);
     }
 
     // dump generated MET
