@@ -120,7 +120,8 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceDataReduced
-                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
+                       * process.newPFPUcorrJetBtaggingSequence
+                       #* process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
                        )
