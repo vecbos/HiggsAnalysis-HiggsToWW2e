@@ -47,10 +47,10 @@ ak5PFJetsNoPUL1FastL2L3Residual = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', co
 #PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3Residual)
 #JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
-CaloJetSequenceData = cms.Sequence( ak5CaloJets * ak5CaloJetsL2L3 * kt6PFJets * ak5CaloJetsL1FastL2L3)   # not run for the moment                 
-PFJetAK5SequenceData = cms.Sequence( ak5PFJets * ak5PFJetsL2L3 * kt6PFJets * ak5PFJetsL1FastL2L3)
-PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3)
-JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
+CaloJetSequenceData = cms.Sequence( ak5CaloJets * ak5CaloJetsL2L3Residual * kt6PFJets * ak5CaloJetsL1FastL2L3Residual)   # not run for the moment                 
+PFJetAK5SequenceData = cms.Sequence( ak5PFJets * ak5PFJetsL2L3Residual * kt6PFJets * ak5PFJetsL1FastL2L3Residual)
+PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3Residual)
+JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
 ourJetSequenceData = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
 ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData)
