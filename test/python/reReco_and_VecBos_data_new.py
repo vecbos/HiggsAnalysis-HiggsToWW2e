@@ -144,7 +144,7 @@ process.treeDumper.dumpMet = cms.untracked.bool(True)
 
 process.treeDumper.saveEcal = cms.untracked.bool(True)
 process.treeDumper.saveFatEcal = cms.untracked.bool(True)
-process.treeDumper.saveTrk = cms.untracked.bool(False)
+process.treeDumper.saveTrk = cms.untracked.bool(True)
 process.treeDumper.saveFatTrk = cms.untracked.bool(False)
 process.treeDumper.saveTrackDeDx = cms.untracked.bool(False)
 process.treeDumper.saveEleID = cms.untracked.bool(True)
