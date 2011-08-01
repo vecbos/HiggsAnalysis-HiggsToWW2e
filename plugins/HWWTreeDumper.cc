@@ -290,8 +290,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::vector<std::string>* LHEComments = new vector<std::string>;
     bool firstEvent = (jevt_>1) ? false : true;
     treeFill.writeCollectionToTree( mcTruthCollection_, LHEComments, iEvent, 100, firstEvent );
-    std::cout << "dopo, size = " << LHEComments->size() << std::endl;
-    //    delete LHEComments;
+    delete LHEComments;
   }
 
 
@@ -311,7 +310,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     CmsConditionsFiller conditionsFiller( tree_, hltParms_, trgNames );
     conditionsFiller.writeConditionsToTree(iEvent,  firstEvent);
     jevt_++;
-    //    delete trgNames;
+    delete trgNames;
   }
   if(dumpHLTObject_) {
     //forward beginRun to HLTObjectFiller
@@ -697,13 +696,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   if(dumpJets_) {
 
     // Calo jets: not used for the moment
-    // CmsJetFiller caloJetFiller(tree_, true);
+    //    CmsJetFiller caloJetFiller(tree_, true);
     std::string prefix("");
     std::string suffix("AK5Jet");
-    // caloJetFiller.saveCand(saveCand_);
-    // caloJetFiller.saveJetExtras(true);
-    // caloJetFiller.saveJetBTag(saveJetBTag_);
-    // caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_, jetCollection3_);
+//     caloJetFiller.saveCand(saveCand_);
+//     caloJetFiller.saveJetExtras(true);
+//     caloJetFiller.saveJetBTag(saveJetBTag_);
+//     caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_, jetCollection3_);
 
     // particle flow jets
     //     if ( dumpParticleFlowObjects_ ) {  
