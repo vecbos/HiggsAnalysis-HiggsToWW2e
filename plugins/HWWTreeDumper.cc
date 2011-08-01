@@ -106,6 +106,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpPreselInfo_     = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
   dumpSignalKfactor_  = iConfig.getUntrackedParameter<bool>("dumpSignalKfactor", false);
   dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
+  dumpLHE_            = iConfig.getUntrackedParameter<bool>("dumpLHE", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
   dumpPhotons_        = iConfig.getUntrackedParameter<bool>("dumpPhotons", false);
   dumpPFlowElectrons_ = iConfig.getUntrackedParameter<bool>("dumpPFlowElectrons", false);
@@ -282,11 +283,15 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   // get MC truth
   CmsMcTruthTreeFiller treeFill(tree_);
+  treeFill.saveLHEComments(dumpLHE_);
 
   if(dumpMCTruth_) {
 
-    treeFill.writeCollectionToTree( mcTruthCollection_, iEvent, 100 );
-
+    std::vector<std::string>* LHEComments = new vector<std::string>;
+    bool firstEvent = (jevt_>1) ? false : true;
+    treeFill.writeCollectionToTree( mcTruthCollection_, LHEComments, iEvent, 100, firstEvent );
+    std::cout << "dopo, size = " << LHEComments->size() << std::endl;
+    //    delete LHEComments;
   }
 
 
@@ -306,6 +311,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     CmsConditionsFiller conditionsFiller( tree_, hltParms_, trgNames );
     conditionsFiller.writeConditionsToTree(iEvent,  firstEvent);
     jevt_++;
+    //    delete trgNames;
   }
   if(dumpHLTObject_) {
     //forward beginRun to HLTObjectFiller

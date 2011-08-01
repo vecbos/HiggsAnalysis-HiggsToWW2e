@@ -40,13 +40,15 @@ class CmsMcTruthTreeFiller {
   virtual ~CmsMcTruthTreeFiller();
 
   // Write the content of the collection
-  void writeCollectionToTree( edm::InputTag mcTruthCollection, const edm::Event& iEvent, int range=100 );
+  void writeCollectionToTree( edm::InputTag mcTruthCollection, std::vector<std::string>* lheComments, const edm::Event& iEvent, int range=100, bool firstEvent=false );
 
   // Modifiers
+  void saveLHEComments(bool what) {saveLHE_ = what; }
 
  private:
 
   CmsMcTruthTreeFillerData *privateData_;
+  bool saveLHE_;
 
 };
 

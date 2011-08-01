@@ -47,6 +47,8 @@ private:
   bool dumpPreselInfo_;
   //! dump H->WW->2lep 2nu gg fusion signal k-factor
   bool dumpSignalKfactor_;
+  //! save the LHE event infos
+  bool dumpLHE_;
   //! dump the basic candidate informations (4-vectors)
   bool saveCand_;
   //! dump specific reco informations in addition to candidate variables

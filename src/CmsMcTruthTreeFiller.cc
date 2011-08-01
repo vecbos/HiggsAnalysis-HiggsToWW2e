@@ -19,6 +19,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticleFwd.h"
 #include "DataFormats/HepMCCandidate/interface/GenParticle.h"
+#include "SimDataFormats/GeneratorProducts/interface/LHEEventProduct.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMcTruthTreeFiller.h"
@@ -38,6 +39,7 @@ CmsMcTruthTreeFiller::CmsMcTruthTreeFiller(CmsTree *cmstree):
   privateData_(new CmsMcTruthTreeFillerData)
 {
   privateData_->cmstree=cmstree; 
+  saveLHE_ = false;
 }
 
 //--------------
@@ -50,8 +52,8 @@ CmsMcTruthTreeFiller::~CmsMcTruthTreeFiller() {
 //-------------
 // Methods   --
 //-------------
-void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection, 
-						 const edm::Event& iEvent, int range) {
+void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection, std::vector<std::string>* lheComments,
+						 const edm::Event& iEvent, int range, bool firstEvent) {
 
   edm::Handle< reco::GenParticleCollection > genParticleHandle;
   try { iEvent.getByLabel(mcTruthCollection, genParticleHandle); }
@@ -99,6 +101,19 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
     zMC.push_back(cand.vz());
     //    }
   }
+
+  // LHE Event
+  // to be written in the ntuple
+  if(saveLHE_) {
+    lheComments->clear();
+    edm::Handle<LHEEventProduct> product;
+    iEvent.getByLabel("source", product);
+    std::vector<std::string>::const_iterator c_begin = product->comments_begin();
+    std::vector<std::string>::const_iterator c_end = product->comments_end();
+    for( std::vector<std::string>::const_iterator cit=c_begin; cit!=c_end; ++cit) {
+      lheComments->push_back(*cit);
+    }
+  }
   
   std::string theName = "Mc";
   std::string indName = "n"+theName;
@@ -117,6 +132,8 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
   //  privateData_->cmstree->column(("x"+theName).c_str(), xMC, indName.c_str(), 0, theName.c_str());
   //  privateData_->cmstree->column(("y"+theName).c_str(), yMC, indName.c_str(), 0, theName.c_str());
   //  privateData_->cmstree->column(("z"+theName).c_str(), zMC, indName.c_str(), 0, theName.c_str());
-    
+
+  if(firstEvent && saveLHE_) privateData_->cmstree->getTree()->Branch("commentLHE", &(*lheComments));
+
 }
   
