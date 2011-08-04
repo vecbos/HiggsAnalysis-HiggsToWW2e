@@ -12,7 +12,7 @@ process.GlobalTag.globaltag = 'GR_R_42_V19::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
-#process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFNoPUJetsProducerSequence_cff")
@@ -22,9 +22,9 @@ process.chargedMetProducer.collectionTag = "particleFlow"
 process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
-#process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
-#process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3Residual'
-#process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
+process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL2L3Residual'
+process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL2L3Residual'
 process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
 process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
 process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
@@ -109,7 +109,7 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceDataReduced
-                       * process.newPFPUcorrJetBtaggingSequence
+                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
                        )

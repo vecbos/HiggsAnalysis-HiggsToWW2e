@@ -193,5 +193,8 @@ private:
   CmsHLTObjectFiller* hltObjectFiller_;
   edm::ParameterSet hltParms_; //parameters for HLTObject filler
 
+  std::vector<std::string>* trgNames_;
+  std::vector<std::string>* LHEComments_;
+
 };
 #endif // HWWTreeDumper_h

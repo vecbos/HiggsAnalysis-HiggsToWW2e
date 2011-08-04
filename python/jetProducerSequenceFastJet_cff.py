@@ -53,7 +53,7 @@ PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
 ourJetSequenceData = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
-ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData)
+ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData * CaloJetSequenceData )
 
 # MC sequeces use only L2L3 corrections
 CaloJetSequenceMC = cms.Sequence( ak5CaloJets * ak5CaloJetsL2L3 * kt6PFJets * ak5CaloJetsL1FastL2L3)  # not run for the moment
@@ -61,5 +61,5 @@ PFJetAK5SequenceMC = cms.Sequence( ak5PFJets * ak5PFJetsL2L3 * kt6PFJets * ak5PF
 PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
 ourJetSequenceMC = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC)
-ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC)
+ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * CaloJetSequenceMC )
 

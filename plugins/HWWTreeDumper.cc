@@ -287,10 +287,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   if(dumpMCTruth_) {
 
-    std::vector<std::string>* LHEComments = new vector<std::string>;
     bool firstEvent = (jevt_>1) ? false : true;
-    treeFill.writeCollectionToTree( mcTruthCollection_, LHEComments, iEvent, 100, firstEvent );
-    delete LHEComments;
+    treeFill.writeCollectionToTree( mcTruthCollection_, LHEComments_, iEvent, 100, firstEvent );
   }
 
 
@@ -304,13 +302,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     triggerTreeFill.writeTriggerToTree (iEvent, prefix, suffix) ;
 
     /// fill the trigger mask in the Event tree
-    std::vector<std::string>* trgNames = new vector<std::string>;
     bool firstEvent = true;
     if(jevt_>1) firstEvent=false; 
-    CmsConditionsFiller conditionsFiller( tree_, hltParms_, trgNames );
+    CmsConditionsFiller conditionsFiller( tree_, hltParms_, trgNames_ );
     conditionsFiller.writeConditionsToTree(iEvent,  firstEvent);
     jevt_++;
-    delete trgNames;
   }
   if(dumpHLTObject_) {
     //forward beginRun to HLTObjectFiller
@@ -696,13 +692,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   if(dumpJets_) {
 
     // Calo jets: not used for the moment
-    //    CmsJetFiller caloJetFiller(tree_, true);
+    CmsJetFiller caloJetFiller(tree_, true);
     std::string prefix("");
     std::string suffix("AK5Jet");
-//     caloJetFiller.saveCand(saveCand_);
-//     caloJetFiller.saveJetExtras(true);
-//     caloJetFiller.saveJetBTag(saveJetBTag_);
-//     caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_, jetCollection3_);
+    caloJetFiller.saveCand(saveCand_);
+    caloJetFiller.saveJetExtras(true);
+    caloJetFiller.saveJetBTag(saveJetBTag_);
+    caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_, jetCollection3_);
 
     // particle flow jets
     //     if ( dumpParticleFlowObjects_ ) {  
@@ -785,6 +781,10 @@ void HWWTreeDumper::beginJob() {
   //HLTObject Filler needs to exist before beginRun is called
   if(dumpHLTObject_)
     hltObjectFiller_ = new CmsHLTObjectFiller(tree_,hltParms_);
+
+  // this pointer MUST survive until tree is closed
+  trgNames_ = new vector<std::string>;
+  LHEComments_ = new vector<std::string>;
 
 }
 

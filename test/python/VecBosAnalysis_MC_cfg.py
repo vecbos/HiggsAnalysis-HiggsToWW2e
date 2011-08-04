@@ -13,7 +13,7 @@ process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
-#process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.btagProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFPUcorrJetsProducerSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.btagPFNoPUJetsProducerSequence_cff")
@@ -24,9 +24,9 @@ process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 # do not use residual corrections in MC
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
-#process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
-#process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
-#process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
+process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
+process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
+process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
 process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
@@ -66,6 +66,7 @@ process.treeDumper.PFpuCorrJetCollection3 = 'ak5PFJetsL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
+process.treeDumper.dumpLHE = False
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpElectrons = True
@@ -111,8 +112,7 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceMCReduced
-                       #* process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
-                       * process.newPFPUcorrJetBtaggingSequence
+                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation )
 
