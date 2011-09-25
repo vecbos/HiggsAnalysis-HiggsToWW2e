@@ -100,6 +100,26 @@ public:
 		       const char* block= 0);
 
 
+  // ====== Long type ======
+  // Make/fill column with a single value
+  virtual void column( const char* label, 
+		       uint64_t value, 
+		       uint64_t defval= 0,
+		       const char* block= 0);
+  // Make/fill column-array. Length is fixed at creation time.
+  virtual void column( const char* label, 
+		       const vector<uint64_t>& v, 
+		       uint64_t defval= 0,
+		       const char* block= 0);
+  // Make/fill column-array. Length is variable and is taken from 
+  // another column.
+  virtual void column( const char* label, 
+		       const vector<uint64_t>& v, 
+		       const char* ilab,
+		       uint64_t defval= 0,
+		       const char* block= 0);
+
+
   // ====== Float type ======
   // Make/fill column with a single value
   virtual void column( const char* label, 

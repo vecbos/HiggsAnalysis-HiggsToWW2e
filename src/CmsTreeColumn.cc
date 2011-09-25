@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //---------------------------------------------------------------------------------
 //
-// $Id: CmsTreeColumn.cc,v 1.2 2010/08/16 16:03:12 emanuele Exp $
+// $Id: CmsTreeColumn.cc,v 1.3 2011/06/05 22:37:32 emanuele Exp $
 //
 // Description:
 //    Class CmsTreeColumn
@@ -201,6 +201,98 @@ void IntDynArrCmsTreeColumn::setValue( const void* p, CmsTreeColumn* cp ) {
     if( pointer ) delete[] (int*)pointer;
     pointer= ip;
     for( int i= 0; i < *np; ++i ) ip[i]= (*vp)[i];
+    brp->SetAddress(  &ip[0] );
+  }
+
+}
+
+// Long columns:
+LongCmsTreeColumn::LongCmsTreeColumn( const char* l, const uint64_t & v, const uint64_t & d, 
+                                      TTree* tp ) : 
+  CmsTreeColumn( l ), defValue( d ) {
+				 
+  // Create a new branch:
+  pointer= new uint64_t;
+  *(uint64_t*)pointer= v;
+  std::string leafs( l ) ;
+  leafs+= "/l";
+  brp= tp->Branch( label.c_str(), pointer, leafs.c_str(), 8000 );
+
+}
+LongArrCmsTreeColumn::LongArrCmsTreeColumn( const char* l, 
+                                            const vector<uint64_t> & v, 
+                                            const uint64_t & d, TTree* tp ) :
+  CmsTreeColumn( l ), defValue( d ) {
+
+  // Create a new branch:
+  nmax= v.size();
+  uint64_t* ip= new uint64_t[nmax];
+  pointer= ip;
+  for( int i= 0; i < nmax; ++i ) ip[i]= v[i];
+  std::string leafs( label.c_str() );
+  leafs+= "[";
+  char buf[33];
+  sprintf( buf, "%i", nmax );
+  leafs+= buf;
+  leafs+= "]/l";
+  brp= tp->Branch( label.c_str(), &ip[0], leafs.c_str(), 8000 );
+  
+}
+void LongArrCmsTreeColumn::setValue( const void* p, CmsTreeColumn* cp ) { 
+
+  const vector<uint64_t>* vp= (const vector<uint64_t>*) p;
+  if( (int)vp->size() < nmax ) {
+    std::cerr << "IntArrCmsTreeColumn::setValue: input vector too short, "
+              << "use default values" << std::endl;
+    setDefValue();
+  }
+  else {
+    for( int i= 0; i < nmax; ++i ) ((uint64_t*)pointer)[i]= (*vp)[i];
+  }
+
+}
+LongDynArrCmsTreeColumn::LongDynArrCmsTreeColumn( const char* l, 
+                                                  const vector<uint64_t> & v, 
+                                                  const uint64_t & d, CmsTreeColumn* inp,
+                                                  TTree* tp ) :
+  CmsTreeColumn( l ), defValue( d ), indexp( inp ) {
+
+  // Make a new branch:
+  uint64_t* np= (uint64_t*) indexp->getPointer();
+  uint64_t* ip= new uint64_t[*np];
+  pointer= ip;
+  for( uint64_t i= 0; i < *np; ++i ) ip[i]= v[i];
+  std::string leafs( label.c_str() );
+  leafs+= "[";
+  leafs+= indexp->getLabel();
+  leafs+= "]/l";
+  brp= tp->Branch( label.c_str(), &ip[0], leafs.c_str(), 8000 );
+
+}
+void LongDynArrCmsTreeColumn::setDefValue() {
+
+  if( pointer ) delete [] (uint64_t*)pointer;
+  uint64_t nmax= *((uint64_t*)(indexp->getPointer()));
+  uint64_t* ip= new uint64_t[nmax];
+  pointer= ip;
+  for( uint64_t i= 0; i < nmax; ++i ) ip[i]= defValue; 
+  brp->SetAddress( &ip[0] );
+
+}
+void LongDynArrCmsTreeColumn::setValue( const void* p, CmsTreeColumn* cp ) {
+
+  const vector<uint64_t>* vp= (const vector<uint64_t>*) p;
+  uint64_t* np= (uint64_t*) cp->getPointer();
+  if( *np > (uint64_t)vp->size() ) {
+    std::cerr << "IntDynArrCmsTreeColumn::setValue: input vector too short, "
+              << "use default values" << std::endl;
+    setDefValue();
+  }
+  else {
+    uint64_t* ip= new uint64_t[*np];
+    if( pointer ) delete[] (uint64_t*)pointer;
+    pointer= ip;
+    for( uint64_t i= 0; i < *np; ++i ) ip[i]= (*vp)[i];
     brp->SetAddress(  &ip[0] );
   }
 

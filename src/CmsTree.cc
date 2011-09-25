@@ -172,7 +172,67 @@ void CmsTree::column( const char* label,
 
 
 
+// ====== Long type ======
+// Make/fill column with a single value
+void CmsTree::column( const char* label, 
+		       uint64_t value, 
+		       uint64_t defval, 
+		       const char* block) {
+  
+  CmsTreeColumn* colp= lpmap.getColumn( label );
+  if( colp ) {
+    // Column exists, fill corresponding memory location with value:
+    colp->setValue( &value );
+    colp->setUseDefValue( false );
+  }
+  else {
+    // Create a new column:
+    colp= new LongCmsTreeColumn( label, value, defval, treep );
+    lpmap.append( colp );
+  }
 
+}
+// Make/fill column-array. Length is fixed at creation time.
+void CmsTree::column( const char* label, 
+		       const vector<uint64_t> & v, 
+		       uint64_t defval,
+		       const char* block) {
+
+  CmsTreeColumn* colp= lpmap.getColumn( label );
+  if( colp ) {
+    // Column exists, fill corresponding memory location with value:
+    colp->setValue( &v );
+    colp->setUseDefValue( false );
+  }
+  else {
+    // Create a new Column:
+    colp= new LongArrCmsTreeColumn( label, v, defval, treep );
+    lpmap.append( colp );
+  }
+
+}
+// Make/fill column-array. Length is variable and is taken from 
+// another column.
+void CmsTree::column( const char* label, 
+		       const vector<uint64_t> & v, 
+		       const char* ilab,
+		       uint64_t defval,
+		       const char* block) {
+  
+  CmsTreeColumn* colp= lpmap.getColumn( label );
+  if( colp ) {
+    // Column exists, fill corresponding memory location with value:
+    colp->setValue( &v, lpmap.getColumn( ilab ) );
+    colp->setUseDefValue( false );
+  }
+  else {
+    // Create a new branch:
+    CmsTreeColumn* indexp= lpmap.getColumn( ilab );
+    colp= new LongDynArrCmsTreeColumn( label, v, defval, indexp, treep );
+    lpmap.append( colp );
+  }
+  
+}
 
 
 

@@ -1,7 +1,7 @@
 // -*- C++ -*-
 //---------------------------------------------------------------------------------
 //
-// $Id: CmsTreeColumn.h,v 1.1 2007/07/20 15:48:12 govoni Exp $
+// $Id: CmsTreeColumn.h,v 1.2 2010/08/16 16:03:11 emanuele Exp $
 //
 // Description:
 //    Class CmsTreeColumn
@@ -108,12 +108,49 @@ private:
 class IntDynArrCmsTreeColumn : public CmsTreeColumn {
 public:
   IntDynArrCmsTreeColumn( const char*, const vector<int> &,
-		   const int &, CmsTreeColumn*, TTree* );
+                          const int &, CmsTreeColumn*, TTree* );
   virtual ~IntDynArrCmsTreeColumn() { delete[] (int*)pointer; }
   virtual void setDefValue();
   virtual void setValue( const void*, CmsTreeColumn* cp= 0 );
 private:
   int defValue;
+  CmsTreeColumn* indexp;
+};
+
+// Classes for long:
+class LongCmsTreeColumn : public CmsTreeColumn {
+public:
+  LongCmsTreeColumn( const char*, const uint64_t &, const uint64_t &, TTree* );
+  virtual ~LongCmsTreeColumn() { delete (uint64_t*)pointer; }
+  virtual void setDefValue() { *(uint64_t*)pointer= defValue; }
+  virtual void setValue( const void* p, CmsTreeColumn* cp= 0 ) { 
+    *(uint64_t*)pointer= *(const uint64_t*)p;
+  }
+private:
+  uint64_t defValue;
+};
+class LongArrCmsTreeColumn : public CmsTreeColumn {
+public:
+  LongArrCmsTreeColumn( const char*, const vector<uint64_t> &, const uint64_t &, 
+                        TTree* );
+  virtual ~LongArrCmsTreeColumn() { delete[] (uint64_t*)pointer; }
+  virtual void setDefValue() { 
+    for( int i= 0; i < nmax; ++i ) ((uint64_t*)pointer)[i]= defValue; 
+  }
+  virtual void setValue( const void*, CmsTreeColumn* cp= 0 );
+private:
+  uint64_t defValue;
+  int nmax;
+};
+class LongDynArrCmsTreeColumn : public CmsTreeColumn {
+public:
+  LongDynArrCmsTreeColumn( const char*, const vector<uint64_t> &,
+                           const uint64_t &, CmsTreeColumn*, TTree* );
+  virtual ~LongDynArrCmsTreeColumn() { delete[] (uint64_t*)pointer; }
+  virtual void setDefValue();
+  virtual void setValue( const void*, CmsTreeColumn* cp= 0 );
+private:
+  uint64_t defValue;
   CmsTreeColumn* indexp;
 };
 

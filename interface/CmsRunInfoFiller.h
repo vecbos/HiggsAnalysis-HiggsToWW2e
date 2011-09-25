@@ -23,7 +23,8 @@ struct CmsRunInfoFillerData {
 
   int *nl1Global, *nl1Technical;
   vector<int> *l1Global, *l1Technical;
-  int *run, *lumisection, *event, *bx, *orbit;
+  int *run, *lumisection, *bx, *orbit;
+  uint64_t *event;
   // pileup info
   int *nBX;
   vector<int> *nInteractions, *bxPU;

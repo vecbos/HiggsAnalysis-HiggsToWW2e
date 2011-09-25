@@ -138,7 +138,7 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
 void CmsRunInfoFiller::treeRunInfo() {
 
   cmstree->column("runNumber", *privateData_->run, 0, "L1T");
-  cmstree->column("eventNumber", *privateData_->event, 0, "L1T");
+  cmstree->column("eventNumber", *privateData_->event, uint64_t(0), "L1T");
   cmstree->column("lumiBlock", *privateData_->lumisection, 0, "L1T");
   cmstree->column("bunchCrossing", *privateData_->bx, 0, "L1T");
   cmstree->column("orbitNumber", *privateData_->orbit, 0, "L1T");
@@ -154,7 +154,7 @@ void CmsRunInfoFiller::treeRunInfo() {
 void CmsRunInfoFillerData::initialise() {
 
   run = new int;
-  event = new int;
+  event = new uint64_t;
   lumisection = new int;
   bx = new int;
   orbit = new int;

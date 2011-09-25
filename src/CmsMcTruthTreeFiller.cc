@@ -118,7 +118,7 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
   std::string theName = "Mc";
   std::string indName = "n"+theName;
   
-  privateData_->cmstree->column(indName.c_str(),pMC.size(),0,theName.c_str());
+  privateData_->cmstree->column(indName.c_str(),(int)pMC.size(),0,theName.c_str());
   privateData_->cmstree->column(("p"+theName).c_str(), pMC, indName.c_str(), 0, theName.c_str());
   //  privateData_->cmstree->column(("mass"+theName).c_str(), massMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("theta"+theName).c_str(), thetaMC, indName.c_str(), 0, theName.c_str());
