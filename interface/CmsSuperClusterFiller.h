@@ -35,6 +35,16 @@
 #include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
+
+#include "HiggsAnalysis/HiggsToGammaGamma/interface/EGEnergyCorrector.h"
+#include "HiggsAnalysis/HiggsToGammaGamma/interface/PhotonFix.h"
+
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionFactory.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h"
+#include "CondFormats/EcalObjects/interface/EcalFunctionParameters.h" 
+
+#include "RecoEcal/EgammaCoreTools/interface/PositionCalc.h"
+
 #include <TTree.h>
 
 struct CmsSuperClusterFillerData {
@@ -45,6 +55,13 @@ struct CmsSuperClusterFillerData {
   vector<float> *seedEnergy, *seedX, *seedY;
   vector<float> *e3x3, * e5x5, *eMax, *e2x2, *e2nd, *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi, *sMaj, *sMin, *alpha,
     *e1x5, *e2x5Max, *e4SwissCross;
+//   vector<float> *etaC,*etaS,*etaM,*phiC,*phiS,*phiM;
+//   vector<float> *xZ,*xC,*xS,*xM,*yZ,*yC,*yS,*yM;
+  vector<float> * photonFix_phoE,* photonFix_phoSigma;
+  vector<float> * photonFix_eleE,* photonFix_eleSigma;
+  vector<float> * regrCorr_phoE,* regrCorr_phoSigma;
+  vector<float> * regrCorr_eleE,* regrCorr_eleSigma;
+
   vector<float> *hOverE;
   int *nSC;
 
@@ -83,8 +100,16 @@ public:
   //! set the rechits for ECAL endcap (needed for cluster shapes)
   void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
 
-protected:
+  void setEGEnergyCorrectorElectron( EGEnergyCorrector* eg) { eCorrector_=eg; }
+  void setEGEnergyCorrectorPhoton( EGEnergyCorrector* eg) { pCorrector_=eg; }
+
+  void setPhotonFixElectron( PhotonFix* eg) { photonFixE_=eg; }
+  void setPhotonFixPhoton( PhotonFix* eg) { photonFixP_=eg; }
+
+  void setPositionCalc( PositionCalc* pos) { posCalculator_=pos; }
   
+  void setEnergyCorrectionFunction( EcalClusterFunctionBaseClass* ef ) { energyCorrectionF=ef; }
+protected:
   virtual void writeSCInfo(const reco::SuperCluster *cand, 
 			   const edm::Event&, const edm::EventSetup&,
                            const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
@@ -107,6 +132,15 @@ protected:
 
   int maxSC_;
   std::string *trkIndexName_;
+
+  EGEnergyCorrector* eCorrector_;
+  EGEnergyCorrector* pCorrector_;
+
+  PhotonFix* photonFixE_;
+  PhotonFix* photonFixP_;
+
+  PositionCalc* posCalculator_;
+  EcalClusterFunctionBaseClass* energyCorrectionF;
 };
 
 #endif // CmsSuperClusterFiller_h

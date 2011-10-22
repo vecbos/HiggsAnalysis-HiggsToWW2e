@@ -101,6 +101,21 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   // basic kinematic informations
   saveCand_  = iConfig.getUntrackedParameter<bool>("saveCand", true);
+  usePhotonFix_ = iConfig.getUntrackedParameter<bool>("usePhotonFix", true);
+  if (usePhotonFix_)
+    {
+      phFixElePar_  = iConfig.getUntrackedParameter<edm::ParameterSet>("PhotonFix_4_2e");
+      phFixPhoPar_  = iConfig.getUntrackedParameter<edm::ParameterSet>("PhotonFix_4_2p");
+    }
+  useEnergyRegression_ = iConfig.getUntrackedParameter<bool>("useEnergyRegression", true);
+  if (useEnergyRegression_)
+    {
+      energyRegressionElectronFile_ = iConfig.getUntrackedParameter<std::string>("energyRegressionElectronFile");
+      energyRegressionPhotonFile_ = iConfig.getUntrackedParameter<std::string>("energyRegressionPhotonFile");
+    }
+
+  posCalcParameters_ =
+    iConfig.getParameter<edm::ParameterSet>("posCalcParameters");
   
   // Candidate Collections
   dumpPreselInfo_     = iConfig.getUntrackedParameter<bool>("dumpPreselInfo", false);
@@ -260,6 +275,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   // Hcal collections
   hcalNoiseSummaryLabel_ = iConfig.getParameter<edm::InputTag>("hcalNoiseSummary");
+
+  energyCorrectionF = EcalClusterFunctionFactory::get()->create("EcalClusterEnergyCorrection", iConfig);
 }
 
 
@@ -405,13 +422,29 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
       treeFill.setCalotowers(calotowersForIsolationProducer_);
+      treeFill.setPositionCalc(posCalculator_);
+      treeFill.setEnergyCorrectionFunction(energyCorrectionF);
+      if (usePhotonFix_)
+	{
+	  treeFill.setPhotonFixElectron(phFixE_);
+	  treeFill.setPhotonFixPhoton(phFixP_);
+	}
+      if (useEnergyRegression_)
+	{
+	  treeFill.setEGEnergyCorrectorElectron(eCorrector_);
+	  treeFill.setEGEnergyCorrectorPhoton(pCorrector_);
+	}
+	
       treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, suffix, false);
+      
 
       CmsSuperClusterFiller treeFillPF(tree_, 1000);
       suffix = "PFSC";
       treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
       treeFillPF.setCalotowers(calotowersForIsolationProducer_);
+      treeFill.setPositionCalc(posCalculator_);
+      treeFill.setEnergyCorrectionFunction(energyCorrectionF);
       treeFillPF.writeCollectionToTree(ecalPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
 
   }
@@ -791,6 +824,25 @@ void HWWTreeDumper::beginJob() {
 void HWWTreeDumper::beginRun( const Run & iRun, const EventSetup & iSetup )
 {
   jevtInRun_ = 0;
+  if (usePhotonFix_)
+    {
+      PhotonFix::initialiseGeometry(iSetup);
+      phFixE_=new PhotonFix(0.,0.);
+      phFixE_->initialiseParameters(phFixElePar_);
+      phFixP_=new PhotonFix(0.,0.);
+      phFixP_->initialiseParameters(phFixPhoPar_);
+    }
+
+  if (useEnergyRegression_)
+    {
+      eCorrector_=new EGEnergyCorrector();
+      pCorrector_=new EGEnergyCorrector();
+      if (!eCorrector_->IsInitialized()) eCorrector_->Initialize(iSetup,energyRegressionElectronFile_);
+      if (!pCorrector_->IsInitialized()) pCorrector_->Initialize(iSetup,energyRegressionPhotonFile_);
+    }
+
+  energyCorrectionF->init(iSetup);
+  posCalculator_ = new PositionCalc(posCalcParameters_);
 }
 
 

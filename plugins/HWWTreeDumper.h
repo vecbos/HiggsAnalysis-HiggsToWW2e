@@ -17,6 +17,16 @@
 #include <TTree.h>
 #include <TFile.h>
 
+
+#include "HiggsAnalysis/HiggsToGammaGamma/interface/EGEnergyCorrector.h"
+#include "HiggsAnalysis/HiggsToGammaGamma/interface/PhotonFix.h"
+
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionFactory.h"
+#include "RecoEcal/EgammaCoreTools/interface/EcalClusterFunctionBaseClass.h"
+#include "CondFormats/EcalObjects/interface/EcalFunctionParameters.h" 
+
+#include "RecoEcal/EgammaCoreTools/interface/PositionCalc.h"
+
 class HWWTreeDumper : public edm::EDAnalyzer {
 public:
   explicit HWWTreeDumper(const edm::ParameterSet&);
@@ -105,6 +115,13 @@ private:
   bool saveTrackDeDx_;
   //! save the calotowers
   bool dumpCaloTowers_;
+
+  bool usePhotonFix_;
+
+  bool useEnergyRegression_;
+
+  std::string energyRegressionElectronFile_;
+  std::string energyRegressionPhotonFile_;
 
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_,pflowElectronCollection_;
@@ -196,5 +213,18 @@ private:
   std::vector<std::string>* trgNames_;
   std::vector<std::string>* LHEComments_;
 
+  edm::ParameterSet phFixElePar_;
+  edm::ParameterSet phFixPhoPar_;
+
+  edm::ParameterSet posCalcParameters_;
+
+  EGEnergyCorrector* eCorrector_;
+  EGEnergyCorrector* pCorrector_;
+  PhotonFix* phFixE_;
+  PhotonFix* phFixP_;
+
+  EcalClusterFunctionBaseClass* energyCorrectionF;
+
+  PositionCalc* posCalculator_;
 };
 #endif // HWWTreeDumper_h

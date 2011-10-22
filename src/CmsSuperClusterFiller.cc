@@ -35,6 +35,8 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
 
+#include "HiggsAnalysis/HiggsToGammaGamma/interface/GBRForest.h"
+
 #include <TTree.h>
 
 #include <string>
@@ -54,14 +56,12 @@ using namespace reco;
 //----------------
 
 
-CmsSuperClusterFiller::CmsSuperClusterFiller(CmsTree *cmsTree, int maxSC):  privateData_(new CmsSuperClusterFillerData)
+CmsSuperClusterFiller::CmsSuperClusterFiller(CmsTree *cmsTree, int maxSC):  privateData_(new CmsSuperClusterFillerData), eCorrector_(0), pCorrector_(0), photonFixE_(0), photonFixP_(0)
 {
   cmstree=cmsTree;
-
   trkIndexName_ = new std::string("n");
   maxSC_=maxSC;
   privateData_->initialiseCandidate();
-
 }
 
 //--------------
@@ -102,7 +102,28 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->time;
   delete privateData_->chi2;
   delete privateData_->recoFlag;
-
+//   delete privateData_->etaC;
+//   delete privateData_->etaS;
+//   delete privateData_->etaM;
+//   delete privateData_->phiC;
+//   delete privateData_->phiS;
+//   delete privateData_->phiM;
+//   delete privateData_->xC;
+//   delete privateData_->xS;
+//   delete privateData_->xM;
+//   delete privateData_->xZ;
+//   delete privateData_->yC;
+//   delete privateData_->yS;
+//   delete privateData_->yM;
+//   delete privateData_->yZ;
+  delete privateData_->photonFix_phoE;
+  delete privateData_->photonFix_phoSigma;
+  delete privateData_->photonFix_eleE;
+  delete privateData_->photonFix_eleSigma;
+  delete privateData_->regrCorr_phoE;
+  delete privateData_->regrCorr_phoSigma;
+  delete privateData_->regrCorr_eleE;
+  delete privateData_->regrCorr_eleSigma;
 }
 
 
@@ -278,6 +299,214 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
         privateData_->seedX->push_back(id.ix());
         privateData_->seedY->push_back(id.iy());        
       }
+      // calculate H/E
+      float hOverEConeSize = 0.15;
+      float hOverEPtMin = 0.;
+      EgammaTowerIsolation *towerIso1 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,1,calotowers_.product()) ;
+      EgammaTowerIsolation *towerIso2 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,2,calotowers_.product()) ;
+      
+      float TowerHcalESum1 = towerIso1->getTowerESum(cand);
+      float TowerHcalESum2 = towerIso2->getTowerESum(cand);
+      float hcalESum = TowerHcalESum1 + TowerHcalESum2;
+      
+      privateData_->hOverE->push_back(hcalESum/cand->energy());
+      delete towerIso1;
+      delete towerIso2;
+
+      if (photonFixE_ || photonFixP_ || eCorrector_ || pCorrector_ )
+	{
+      const CaloSubdetectorGeometry* subDetGeometry =0 ;
+      if ( fabs(seedEta) < 1.479 )
+	subDetGeometry =  pGeometry->getSubdetectorGeometry(DetId::Ecal, EcalBarrel);
+      else
+	subDetGeometry =  pGeometry->getSubdetectorGeometry(DetId::Ecal, EcalEndcap);
+      math::XYZPoint unconvPos = posCalculator_->Calculate_Location(cand->seed()->hitsAndFractions(), &(*rechits) ,subDetGeometry,pGeometry->getSubdetectorGeometry(DetId::Ecal,EcalPreshower));
+      float r9 =e3x3/(cand->rawEnergy());
+      
+      float phot_energy;
+      math::XYZPoint phot_pos;
+      if ( fabs(seedEta) < 1.479 && r9>0.94 )
+	{
+	  const reco::SuperCluster* sc=&(*cand);
+	  double deltaE = energyCorrectionF->getValue(*sc, 1);
+	  //	  double deltaE=0;
+	  phot_energy=e5x5*(1.0 +  deltaE/cand->rawEnergy() );
+	  phot_pos=unconvPos;
+	}
+      else if ( fabs(seedEta) > 1.479 && r9>0.95 )
+	{
+	  phot_energy=e5x5 + cand->preshowerEnergy();
+	  phot_pos=unconvPos;
+	}
+      else
+	{
+	  phot_pos = cand->position();
+	  phot_energy=cand->energy();
+	}
+      
+      if (photonFixE_)
+	{
+	  photonFixE_->setClusterParameters(phot_energy,(float)phot_pos.eta(),(float)phot_pos.eta(),e3x3/(float)cand->rawEnergy());
+ 	  privateData_->photonFix_eleE->push_back(photonFixE_->fixedEnergy());
+ 	  privateData_->photonFix_eleSigma->push_back(photonFixE_->sigmaEnergy());
+ 	}
+      else
+	{
+ 	  privateData_->photonFix_eleE->push_back(-1);
+ 	  privateData_->photonFix_eleSigma->push_back(-1);
+	}
+
+      if (photonFixP_)
+	{
+
+	  photonFixP_->setClusterParameters(phot_energy,(float)phot_pos.eta(),(float)phot_pos.eta(),e3x3/(float)cand->rawEnergy());
+ 	  privateData_->photonFix_phoE->push_back(photonFixP_->fixedEnergy());
+ 	  privateData_->photonFix_phoSigma->push_back(photonFixP_->sigmaEnergy());
+	}
+      else
+	{
+ 	  privateData_->photonFix_phoE->push_back(-1);
+ 	  privateData_->photonFix_phoSigma->push_back(-1);
+	}
+
+
+      if (eCorrector_)
+	{
+	  photonFixE_->setClusterParameters(phot_energy,cand->position().eta(),cand->position().phi(),r9); 
+	    
+	  Bool_t isbarrel =  (fabs(cand->position().eta()) < 1.48);
+	  
+	  if (isbarrel) {
+	    eCorrector_->fVals[0]  = cand->rawEnergy();
+	    eCorrector_->fVals[1]  = e3x3/cand->rawEnergy(); //r9
+	    eCorrector_->fVals[2]  = cand->position().eta();
+	    eCorrector_->fVals[3]  = cand->position().phi();
+	    eCorrector_->fVals[4]  = e5x5/cand->rawEnergy();
+	    eCorrector_->fVals[5]  = photonFixE_->etaC();
+	    eCorrector_->fVals[6]  = photonFixE_->etaS();
+	    eCorrector_->fVals[7]  = photonFixE_->etaM();
+	    eCorrector_->fVals[8]  = photonFixE_->phiC();
+	    eCorrector_->fVals[9]  = photonFixE_->phiS();
+	    eCorrector_->fVals[10] = photonFixE_->phiM();    
+	    eCorrector_->fVals[11] = hcalESum/cand->energy();
+	    eCorrector_->fVals[12] = cand->etaWidth();
+	    eCorrector_->fVals[13] = cand->phiWidth();
+	    eCorrector_->fVals[14] = sqrt(covIEtaIEta);
+	  }
+	  else {
+	    eCorrector_->fVals[0]  = cand->rawEnergy();
+	    eCorrector_->fVals[1]  = e3x3/cand->rawEnergy(); //r9
+	    eCorrector_->fVals[2]  = cand->position().eta();
+	    eCorrector_->fVals[3]  = cand->position().phi();
+	    eCorrector_->fVals[4]  = e5x5/cand->rawEnergy();
+	    eCorrector_->fVals[5]  = cand->preshowerEnergy()/cand->rawEnergy();
+	    eCorrector_->fVals[6]  = photonFixE_->xZ();
+	    eCorrector_->fVals[7]  = photonFixE_->xC();
+	    eCorrector_->fVals[8]  = photonFixE_->xS();
+	    eCorrector_->fVals[9]  = photonFixE_->xM();
+	    eCorrector_->fVals[10] = photonFixE_->yZ();
+	    eCorrector_->fVals[11] = photonFixE_->yC();
+	    eCorrector_->fVals[12] = photonFixE_->yS();
+	    eCorrector_->fVals[13] = photonFixE_->yM();
+	    eCorrector_->fVals[14] = hcalESum/cand->energy();
+	    eCorrector_->fVals[15] = cand->etaWidth();
+	    eCorrector_->fVals[16] = cand->phiWidth();
+	    eCorrector_->fVals[17] = sqrt(covIEtaIEta);
+	  }
+	  
+	  const Double_t varscale = 1.253;
+	  Double_t den;
+	  const GBRForest *reader;
+	  const GBRForest *readervar;
+	  if (isbarrel) {
+	    den = cand->rawEnergy();
+	    reader = eCorrector_->fReadereb;
+	    readervar = eCorrector_->fReaderebvariance;
+	  }
+	  else {
+	    den = cand->rawEnergy() + cand->preshowerEnergy();
+	    reader = eCorrector_->fReaderee;
+	    readervar = eCorrector_->fReadereevariance;
+	  }
+	  
+	  privateData_->regrCorr_eleE->push_back(reader->GetResponse(eCorrector_->fVals)*den);
+	  privateData_->regrCorr_eleSigma->push_back(readervar->GetResponse(eCorrector_->fVals)*den*varscale);
+	}
+      else
+	{
+	  privateData_->regrCorr_eleE->push_back(-1);
+	  privateData_->regrCorr_eleSigma->push_back(-1);
+	}
+
+      if (pCorrector_)
+	{
+	  photonFixP_->setClusterParameters(phot_energy,phot_pos.eta(),phot_pos.phi(),r9); 
+	    
+	  Bool_t isbarrel = (fabs(phot_pos.eta()) < 1.48); //to comply with PhotonFix asserts
+	  
+	  if (isbarrel) {
+	    pCorrector_->fVals[0]  = cand->rawEnergy();
+	    pCorrector_->fVals[1]  = e3x3/cand->rawEnergy(); //r9
+	    pCorrector_->fVals[2]  = cand->position().eta();
+	    pCorrector_->fVals[3]  = cand->position().phi();
+	    pCorrector_->fVals[4]  = e5x5/cand->rawEnergy();
+	    pCorrector_->fVals[5]  = photonFixP_->etaC();
+	    pCorrector_->fVals[6]  = photonFixP_->etaS();
+	    pCorrector_->fVals[7]  = photonFixP_->etaM();
+	    pCorrector_->fVals[8]  = photonFixP_->phiC();
+	    pCorrector_->fVals[9]  = photonFixP_->phiS();
+	    pCorrector_->fVals[10] = photonFixP_->phiM();    
+	    pCorrector_->fVals[11] = hcalESum/cand->energy();
+	    pCorrector_->fVals[12] = cand->etaWidth();
+	    pCorrector_->fVals[13] = cand->phiWidth();
+	    pCorrector_->fVals[14] = sqrt(covIEtaIEta);
+	  }
+	  else {
+	    pCorrector_->fVals[0]  = cand->rawEnergy();
+	    pCorrector_->fVals[1]  = e3x3/cand->rawEnergy(); //r9
+	    pCorrector_->fVals[2]  = cand->position().eta();
+	    pCorrector_->fVals[3]  = cand->position().phi();
+	    pCorrector_->fVals[4]  = e5x5/cand->rawEnergy();
+	    pCorrector_->fVals[5]  = cand->preshowerEnergy()/cand->rawEnergy();
+	    pCorrector_->fVals[6]  = photonFixP_->xZ();
+	    pCorrector_->fVals[7]  = photonFixP_->xC();
+	    pCorrector_->fVals[8]  = photonFixP_->xS();
+	    pCorrector_->fVals[9]  = photonFixP_->xM();
+	    pCorrector_->fVals[10] = photonFixP_->yZ();
+	    pCorrector_->fVals[11] = photonFixP_->yC();
+	    pCorrector_->fVals[12] = photonFixP_->yS();
+	    pCorrector_->fVals[13] = photonFixP_->yM();
+	    pCorrector_->fVals[14] = hcalESum/cand->energy();
+	    pCorrector_->fVals[15] = cand->etaWidth();
+	    pCorrector_->fVals[16] = cand->phiWidth();
+	    pCorrector_->fVals[17] = sqrt(covIEtaIEta);
+	  }
+	  
+	  const Double_t varscale = 1.253;
+	  Double_t den;
+	  const GBRForest *reader;
+	  const GBRForest *readervar;
+	  if (isbarrel) {
+	    den = cand->rawEnergy();
+	    reader = pCorrector_->fReadereb;
+	    readervar = pCorrector_->fReaderebvariance;
+	  }
+	  else {
+	    den = cand->rawEnergy() + cand->preshowerEnergy();
+	    reader = pCorrector_->fReaderee;
+	    readervar = pCorrector_->fReadereevariance;
+	  }
+	  
+	  privateData_->regrCorr_phoE->push_back(reader->GetResponse(pCorrector_->fVals)*den);
+	  privateData_->regrCorr_phoSigma->push_back(readervar->GetResponse(pCorrector_->fVals)*den*varscale);
+	}
+      else
+	{
+	  privateData_->regrCorr_phoE->push_back(-1);
+	  privateData_->regrCorr_phoSigma->push_back(-1);
+	}
+
+}
 
   } else {
     privateData_->e3x3->push_back(-1.);
@@ -298,22 +527,19 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->chi2->push_back(-999.);
     privateData_->recoFlag->push_back(-1);
     privateData_->seedEnergy->push_back(-1.);
+    privateData_->photonFix_phoE->push_back(-1);
+    privateData_->photonFix_phoSigma->push_back(-1);
+
+    privateData_->photonFix_eleE->push_back(-1);
+    privateData_->photonFix_eleSigma->push_back(-1);
+
+    privateData_->regrCorr_eleE->push_back(-1);
+    privateData_->regrCorr_eleSigma->push_back(-1);
+    privateData_->regrCorr_phoE->push_back(-1);
+    privateData_->regrCorr_phoSigma->push_back(-1);
   }
 
-  // calculate H/E
-  float hOverEConeSize = 0.15;
-  float hOverEPtMin = 0.;
-  EgammaTowerIsolation *towerIso1 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,1,calotowers_.product()) ;
-  EgammaTowerIsolation *towerIso2 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,2,calotowers_.product()) ;
-  
-  float TowerHcalESum1 = towerIso1->getTowerESum(cand);
-  float TowerHcalESum2 = towerIso2->getTowerESum(cand);
-  float hcalESum = TowerHcalESum1 + TowerHcalESum2;
-  
-  privateData_->hOverE->push_back(hcalESum/cand->energy());
 
-  delete towerIso1;
-  delete towerIso2;
 
 }
 
@@ -351,6 +577,31 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedX"+colSuffix).c_str(), *privateData_->seedX, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedY"+colSuffix).c_str(), *privateData_->seedY, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"etaC"+colSuffix).c_str(), *privateData_->etaC, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"etaS"+colSuffix).c_str(), *privateData_->etaS, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"etaM"+colSuffix).c_str(), *privateData_->etaM, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"phiC"+colSuffix).c_str(), *privateData_->phiC, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"phiS"+colSuffix).c_str(), *privateData_->phiS, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"phiM"+colSuffix).c_str(), *privateData_->phiM, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"xC"+colSuffix).c_str(), *privateData_->xC, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"xS"+colSuffix).c_str(), *privateData_->xS, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"xM"+colSuffix).c_str(), *privateData_->xM, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"xZ"+colSuffix).c_str(), *privateData_->xZ, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"yC"+colSuffix).c_str(), *privateData_->yC, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"yS"+colSuffix).c_str(), *privateData_->yS, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"yM"+colSuffix).c_str(), *privateData_->yM, nCandString.c_str(), 0, "Reco");
+//   cmstree->column((colPrefix+"yZ"+colSuffix).c_str(), *privateData_->yZ, nCandString.c_str(), 0, "Reco");
+      if (photonFixE_ || photonFixP_ || eCorrector_ || pCorrector_ )
+	{
+	  cmstree->column((colPrefix+"photonFix_phoE"+colSuffix).c_str(), *privateData_->photonFix_phoE, nCandString.c_str(), 0, "Reco");
+	  cmstree->column((colPrefix+"photonFix_phoSigma"+colSuffix).c_str(), *privateData_->photonFix_phoSigma, nCandString.c_str(), 0, "Reco");
+	  cmstree->column((colPrefix+"photonFix_eleE"+colSuffix).c_str(), *privateData_->photonFix_eleE, nCandString.c_str(), 0, "Reco");
+	  cmstree->column((colPrefix+"photonFix_eleSigma"+colSuffix).c_str(), *privateData_->photonFix_eleSigma, nCandString.c_str(), 0, "Reco");
+	  cmstree->column((colPrefix+"regrCorr_phoE"+colSuffix).c_str(), *privateData_->regrCorr_phoE, nCandString.c_str(), 0, "Reco");
+	  cmstree->column((colPrefix+"regrCorr_phoSigma"+colSuffix).c_str(), *privateData_->regrCorr_phoSigma, nCandString.c_str(), 0, "Reco");
+	  cmstree->column((colPrefix+"regrCorr_eleE"+colSuffix).c_str(), *privateData_->regrCorr_eleE, nCandString.c_str(), 0, "Reco");
+	  cmstree->column((colPrefix+"regrCorr_eleSigma"+colSuffix).c_str(), *privateData_->regrCorr_eleSigma, nCandString.c_str(), 0, "Reco");
+	}
 }
 
 
@@ -387,7 +638,30 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   seedEnergy = new vector<float>;
   seedX = new vector<float>;
   seedY = new vector<float>;
+  photonFix_phoE= new vector<float>;
+   photonFix_phoSigma= new vector<float>;
+   photonFix_eleE= new vector<float>;
+   photonFix_eleSigma= new vector<float>;
+   regrCorr_phoE= new vector<float>;
+   regrCorr_phoSigma= new vector<float>;
+   regrCorr_eleE= new vector<float>;
+   regrCorr_eleSigma= new vector<float>;  
   nSC =  new int;
+//   etaC= new vector<float>;
+//   etaS= new vector<float>;
+//   etaM= new vector<float>;
+//   phiC= new vector<float>;
+//   phiS= new vector<float>;
+//   phiM= new vector<float>;
+//   xC= new vector<float>;
+//   xS= new vector<float>;
+//   xM= new vector<float>;
+//   xZ= new vector<float>;
+//   yC= new vector<float>;
+//   yS= new vector<float>;
+//   yM= new vector<float>;
+//   yZ= new vector<float>;
+
 }
 
 void CmsSuperClusterFillerData::clear() 
@@ -423,4 +697,26 @@ void CmsSuperClusterFillerData::clear()
   seedEnergy->clear();
   seedX->clear();
   seedY->clear();
+//   etaC->clear();
+//   etaS->clear();
+//   etaM->clear();
+//   phiC->clear();
+//   phiS->clear();
+//   phiM->clear();
+//   xC->clear();
+//   xS->clear();
+//   xM->clear();
+//   xZ->clear();
+//   yC->clear();
+//   yS->clear();
+//   yM->clear();
+//   yZ->clear();
+  photonFix_phoE->clear();
+   photonFix_phoSigma->clear();
+   photonFix_eleE->clear();
+   photonFix_eleSigma->clear();
+   regrCorr_phoE->clear();
+   regrCorr_phoSigma->clear();
+   regrCorr_eleE->clear();
+   regrCorr_eleSigma->clear();  
 }

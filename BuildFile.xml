@@ -47,6 +47,7 @@
 <use   name="RecoVertex/KinematicFitPrimitives"/>
 <use   name="RecoVertex/KinematicFit"/>
 <use   name="HLTrigger/HLTcore"/>
+<use   name="HiggsAnalysis/HiggsToGammaGamma"/>
 <export>
   <lib   name="1"/>
 </export>
