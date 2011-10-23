@@ -605,9 +605,9 @@ float CmsPFJetFiller::calcDzPFJet( const PFJet* pfjet ) {
   for(std::vector<reco::PFCandidatePtr>::const_iterator pfcand=constituents.begin(); pfcand!=constituents.end(); pfcand++) {
     reco::TrackRef trk = (*pfcand)->trackRef();
     if(trk.isNonnull()) {
-      float dz = trk->vz() - bestPrimaryVertex_.z();
+      float dzCorr = trk->dsz(bestPrimaryVertex_.position());
       float pt = trk->pt();
-      num += pt*pt * dz;
+      num += pt*pt * dzCorr;
       denom += pt*pt;
     }
   }
