@@ -13,9 +13,8 @@
 
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
-#include "DataFormats/JetReco/interface/Jet.h"
-#include "DataFormats/JetReco/interface/PFJet.h"
 #include "DataFormats/RecoCandidate/interface/RecoCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
 #include "DataFormats/BTauReco/interface/JetTag.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFJetFiller.h"
@@ -100,6 +99,7 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->uncorrEnergy;
   delete privateData_->L2L3CorrEnergy;
   delete privateData_->area;
+  delete privateData_->weightedDz;
 
   // for backward compatibility with existing trees
   delete privateData_->chargedEmEnergy;
@@ -149,6 +149,12 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << L2L3correctedCollectionTag; }
     L2L3correctedCollection = L2L3correctedCollectionHandle.product();
   }
+
+  edm::Handle< reco::VertexCollection>  primaryVertexColl  ;
+  try { iEvent.getByLabel("offlinePrimaryVertices", primaryVertexColl); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get primary vertex collection: offlinePrimaryVertices"; }
+  VertexCollection::const_iterator vMax = primaryVertexColl->begin();
+  bestPrimaryVertex_ = *vMax;
 
   privateData_->clearTrkVectors();
 
@@ -232,6 +238,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
         privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
         privateData_->area->push_back( thisPFJet->jetArea() );
+        privateData_->weightedDz->push_back( calcDzPFJet(thisPFJet) );
 
         // compute marini's variables
         QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
@@ -250,6 +257,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->photonMultiplicity->push_back( -1. );
         privateData_->electronMultiplicity->push_back( -1. );
         privateData_->muonMultiplicity->push_back( -1. );
+        privateData_->weightedDz->push_back( -1. );
 
         // for backward compatibility with existing trees
         privateData_->chargedEmEnergy->push_back( -1. );
@@ -367,6 +375,7 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"HFHadronMultiplicity"+colSuffix).c_str(), *privateData_->HFHadronMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"HFEMMultiplicity"+colSuffix).c_str(), *privateData_->HFEMMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"area"+colSuffix).c_str(), *privateData_->area, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"weightedDz"+colSuffix).c_str(), *privateData_->weightedDz, nCandString.c_str(), 0, "Reco");
 
   // for backward compatibility with existing trees 
   cmstree->column((colPrefix+"chargedEmEnergy"+colSuffix).c_str(), *privateData_->chargedEmEnergy, nCandString.c_str(), 0, "Reco");
@@ -440,6 +449,7 @@ void CmsPFJetFillerData::initialise() {
   uncorrEnergy = new vector<float>;
   L2L3CorrEnergy = new vector<float>;
   area = new vector<float>;
+  weightedDz = new vector<float>;
   ptD = new vector<float>;
   rmsCand = new vector<float>;
 
@@ -584,4 +594,26 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 
   return vars;
 
+}
+
+float CmsPFJetFiller::calcDzPFJet( const PFJet* pfjet ) {
+  
+  float num, denom;
+  num = denom = 0.0;
+
+  std::vector <reco::PFCandidatePtr> constituents = pfjet->getPFConstituents();
+  for(std::vector<reco::PFCandidatePtr>::const_iterator pfcand=constituents.begin(); pfcand!=constituents.end(); pfcand++) {
+    reco::TrackRef trk = (*pfcand)->trackRef();
+    if(trk.isNonnull()) {
+      float dz = trk->vz() - bestPrimaryVertex_.z();
+      float pt = trk->pt();
+      num += pt*pt * dz;
+      denom += pt*pt;
+    }
+  }
+
+  float dzjet = -1.0;
+  if(denom>0) dzjet = num/denom;
+
+  return dzjet;
 }

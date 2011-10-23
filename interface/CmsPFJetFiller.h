@@ -16,9 +16,13 @@
 #define CmsPFJetFiller_h
 
 #include "FWCore/Framework/interface/Event.h"
-#include "DataFormats/Common/interface/Handle.h"
 #include "FWCore/Framework/interface/EventSetup.h"
 #include "FWCore/ParameterSet/interface/ParameterSet.h"
+#include "DataFormats/Common/interface/Handle.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/JetReco/interface/Jet.h"
+#include "DataFormats/JetReco/interface/PFJet.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -58,6 +62,7 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
     *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags;
+  std::vector<float> *weightedDz;
   
   // for backward compatibility with existing trees
   std::vector<float> *chargedEmEnergy, *neutralEmEnergy;
@@ -102,6 +107,7 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   
   void writeJetInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&);
   void treeJetInfo(const std::string &colPrefix, const std::string &colSuffix);
+  float calcDzPFJet( const reco::PFJet* pfjet );
 
   // Friends
   bool saveJetBTag_;
@@ -119,6 +125,8 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   CmsPFJetFillerData *privateData_;
 
   CmsTree *cmstree;
+
+  reco::Vertex bestPrimaryVertex_;
 
 };
 

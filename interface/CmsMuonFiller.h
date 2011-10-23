@@ -49,6 +49,7 @@ struct CmsMuonFillerData : public CmsCandidateFillerData {
   vector<int> *muonId, *type, *numberOfMatches;
   vector<float> *pfChargedIso, *pfNeutralIso, *pfPhotonIso, *pfGenericChargedIso, *pfGenericNeutralIso, *pfGenericPhotonIso,
     *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso, *pfCombinedIso;
+  vector<float> *kink;
 
   vector<float> *EcalExpDepo, *HcalExpDepo, *HoExpDepo, *emS9, *hadS9, *hoS9, *CaloComp;
 

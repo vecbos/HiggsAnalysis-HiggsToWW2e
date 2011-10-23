@@ -127,6 +127,7 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->  hoEt05;
   delete privateData_->  nTrk05;
   delete privateData_->  nJets05;
+  delete privateData_->  kink;
 
   delete privateData_->EcalExpDepo;
   delete privateData_->HcalExpDepo;
@@ -360,7 +361,10 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfGenericNoOverNeutralIso->push_back( muonsPfGenericNoOverNeutralIsoVal[muonRef] );
     privateData_->pfGenericNoOverPhotonIso->push_back( muonsPfGenericNoOverPhotonIsoVal[muonRef] );
     privateData_->pfCombinedIso->push_back( electronsPfCombinedIsoVal[muonRef] );
-      
+
+    // track kinks
+    privateData_->kink->push_back(muonRef->combinedQuality().trkKink) ;
+
     // Expected deposits in CALO
     privateData_->EcalExpDepo->push_back(muon->calEnergy().em);
     privateData_->HcalExpDepo->push_back(muon->calEnergy().had);
@@ -400,6 +404,8 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfGenericNoOverNeutralIso->push_back( -1 );
     privateData_->pfGenericNoOverPhotonIso->push_back( -1 );
     privateData_->pfCombinedIso->push_back( -1 );
+
+    privateData_->kink->push_back( -1 );
 
     // Expected deposits in CALO
     privateData_->EcalExpDepo->push_back(-1.);
@@ -447,6 +453,7 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"pfGenericNoOverNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverNeutralIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfGenericNoOverPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericNoOverPhotonIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"kink"+colSuffix).c_str(),  *privateData_->kink, nCandString.c_str(), 0, "Reco");
 
   //  Expected deposits in CALO
   cmstree->column((colPrefix+"EcalExpDepo"+colSuffix).c_str(), *privateData_->EcalExpDepo, nCandString.c_str(), 0, "Reco");
@@ -495,6 +502,8 @@ void CmsMuonFillerData::initialise() {
   pfGenericNoOverPhotonIso   = new vector<float>;
   pfCombinedIso            = new vector<float>;
 
+  kink = new vector<float>;
+
   EcalExpDepo = new vector<float>;
   HcalExpDepo = new vector<float>;
   HoExpDepo = new vector<float>;
@@ -541,6 +550,8 @@ void CmsMuonFillerData::clearTrkVectors() {
   pfGenericNoOverNeutralIso  ->clear();
   pfGenericNoOverPhotonIso   ->clear();
   pfCombinedIso            ->clear();
+
+  kink->clear();
 
   EcalExpDepo->clear();
   HcalExpDepo->clear();
