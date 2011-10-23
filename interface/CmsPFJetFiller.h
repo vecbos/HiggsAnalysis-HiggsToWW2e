@@ -62,7 +62,7 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
     *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags;
-  std::vector<float> *weightedDz;
+  std::vector<float> *weightedDz1, *weightedDz2;
   
   // for backward compatibility with existing trees
   std::vector<float> *chargedEmEnergy, *neutralEmEnergy;
@@ -107,7 +107,8 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   
   void writeJetInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&);
   void treeJetInfo(const std::string &colPrefix, const std::string &colSuffix);
-  float calcDzPFJet( const reco::PFJet* pfjet );
+  std::pair<float,float> calcDzPFJet( const reco::PFJet* pfjet );
+  float DzCorrected(reco::TrackRef trk, reco::Vertex vtx);
 
   // Friends
   bool saveJetBTag_;

@@ -21,6 +21,7 @@
 
 #include "fastjet/PseudoJet.hh"
 #include "fastjet/ClusterSequence.hh"
+#include <TVector3.h>
 
 #include <string>
 
@@ -99,7 +100,8 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->uncorrEnergy;
   delete privateData_->L2L3CorrEnergy;
   delete privateData_->area;
-  delete privateData_->weightedDz;
+  delete privateData_->weightedDz1;
+  delete privateData_->weightedDz2;
 
   // for backward compatibility with existing trees
   delete privateData_->chargedEmEnergy;
@@ -238,7 +240,9 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->chargedEmEnergy->push_back( thisPFJet->chargedEmEnergy() );
         privateData_->neutralEmEnergy->push_back( thisPFJet->neutralEmEnergy() );
         privateData_->area->push_back( thisPFJet->jetArea() );
-        privateData_->weightedDz->push_back( calcDzPFJet(thisPFJet) );
+        std::pair<float,float> avgdzjet = calcDzPFJet(thisPFJet);
+        privateData_->weightedDz1->push_back( avgdzjet.first );
+        privateData_->weightedDz2->push_back( avgdzjet.second );
 
         // compute marini's variables
         QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
@@ -257,7 +261,8 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->photonMultiplicity->push_back( -1. );
         privateData_->electronMultiplicity->push_back( -1. );
         privateData_->muonMultiplicity->push_back( -1. );
-        privateData_->weightedDz->push_back( -1. );
+        privateData_->weightedDz1->push_back( -1. );
+        privateData_->weightedDz2->push_back( -1. );
 
         // for backward compatibility with existing trees
         privateData_->chargedEmEnergy->push_back( -1. );
@@ -375,7 +380,8 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"HFHadronMultiplicity"+colSuffix).c_str(), *privateData_->HFHadronMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"HFEMMultiplicity"+colSuffix).c_str(), *privateData_->HFEMMultiplicity, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"area"+colSuffix).c_str(), *privateData_->area, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"weightedDz"+colSuffix).c_str(), *privateData_->weightedDz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"weightedDz1"+colSuffix).c_str(), *privateData_->weightedDz1, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"weightedDz2"+colSuffix).c_str(), *privateData_->weightedDz2, nCandString.c_str(), 0, "Reco");
 
   // for backward compatibility with existing trees 
   cmstree->column((colPrefix+"chargedEmEnergy"+colSuffix).c_str(), *privateData_->chargedEmEnergy, nCandString.c_str(), 0, "Reco");
@@ -449,7 +455,8 @@ void CmsPFJetFillerData::initialise() {
   uncorrEnergy = new vector<float>;
   L2L3CorrEnergy = new vector<float>;
   area = new vector<float>;
-  weightedDz = new vector<float>;
+  weightedDz1 = new vector<float>;
+  weightedDz2 = new vector<float>;
   ptD = new vector<float>;
   rmsCand = new vector<float>;
 
@@ -491,6 +498,8 @@ void CmsPFJetFillerData::clearTrkVectors() {
   uncorrEnergy->clear();
   L2L3CorrEnergy->clear();
   area->clear();
+  weightedDz1->clear();
+  weightedDz2->clear();
   ptD->clear();
   rmsCand->clear();
 
@@ -596,24 +605,39 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 
 }
 
-float CmsPFJetFiller::calcDzPFJet( const PFJet* pfjet ) {
+// calculating average dzjet. The two output differ only in the calculation of corrected deltaZ of the track wrt the PV
+// first is Guillelmo's deltaZ method (below). second is Track dsz method.
+std::pair<float,float> CmsPFJetFiller::calcDzPFJet( const PFJet* pfjet ) {
   
-  float num, denom;
-  num = denom = 0.0;
+  float num1, num2, denom;
+  num1 = num2 = denom = 0.0;
 
   std::vector <reco::PFCandidatePtr> constituents = pfjet->getPFConstituents();
   for(std::vector<reco::PFCandidatePtr>::const_iterator pfcand=constituents.begin(); pfcand!=constituents.end(); pfcand++) {
     reco::TrackRef trk = (*pfcand)->trackRef();
     if(trk.isNonnull()) {
-      float dzCorr = trk->dsz(bestPrimaryVertex_.position());
+      float dzCorr1 = DzCorrected(trk,bestPrimaryVertex_);
+      float dzCorr2 = trk->dsz(bestPrimaryVertex_.position());
       float pt = trk->pt();
-      num += pt*pt * dzCorr;
+      num1 += pt*pt * dzCorr1;
+      num2 += pt*pt * dzCorr2;
       denom += pt*pt;
     }
   }
 
-  float dzjet = -1.0;
-  if(denom>0) dzjet = num/denom;
+  float dzjet1, dzjet2;
+  dzjet1 = dzjet2 = -1.0;
+  if(denom>0) {
+    dzjet1 = num1/denom;
+    dzjet2 = num2/denom;
+  }
+  return std::make_pair<float,float>(dzjet1,dzjet2);
+}
 
-  return dzjet;
+float CmsPFJetFiller::DzCorrected(reco::TrackRef trk, reco::Vertex vtx)
+{
+  // Compute Dxy with respect to a given position
+  TVector3 momPerp(trk->px(),trk->py(),0);
+  TVector3 posPerp(trk->vx()-vtx.position().x(),trk->vy()-vtx.position().y(),0);
+  return trk->vz()-vtx.position().z() - posPerp.Dot(momPerp)/trk->pt() * (trk->pz()/trk->pt());
 }
