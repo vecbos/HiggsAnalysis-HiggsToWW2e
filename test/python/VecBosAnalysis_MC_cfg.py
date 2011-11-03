@@ -119,6 +119,5 @@ process.p = cms.Path ( process.totalKinematicsFilter
                        * process.ourJetSequenceMCReduced
                        * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
-                       * process.FastjetForIsolation )
-
-process.q = cms.EndPath ( process.treeDumper )
+                       * process.FastjetForIsolation
+                       * process.treeDumper )
