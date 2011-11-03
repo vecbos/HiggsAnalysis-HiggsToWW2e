@@ -14,6 +14,7 @@ cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/DataFormats UserCode/Mangano/W
 cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
+cvs co -r CMSSW_4_2_4 GeneratorInterface/GenFilters
 
 scram b
 
