@@ -54,6 +54,10 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
+# --- filter to reject badly generated events
+# ( https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html )
+process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
@@ -106,7 +110,8 @@ process.source = cms.Source("PoolSource",
                             fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root')
                             )
 
-process.p = cms.Path ( process.leptonLinkedTracks
+process.p = cms.Path ( process.totalKinematicsFilter
+                       * process.leptonLinkedTracks
                        * process.mergedSuperClusters
                        * process.chargedMetProducer
                        * process.metSequence
