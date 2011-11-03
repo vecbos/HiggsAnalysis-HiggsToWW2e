@@ -221,20 +221,20 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       trackCountingHighEffBJetTags;
 
     if(saveJetBTag_) {
-      iEvent.getByLabel("combinedSecondaryVertexBJetTags", combinedSecondaryVertexBJetTags);
-      iEvent.getByLabel("combinedSecondaryVertexMVABJetTags", combinedSecondaryVertexMVABJetTags);
-      iEvent.getByLabel("jetBProbabilityBJetTags", jetBProbabilityBJetTags);
-      iEvent.getByLabel("jetProbabilityBJetTags", jetProbabilityBJetTags);
-      iEvent.getByLabel("simpleSecondaryVertexHighEffBJetTags", simpleSecondaryVertexHighEffBJetTags);
-      iEvent.getByLabel("simpleSecondaryVertexHighPurBJetTags", simpleSecondaryVertexHighPurBJetTags);
-      iEvent.getByLabel("softMuonBJetTags", softMuonBJetTags);
-      iEvent.getByLabel("softMuonByIP3dBJetTags", softMuonByIP3dBJetTags);
-      iEvent.getByLabel("softMuonByPtBJetTags", softMuonByPtBJetTags);
-      // iEvent.getByLabel("softElectronBJetTags", softElectronBJetTags);
-      iEvent.getByLabel("softElectronByIP3dBJetTags", softElectronByIP3dBJetTags);
-      iEvent.getByLabel("softElectronByPtBJetTags", softElectronByPtBJetTags);
-      iEvent.getByLabel("trackCountingHighPurBJetTags", trackCountingHighPurBJetTags);
-      iEvent.getByLabel("trackCountingHighEffBJetTags", trackCountingHighEffBJetTags);
+      iEvent.getByLabel("newCombinedSecondaryVertexBJetTags", combinedSecondaryVertexBJetTags);
+      iEvent.getByLabel("newCombinedSecondaryVertexMVABJetTags", combinedSecondaryVertexMVABJetTags);
+      iEvent.getByLabel("newJetBProbabilityBJetTags", jetBProbabilityBJetTags);
+      iEvent.getByLabel("newJetProbabilityBJetTags", jetProbabilityBJetTags);
+      iEvent.getByLabel("newSimpleSecondaryVertexHighEffBJetTags", simpleSecondaryVertexHighEffBJetTags);
+      iEvent.getByLabel("newSimpleSecondaryVertexHighPurBJetTags", simpleSecondaryVertexHighPurBJetTags);
+      iEvent.getByLabel("newSoftMuonBJetTags", softMuonBJetTags);
+      iEvent.getByLabel("newSoftMuonByIP3dBJetTags", softMuonByIP3dBJetTags);
+      iEvent.getByLabel("newSoftMuonByPtBJetTags", softMuonByPtBJetTags);
+      // iEvent.getByLabel("newSoftElectronBJetTags", softElectronBJetTags);
+      iEvent.getByLabel("newSoftElectronByIP3dBJetTags", softElectronByIP3dBJetTags);
+      iEvent.getByLabel("newSoftElectronByPtBJetTags", softElectronByPtBJetTags);
+      iEvent.getByLabel("newTrackCountingHighPurBJetTags", trackCountingHighPurBJetTags);
+      iEvent.getByLabel("newTrackCountingHighEffBJetTags", trackCountingHighEffBJetTags);
     }
 
     edm::Handle<reco::JetIDValueMap> hJetIDMap;
