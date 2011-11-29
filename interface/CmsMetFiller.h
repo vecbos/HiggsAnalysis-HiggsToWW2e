@@ -36,7 +36,7 @@ struct CmsMetFillerData : public CmsCandidateFillerData {
   vector<float> *sumEt;
   vector<float> *mEtSig;
   vector<float> *significance;
-
+  int *filterBits;
 
 public:
   void initialise();

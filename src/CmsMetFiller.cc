@@ -64,6 +64,7 @@ CmsMetFiller::~CmsMetFiller() {
   delete privateData_->sumEt;
   delete privateData_->mEtSig;
   delete privateData_->significance;
+  delete privateData_->filterBits;
 }
 
 
@@ -105,7 +106,17 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 				     << maxTracks_ 
 				     << ". Collection will be truncated ";
     }
-  
+
+    // take the noise filter bits
+    edm::Handle< bool > ECALTPFilter;
+    try { iEvent.getByLabel("EcalDeadCellEventFlagProducer", ECALTPFilter); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << ECALTPFilter; }
+    bool ECALTPFilterFlag = ECALTPFilter.product();
+
+    int packedFilters = -1;
+    packedFilters = ECALTPFilterFlag; // others to be added in or asb its. Just one of the moment
+    *(privateData_->filterBits) = packedFilters;
+
     *(privateData_->ncand) = collection->size();
 
     edm::View<reco::Candidate>::const_iterator cand;
@@ -150,6 +161,9 @@ void CmsMetFiller::treeMetInfo(const std::string colPrefix, const std::string co
   cmstree->column((colPrefix+"sumEt"+colSuffix).c_str(), *privateData_->sumEt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"mEtSig"+colSuffix).c_str(), *privateData_->mEtSig, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"significance"+colSuffix).c_str(), *privateData_->significance, nCandString.c_str(), 0, "Reco");
+  
+  cmstree->column("METFlags", *privateData_->filterBits, 0, "Reco");
+  
 }
 
 
@@ -164,6 +178,7 @@ void CmsMetFillerData::initialise() {
   sumEt = new vector<float>;
   mEtSig = new vector<float>;
   significance = new vector<float>;
+  filterBits = new int;
 
   mcIndex = new vector<int>;
 

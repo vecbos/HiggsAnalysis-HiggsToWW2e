@@ -22,6 +22,9 @@ process.load("WWAnalysis.Tools.chargedMetProducer_cfi")
 process.chargedMetProducer.collectionTag = "particleFlow"
 process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
+# --- noise filters ---
+process.load("MyAnalysis.METFlags.EcalDeadCellEventFlagProducer_cfi")
+
 # do not use residual corrections in MC
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
@@ -114,6 +117,7 @@ process.p = cms.Path ( process.totalKinematicsFilter
                        * process.leptonLinkedTracks
                        * process.mergedSuperClusters
                        * process.chargedMetProducer
+                       * process.EcalDeadCellEventFlagProducer
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceMCReduced
