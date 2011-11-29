@@ -4,8 +4,9 @@ setenv SCRAM_ARCH slc5_amd64_gcc434
 cmsrel CMSSW_4_2_8_patch7
 cd CMSSW_4_2_8_patch7
 cmsenv
-cvs co -r V25-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V26-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V00-4_2_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r V02-04-17 RecoJets/Configuration
 cvs co -r V04-01-00 RecoJets/JetAlgorithms
 cvs co -r V05-05-03 RecoJets/JetProducers
