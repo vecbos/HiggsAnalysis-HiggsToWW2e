@@ -108,14 +108,28 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     }
 
     // take the noise filter bits
+    // ECAL MET optional filters
     edm::Handle< bool > ECALTPFilter;
     try { iEvent.getByLabel("EcalDeadCellEventFlagProducer", ECALTPFilter); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << ECALTPFilter; }
-    bool ECALTPFilterFlag = ECALTPFilter.product();
+    bool ECALTPFilterFlag = *ECALTPFilter;
+
+    edm::Handle< int > ECALDeadDRFilter;
+    try { iEvent.getByLabel("simpleDRFlagProducer","deadCellStatus", ECALDeadDRFilter); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get int: " << ECALDeadDRFilter; }
+    int ECALDeadDRFilterFlag = *ECALDeadDRFilter;
+    
+    edm::Handle< int > ECALBoundaryDRFilter;
+    try { iEvent.getByLabel("simpleDRFlagProducer","boundaryStatus", ECALBoundaryDRFilter); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get int: " << ECALBoundaryDRFilter; }
+    int ECALBoundaryDRFilterFlag = *ECALBoundaryDRFilter;
+
+    int drDead = (ECALDeadDRFilterFlag>0) ? 1 : 0;
+    int drBoundary = (ECALBoundaryDRFilterFlag>0) ? 1 : 0;
 
     int packedFilters = -1;
-    packedFilters = ECALTPFilterFlag; // others to be added in or asb its. Just one of the moment
-    *(privateData_->filterBits) = packedFilters;
+    packedFilters = ECALTPFilterFlag; // others to be added in or as bits. Just one of the moment
+    *(privateData_->filterBits) = ( drDead << 2 ) | ( drBoundary << 1 ) | packedFilters;
 
     *(privateData_->ncand) = collection->size();
 

@@ -23,7 +23,7 @@ process.chargedMetProducer.collectionTag = "particleFlow"
 process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 # --- noise filters ---
-process.load("MyAnalysis.METFlags.EcalDeadCellEventFlagProducer_cfi")
+process.load("HiggsAnalysis.HiggsToWW2e.METOptionalFilterFlags_cff")
 
 # do not use residual corrections in MC
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
@@ -117,7 +117,7 @@ process.p = cms.Path ( process.totalKinematicsFilter
                        * process.leptonLinkedTracks
                        * process.mergedSuperClusters
                        * process.chargedMetProducer
-                       * process.EcalDeadCellEventFlagProducer
+                       * process.metOptionalFilterSequence
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceMCReduced

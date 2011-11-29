@@ -22,7 +22,7 @@ process.chargedMetProducer.collectionTag = "particleFlow"
 process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 # --- noise filters ---
-process.load("MyAnalysis.METFlags.EcalDeadCellEventFlagProducer_cfi")
+process.load("HiggsAnalysis.HiggsToWW2e.METOptionalFilterFlags_cff")
 
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
@@ -109,7 +109,7 @@ process.source = cms.Source("PoolSource",
 process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters 
                        * process.chargedMetProducer
-                       * process.EcalDeadCellEventFlagProducer
+                       * process.metOptionalFilterSequence
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceDataReduced
