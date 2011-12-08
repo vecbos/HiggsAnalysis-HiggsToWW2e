@@ -132,9 +132,12 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << CSCHaloFilter; }
     bool CSCHaloFilterFlag = *CSCHaloFilter;    
 
-    int packedFilters = -1;
-    packedFilters = ECALTPFilterFlag;
-    *(privateData_->filterBits) = (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
+    edm::Handle< bool > trackerFailureFilter;
+    try { iEvent.getByLabel("trackingFailureFlagProducer", trackerFailureFilter); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << trackerFailureFilter; }
+    bool trackerFailureFilterFlag = *trackerFailureFilter;    
+
+    *(privateData_->filterBits) = (trackerFailureFilterFlag << 4) | (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
 
     *(privateData_->ncand) = collection->size();
 
