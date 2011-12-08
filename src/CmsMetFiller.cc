@@ -127,9 +127,14 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     int drDead = (ECALDeadDRFilterFlag>0) ? 1 : 0;
     int drBoundary = (ECALBoundaryDRFilterFlag>0) ? 1 : 0;
 
+    edm::Handle< bool > CSCHaloFilter;
+    try { iEvent.getByLabel("CSCTightHaloFlagProducer", CSCHaloFilter); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << CSCHaloFilter; }
+    bool CSCHaloFilterFlag = *CSCHaloFilter;    
+
     int packedFilters = -1;
-    packedFilters = ECALTPFilterFlag; // others to be added in or as bits. Just one of the moment
-    *(privateData_->filterBits) = ( drDead << 2 ) | ( drBoundary << 1 ) | packedFilters;
+    packedFilters = ECALTPFilterFlag;
+    *(privateData_->filterBits) = (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
 
     *(privateData_->ncand) = collection->size();
 
