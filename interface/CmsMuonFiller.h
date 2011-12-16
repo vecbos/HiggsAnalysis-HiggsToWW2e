@@ -26,14 +26,6 @@
 #include "DataFormats/MuonReco/interface/MuonSegmentMatch.h"
 #include "DataFormats/Common/interface/ValueMap.h"
 
-#include "Geometry/CaloGeometry/interface/CaloGeometry.h"
-#include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
-#include "TrackingTools/TrackAssociator/interface/CachedTrajectory.h"
-#include "TrackingTools/TrackAssociator/interface/CaloDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/EcalDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/MuonDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/HcalDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/HODetIdAssociator.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
@@ -97,8 +89,6 @@ class CmsMuonFiller : public CmsCandidateFiller {
 			     bool dumpData=false);
 
   
-  void SetGeometry(const edm::EventSetup& iSetup);
-
  private:
   
   void writeTrkInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&, const reco::Muon *muon);
@@ -124,19 +114,7 @@ class CmsMuonFiller : public CmsCandidateFiller {
 
   CmsTree *cmstree;
 
-  // Geometry
-  EcalDetIdAssociator ecalDetIdAssociator_;
-  HcalDetIdAssociator hcalDetIdAssociator_;
-  HODetIdAssociator   hoDetIdAssociator_;
-  CaloDetIdAssociator caloDetIdAssociator_;
-  MuonDetIdAssociator muonDetIdAssociator_;
-
-
-  CachedTrajectory cachedTrajectory_;
   edm::Handle< reco::TrackRefVector > h_tracks;
-  edm::ESHandle<MagneticField> bField;
-  edm::ESHandle<CaloGeometry> theCaloGeometry_;
-  edm::ESHandle<GlobalTrackingGeometry> theTrackingGeometry_;
 
   typedef edm::ValueMap<double> isoFromDepositsMap;
   typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;

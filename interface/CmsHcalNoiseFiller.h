@@ -27,12 +27,6 @@
 
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/Records/interface/GlobalTrackingGeometryRecord.h"
-#include "TrackingTools/TrackAssociator/interface/CachedTrajectory.h"
-#include "TrackingTools/TrackAssociator/interface/CaloDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/EcalDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/MuonDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/HcalDetIdAssociator.h"
-#include "TrackingTools/TrackAssociator/interface/HODetIdAssociator.h"
 #include "MagneticField/Engine/interface/MagneticField.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
