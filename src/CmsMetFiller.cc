@@ -17,6 +17,7 @@
 #include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
+#include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
 
 #include <TTree.h>
 
@@ -137,7 +138,19 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << trackerFailureFilter; }
     bool trackerFailureFilterFlag = *trackerFailureFilter;    
 
-    *(privateData_->filterBits) = (trackerFailureFilterFlag << 4) | (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
+    edm::InputTag ecalAnomalousFilterTag("EcalAnomalousEventFilter","anomalousECALVariables");
+    Handle<AnomalousECALVariables> anomalousECALvarsHandle;
+    iEvent.getByLabel(ecalAnomalousFilterTag, anomalousECALvarsHandle);
+    AnomalousECALVariables anomalousECALvars;
+    if (anomalousECALvarsHandle.isValid()) {
+      anomalousECALvars = *anomalousECALvarsHandle;
+    } else {
+      edm::LogWarning("anomalous ECAL Vars not valid/found");
+    } 
+
+    bool isNotDeadEcalCluster = !(anomalousECALvars.isDeadEcalCluster());
+
+    *(privateData_->filterBits) = (isNotDeadEcalCluster << 5) | (trackerFailureFilterFlag << 4) | (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
 
     *(privateData_->ncand) = collection->size();
 
