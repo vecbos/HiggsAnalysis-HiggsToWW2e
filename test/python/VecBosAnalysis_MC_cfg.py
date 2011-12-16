@@ -8,7 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START42_V14B::All'
+process.GlobalTag.globaltag = 'START44_V10::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
@@ -24,6 +24,9 @@ process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 # --- noise filters ---
 process.load("HiggsAnalysis.HiggsToWW2e.METOptionalFilterFlags_cff")
+
+# --- tracker failures ---
+process.load("MyAnalysis.METFlags.logErrorAnalysisProducer_cff")
 
 # do not use residual corrections in MC
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
@@ -124,4 +127,6 @@ process.p = cms.Path ( process.totalKinematicsFilter
                        * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
-                       * process.treeDumper )
+                       * process.logErrorAnalysis
+                       * process.treeDumper
+                       )

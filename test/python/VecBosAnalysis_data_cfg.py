@@ -8,7 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR_R_42_V21::All'
+process.GlobalTag.globaltag = 'GR_R_44_V12::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -23,6 +23,9 @@ process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
 # --- noise filters ---
 process.load("HiggsAnalysis.HiggsToWW2e.METOptionalFilterFlags_cff")
+
+# --- tracker failures ---
+process.load("MyAnalysis.METFlags.logErrorAnalysisProducer_cff")
 
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL2L3Residual'
@@ -103,7 +106,7 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DoubleElectron_08Nov2011.root')
                             )
 
 process.p = cms.Path ( process.leptonLinkedTracks
@@ -116,6 +119,7 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
+                       * process.logErrorAnalysis
+                       * process.treeDumper
                        )
 
-process.q = cms.EndPath ( process.treeDumper )

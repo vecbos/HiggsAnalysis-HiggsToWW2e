@@ -263,6 +263,9 @@ muonCombinedPFIsoMapProducer = WWAnalysis.Tools.muonPFIsoMapProd_cfi.muonPFIsoMa
 muonCombinedPFIsoMapProducer.vtxLabel = 'offlinePrimaryVertices' # if the event has the first vertex bad, will be discarded offline.
 
 from CommonTools.ParticleFlow.pfNoPileUp_cff import *
+pfPileUp.PFCandidates = "particleFlow"
+pfNoPileUp.bottomCollection = "particleFlow"
+
 pfPUSequence = cms.Sequence( pfPileUp * pfNoPileUp )
 
 pfIsoStdSequence = cms.Sequence( goodMuons * goodElectrons * pfIsoSequence )

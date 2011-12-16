@@ -14,6 +14,7 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
 
@@ -127,10 +128,9 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     int drDead = (ECALDeadDRFilterFlag>0) ? 1 : 0;
     int drBoundary = (ECALBoundaryDRFilterFlag>0) ? 1 : 0;
 
-    edm::Handle< bool > CSCHaloFilter;
-    try { iEvent.getByLabel("CSCTightHaloFlagProducer", CSCHaloFilter); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << CSCHaloFilter; }
-    bool CSCHaloFilterFlag = *CSCHaloFilter;    
+    edm::Handle< BeamHaloSummary > beamHaloH;
+    iEvent.getByLabel("BeamHaloSummary", beamHaloH);
+    bool CSCHaloFilterFlag = beamHaloH->CSCTightHaloId();
 
     edm::Handle< bool > trackerFailureFilter;
     try { iEvent.getByLabel("trackingFailureFlagProducer", trackerFailureFilter); }
