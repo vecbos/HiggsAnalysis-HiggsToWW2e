@@ -131,7 +131,7 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     edm::Handle< BeamHaloSummary > beamHaloH;
     iEvent.getByLabel("BeamHaloSummary", beamHaloH);
-    bool CSCHaloFilterFlag = beamHaloH->CSCTightHaloId();
+    bool CSCHaloFilterFlag = ! beamHaloH->CSCTightHaloId();
 
     edm::Handle< bool > trackerFailureFilter;
     try { iEvent.getByLabel("trackingFailureFlagProducer", trackerFailureFilter); }
