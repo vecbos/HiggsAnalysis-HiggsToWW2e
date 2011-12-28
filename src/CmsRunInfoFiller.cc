@@ -130,17 +130,19 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
   cmstree->column("rhoJetsFastJet", rhoJets, float(0.), "Jets");
 
   // log errors (tracker failures)
-  edm::Handle< bool > tooManySeedsH;
-  iEvent.getByLabel(edm::InputTag("tooManySeeds:TrackerLogError"), tooManySeedsH);
-  bool tooManySeeds = *tooManySeedsH;
-
-  edm::Handle< bool > tooManyClustersH;
-  iEvent.getByLabel(edm::InputTag("tooManyClusters:TrackerLogError"), tooManyClustersH);
-  bool tooManyClusters = *tooManyClustersH;
-
-  int trackerFailures = ( tooManySeeds << 1 ) | tooManyClusters;
-  
-  cmstree->column("tooManyTrackerFailures", trackerFailures, 0, "LogError");
+  if(!isMC_) {
+    edm::Handle< bool > tooManySeedsH;
+    iEvent.getByLabel(edm::InputTag("tooManySeeds:TrackerLogError"), tooManySeedsH);
+    bool tooManySeeds = *tooManySeedsH;
+    
+    edm::Handle< bool > tooManyClustersH;
+    iEvent.getByLabel(edm::InputTag("tooManyClusters:TrackerLogError"), tooManyClustersH);
+    bool tooManyClusters = *tooManyClustersH;
+    
+    int trackerFailures = ( tooManySeeds << 1 ) | tooManyClusters;
+    
+    cmstree->column("tooManyTrackerFailures", trackerFailures, 0, "LogError");
+  }
 
   treeRunInfo();
 
