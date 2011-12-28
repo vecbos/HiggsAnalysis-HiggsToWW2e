@@ -22,9 +22,6 @@ process.load("WWAnalysis.Tools.chargedMetProducer_cfi")
 process.chargedMetProducer.collectionTag = "particleFlow"
 process.chargedMetProducer.vertexTag = "offlinePrimaryVertices"
 
-# --- noise filters ---
-process.load("HiggsAnalysis.HiggsToWW2e.METOptionalFilterFlags_cff")
-
 # --- tracker failures ---
 process.load("MyAnalysis.METFlags.logErrorAnalysisProducer_cff")
 
@@ -59,10 +56,6 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
-
-# --- filter to reject badly generated events
-# ( https://hypernews.cern.ch/HyperNews/CMS/get/physics-validation/1489.html )
-process.load("GeneratorInterface.GenFilters.TotalKinematicsFilter_cfi")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
@@ -113,20 +106,17 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root')
+                            fileNames = cms.untracked.vstring('file:RAZOR_MSUGRA_600_600_EW_7TeV_cfi_py_GEN_FASTSIM_HLT_PU.root')
                             )
 
-process.p = cms.Path ( process.totalKinematicsFilter
-                       * process.leptonLinkedTracks
+process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters
                        * process.chargedMetProducer
-                       * process.metOptionalFilterSequence
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceMCReduced
                        * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
-                       * process.logErrorAnalysis
                        * process.treeDumper
                        )
