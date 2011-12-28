@@ -106,7 +106,7 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
-                            fileNames = cms.untracked.vstring('file:RAZOR_MSUGRA_600_600_EW_7TeV_cfi_py_GEN_FASTSIM_HLT_PU.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
                             )
 
 process.p = cms.Path ( process.leptonLinkedTracks
