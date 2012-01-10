@@ -679,6 +679,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string prefix("");
     std::string suffix("Met");
     treeRecoFill1.saveCand(saveCand_);
+    treeRecoFill1.isData(!dumpMCTruth_);
     treeRecoFill1.writeCollectionToTree(metCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // Corrected CALO MET
@@ -690,6 +691,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // Track-Corrected MET
     CmsMetFiller treeRecoFill2(tree_, true);
     suffix = "TCMet";
+    treeRecoFill2.isData(false); // the met flags are per event, dumped for caloMET
     treeRecoFill2.saveCand(saveCand_);
     treeRecoFill2.writeCollectionToTree(TCmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
@@ -698,12 +700,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsMetFiller pfMetFiller(tree_, true);
       suffix = "PFMet";
       pfMetFiller.saveCand(saveCand_);
+      pfMetFiller.isData(false); // the met flags are per event, dumped for caloMET
       pfMetFiller.writeCollectionToTree(PFmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
       // charged PF MET HWW version
       CmsMetFiller treeRecoFill1(tree_, true);
       std::string prefix("");
       std::string suffix("PFChMet");
+      treeRecoFill1.isData(false); // the met flags are per event, dumped for caloMET
       treeRecoFill1.saveCand(saveCand_);
       treeRecoFill1.writeCollectionToTree(PFChMetCollection_, iEvent, iSetup, prefix, suffix, false);
     }
@@ -814,6 +818,7 @@ void HWWTreeDumper::beginJob() {
   //HLTObject Filler needs to exist before beginRun is called
   if(dumpHLTObject_)
     hltObjectFiller_ = new CmsHLTObjectFiller(tree_,hltParms_);
+  else hltObjectFiller_ = 0;
 
   // this pointer MUST survive until tree is closed
   trgNames_ = new vector<std::string>;

@@ -63,6 +63,7 @@ class CmsMetFiller : public CmsCandidateFiller {
 				     const std::string &columnPrefix, const std::string &columnSuffix,
 				     bool dumpData=false);
   
+  virtual void isData(bool what) { isData_ = what; };
 
  protected:
   
@@ -79,6 +80,8 @@ class CmsMetFiller : public CmsCandidateFiller {
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
   int maxMCTracks_;
+
+  bool isData_;
 
   std::string *trkIndexName_;
 };

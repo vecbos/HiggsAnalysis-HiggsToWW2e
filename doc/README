@@ -1,12 +1,51 @@
+--- Recipe to build and run the H->WW / RAZOR 44X  ---
+
+cmsrel CMSSW_4_4_2
+cd CMSSW_4_4_2
+cmsenv
+cvs co -r V03-4_4_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
+cvs co -r V110523_BE -d DataFormats/AnomalousEcalDataFormats UserCode/csander/DataFormats/AnomalousEcalDataFormats
+cvs co -r V110523_BE -d PhysicsTools/EcalAnomalousEventFilter UserCode/csander/PhysicsTools/EcalAnomalousEventFilter
+cvs co -r V110523_BE -d Sandbox UserCode/csander/Sandbox
+cvs co -r V19MAY2011_v3 JetMETAnalysis/ecalDeadCellTools
+cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
+cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
+cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
+cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
+
+scram b
+
+* To produce the trees on AOD:
+- cd HiggsAnalysis/HiggsToWW2e/test/python
+- change in the following cfg.py's: 'runOnAOD = 1' at the beginning of the file
+cmsRun VecBosAnalysis_data_cfg.py
+cmsRun VecBosAnalysis_MC_cfg.py
+
+* To produce the trees on RECO (more complete than the AOD ones):
+- cd HiggsAnalysis/HiggsToWW2e/test/python
+- change in the following cfg.py's: 'runOnAOD = 0' at the beginning of the file
+cmsRun VecBosAnalysis_data_cfg.py
+cmsRun VecBosAnalysis_MC_cfg.py
+
+* crab and multicrab cfgs examples are in:
+HiggsAnalysis/HiggsToWW2e/test/crab
+
+
 --- Recipe to build and run the H->WW / V+jets analysis in 42X (Run2011 reprocessing data and Summer11 MC)  ---
 
 setenv SCRAM_ARCH slc5_amd64_gcc434
 cmsrel CMSSW_4_2_8_patch7
 cd CMSSW_4_2_8_patch7
 cmsenv
-cvs co -r V27-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V30-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r V00-4_2_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
+cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
+cvs co -r V110523_BE -d DataFormats/AnomalousEcalDataFormats UserCode/csander/DataFormats/AnomalousEcalDataFormats
+cvs co -r V110523_BE -d PhysicsTools/EcalAnomalousEventFilter UserCode/csander/PhysicsTools/EcalAnomalousEventFilter
+cvs co -r V110523_BE -d Sandbox UserCode/csander/Sandbox
+cvs co -r V19MAY2011_v3 JetMETAnalysis/ecalDeadCellTools
 cvs co -r V02-04-17 RecoJets/Configuration
 cvs co -r V04-01-00 RecoJets/JetAlgorithms
 cvs co -r V05-05-03 RecoJets/JetProducers
@@ -32,406 +71,4 @@ cmsRun VecBosAnalysis_MC_cfg.py
 
 * crab and multicrab cfgs examples are in:
 HiggsAnalysis/HiggsToWW2e/test/crab
-
-
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 41X (Run2011A data and Spring11 MC)  ---
-
-setenv SCRAM_ARCH slc5_amd64_gcc434
-cmsrel CMSSW_4_1_6
-cd CMSSW_4_1_6/src
-cmsenv
-cvs co -r V00-01-01-02   CommonTools/ParticleFlow                         
-cvs co -r V09-09-04      DataFormats/TrackReco
-cvs co -r branch-41X-V01 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
-cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
-cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
-cvs co -r V06-04-07-01   TrackingTools/TrajectoryState
-cvs co -r V01-04-07      RecoVertex/PrimaryVertexProducer
-cvs co -r V00-03-30      RecoEgamma/ElectronIdentification
-cvs co -r V08-11-09      RecoEgamma/EgammaTools
-cvs co -r V02-04-16 RecoJets/Configuration
-cvs co -r V04-01-00 RecoJets/JetAlgorithms
-cvs co -r V05-05-03-00 RecoJets/JetProducers
-
-scram b
-
-* To produce the trees on AOD:
-- cd HiggsAnalysis/HiggsToWW2e/test/python
-- change in the following cfg.py's: 'runOnAOD = 1' at the beginning of the file
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-
-* To produce the trees on RECO (more complete than the AOD ones):
-- cd HiggsAnalysis/HiggsToWW2e/test/python
-- change in the following cfg.py's: 'runOnAOD = 0' at the beginning of the file
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
-
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 39X (Run 2010A+B data up to Dec.22 re-reco and Winter10 MC) ---
-
-cmsrel CMSSW_3_9_9
-cd CMSSW_3_9_9/src
-cmsenv
-
-cvs co -r V21-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r V03-01-21    CondFormats/JetMETObjects
-cvs co -r V02-02-03    JetMETCorrections/Algorithms
-cvs co -r V03-02-07    JetMETCorrections/Configuration
-cvs co -r V05-00-17    JetMETCorrections/Modules
-cvs co -r V00-03-21    RecoEgamma/ElectronIdentification
-addpkg                 TrackingTools/TrajectoryState
-cvs update -r 1.5 TrackingTools/TrajectoryState/src/TrajectoryStateClosestToBeamLine.cc
-cvs co -r 1.2 TrackingTools/TrajectoryState/BuildFile.xml
-rm TrackingTools/TrajectoryState/BuildFile
-
-scram b
-
-* To produce the trees on AOD:
-- cd HiggsAnalysis/HiggsToWW2e/test/python
-- change in the following cfg.py's: 'runOnAOD = 1' at the beginning of the file
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-
-* To produce the trees on RECO (more complete than the AOD ones):
-- cd HiggsAnalysis/HiggsToWW2e/test/python
-- change in the following cfg.py's: 'runOnAOD = 0' at the beginning of the file
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
-
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 38X ---
-
-cmsrel CMSSW_3_8_7
-cd CMSSW_3_8_7/src
-cmsenv
-
-cvs co -r V12-3_9_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-03-14-03 RecoEgamma/ElectronIdentification
-cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-
-scram b
-
-cd HiggsAnalysis/HiggsToWW2e/test/python
-(1) H->WW trees:
-cmsRun HWW2eAnalysis_cfg.py
-(2) V+jets trees:
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-(3) J/Psi trees:
-cmsRun JPsiAnalysis_data_cfg.py
-cmsRun JPsiAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
-
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 361_p2 ---
-
-scramv1 p CMSSW CMSSW_3_6_1_patch2
-cd CMSSW_3_6_1_patch2/src
-cmsenv
-
-cvs co -r V09-361p2 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-3_5_X -d Configuration/ElectronIdentification UserCode/emanuele/Configuration/ElectronIdentification
-addpkg RecoEgamma/ElectronIdentification V00-03-08
-addpkg RecoEgamma/EgammaTools V00-05-03
-cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-
-cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
-cd RecoEgamma/ElectronIdentification/python/
-rm likelihoodPdfsDB_cfi.py
-wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
-cd -
-
-scram b
-
-cd HiggsAnalysis/HiggsToWW2e/test/python
-(1) H->WW trees:
-cmsRun HWW2eAnalysis_cfg.py
-(2) V+jets trees:
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-(3) J/Psi trees:
-cmsRun JPsiAnalysis_data_cfg.py
-cmsRun JPsiAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_6_X ---
-
-scramv1 p CMSSW CMSSW_3_6_0
-cd CMSSW_3_6_0/src
-cmsenv
-
-cvs co -r V09-3_6_0 -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-3_5_X -d Configuration/ElectronIdentification UserCode/emanuele/Configuration/ElectronIdentification
-addpkg RecoEgamma/ElectronIdentification V00-03-08
-addpkg RecoEgamma/EgammaTools V00-05-02
-cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-
-cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
-cd RecoEgamma/ElectronIdentification/python/
-rm likelihoodPdfsDB_cfi.py
-wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
-cd -
-
-scram b
-
-cd HiggsAnalysis/HiggsToWW2e/test/python
-(1) H->WW trees:
-cmsRun HWW2eAnalysis_cfg.py
-(2) V+jets trees:
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-(3) J/Psi trees:
-cmsRun JPsiAnalysis_data_cfg.py
-cmsRun JPsiAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_5_X ---
-
-scramv1 p CMSSW CMSSW_3_5_8
-cd CMSSW_3_5_8/src
-cmsenv
-
-cvs co -r V10-3_5_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-addpkg RecoEgamma/ElectronIdentification
-cvs co -r V02-3_6_0 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r V00-3_5_X -d Configuration/ElectronIdentification UserCode/emanuele/Configuration/ElectronIdentification
-addpkg RecoEgamma/ElectronIdentification V00-03-08
-addpkg RecoEgamma/EgammaTools V00-05-03
-cvs co -r V02-00-05-07    CondFormats/JetMETObjects
-cvs co -r V02-00-02-03    JetMETCorrections/Configuration
-cvs co -r V02-00-02       JetMETCorrections/Algorithms
-cvs co -r V03-00-01       JetMETCorrections/Modules
-cvs co -r V03-00-01       JetMETCorrections/Objects
-
-cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
-cd RecoEgamma/ElectronIdentification/python/
-rm likelihoodPdfsDB_cfi.py
-wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
-cd -
-
-scram b
-
-cd HiggsAnalysis/HiggsToWW2e/test/python
-(1) H->WW trees:
-cmsRun HWW2eAnalysis_cfg.py
-(2) V+jets trees:
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-(3) J/Psi trees:
-cmsRun JPsiAnalysis_data_cfg.py
-cmsRun JPsiAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
---- Recipe to build and run the H->WW / V+jets / J-Psi analysis in 3_3_X ---
-
-scramv1 p CMSSW CMSSW_3_3_6
-cd CMSSW_3_3_6/src
-cmsenv
-
-cvs co -r V20-3_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-3_3_X HiggsAnalysis/HiggsToWW2Leptons
-addpkg RecoEgamma/ElectronIdentification
-cvs co -r V01-3_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-
-cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_3_2_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
-cd RecoEgamma/ElectronIdentification/python/
-rm likelihoodPdfsDB_cfi.py
-wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
-cd -
-
-scramv1 b
-
-cd HiggsAnalysis/HiggsToWW2e/test/python
-(1) H->WW trees:
-cmsRun HWW2eAnalysis_cfg.py
-(2) V+jets trees:
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-(3) J/Psi trees:
-cmsRun JPsiAnalysis_data_cfg.py
-cmsRun JPsiAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
---- Recipe to build and run the H->WW analysis in 2_2_X ---
-
-> scramv1 p CMSSW CMSSW_2_2_12
-cd CMSSW_2_2_12/src/
-
-> in 2_2_X check out the extra tags for correct isolation modules (no more need in 3XX)
-
-cvs co -r V00-16-07  DataFormats/RecoCandidate
-cvs co -r V00-02-05  EgammaAnalysis/EgammaIsolationProducers
-cvs co -r V01-02-00  PhysicsTools/IsolationAlgos
-cvs co -r V00-02-03  RecoEgamma/EgammaIsolationAlgos
-cvs co -r V00-01-10  RecoEgamma/ElectronIdentification
-
-> check out the Higgs->2e2nu package and the dependenies:
-
-cvs co -r V05-2_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-2_2_X HiggsAnalysis/HiggsToWW2Leptons
-cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-
-> take the new electron likelihood PDFs (done with Summer08 21X samples):
-
-cp /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_2_1_X/electronIdLikelihoodTkIsolated.db HiggsAnalysis/HiggsToWW2e/test/python
-
-> patch the DB path:
-cd RecoEgamma/ElectronIdentification/python/
-rm likelihoodPdfsDB_cfi.py
-wget http://emanuele.web.cern.ch/emanuele/ElectronID/patchLikelihoodDb/likelihoodPdfsDB_cfi.py
-cd -
-
-
-scramv1 b
-
-> run
-cd HiggsAnalysis/HiggsToWW2e/test/python
-cmsRun HWW2eAnalysis_cfg.py
-
-
-
-
-
-
---- Recipe to build and run the H->WW analysis in 2_1_X ---
-
-> scramv1 p CMSSW CMSSW_2_1_17
-cd CMSSW_2_1_17/src/
-
-> in 2_1_X check out the extra tags for correct isolation modules (no more need in 3XX)
-
-cvs co -r V00-16-07  DataFormats/RecoCandidate
-cvs co -r V00-02-05  EgammaAnalysis/EgammaIsolationProducers
-cvs co -r V01-02-00  PhysicsTools/IsolationAlgos
-cvs co -r V00-02-03  RecoEgamma/EgammaIsolationAlgos
-cvs co -r V01-06-05  CondFormats/JetMETObjects
-cvs co -r V01-08-10  JetMETCorrections/Configuration
-cvs co -r V02-09-00  JetMETCorrections/Modules
-
-> check out the Higgs->2e2nu package and the dependenies:
-
-cvs co -r V10-2_1_X HiggsAnalysis/HiggsToWW2e
-cvs co -r V04-2_1_X HiggsAnalysis/HiggsToWW2Leptons
-cvs co -r V03-2_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-
-scramv1 b
-
-> run
-cd HiggsAnalysis/HiggsToWW2e/test/python
-cmsRun HWW2eAnalysis_cfg.py
-
-
-
-
-
-
-
-
-
-
---- Recipe to build and run the H->WW->2e2nu analysis in CMSSW_1_6_9 ---
-
-> get the release:
-scramv1 p -n vanilla169 CMSSW CMSSW_1_6_9
-cd vanilla169/src 
-
-> check out the necessary packages:
-cvs co -r V00-00-04 	      EgammaAnalysis/EgammaIsolationProducers
-cvs co -r V00-00-07-02        EgammaAnalysis/ElectronIDAlgos
-cvs co -r V00-00-04           EgammaAnalysis/ElectronIDProducers
-cvs co -r V00-00-03-01        EgammaAnalysis/ElectronIDESSources
-cvs co -r V00-01-01           CondCore/EgammaPlugins
-cvs co -r V02-06-02           CondFormats/DataRecord
-cvs co -r V00-02-00           CondFormats/EgammaObjects
-cvs co -r V00-01-03           CondFormats/PhysicsToolsObjects
-cvs co -r V00-07-00-02	      DataFormats/EgammaCandidates
-cvs co -r V00-00-04           RecoEgamma/EgammaIsolationAlgos
-cvs co                        HiggsAnalysis/HiggsToWW2Leptons
-cvs co -r V02-1_6_9	      HiggsAnalysis/HiggsToWW2e
-cvs co -r V02-15-10           TrackingTools/TrackAssociator
-
-source HiggsAnalysis/HiggsToWW2e/doc/patch.src
-
-[ --- running on the soups:
-> to run on the soups saving the process ID, etc, add:
-cvs co -r V06-18-03      PhysicsTools/HepMCCandAlgos
-
-> and modify the ttbar cross sections:
-vector<double> CSA07EventWeightProducer::GetTTbarCrossSection() {
-  vector<double> vec;
-  vec.push_back(619.0);
-  vec.push_back(176.0);
-  vec.push_back(34.0);
-  vec.push_back(6.0);
-  vec.push_back(1.5);
-  return vec;
-}
-
-> and remember to turn on the CSA07WeightProducer module in the path "hlRecoPath" and
-  turn on the dumping of the infos with 
-  replace treeDumper.dumpGenInfo = true
-  in the cfg file.
-
-> if the soups are skimmed, only AOD are saved, where trackExtras are not present. Do:
-  replace treeDumper.saveFatTrk = false
-
-end running on the soups --- ]
-
-> build and test interactively:
-scramv1 b
-cmsRun HiggsAnalysis/HiggsToWW2e/test/HWW2eAnalysis.cfg
-
-> to run with CRAB, change, in EgammaAnalysis/ElectronIDESSources/data/likelihoodPdfsDB.cfi:
-replace CondDBCommon.connect = "sqlite_file:electronIdLikelihoodTkIsolated.db"    
-replace CondDBCommon.catalog = "file:electronIdLikelihoodTkIsolatedCRAB.xml"
-> and put, in CRAB cfg file:
-## files to be put in InputSandBox, full path or in the current directory
-## (wildcard * are allowed): comma separated list
-additional_input_files = /afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_1_6_8/electronIdLikelihoodTkIsolated.db, 
-/afs/cern.ch/user/e/emanuele/public/4Likelihood/PDFsSQLite/CMSSW_1_6_8/electronIdLikelihoodTkIsolatedCRAB.xml
-
-
---- Recipe to build and run the H->WW->2e2nu analysis in CMSSW_1_8_4 ---
-
-recipe is not tested: it compiles for now in 1_8_4
-
-cvs co -r V08-12-11      DataFormats/Candidate
-cvs co -r V00-01-00      EgammaAnalysis/ElectronIDESSources
-cvs co -r V00-00-08      EgammaAnalysis/ElectronIDProducers
-cvs co -r edm-27May08    HiggsAnalysis/HiggsToWW2e
-
-
---- Recipe to build and run the H->WW->2e2nu analysis in CMSSW_2_0_9 ---
-
-cvs co -r V09-00-04      DataFormats/Candidate
-cvs co -r V01-2_0_9      HiggsAnalysis/HiggsToWW2e
-cvs co -r V07-00-07      PhysicsTools/CandAlgos
-cvs co -r V09-00-05      PhysicsTools/CandUtils
 

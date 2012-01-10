@@ -14,8 +14,10 @@
 #include "FWCore/MessageLogger/interface/MessageLogger.h"
 
 #include "DataFormats/METReco/interface/MET.h"
+#include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
+#include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
 
 #include <TTree.h>
 
@@ -49,6 +51,8 @@ CmsMetFiller::CmsMetFiller(CmsTree *cmsTree, int maxTracks,
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
   maxTracks_=maxTracks;
   maxMCTracks_=maxMCTracks;
+
+  isData_ = false;
 
   privateData_->initialise();
 }
@@ -107,37 +111,50 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 				     << ". Collection will be truncated ";
     }
 
-    // take the noise filter bits
-    // ECAL MET optional filters
-    edm::Handle< bool > ECALTPFilter;
-    try { iEvent.getByLabel("EcalDeadCellEventFlagProducer", ECALTPFilter); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << ECALTPFilter; }
-    bool ECALTPFilterFlag = *ECALTPFilter;
+    if(isData_) {
+      // take the noise filter bits
+      // ECAL MET optional filters
+      edm::Handle< bool > ECALTPFilter;
+      try { iEvent.getByLabel("EcalDeadCellEventFlagProducer", ECALTPFilter); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << ECALTPFilter; }
+      bool ECALTPFilterFlag = *ECALTPFilter;
 
-    edm::Handle< int > ECALDeadDRFilter;
-    try { iEvent.getByLabel("simpleDRFlagProducer","deadCellStatus", ECALDeadDRFilter); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get int: " << ECALDeadDRFilter; }
-    int ECALDeadDRFilterFlag = *ECALDeadDRFilter;
+      edm::Handle< int > ECALDeadDRFilter;
+      try { iEvent.getByLabel("simpleDRFlagProducer","deadCellStatus", ECALDeadDRFilter); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get int: " << ECALDeadDRFilter; }
+      int ECALDeadDRFilterFlag = *ECALDeadDRFilter;
     
-    edm::Handle< int > ECALBoundaryDRFilter;
-    try { iEvent.getByLabel("simpleDRFlagProducer","boundaryStatus", ECALBoundaryDRFilter); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get int: " << ECALBoundaryDRFilter; }
-    int ECALBoundaryDRFilterFlag = *ECALBoundaryDRFilter;
+      edm::Handle< int > ECALBoundaryDRFilter;
+      try { iEvent.getByLabel("simpleDRFlagProducer","boundaryStatus", ECALBoundaryDRFilter); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get int: " << ECALBoundaryDRFilter; }
+      int ECALBoundaryDRFilterFlag = *ECALBoundaryDRFilter;
 
-    int drDead = (ECALDeadDRFilterFlag>0) ? 1 : 0;
-    int drBoundary = (ECALBoundaryDRFilterFlag>0) ? 1 : 0;
+      int drDead = (ECALDeadDRFilterFlag>0) ? 1 : 0;
+      int drBoundary = (ECALBoundaryDRFilterFlag>0) ? 1 : 0;
 
-    edm::Handle< bool > CSCHaloFilter;
-    try { iEvent.getByLabel("CSCTightHaloFlagProducer", CSCHaloFilter); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << CSCHaloFilter; }
-    bool CSCHaloFilterFlag = *CSCHaloFilter;    
+      edm::Handle< BeamHaloSummary > beamHaloH;
+      iEvent.getByLabel("BeamHaloSummary", beamHaloH);
+      bool CSCHaloFilterFlag = ! beamHaloH->CSCTightHaloId();
 
-    edm::Handle< bool > trackerFailureFilter;
-    try { iEvent.getByLabel("trackingFailureFlagProducer", trackerFailureFilter); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << trackerFailureFilter; }
-    bool trackerFailureFilterFlag = *trackerFailureFilter;    
+      edm::Handle< bool > trackerFailureFilter;
+      try { iEvent.getByLabel("trackingFailureFlagProducer", trackerFailureFilter); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << trackerFailureFilter; }
+      bool trackerFailureFilterFlag = *trackerFailureFilter;    
 
-    *(privateData_->filterBits) = (trackerFailureFilterFlag << 4) | (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
+      edm::InputTag ecalAnomalousFilterTag("EcalAnomalousEventFilter","anomalousECALVariables");
+      Handle<AnomalousECALVariables> anomalousECALvarsHandle;
+      iEvent.getByLabel(ecalAnomalousFilterTag, anomalousECALvarsHandle);
+      AnomalousECALVariables anomalousECALvars;
+      if (anomalousECALvarsHandle.isValid()) {
+        anomalousECALvars = *anomalousECALvarsHandle;
+      } else {
+        edm::LogWarning("anomalous ECAL Vars not valid/found");
+      } 
+
+      bool isNotDeadEcalCluster = !(anomalousECALvars.isDeadEcalCluster());
+      
+      *(privateData_->filterBits) = (isNotDeadEcalCluster << 5) | (trackerFailureFilterFlag << 4) | (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
+    }
 
     *(privateData_->ncand) = collection->size();
 
@@ -184,7 +201,7 @@ void CmsMetFiller::treeMetInfo(const std::string colPrefix, const std::string co
   cmstree->column((colPrefix+"mEtSig"+colSuffix).c_str(), *privateData_->mEtSig, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"significance"+colSuffix).c_str(), *privateData_->significance, nCandString.c_str(), 0, "Reco");
   
-  cmstree->column("METFlags", *privateData_->filterBits, 0, "Reco");
+  if(isData_) cmstree->column("METFlags", *privateData_->filterBits, 0, "Reco");
   
 }
 
