@@ -818,6 +818,7 @@ void HWWTreeDumper::beginJob() {
   //HLTObject Filler needs to exist before beginRun is called
   if(dumpHLTObject_)
     hltObjectFiller_ = new CmsHLTObjectFiller(tree_,hltParms_);
+  else hltObjectFiller_ = 0;
 
   // this pointer MUST survive until tree is closed
   trgNames_ = new vector<std::string>;
