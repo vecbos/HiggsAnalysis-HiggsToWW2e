@@ -97,6 +97,7 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->softElectronByPtBJetTags;
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
+  delete privateData_->trackCountingVeryHighEffBJetTags;
   delete privateData_->uncorrEnergy;
   delete privateData_->L2L3CorrEnergy;
   delete privateData_->area;
@@ -192,7 +193,8 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       softElectronByIP3dBJetTags,
       softElectronByPtBJetTags,
       trackCountingHighPurBJetTags,
-      trackCountingHighEffBJetTags;
+      trackCountingHighEffBJetTags,
+      trackCountingVeryHighEffBJetTags;
 
     if(saveJetBTag_) {
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("combinedSecondaryVertexBJetTags"), combinedSecondaryVertexBJetTags);
@@ -209,6 +211,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softElectronByPtBJetTags"), softElectronByPtBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingHighPurBJetTags"), trackCountingHighPurBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingHighEffBJetTags"), trackCountingHighEffBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingVeryHighEffBJetTags"), trackCountingVeryHighEffBJetTags);
     }
 
     int index = 0;
@@ -285,6 +288,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->softElectronByPtBJetTags->push_back( (*softElectronByPtBJetTags)[index].second );
         privateData_->trackCountingHighPurBJetTags->push_back( (*trackCountingHighPurBJetTags)[index].second );
         privateData_->trackCountingHighEffBJetTags->push_back( (*trackCountingHighEffBJetTags)[index].second );
+        privateData_->trackCountingVeryHighEffBJetTags->push_back( (*trackCountingVeryHighEffBJetTags)[index].second );
       } else {
         privateData_->combinedSecondaryVertexBJetTags->push_back( -1. );
         privateData_->combinedSecondaryVertexMVABJetTags->push_back( -1. );
@@ -300,6 +304,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->softElectronByPtBJetTags->push_back( -1. );
         privateData_->trackCountingHighPurBJetTags->push_back( -1. );
         privateData_->trackCountingHighEffBJetTags->push_back( -1. );
+        privateData_->trackCountingVeryHighEffBJetTags->push_back( -1. );
       }
 
       // if an uncorrected jet collection is provided, save also the uncorrected energy
@@ -401,6 +406,7 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
     cmstree->column((colPrefix+"softElectronByPtBJetTags"+colSuffix).c_str(), *privateData_->softElectronByPtBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingHighPurBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighPurBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighEffBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"trackCountingVeryHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingVeryHighEffBJetTags, nCandString.c_str(), 0, "Reco");
   }
   if(dumpUncorrEnergy_) {
     cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
@@ -452,6 +458,7 @@ void CmsPFJetFillerData::initialise() {
   softElectronByPtBJetTags = new vector<float>;
   trackCountingHighPurBJetTags = new vector<float>;
   trackCountingHighEffBJetTags = new vector<float>;
+  trackCountingVeryHighEffBJetTags = new vector<float>;
   uncorrEnergy = new vector<float>;
   L2L3CorrEnergy = new vector<float>;
   area = new vector<float>;
@@ -495,6 +502,7 @@ void CmsPFJetFillerData::clearTrkVectors() {
   softElectronByPtBJetTags->clear();
   trackCountingHighPurBJetTags->clear();
   trackCountingHighEffBJetTags->clear();
+  trackCountingVeryHighEffBJetTags->clear();
   uncorrEnergy->clear();
   L2L3CorrEnergy->clear();
   area->clear();

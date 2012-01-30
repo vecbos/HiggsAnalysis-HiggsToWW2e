@@ -238,7 +238,8 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                                                               softElectronByIP3dBJetTags = cms.InputTag("newSoftElectronByIP3dBPFJetTags"),
                                                               softElectronByPtBJetTags = cms.InputTag("newSoftElectronByPtBPFJetTags"),
                                                               trackCountingHighPurBJetTags = cms.InputTag("newTrackCountingHighPurBPFJetTags"),
-                                                              trackCountingHighEffBJetTags = cms.InputTag("newTrackCountingHighEffBPFJetTags")),
+                                                              trackCountingHighEffBJetTags = cms.InputTag("newTrackCountingHighEffBPFJetTags"),
+                                                              trackCountingVeryHighEffBJetTags = cms.InputTag("newTrackCountingVeryHighEffBPFJetTags")),
                             PFPUcorrJetsBTags = cms.untracked.PSet( combinedSecondaryVertexBJetTags = cms.InputTag("newCombinedSecondaryVertexBPFPUcorrJetTags"),
                                                                     combinedSecondaryVertexMVABJetTags = cms.InputTag("newCombinedSecondaryVertexMVABPFPUcorrJetTags"),
                                                                     jetBProbabilityBJetTags = cms.InputTag("newJetBProbabilityBPFPUcorrJetTags"),
@@ -252,5 +253,6 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                                                                     softElectronByIP3dBJetTags = cms.InputTag("newSoftElectronByIP3dBPFPUcorrJetTags"),
                                                                     softElectronByPtBJetTags = cms.InputTag("newSoftElectronByPtBPFPUcorrJetTags"),
                                                                     trackCountingHighPurBJetTags = cms.InputTag("newTrackCountingHighPurBPFPUcorrJetTags"),
-                                                                    trackCountingHighEffBJetTags = cms.InputTag("newTrackCountingHighEffBPFPUcorrJetTags"))
+                                                                    trackCountingHighEffBJetTags = cms.InputTag("newTrackCountingHighEffBPFPUcorrJetTags"),
+                                                                    trackCountingVeryHighEffBJetTags = cms.InputTag("newTrackCountingVeryHighEffBPFPUcorrJetTags"))
                             )

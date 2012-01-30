@@ -42,7 +42,8 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
     *softElectronByIP3dBJetTags,
     *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
-    *trackCountingHighEffBJetTags;
+    *trackCountingHighEffBJetTags,
+    *trackCountingVeryHighEffBJetTags;
   std::vector<float> *uncorrEnergy, *L2L3CorrEnergy;
 
 public:

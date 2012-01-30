@@ -25,6 +25,12 @@ newJetBProbabilityBPFPUcorrJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPF
 newImpactParameterMVABPFPUcorrJetTags = RecoBTag.Configuration.RecoBTag_cff.impactParameterMVABJetTags.clone()
 newImpactParameterMVABPFPUcorrJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFPUcorrJetsImpactParameterTagInfos") )
 
+# impact parameter done with the first track instead of the second
+from RecoBTag.ImpactParameter.trackCounting3D1stComputer_cfi import *
+import RecoBTag.ImpactParameter.trackCountingVeryHighEffBJetTags_cfi
+newTrackCountingVeryHighEffBPFPUcorrJetTags = RecoBTag.ImpactParameter.trackCountingVeryHighEffBJetTags_cfi.trackCountingVeryHighEffBJetTags.clone()
+newTrackCountingVeryHighEffBPFPUcorrJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFPUcorrJetsImpactParameterTagInfos") )
+
 # secondary vertex b-tag
 newPFPUcorrJetsSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
 newPFPUcorrJetsSecondaryVertexTagInfos.trackIPTagInfos = "newPFPUcorrJetsImpactParameterTagInfos"
@@ -64,6 +70,7 @@ newPFPUcorrJetTracksAssociator = cms.Sequence(
 
 newPFPUcorrJetBtaggingIP = cms.Sequence(
     newPFPUcorrJetsImpactParameterTagInfos * (
+       newTrackCountingVeryHighEffBPFPUcorrJetTags +
        newTrackCountingHighEffBPFPUcorrJetTags +
        newTrackCountingHighPurBPFPUcorrJetTags +
        newJetProbabilityBPFPUcorrJetTags +

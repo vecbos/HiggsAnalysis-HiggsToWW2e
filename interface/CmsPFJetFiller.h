@@ -61,7 +61,8 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
     *softElectronByIP3dBJetTags,
     *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
-    *trackCountingHighEffBJetTags;
+    *trackCountingHighEffBJetTags,
+    *trackCountingVeryHighEffBJetTags;
   std::vector<float> *weightedDz1, *weightedDz2;
   
   // for backward compatibility with existing trees

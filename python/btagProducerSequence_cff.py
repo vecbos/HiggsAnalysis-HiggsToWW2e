@@ -25,6 +25,12 @@ newJetBProbabilityBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactPara
 newImpactParameterMVABJetTags = RecoBTag.Configuration.RecoBTag_cff.impactParameterMVABJetTags.clone()
 newImpactParameterMVABJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
 
+# impact parameter done with the first track instead of the second
+from RecoBTag.ImpactParameter.trackCounting3D1stComputer_cfi import *
+import RecoBTag.ImpactParameter.trackCountingVeryHighEffBJetTags_cfi
+newTrackCountingVeryHighEffBJetTags = RecoBTag.ImpactParameter.trackCountingVeryHighEffBJetTags_cfi.trackCountingVeryHighEffBJetTags.clone()
+newTrackCountingVeryHighEffBJetTags.tagInfos = cms.VInputTag( cms.InputTag("newImpactParameterTagInfos") )
+
 # secondary vertex b-tag
 newSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
 newSecondaryVertexTagInfos.trackIPTagInfos = "newImpactParameterTagInfos"
@@ -64,6 +70,7 @@ newJetTracksAssociator = cms.Sequence(
 
 newJetBtaggingIP = cms.Sequence(
     newImpactParameterTagInfos * (
+       newTrackCountingVeryHighEffBJetTags +
        newTrackCountingHighEffBJetTags +
        newTrackCountingHighPurBJetTags +
        newJetProbabilityBJetTags +
