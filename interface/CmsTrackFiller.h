@@ -58,7 +58,7 @@ struct CmsTrackFillerData {
   vector<float> *truncatedDeDx, *truncatedDeDxError, *truncatedDeDxNoM;
   vector<float> *medianDeDx, *medianDeDxError, *medianDeDxNoM;
   vector<float> *harmonic2DeDx, *harmonic2DeDxError, *harmonic2DeDxNoM;
-  vector<int> *pixelHits, *expInnerLayers;
+  vector<int> *pixelHits, *expInnerLayers, *trackerLayersWithMeasurement;
   vector<int> *numberOfValidPixelBarrelHits, *numberOfValidPixelEndcapHits;
   vector<int> *numberOfValidStripTIBHits, *numberOfValidStripTIDHits, *numberOfValidStripTOBHits, *numberOfValidStripTECHits;
   vector<int> *numberOfValidMuonHits;

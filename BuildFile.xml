@@ -34,6 +34,7 @@
 <use   name="TrackingTools/GeomPropagators"/>
 <use   name="TrackingTools/TrackAssociator"/>
 <use   name="Geometry/TrackerGeometryBuilder"/>
+<use   name="Geometry/EcalAlgo"/>
 <use   name="RecoBTau/JetTagComputer"/>
 <use   name="RecoEcal/EgammaCoreTools"/>
 <use   name="RecoEgamma/EgammaElectronAlgos"/>

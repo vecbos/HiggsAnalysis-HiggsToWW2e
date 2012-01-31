@@ -29,11 +29,13 @@
 #include "RecoEgamma/EgammaIsolationAlgos/interface/EgammaTowerIsolation.h"
 #include "RecoEgamma/EgammaTools/interface/ECALPositionCalculator.h"
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+#include "Geometry/CaloTopology/interface/EcalPreshowerTopology.h"
 
 #include "MyAnalysis/IsolationTools/interface/SuperClusterHitsEcalIsolation.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/ESHelper.h"
 
 #include "HiggsAnalysis/HiggsToGammaGamma/interface/GBRForest.h"
 
@@ -76,6 +78,7 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->rawEnergy;
   delete privateData_->energy;
   delete privateData_->esEnergy;
+  delete privateData_->seedClusterEnergy;
   delete privateData_->seedEnergy;
   delete privateData_->seedX;
   delete privateData_->seedY;
@@ -89,6 +92,14 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->eMax;
   delete privateData_->e2x2;
   delete privateData_->e2nd;
+  delete privateData_->e2x5Left;
+  delete privateData_->e2x5Right;
+  delete privateData_->e2x5Top;
+  delete privateData_->e2x5Bottom;
+  delete privateData_->eLeft;
+  delete privateData_->eRight;
+  delete privateData_->eTop;
+  delete privateData_->eBottom;
   delete privateData_->hOverE;
   delete privateData_->covIEtaIEta;
   delete privateData_->covIEtaIPhi;
@@ -102,6 +113,12 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->time;
   delete privateData_->chi2;
   delete privateData_->recoFlag;
+  delete privateData_->esEffsIxIx;
+  delete privateData_->esEffsIyIy;
+  delete privateData_->esL1Energy;
+  delete privateData_->esL2Energy;
+  delete privateData_->esL1Strips;
+  delete privateData_->esL2Strips;
 //   delete privateData_->etaC;
 //   delete privateData_->etaS;
 //   delete privateData_->etaM;
@@ -172,11 +189,16 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       try { iEvent.getByLabel(EcalEndcapRecHits_, EcalEndcapRecHits); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get ECAL endcap rec hits Collection" << EcalEndcapRecHits_; }
       const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
+
+      Handle< EcalRecHitCollection > EcalPreshowerRecHits;
+      try { iEvent.getByLabel(ESRecHits_, EcalPreshowerRecHits); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get ECAL preshower rec hits Collection" << ESRecHits_; }
+      const EcalRecHitCollection *ESRecHits = EcalPreshowerRecHits.product();
       
       SuperClusterCollection::const_iterator cand;
       for(cand=collection->begin(); cand!=collection->end(); cand++) {
         // fill basic kinematics
-        writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits);
+        writeSCInfo(&(*cand),iEvent,iSetup,EBRecHits,EERecHits,ESRecHits);
       }
     }
   else {
@@ -205,12 +227,14 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand, 
                                         const edm::Event& iEvent, const edm::EventSetup& iSetup,
-                                        const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits) {
+                                        const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits,
+                                        const EcalRecHitCollection *ESRecHits) {
 
   // fill the SC infos
   privateData_->nBC->push_back((int)cand->clustersSize());
   privateData_->nCrystals->push_back((int)cand->hitsAndFractions().size());
   privateData_->rawEnergy->push_back((float)cand->rawEnergy());
+  privateData_->seedClusterEnergy->push_back((float)cand->seed()->energy());
   privateData_->energy->push_back((float)cand->energy());
   privateData_->esEnergy->push_back((float)cand->preshowerEnergy());
   privateData_->phiWidth->push_back((float)cand->phiWidth());
@@ -247,6 +271,14 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       float e2nd = EcalClusterTools::e2nd( *theSeed, &(*rechits) );
       float e1x5 = EcalClusterTools::e1x5( *theSeed, &(*rechits), topology );
       float e2x5Max = EcalClusterTools::e2x5Max( *theSeed, &(*rechits), topology );
+      float e2x5Left = EcalClusterTools::e2x5Left( *theSeed, &(*rechits), topology );
+      float e2x5Right = EcalClusterTools::e2x5Right( *theSeed, &(*rechits), topology );
+      float e2x5Top = EcalClusterTools::e2x5Top( *theSeed, &(*rechits), topology );
+      float e2x5Bottom = EcalClusterTools::e2x5Bottom( *theSeed, &(*rechits), topology );
+      float eLeft = EcalClusterTools::eLeft( *theSeed, &(*rechits), topology );
+      float eRight = EcalClusterTools::eRight( *theSeed, &(*rechits), topology );
+      float eTop = EcalClusterTools::eTop( *theSeed, &(*rechits), topology );
+      float eBottom = EcalClusterTools::eBottom( *theSeed, &(*rechits), topology );
       float e4SwissCross = ( EcalClusterTools::eLeft( *theSeed, &(*rechits), topology ) +
                              EcalClusterTools::eRight( *theSeed, &(*rechits), topology ) +
                              EcalClusterTools::eTop( *theSeed, &(*rechits), topology ) +
@@ -259,6 +291,14 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->e2nd->push_back(e2nd);
       privateData_->e1x5->push_back(e1x5);
       privateData_->e2x5Max->push_back(e2x5Max);
+      privateData_->e2x5Left->push_back(e2x5Left);
+      privateData_->e2x5Right->push_back(e2x5Right);
+      privateData_->e2x5Top->push_back(e2x5Top);
+      privateData_->e2x5Bottom->push_back(e2x5Bottom);
+      privateData_->eLeft->push_back(eLeft);
+      privateData_->eRight->push_back(eRight);
+      privateData_->eTop->push_back(eTop);
+      privateData_->eBottom->push_back(eBottom);
       privateData_->e4SwissCross->push_back(e4SwissCross);
 
       // local covariances: instead of using absolute eta/phi it counts crystals normalised
@@ -312,6 +352,59 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->hOverE->push_back(hcalESum/cand->energy());
       delete towerIso1;
       delete towerIso2;
+
+      // === Preshower cluster shapes === //
+      // ES geometry
+      const CaloSubdetectorGeometry *es_geometry = pGeometry->getSubdetectorGeometry(DetId::Ecal, EcalPreshower);
+      const CaloSubdetectorGeometry *& es_geometry_p = es_geometry;
+
+      CaloSubdetectorTopology *es_topology_p = 0;
+      if (es_geometry) es_topology_p = new EcalPreshowerTopology(pGeometry);
+
+      // make the map of rechits
+      es_rechits_map_.clear();
+      if (ESRecHits) {
+        for (EcalRecHitCollection::const_iterator it = ESRecHits->begin(); it != ESRecHits->end(); ++it) {
+          // remove bad ES rechits
+          if (it->recoFlag()==1 || it->recoFlag()==14 || (it->recoFlag()<=10 && it->recoFlag()>=5)) continue;
+          //Make the map of DetID, EcalRecHit pairs
+          es_rechits_map_.insert(std::make_pair(it->id(), *it));   
+        }
+      }
+
+      float ixix, iyiy;
+      ixix = iyiy = 0;
+      // calculate preshower cluster shape
+      ESHelper *gES = new ESHelper(es_rechits_map_, es_geometry_p, es_topology_p);
+      if (fabs(cand->eta()) > 1.6 && fabs(cand->eta()) < 3) {
+        std::vector<float> elESHits0 = gES->getESHits(cand->x(), cand->y(), cand->z(), 0);
+        std::vector<float> elESShape = gES->getESShape(elESHits0);
+        ixix = elESShape[0];
+        iyiy = elESShape[1];
+      }
+
+      privateData_->esEffsIxIx->push_back(ixix);
+      privateData_->esEffsIyIy->push_back(iyiy);
+
+      // the preshowerClustersBegin() iteration only works for PF superclusters...
+      float esL1Energy, esL2Energy;
+      esL1Energy = esL2Energy = 0.;
+      int esL1Strips, esL2Strips;
+      esL1Strips = esL2Strips = 0;
+      for (reco::CaloCluster_iterator it=cand->preshowerClustersBegin(); it != cand->preshowerClustersEnd(); it++) {
+        if (ESDetId(((*it)->hitsAndFractions())[0].first).plane() == 1) {
+          esL1Energy += (float) (*it)->energy();
+          esL1Strips += (*it)->hitsAndFractions().size();
+        } else {
+          esL2Energy += (float) (*it)->energy();
+          esL2Strips += (*it)->hitsAndFractions().size();
+        }
+      }
+
+      privateData_->esL1Energy->push_back(esL1Energy);
+      privateData_->esL2Energy->push_back(esL2Energy);
+      privateData_->esL1Strips->push_back(esL1Strips);
+      privateData_->esL2Strips->push_back(esL2Strips);
 
       if (photonFixE_ || photonFixP_ || eCorrector_ || pCorrector_ )
 	{
@@ -506,7 +599,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
 	  privateData_->regrCorr_phoSigma->push_back(-1);
 	}
 
-}
+        }
 
   } else {
     privateData_->e3x3->push_back(-1.);
@@ -550,6 +643,7 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"nCrystals"+colSuffix).c_str(), *privateData_->nCrystals, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rawEnergy"+colSuffix).c_str(), *privateData_->rawEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"seedClusterEnergy"+colSuffix).c_str(), *privateData_->seedClusterEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"esEnergy"+colSuffix).c_str(), *privateData_->esEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
@@ -563,6 +657,14 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"e2nd"+colSuffix).c_str(), *privateData_->e2nd, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e1x5"+colSuffix).c_str(), *privateData_->e1x5, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e2x5Max"+colSuffix).c_str(), *privateData_->e2x5Max, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Left"+colSuffix).c_str(), *privateData_->e2x5Left, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Right"+colSuffix).c_str(), *privateData_->e2x5Right, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Top"+colSuffix).c_str(), *privateData_->e2x5Top, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Bottom"+colSuffix).c_str(), *privateData_->e2x5Bottom, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eLeft"+colSuffix).c_str(), *privateData_->eLeft, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eRight"+colSuffix).c_str(), *privateData_->eRight, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eTop"+colSuffix).c_str(), *privateData_->eTop, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eBottom"+colSuffix).c_str(), *privateData_->eBottom, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e4SwissCross"+colSuffix).c_str(), *privateData_->e4SwissCross, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
@@ -577,6 +679,12 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedX"+colSuffix).c_str(), *privateData_->seedX, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedY"+colSuffix).c_str(), *privateData_->seedY, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esEffsIxIx"+colSuffix).c_str(), *privateData_->esEffsIxIx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esEffsIyIy"+colSuffix).c_str(), *privateData_->esEffsIyIy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esL1Energy"+colSuffix).c_str(), *privateData_->esL1Energy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esL2Energy"+colSuffix).c_str(), *privateData_->esL2Energy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esL1Strips"+colSuffix).c_str(), *privateData_->esL1Strips, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"esL2Strips"+colSuffix).c_str(), *privateData_->esL2Strips, nCandString.c_str(), 0, "Reco");
 //   cmstree->column((colPrefix+"etaC"+colSuffix).c_str(), *privateData_->etaC, nCandString.c_str(), 0, "Reco");
 //   cmstree->column((colPrefix+"etaS"+colSuffix).c_str(), *privateData_->etaS, nCandString.c_str(), 0, "Reco");
 //   cmstree->column((colPrefix+"etaM"+colSuffix).c_str(), *privateData_->etaM, nCandString.c_str(), 0, "Reco");
@@ -611,7 +719,14 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   nCrystals = new vector<int>; 
   rawEnergy = new vector<float>; 
   energy = new vector<float>; 
+  seedClusterEnergy = new vector<float>;
   esEnergy = new vector<float>; 
+  esEffsIxIx = new vector<float>;
+  esEffsIyIy = new vector<float>;
+  esL1Energy = new vector<float>;
+  esL2Energy = new vector<float>;
+  esL1Strips = new vector<int>;
+  esL2Strips = new vector<int>;
   eta = new vector<float>; 
   theta = new vector<float>; 
   phi = new vector<float>;
@@ -624,6 +739,14 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   e2nd = new vector<float>;
   e1x5 = new vector<float>;
   e2x5Max = new vector<float>;
+  e2x5Left = new vector<float>;
+  e2x5Right = new vector<float>;
+  e2x5Top = new vector<float>;
+  e2x5Bottom = new vector<float>;
+  eLeft = new vector<float>;
+  eRight = new vector<float>;
+  eTop = new vector<float>;
+  eBottom = new vector<float>;
   e4SwissCross = new vector<float>;
   hOverE = new vector<float>;
   covIEtaIEta = new vector<float>;
@@ -639,13 +762,13 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   seedX = new vector<float>;
   seedY = new vector<float>;
   photonFix_phoE= new vector<float>;
-   photonFix_phoSigma= new vector<float>;
-   photonFix_eleE= new vector<float>;
-   photonFix_eleSigma= new vector<float>;
-   regrCorr_phoE= new vector<float>;
-   regrCorr_phoSigma= new vector<float>;
-   regrCorr_eleE= new vector<float>;
-   regrCorr_eleSigma= new vector<float>;  
+  photonFix_phoSigma= new vector<float>;
+  photonFix_eleE= new vector<float>;
+  photonFix_eleSigma= new vector<float>;
+  regrCorr_phoE= new vector<float>;
+  regrCorr_phoSigma= new vector<float>;
+  regrCorr_eleE= new vector<float>;
+  regrCorr_eleSigma= new vector<float>;  
   nSC =  new int;
 //   etaC= new vector<float>;
 //   etaS= new vector<float>;
@@ -670,7 +793,14 @@ void CmsSuperClusterFillerData::clear()
   nCrystals->clear();
   rawEnergy->clear();
   energy->clear();
+  seedClusterEnergy->clear();
   esEnergy->clear();
+  esEffsIxIx->clear();
+  esEffsIyIy->clear();
+  esL1Energy->clear();
+  esL2Energy->clear();
+  esL1Strips->clear();
+  esL2Strips->clear();
   eta->clear(); 
   theta->clear();
   phi->clear();
@@ -683,6 +813,14 @@ void CmsSuperClusterFillerData::clear()
   e2nd->clear();
   e1x5->clear();
   e2x5Max->clear();
+  e2x5Left->clear();
+  e2x5Right->clear();
+  e2x5Top->clear();
+  e2x5Bottom->clear();
+  eLeft->clear();
+  eRight->clear();
+  eTop->clear();
+  eBottom->clear();
   e4SwissCross->clear();
   hOverE->clear();
   covIEtaIEta->clear();

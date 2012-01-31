@@ -167,6 +167,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalBCCollection_        = iConfig.getParameter<edm::InputTag>("ecalBCCollection");
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
+  esRecHits_               = iConfig.getParameter<edm::InputTag>("esRecHits");
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
   conversions_             = iConfig.getParameter<edm::InputTag>("conversionCollection");
   trackCollection_         = iConfig.getParameter<edm::InputTag>("trackCollection");
@@ -421,6 +422,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       std::string suffix("SC");
       treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFill.setESRecHits(esRecHits_);
       treeFill.setCalotowers(calotowersForIsolationProducer_);
       treeFill.setPositionCalc(posCalculator_);
       treeFill.setEnergyCorrectionFunction(energyCorrectionF);
@@ -442,9 +444,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       suffix = "PFSC";
       treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPF.setESRecHits(esRecHits_);
       treeFillPF.setCalotowers(calotowersForIsolationProducer_);
-      treeFill.setPositionCalc(posCalculator_);
-      treeFill.setEnergyCorrectionFunction(energyCorrectionF);
+      treeFillPF.setPositionCalc(posCalculator_);
+      treeFillPF.setEnergyCorrectionFunction(energyCorrectionF);
       treeFillPF.writeCollectionToTree(ecalPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
 
   }

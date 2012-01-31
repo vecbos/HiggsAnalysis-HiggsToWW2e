@@ -134,6 +134,7 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->py;
   delete privateData_->pz;
   delete privateData_->trackNormalizedChi2;
+  delete privateData_->trackerLayersWithMeasurement;
   delete privateData_->qualityMask;
   delete privateData_->trackLostHits;
   delete privateData_->trackVx;
@@ -382,6 +383,8 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
       
     privateData_->pixelHits->push_back(packed_sel);
 
+    privateData_->trackerLayersWithMeasurement->push_back(trackerPattern.trackerLayersWithMeasurement());
+
     privateData_->numberOfValidPixelBarrelHits->push_back(trackerPattern.numberOfValidPixelBarrelHits());
     privateData_->numberOfValidPixelEndcapHits->push_back(trackerPattern.numberOfValidPixelEndcapHits());
     privateData_->numberOfValidStripTIBHits->push_back(trackerPattern.numberOfValidStripTIBHits());
@@ -613,6 +616,7 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
   }    
 
   cmstree->column((colPrefix+"pixelHits"+colSuffix).c_str(), *privateData_->pixelHits, nCandString.c_str(), 0, "Reco");  
+  cmstree->column((colPrefix+"trackerLayersWithMeasurement"+colSuffix).c_str(), *privateData_->trackerLayersWithMeasurement, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"expInnerLayers"+colSuffix).c_str(), *privateData_->expInnerLayers, nCandString.c_str(), 0, "Reco");  
   cmstree->column((colPrefix+"numberOfValidPixelBarrelHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelBarrelHits, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"numberOfValidPixelEndcapHits"+colSuffix).c_str(), *privateData_->numberOfValidPixelEndcapHits, nCandString.c_str(), 0, "Reco");
@@ -691,6 +695,7 @@ void CmsTrackFillerData::initialise() {
   harmonic2DeDxNoM = new vector<float>;
   pixelHits = new vector<int>;
   expInnerLayers = new vector<int>;
+  trackerLayersWithMeasurement = new vector<int>;
   numberOfValidPixelBarrelHits = new vector<int>;
   numberOfValidPixelEndcapHits = new vector<int>;
   numberOfValidStripTIBHits = new vector<int>;
@@ -750,6 +755,7 @@ void CmsTrackFillerData::clearTrkVectors() {
   harmonic2DeDxError->clear();
   harmonic2DeDxNoM->clear();
   pixelHits->clear();
+  trackerLayersWithMeasurement->clear();
   expInnerLayers->clear();
   numberOfValidPixelBarrelHits->clear();
   numberOfValidPixelEndcapHits->clear();

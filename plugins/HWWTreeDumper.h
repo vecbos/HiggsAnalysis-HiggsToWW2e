@@ -151,7 +151,7 @@ private:
   //! basiccluster collections in input
   edm::InputTag ecalBCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly
-  edm::InputTag ecalBarrelRecHits_, ecalEndcapRecHits_;
+  edm::InputTag ecalBarrelRecHits_, ecalEndcapRecHits_, esRecHits_;
   //! coversions collection
   edm::InputTag conversions_;
   //! track and calotowers collection for isolation studies

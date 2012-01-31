@@ -43,9 +43,9 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
 
   vector<int>   *classification, *standardClassification;
   vector<float> *fbrem;
-  vector<int>   *nbrems;
-  vector<float> *hOverE, *eSuperClusterOverP, *eSeedOverPout;
-  vector<float> *deltaEtaAtVtx, *deltaEtaAtCalo, *deltaPhiAtVtx, *deltaPhiAtCalo;
+  vector<int>   *nbrems, *ambiguousGsfTracksSize;
+  vector<float> *hOverE, *eSuperClusterOverP, *eSeedOverPout, *eEleClusterOverPout;
+  vector<float> *deltaEtaAtVtx, *deltaEtaAtCalo, *deltaPhiAtVtx, *deltaPhiAtCalo, *deltaEtaEleClusterTrackAtCalo, *deltaPhiEleClusterTrackAtCalo;
   vector<float> *dr03TkSumPt, *dr03EcalRecHitSumEt, *dr03HcalTowerSumEt;
   vector<float> *dr04TkSumPt, *dr04EcalRecHitSumEt, *dr04HcalTowerSumEt;
   vector<float> *scBasedEcalSum03, *scBasedEcalSum04;

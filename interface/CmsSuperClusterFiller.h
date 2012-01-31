@@ -51,10 +51,13 @@ struct CmsSuperClusterFillerData {
   // All the vectors that will store the stuff
   // going into the tree.
   vector<int>  *nBC, *nCrystals, *recoFlag;
-  vector<float> *rawEnergy, *energy, *esEnergy, *phiWidth, *etaWidth, *eta, *theta, *phi, *time, *chi2;
+  vector<float> *rawEnergy, *energy, *esEnergy, *seedClusterEnergy, *phiWidth, *etaWidth, *eta, *theta, *phi, *time, *chi2;
   vector<float> *seedEnergy, *seedX, *seedY;
   vector<float> *e3x3, * e5x5, *eMax, *e2x2, *e2nd, *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi, *sMaj, *sMin, *alpha,
     *e1x5, *e2x5Max, *e4SwissCross;
+  vector<float> *e2x5Left, *e2x5Right, *e2x5Top, *e2x5Bottom, *eLeft, *eRight, *eTop, *eBottom;
+  vector<float> *esEffsIxIx, *esEffsIyIy, *esL1Energy, *esL2Energy;
+  vector<int> *esL1Strips, *esL2Strips;
 //   vector<float> *etaC,*etaS,*etaM,*phiC,*phiS,*phiM;
 //   vector<float> *xZ,*xC,*xS,*xM,*yZ,*yC,*yS,*yM;
   vector<float> * photonFix_phoE,* photonFix_phoSigma;
@@ -99,6 +102,8 @@ public:
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
   void setEcalEndcapRecHits( edm::InputTag EcalEndcapRecHits ) { EcalEndcapRecHits_ = EcalEndcapRecHits; }
+  //! set the rechits for preshower (needed for cluster shapes)
+  void setESRecHits( edm::InputTag ESRecHits ) { ESRecHits_ = ESRecHits; }
 
   void setEGEnergyCorrectorElectron( EGEnergyCorrector* eg) { eCorrector_=eg; }
   void setEGEnergyCorrectorPhoton( EGEnergyCorrector* eg) { pCorrector_=eg; }
@@ -112,7 +117,8 @@ public:
 protected:
   virtual void writeSCInfo(const reco::SuperCluster *cand, 
 			   const edm::Event&, const edm::EventSetup&,
-                           const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits);
+                           const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits,
+                           const EcalRecHitCollection *ESRecHits);
 
   virtual void treeSCInfo(const std::string colPrefix, const std::string colSuffix);
   
@@ -124,6 +130,7 @@ protected:
 
   edm::InputTag EcalBarrelRecHits_;
   edm::InputTag EcalEndcapRecHits_;
+  edm::InputTag ESRecHits_;
   edm::InputTag Calotowers_;
 
   edm::Handle<CaloTowerCollection> calotowers_;
@@ -141,6 +148,8 @@ protected:
 
   PositionCalc* posCalculator_;
   EcalClusterFunctionBaseClass* energyCorrectionF;
+
+  std::map<DetId, EcalRecHit> es_rechits_map_;
 };
 
 #endif // CmsSuperClusterFiller_h
