@@ -15,7 +15,9 @@ from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import *
 from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 
 ##-------------------- Turn-on the FastJet density calculation -----------------------
-kt6PFJets.doRhoFastjet = True
+from RecoJets.JetProducers.kt4PFJets_cfi import *
+kt6PFJets= kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
+#kt6PFJets.doRhoFastjet = True
 ##-------------------- Turn-on the FastJet jet area calculation for your favorite algorithm -----------------------
 ak5PFJets.doAreaFastjet = True
 ak5CaloJets.doAreaFastjet = True
@@ -29,15 +31,25 @@ from RecoJets.JetProducers.ak5PFJets_cfi import *
 ak5PFJetsNoPU = ak5PFJets.clone( src = 'pfNoPileUp' )
 
 # calculate rho from this
-from RecoJets.JetProducers.kt4PFJets_cfi import *
-kt6PFJetsNoPu = kt4PFJets.clone( src = 'pfNoPileUp', rParam = 0.6, doRhoFastjet = True )
+kt6PFJetsNoPU = kt4PFJets.clone( src = 'pfNoPileUp', rParam = 0.6, doRhoFastjet = True )
 
 # uncorrected jet sequence
-FastjetForPFNoPU = cms.Sequence( kt6PFJetsNoPu * ak5PFJetsNoPU )
+FastjetForPFNoPU = cms.Sequence( kt6PFJetsNoPU * ak5PFJetsNoPU )
 
 # correct the PFnoPU jets
-ak5PFJetsNoPUL1FastL2L3 = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3'] )
-ak5PFJetsNoPUL1FastL2L3Residual = ak5PFJetsL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3Residual'] )
+#ak5PFNoPUL1Fastjet = ak5PFL1Fastjet.clone( 
+
+ak5PFNoPUL1Fastjet = ak5PFL1Fastjet.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho') )
+ak5PFNoPUL1FastL2L3 = ak5PFL2L3.clone()
+ak5PFNoPUL1FastL2L3.correctors.insert(0,'ak5PFNoPUL1Fastjet')
+
+ak5PFNoPUL1FastL2L3Residual = ak5PFL2L3Residual.clone()
+ak5PFNoPUL1FastL2L3Residual.correctors.insert(0,'ak5PFNoPUL1Fastjet')
+
+ak5PFJetsNoPUL1FastL2L3 = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFNoPUL1FastL2L3'] )
+ak5PFJetsNoPUL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFNoPUL1FastL2L3Residual'] )
+#ak5PFJetsNoPUL1FastL2L3 = ak5PFJetsL1FastL2L3.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho'), src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3'] )
+#ak5PFJetsNoPUL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho'), src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3Residual'] )
 ####################################
 
 # data sequences use residual corrections
@@ -61,5 +73,6 @@ PFJetAK5SequenceMC = cms.Sequence( ak5PFJets * ak5PFJetsL2L3 * kt6PFJets * ak5PF
 PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFJetsNoPUL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
 ourJetSequenceMC = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC)
-ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * CaloJetSequenceMC )
+#ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * CaloJetSequenceMC )
+ourJetSequenceMCReduced = cms.Sequence( PFNoPUJetAK5SequenceMC * PFJetAK5SequenceMC * CaloJetSequenceMC )
 
