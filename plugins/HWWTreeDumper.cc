@@ -741,14 +741,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_, jetCollection3_);
 
     // particle flow jets
-    //     if ( dumpParticleFlowObjects_ ) {  
-    //       CmsPFJetFiller pfJetFiller(tree_, true);
-    //       suffix = "AK5PFJet";
-    //       pfJetFiller.saveCand(saveCand_);
-    //       pfJetFiller.saveJetBTag(false);  // since it is done on the same collection as pfPUcorrJetFiller, do not waste CPU repeating it
-    //       pfJetFiller.setBTags(PFJetsBTags_);
-    //       pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
-    //     }
+    if ( dumpParticleFlowObjects_ ) {  
+      CmsPFJetFiller pfJetFiller(tree_, true);
+      suffix = "AK5PFNoPUJet";
+      pfJetFiller.saveCand(saveCand_);
+      pfJetFiller.saveJetBTag(false);  // since it is done on the same collection as pfPUcorrJetFiller, do not waste CPU repeating it
+      pfJetFiller.setBTags(PFJetsBTags_);
+      pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
+    }
 
     // particle flow jets with correction for pileup
     if ( dumpParticleFlowObjects_ && dumpPUcorrPFJet_ ) {
