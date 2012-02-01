@@ -132,7 +132,7 @@ private:
   // edm::InputTag corrmetCollection_;
   edm::InputTag vertexCollection_;
   edm::InputTag K0sCollection_;
-  edm::InputTag PFjetCollection1_, PFjetCollection2_, PFmetCollection_, PFChMetCollection_;
+  edm::InputTag PFjetCollection1_, PFjetCollection2_, PFjetCollection3_, PFmetCollection_, PFChMetCollection_;
   edm::InputTag leptonLinkedPFCandidates_;
   edm::InputTag JPTjetCollection1_, JPTjetCollection2_;
   edm::InputTag chargedMetCollection_;

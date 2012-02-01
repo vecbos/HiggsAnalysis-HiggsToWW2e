@@ -183,6 +183,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   jetCollection3_          = iConfig.getParameter<edm::InputTag>("jetCollection3");
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
   PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
+  PFjetCollection3_        = iConfig.getParameter<edm::InputTag>("PFjetCollection3");
   PFpuCorrJetCollection1_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection1");
   PFpuCorrJetCollection2_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection2");
   PFpuCorrJetCollection3_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection3");
@@ -745,9 +746,9 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       CmsPFJetFiller pfJetFiller(tree_, true);
       suffix = "AK5PFNoPUJet";
       pfJetFiller.saveCand(saveCand_);
-      pfJetFiller.saveJetBTag(false);  // since it is done on the same collection as pfPUcorrJetFiller, do not waste CPU repeating it
+      pfJetFiller.saveJetBTag(saveJetBTag_);
       pfJetFiller.setBTags(PFJetsBTags_);
-      pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_);
+      pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_, PFjetCollection3_);
     }
 
     // particle flow jets with correction for pileup
