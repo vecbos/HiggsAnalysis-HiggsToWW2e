@@ -8,7 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START42_V14B::All'
+process.GlobalTag.globaltag = 'START44_V10::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
@@ -67,6 +67,7 @@ process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
 process.treeDumper.jetCollection3 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
 process.treeDumper.PFjetCollection1 = 'ak5PFNoPUJetsL1FastL2L3'
+process.treeDumper.PFjetCollection3 = 'ak5PFNoPUJetsL2L3'
 process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
 process.treeDumper.PFpuCorrJetCollection3 = 'ak5PFJetsL2L3'
 process.treeDumper.dumpTriggerResults = True
@@ -112,7 +113,7 @@ process.source = cms.Source("PoolSource",
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
 #                           fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root')
                             #fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
-                            fileNames = cms.untracked.vstring('file:events_GluGluToHToZZTo2L2Q_M-550_7TeV-powheg-pythia6_Summer11_PROVA.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
                             )
 
 process.p = cms.Path ( process.leptonLinkedTracks
