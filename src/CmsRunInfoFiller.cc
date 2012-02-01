@@ -116,18 +116,47 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
 
   // get the rho parameter from Fastjet computation - isolation
   edm::Handle<double> rhoH, sigmaH;
-  iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","rho"),rhoH);
-  float rho = *rhoH;
-  iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","sigma"),sigmaH);
-  float sigma = *sigmaH;
+  float rho;
+  if( iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","rho"),rhoH) )
+    rho = *rhoH;
+  else
+    rho = 0.;
+  float sigma;
+  if( iEvent.getByLabel(edm::InputTag("kt6PFJetsForIsolation","sigma"),sigmaH) )
+    sigma = *sigmaH;
+  else
+    sigma = 0.;
   cmstree->column("rhoFastjet", rho, float(0.), "Iso");
   cmstree->column("sigmaFastjet", sigma, float(0.), "Iso");
 
   // get the rho parameter from Fastjet computation - jets
   edm::Handle<double> rhoHjets;
-  iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"),rhoHjets);
-  float rhoJets = *rhoHjets;
+  float rhoJets;
+  if( iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"),rhoHjets) )
+    rhoJets = *rhoHjets;
+  else
+    rhoJets = 0.;
   cmstree->column("rhoJetsFastJet", rhoJets, float(0.), "Jets");
+
+
+  edm::Handle<double> rhoNoPuAllH;
+  float rhoJets_nopu;
+  if (iEvent.getByLabel(edm::InputTag("kt6PFJetsNoPU", "rho"), rhoNoPuAllH))
+    rhoJets_nopu = *rhoNoPuAllH;
+  else
+    rhoJets_nopu = 0.;
+  cmstree->column("rhoJetsFastJet_nopu", rhoJets_nopu, float(0.), "Jets");
+
+  edm::Handle<double> rhoNoPuH;
+  float rho_nopu;
+  if (iEvent.getByLabel(edm::InputTag("kt6PFJetsNoPUForIsolation", "rho"), rhoNoPuH))
+    rho_nopu = *rhoNoPuH;
+  else
+    rho_nopu = 0.;
+  cmstree->column("rhoFastJet_nopu", rho_nopu, float(0.), "Iso");
+
+
+
 
   // log errors (tracker failures)
   if(!isMC_) {
