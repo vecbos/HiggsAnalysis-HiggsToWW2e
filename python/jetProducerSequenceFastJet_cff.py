@@ -28,13 +28,13 @@ offsetCaloCorrection = cms.Sequence(kt6PFJets)
 ############## PF jets PF no PU
 # produce PFnoPU jets
 from RecoJets.JetProducers.ak5PFJets_cfi import *
-ak5PFJetsNoPU = ak5PFJets.clone( src = 'pfNoPileUp' )
+ak5PFNoPUJets = ak5PFJets.clone( src = 'pfNoPileUp' )
 
 # calculate rho from this
 kt6PFJetsNoPU = kt4PFJets.clone( src = 'pfNoPileUp', rParam = 0.6, doRhoFastjet = True )
 
 # uncorrected jet sequence
-FastjetForPFNoPU = cms.Sequence( kt6PFJetsNoPU * ak5PFJetsNoPU )
+FastjetForPFNoPU = cms.Sequence( kt6PFJetsNoPU * ak5PFNoPUJets )
 
 
 #ak5PFNoPUL1Fastjet = ak5PFL1Fastjet.clone(
@@ -51,10 +51,10 @@ ak5PFNoPUL1FastL2L3.correctors.insert(0,'ak5PFNoPUL1Fastjet')
 ak5PFNoPUL1FastL2L3Residual = ak5PFL2L3Residual.clone()
 ak5PFNoPUL1FastL2L3Residual.correctors.insert(0,'ak5PFNoPUL1Fastjet')
 
-ak5PFNoPUJetsL1FastL2L3 = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFNoPUL1FastL2L3'] )
-ak5PFNoPUJetsL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFJetsNoPU', correctors = ['ak5PFNoPUL1FastL2L3Residual'] )
-#ak5PFNoPUJetsL1FastL2L3 = ak5PFJetsL1FastL2L3.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho'), src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3'] )
-#ak5PFNoPUJetsL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho'), src = 'ak5PFJetsNoPU', correctors = ['ak5PFL1FastL2L3Residual'] )
+ak5PFNoPUJetsL1FastL2L3 = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFNoPUJets', correctors = ['ak5PFNoPUL1FastL2L3'] )
+ak5PFNoPUJetsL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFNoPUJets', correctors = ['ak5PFNoPUL1FastL2L3Residual'] )
+#ak5PFNoPUJetsL1FastL2L3 = ak5PFJetsL1FastL2L3.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho'), src = 'ak5PFNoPUJets', correctors = ['ak5PFL1FastL2L3'] )
+#ak5PFNoPUJetsL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho'), src = 'ak5PFNoPUJets', correctors = ['ak5PFL1FastL2L3Residual'] )
 ####################################
 
 # data sequences use residual corrections
