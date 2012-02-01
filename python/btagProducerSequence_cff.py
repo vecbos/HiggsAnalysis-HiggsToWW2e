@@ -72,9 +72,7 @@ newJetBtaggingIP = cms.Sequence(
     newImpactParameterTagInfos * (
        newTrackCountingVeryHighEffBJetTags +
        newTrackCountingHighEffBJetTags +
-       newTrackCountingHighPurBJetTags +
-       newJetProbabilityBJetTags +
-       newJetBProbabilityBJetTags )
+       newTrackCountingHighPurBJetTags )
     )
 
 newJetBtaggingSV = cms.Sequence(
@@ -82,8 +80,7 @@ newJetBtaggingSV = cms.Sequence(
     newSecondaryVertexTagInfos * (
        newSimpleSecondaryVertexHighEffBJetTags +
        newSimpleSecondaryVertexHighPurBJetTags +
-       newCombinedSecondaryVertexBJetTags +
-       newCombinedSecondaryVertexMVABJetTags )
+       newCombinedSecondaryVertexBJetTags )
     )
 
 newJetBtaggingEle = cms.Sequence(
@@ -103,9 +100,7 @@ newJetBtaggingMu = cms.Sequence(
 
 newJetBtagging = cms.Sequence(
     newJetBtaggingIP +
-    newJetBtaggingSV +
-    newJetBtaggingEle +
-    newJetBtaggingMu )
+    newJetBtaggingSV )
 
 newBtaggingSequence = cms.Sequence(
     newJetTracksAssociator *
