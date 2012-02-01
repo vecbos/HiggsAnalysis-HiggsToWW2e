@@ -30,9 +30,12 @@ process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
 process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
 process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
-process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFPuCorrJetsL1FastL2L3'
+process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFPuCorrJetsL1FastL2L3'
+process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFPuCorrJetsL1FastL2L3'
+process.newPFNoPUJetTracksAssociatorAtVertex.jets = 'ak5PFNoPUJetsL1FastL2L3'
+process.newPFNoPUJetsSoftElectronTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
+process.newPFNoPUJetsSoftMuonTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -79,6 +82,7 @@ process.treeDumper.dumpBCs = False
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
+#process.treeDumper.dumpParticleFlowObjects = False
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.dumpPFCandidates = False
 process.treeDumper.dumpTree = True
@@ -106,6 +110,7 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
+#                           fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root')
                             fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
                             )
 
@@ -115,7 +120,9 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceMCReduced
-                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
+                       * process.newBtaggingSequence 
+                       * process.newPFPUcorrJetBtaggingSequence
+                       * process.newPFNoPUJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
                        * process.treeDumper
