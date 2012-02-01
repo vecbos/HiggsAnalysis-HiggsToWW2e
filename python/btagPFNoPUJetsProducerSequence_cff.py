@@ -25,6 +25,12 @@ newJetBProbabilityBPFNoPUJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFNo
 newImpactParameterMVABPFNoPUJetTags = RecoBTag.Configuration.RecoBTag_cff.impactParameterMVABJetTags.clone()
 newImpactParameterMVABPFNoPUJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFNoPUJetsImpactParameterTagInfos") )
 
+# impact parameter done with the first track instead of the second
+from RecoBTag.ImpactParameter.trackCounting3D1stComputer_cfi import *
+import RecoBTag.ImpactParameter.trackCountingVeryHighEffBJetTags_cfi
+newTrackCountingVeryHighEffBPFNoPUJetTags = RecoBTag.ImpactParameter.trackCountingVeryHighEffBJetTags_cfi.trackCountingVeryHighEffBJetTags.clone()
+newTrackCountingVeryHighEffBPFNoPUJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFNoPUJetsImpactParameterTagInfos") )
+
 # secondary vertex b-tag
 newPFNoPUJetsSecondaryVertexTagInfos = RecoBTag.Configuration.RecoBTag_cff.secondaryVertexTagInfos.clone()
 newPFNoPUJetsSecondaryVertexTagInfos.trackIPTagInfos = "newPFNoPUJetsImpactParameterTagInfos"
@@ -64,10 +70,9 @@ newPFNoPUJetTracksAssociator = cms.Sequence(
 
 newPFNoPUJetBtaggingIP = cms.Sequence(
     newPFNoPUJetsImpactParameterTagInfos * (
+       newTrackCountingVeryHighEffBPFNoPUJetTags +
        newTrackCountingHighEffBPFNoPUJetTags +
-       newTrackCountingHighPurBPFNoPUJetTags +
-       newJetProbabilityBPFNoPUJetTags +
-       newJetBProbabilityBPFNoPUJetTags )
+       newTrackCountingHighPurBPFNoPUJetTags )
     )
 
 newPFNoPUJetBtaggingSV = cms.Sequence(
@@ -75,8 +80,7 @@ newPFNoPUJetBtaggingSV = cms.Sequence(
     newPFNoPUJetsSecondaryVertexTagInfos * (
        newSimpleSecondaryVertexHighEffBPFNoPUJetTags +
        newSimpleSecondaryVertexHighPurBPFNoPUJetTags +
-       newCombinedSecondaryVertexBPFNoPUJetTags +
-       newCombinedSecondaryVertexMVABPFNoPUJetTags )
+       newCombinedSecondaryVertexBPFNoPUJetTags )
     )
 
 newPFNoPUJetBtaggingEle = cms.Sequence(
@@ -96,9 +100,7 @@ newPFNoPUJetBtaggingMu = cms.Sequence(
 
 newPFNoPUJetBtagging = cms.Sequence(
     newPFNoPUJetBtaggingIP +
-    newPFNoPUJetBtaggingSV +
-    newPFNoPUJetBtaggingEle +
-    newPFNoPUJetBtaggingMu )
+    newPFNoPUJetBtaggingSV )
 
 newPFNoPUJetBtaggingSequence = cms.Sequence(
     newPFNoPUJetTracksAssociator *

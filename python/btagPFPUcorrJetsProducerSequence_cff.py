@@ -72,9 +72,7 @@ newPFPUcorrJetBtaggingIP = cms.Sequence(
     newPFPUcorrJetsImpactParameterTagInfos * (
        newTrackCountingVeryHighEffBPFPUcorrJetTags +
        newTrackCountingHighEffBPFPUcorrJetTags +
-       newTrackCountingHighPurBPFPUcorrJetTags +
-       newJetProbabilityBPFPUcorrJetTags +
-       newJetBProbabilityBPFPUcorrJetTags )
+       newTrackCountingHighPurBPFPUcorrJetTags )
     )
 
 newPFPUcorrJetBtaggingSV = cms.Sequence(
@@ -82,8 +80,7 @@ newPFPUcorrJetBtaggingSV = cms.Sequence(
     newPFPUcorrJetsSecondaryVertexTagInfos * (
        newSimpleSecondaryVertexHighEffBPFPUcorrJetTags +
        newSimpleSecondaryVertexHighPurBPFPUcorrJetTags +
-       newCombinedSecondaryVertexBPFPUcorrJetTags +
-       newCombinedSecondaryVertexMVABPFPUcorrJetTags )
+       newCombinedSecondaryVertexBPFPUcorrJetTags )
     )
 
 newPFPUcorrJetBtaggingEle = cms.Sequence(
@@ -103,9 +100,7 @@ newPFPUcorrJetBtaggingMu = cms.Sequence(
 
 newPFPUcorrJetBtagging = cms.Sequence(
     newPFPUcorrJetBtaggingIP +
-    newPFPUcorrJetBtaggingSV +
-    newPFPUcorrJetBtaggingEle +
-    newPFPUcorrJetBtaggingMu )
+    newPFPUcorrJetBtaggingSV )
 
 newPFPUcorrJetBtaggingSequence = cms.Sequence(
     newPFPUcorrJetTracksAssociator *

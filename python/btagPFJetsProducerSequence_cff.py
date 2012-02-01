@@ -75,8 +75,7 @@ newPFJetBtaggingSV = cms.Sequence(
     newPFJetsSecondaryVertexTagInfos * (
        newSimpleSecondaryVertexHighEffBPFJetTags +
        newSimpleSecondaryVertexHighPurBPFJetTags +
-       newCombinedSecondaryVertexBPFJetTags +
-       newCombinedSecondaryVertexMVABPFJetTags )
+       newCombinedSecondaryVertexBPFJetTags )
     )
 
 newPFJetBtaggingEle = cms.Sequence(
