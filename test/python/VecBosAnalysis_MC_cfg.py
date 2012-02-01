@@ -8,7 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START44_V10::All'
+process.GlobalTag.globaltag = 'START42_V14B::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
@@ -30,9 +30,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
 process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
 process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
 process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
-process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFPuCorrJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFPuCorrJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFPuCorrJetsL1FastL2L3'
+process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
+process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFNoPUJetTracksAssociatorAtVertex.jets = 'ak5PFNoPUJetsL1FastL2L3'
 process.newPFNoPUJetsSoftElectronTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
 process.newPFNoPUJetsSoftMuonTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
@@ -66,7 +66,7 @@ process.treeDumper.nameFile = 'default_MC.root'
 process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
 process.treeDumper.jetCollection3 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
-process.treeDumper.PFjetCollection1 = 'ak5PFJetsNoPUL1FastL2L3'
+process.treeDumper.PFjetCollection1 = 'ak5PFNoPUJetsL1FastL2L3'
 process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
 process.treeDumper.PFpuCorrJetCollection3 = 'ak5PFJetsL2L3'
 process.treeDumper.dumpTriggerResults = True
@@ -111,7 +111,8 @@ process.source = cms.Source("PoolSource",
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
 #                           fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root')
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
+                            #fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
+                            fileNames = cms.untracked.vstring('file:events_GluGluToHToZZTo2L2Q_M-550_7TeV-powheg-pythia6_Summer11_PROVA.root')
                             )
 
 process.p = cms.Path ( process.leptonLinkedTracks
