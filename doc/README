@@ -3,7 +3,7 @@
 cmsrel CMSSW_4_4_2
 cd CMSSW_4_4_2
 cmsenv
-cvs co -r V03-4_4_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V04-4_4_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-4_1_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
