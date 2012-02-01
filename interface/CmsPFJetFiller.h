@@ -49,17 +49,8 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
   std::vector<float> *uncorrEnergy, *L2L3CorrEnergy, *area;
   std::vector<float> *ptD, *rmsCand;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
-    *combinedSecondaryVertexMVABJetTags,
-    *jetBProbabilityBJetTags,
-    *jetProbabilityBJetTags,
     *simpleSecondaryVertexHighEffBJetTags,
     *simpleSecondaryVertexHighPurBJetTags,
-    *softMuonBJetTags,
-    *softMuonByIP3dBJetTags,
-    *softMuonByPtBJetTags,
-    *softElectronBJetTags,
-    *softElectronByIP3dBJetTags,
-    *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags,
     *trackCountingVeryHighEffBJetTags;

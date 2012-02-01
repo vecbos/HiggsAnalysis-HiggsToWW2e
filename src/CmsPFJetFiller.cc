@@ -84,17 +84,8 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->HFHadronMultiplicity;
   delete privateData_->HFEMMultiplicity;
   delete privateData_->combinedSecondaryVertexBJetTags;
-  delete privateData_->combinedSecondaryVertexMVABJetTags;
-  delete privateData_->jetBProbabilityBJetTags;
-  delete privateData_->jetProbabilityBJetTags;
   delete privateData_->simpleSecondaryVertexHighEffBJetTags;
   delete privateData_->simpleSecondaryVertexHighPurBJetTags;
-  delete privateData_->softMuonBJetTags;
-  delete privateData_->softMuonByIP3dBJetTags;
-  delete privateData_->softMuonByPtBJetTags;
-  delete privateData_->softElectronBJetTags;
-  delete privateData_->softElectronByIP3dBJetTags;
-  delete privateData_->softElectronByPtBJetTags;
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
   delete privateData_->trackCountingVeryHighEffBJetTags;
@@ -181,34 +172,16 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     *(privateData_->ncand) = collection->size();
 
     edm::Handle<reco::JetTagCollection> combinedSecondaryVertexBJetTags,
-      combinedSecondaryVertexMVABJetTags,
-      jetBProbabilityBJetTags,
-      jetProbabilityBJetTags,
       simpleSecondaryVertexHighEffBJetTags,
       simpleSecondaryVertexHighPurBJetTags,
-      softMuonBJetTags,
-      softMuonByIP3dBJetTags,
-      softMuonByPtBJetTags,
-      softElectronBJetTags,
-      softElectronByIP3dBJetTags,
-      softElectronByPtBJetTags,
       trackCountingHighPurBJetTags,
       trackCountingHighEffBJetTags,
       trackCountingVeryHighEffBJetTags;
 
     if(saveJetBTag_) {
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("combinedSecondaryVertexBJetTags"), combinedSecondaryVertexBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("combinedSecondaryVertexMVABJetTags"), combinedSecondaryVertexMVABJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("jetBProbabilityBJetTags"), jetBProbabilityBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("jetProbabilityBJetTags"), jetProbabilityBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("simpleSecondaryVertexHighEffBJetTags"), simpleSecondaryVertexHighEffBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("simpleSecondaryVertexHighPurBJetTags"), simpleSecondaryVertexHighPurBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softMuonBJetTags"), softMuonBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softMuonByIP3dBJetTags"), softMuonByIP3dBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softMuonByPtBJetTags"), softMuonByPtBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softElectronBJetTags"), softElectronBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softElectronByIP3dBJetTags"), softElectronByIP3dBJetTags);
-      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("softElectronByPtBJetTags"), softElectronByPtBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingHighPurBJetTags"), trackCountingHighPurBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingHighEffBJetTags"), trackCountingHighEffBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingVeryHighEffBJetTags"), trackCountingVeryHighEffBJetTags);
@@ -275,33 +248,15 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       // fill the btag algorithms output
       if(saveJetBTag_) {
         privateData_->combinedSecondaryVertexBJetTags->push_back( (*combinedSecondaryVertexBJetTags)[index].second );
-        privateData_->combinedSecondaryVertexMVABJetTags->push_back( (*combinedSecondaryVertexMVABJetTags)[index].second );
-        privateData_->jetBProbabilityBJetTags->push_back( (*jetBProbabilityBJetTags)[index].second );
-        privateData_->jetProbabilityBJetTags->push_back( (*jetProbabilityBJetTags)[index].second );
         privateData_->simpleSecondaryVertexHighEffBJetTags->push_back( (*simpleSecondaryVertexHighEffBJetTags)[index].second );
         privateData_->simpleSecondaryVertexHighPurBJetTags->push_back( (*simpleSecondaryVertexHighPurBJetTags)[index].second );
-        privateData_->softMuonBJetTags->push_back( (*softMuonBJetTags)[index].second );
-        privateData_->softMuonByIP3dBJetTags->push_back( (*softMuonByIP3dBJetTags)[index].second );
-        privateData_->softMuonByPtBJetTags->push_back( (*softMuonByPtBJetTags)[index].second );
-        privateData_->softElectronBJetTags->push_back( (*softElectronBJetTags)[index].second );
-        privateData_->softElectronByIP3dBJetTags->push_back( (*softElectronByIP3dBJetTags)[index].second );
-        privateData_->softElectronByPtBJetTags->push_back( (*softElectronByPtBJetTags)[index].second );
         privateData_->trackCountingHighPurBJetTags->push_back( (*trackCountingHighPurBJetTags)[index].second );
         privateData_->trackCountingHighEffBJetTags->push_back( (*trackCountingHighEffBJetTags)[index].second );
         privateData_->trackCountingVeryHighEffBJetTags->push_back( (*trackCountingVeryHighEffBJetTags)[index].second );
       } else {
         privateData_->combinedSecondaryVertexBJetTags->push_back( -1. );
-        privateData_->combinedSecondaryVertexMVABJetTags->push_back( -1. );
-        privateData_->jetBProbabilityBJetTags->push_back( -1. );
-        privateData_->jetProbabilityBJetTags->push_back( -1. );
         privateData_->simpleSecondaryVertexHighEffBJetTags->push_back( -1. );
         privateData_->simpleSecondaryVertexHighPurBJetTags->push_back( -1. );
-        privateData_->softMuonBJetTags->push_back( 1. );
-        privateData_->softMuonByIP3dBJetTags->push_back( -1. );
-        privateData_->softMuonByPtBJetTags->push_back( -1. );
-        privateData_->softElectronBJetTags->push_back( -1. );
-        privateData_->softElectronByIP3dBJetTags->push_back( -1. );
-        privateData_->softElectronByPtBJetTags->push_back( -1. );
         privateData_->trackCountingHighPurBJetTags->push_back( -1. );
         privateData_->trackCountingHighEffBJetTags->push_back( -1. );
         privateData_->trackCountingVeryHighEffBJetTags->push_back( -1. );
@@ -393,17 +348,8 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"neutralEmEnergy"+colSuffix).c_str(), *privateData_->neutralEmEnergy, nCandString.c_str(), 0, "Reco");
   if(saveJetBTag_) {
     cmstree->column((colPrefix+"combinedSecondaryVertexBJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"combinedSecondaryVertexMVABJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexMVABJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"jetBProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetBProbabilityBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"jetProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetProbabilityBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"simpleSecondaryVertexHighEffBJetTags"+colSuffix).c_str(), *privateData_->simpleSecondaryVertexHighEffBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"simpleSecondaryVertexHighPurBJetTags"+colSuffix).c_str(), *privateData_->simpleSecondaryVertexHighPurBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"softMuonBJetTags"+colSuffix).c_str(), *privateData_->softMuonBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"softMuonByIP3dBJetTags"+colSuffix).c_str(), *privateData_->softMuonByIP3dBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"softMuonByPtBJetTags"+colSuffix).c_str(), *privateData_->softMuonByPtBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"softElectronBJetTags"+colSuffix).c_str(), *privateData_->softElectronBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"softElectronByIP3dBJetTags"+colSuffix).c_str(), *privateData_->softElectronByIP3dBJetTags, nCandString.c_str(), 0, "Reco");
-    cmstree->column((colPrefix+"softElectronByPtBJetTags"+colSuffix).c_str(), *privateData_->softElectronByPtBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingHighPurBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighPurBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighEffBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingVeryHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingVeryHighEffBJetTags, nCandString.c_str(), 0, "Reco");
@@ -445,17 +391,8 @@ void CmsPFJetFillerData::initialise() {
   HFHadronMultiplicity = new vector<int>;
   HFEMMultiplicity = new vector<int>;
   combinedSecondaryVertexBJetTags = new vector<float>;
-  combinedSecondaryVertexMVABJetTags = new vector<float>;
-  jetBProbabilityBJetTags = new vector<float>;
-  jetProbabilityBJetTags = new vector<float>;
   simpleSecondaryVertexHighEffBJetTags = new vector<float>;
   simpleSecondaryVertexHighPurBJetTags = new vector<float>;
-  softMuonBJetTags = new vector<float>;
-  softMuonByIP3dBJetTags = new vector<float>;
-  softMuonByPtBJetTags = new vector<float>;
-  softElectronBJetTags = new vector<float>;
-  softElectronByIP3dBJetTags = new vector<float>;
-  softElectronByPtBJetTags = new vector<float>;
   trackCountingHighPurBJetTags = new vector<float>;
   trackCountingHighEffBJetTags = new vector<float>;
   trackCountingVeryHighEffBJetTags = new vector<float>;
@@ -489,17 +426,8 @@ void CmsPFJetFillerData::clearTrkVectors() {
   HFHadronMultiplicity->clear();
   HFEMMultiplicity->clear();
   combinedSecondaryVertexBJetTags->clear();
-  combinedSecondaryVertexMVABJetTags->clear();
-  jetBProbabilityBJetTags->clear();
-  jetProbabilityBJetTags->clear();
   simpleSecondaryVertexHighEffBJetTags->clear();
   simpleSecondaryVertexHighPurBJetTags->clear();
-  softMuonBJetTags->clear();
-  softMuonByIP3dBJetTags->clear();
-  softMuonByPtBJetTags->clear();
-  softElectronBJetTags->clear();
-  softElectronByIP3dBJetTags->clear();
-  softElectronByPtBJetTags->clear();
   trackCountingHighPurBJetTags->clear();
   trackCountingHighEffBJetTags->clear();
   trackCountingVeryHighEffBJetTags->clear();

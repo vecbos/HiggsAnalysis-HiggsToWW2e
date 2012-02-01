@@ -30,17 +30,10 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
   std::vector<int> *nHit, *nHit90;
   std::vector<float> *fHPD, *covEtaEta, *covPhiPhi, *fLS, *fOOT;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
-    *combinedSecondaryVertexMVABJetTags,
     *jetBProbabilityBJetTags,
     *jetProbabilityBJetTags,
     *simpleSecondaryVertexHighEffBJetTags,
     *simpleSecondaryVertexHighPurBJetTags,
-    *softMuonBJetTags,
-    *softMuonByIP3dBJetTags,
-    *softMuonByPtBJetTags,
-  //    *softElectronBJetTags, 
-    *softElectronByIP3dBJetTags,
-    *softElectronByPtBJetTags,
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags,
     *trackCountingVeryHighEffBJetTags;
