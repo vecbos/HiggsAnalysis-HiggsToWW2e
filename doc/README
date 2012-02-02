@@ -15,7 +15,10 @@ cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/DataFormats UserCode/Mangano/W
 cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
+addpkg ElectroWeakAnalysis/Utilities
 
+scram setup lhapdffull
+touch $CMSSW_BASE/src/ElectroWeakAnalysis/Utilities/CMS.BuildFile.xml
 scram b
 
 * To produce the trees on AOD:
@@ -56,7 +59,10 @@ cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/DataFormats UserCode/Mangano/W
 cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
+addpkg ElectroWeakAnalysis/Utilities
 
+scram setup lhapdffull
+touch $CMSSW_BASE/src/ElectroWeakAnalysis/Utilities/CMS.BuildFile.xml
 scram b
 
 * To produce the trees on AOD:

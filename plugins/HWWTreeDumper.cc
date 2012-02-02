@@ -58,6 +58,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsHcalNoiseFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFCandidateFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsPdfWeightFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
 
@@ -151,6 +152,9 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
 
   // data run informations
   dumpRunInfo_ = iConfig.getUntrackedParameter<bool>("dumpRunInfo",false);
+
+  // eigenvalues for PDF systematics
+  dumpPdfWeight_ = iConfig.getUntrackedParameter<bool>("dumpPdfWeight",false);
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
   pflowElectronCollection_ = iConfig.getParameter<edm::InputTag>("pflowElectronCollection");
@@ -279,6 +283,16 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hcalNoiseSummaryLabel_ = iConfig.getParameter<edm::InputTag>("hcalNoiseSummary");
 
   energyCorrectionF = EcalClusterFunctionFactory::get()->create("EcalClusterEnergyCorrection", iConfig);
+
+  // PDF sets
+  pdfSet1_ = iConfig.getParameter<edm::InputTag>("pdfSet1");
+  pdfSet2_ = iConfig.getParameter<edm::InputTag>("pdfSet2");
+  pdfSet3_ = iConfig.getParameter<edm::InputTag>("pdfSet3");
+
+  namePdf1_ = iConfig.getUntrackedParameter<std::string>("namepdf1", "pdfSet1");
+  namePdf2_ = iConfig.getUntrackedParameter<std::string>("namepdf2", "pdfSet2");
+  namePdf3_ = iConfig.getUntrackedParameter<std::string>("namepdf3", "pdfSet3");
+
 }
 
 
@@ -310,6 +324,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeCollectionToTree( mcTruthCollection_, LHEComments_, iEvent, 100, firstEvent );
   }
 
+  // fill the PDF weights
+  if(dumpPdfWeight_) {
+    CmsPdfWeightFiller pdfWeightFiller( tree_);
+    pdfWeightFiller.writePdfWeightToTree(pdfSet1_, iEvent, iSetup, "", namePdf1_.c_str(), false);
+    pdfWeightFiller.writePdfWeightToTree(pdfSet2_, iEvent, iSetup, "", namePdf2_.c_str(), false);
+    pdfWeightFiller.writePdfWeightToTree(pdfSet3_, iEvent, iSetup, "", namePdf3_.c_str(), false);
+  }
 
   jevtInRun_++;
   // fill the trigger paths info

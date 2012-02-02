@@ -57,8 +57,8 @@ private:
   bool dumpPreselInfo_;
   //! dump H->WW->2lep 2nu gg fusion signal k-factor
   bool dumpSignalKfactor_;
-  //! save the LHE event infos
-  bool dumpLHE_;
+  //! save the LHE event infos, PDF infos
+  bool dumpLHE_, dumpPdfWeight_;
   //! dump the basic candidate informations (4-vectors)
   bool saveCand_;
   //! dump specific reco informations in addition to candidate variables
@@ -111,6 +111,9 @@ private:
   bool aodHcalNoiseFlags_;
   //! dump the run info informations
   bool dumpRunInfo_;
+  //! PDF collections
+  edm::InputTag pdfSet1_, pdfSet2_, pdfSet3_; 
+  std::string namePdf1_, namePdf2_, namePdf3_;
   //! save the dE/dx of the tracks (requires the right module to be run)
   bool saveTrackDeDx_;
   //! save the calotowers

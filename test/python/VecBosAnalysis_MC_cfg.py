@@ -61,6 +61,17 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
+#PDF systematics
+# Produce PDF weights (maximum is 3)
+process.pdfWeights = cms.EDProducer("PdfWeightProducer",
+                                    # Fix POWHEG if buggy (this PDF set will also appear on output,
+                                    # so only two more PDF sets can be added in PdfSetNames if not "")
+                                    #FixPOWHEG = cms.untracked.string("cteq66.LHgrid"),
+                                    GenTag = cms.untracked.InputTag("genParticles"),
+                                    PdfInfoTag = cms.untracked.InputTag("generator"),
+                                    PdfSetNames = cms.untracked.vstring("cteq66.LHgrid", "MRST2006nnlo.LHgrid", "NNPDF10_100.LHgrid")
+                                    )
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
@@ -75,6 +86,7 @@ process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpLHE = False
+process.treeDumper.dumpPdfWeight = False
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpElectrons = True
@@ -116,16 +128,32 @@ process.source = cms.Source("PoolSource",
                             #fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
                             )
 
-process.p = cms.Path ( process.leptonLinkedTracks
-                       * process.mergedSuperClusters
-                       * process.chargedMetProducer
-                       * process.metSequence
-                       * process.pfIsolationAllSequence
-                       * process.ourJetSequenceMCReduced
-                       * process.newBtaggingSequence 
-                       * process.newPFPUcorrJetBtaggingSequence
-                       * process.newPFNoPUJetBtaggingSequence
-                       * process.eIdSequence
-                       * process.FastjetForIsolation
-                       * process.treeDumper
-                       )
+if(process.treeDumper.dumpPdfWeight == False) :
+    process.p = cms.Path ( process.leptonLinkedTracks
+                           * process.mergedSuperClusters
+                           * process.chargedMetProducer
+                           * process.metSequence
+                           * process.pfIsolationAllSequence
+                           * process.ourJetSequenceMCReduced
+                           * process.newBtaggingSequence 
+                           * process.newPFPUcorrJetBtaggingSequence
+                           * process.newPFNoPUJetBtaggingSequence
+                           * process.eIdSequence
+                           * process.FastjetForIsolation
+                           * process.treeDumper
+                           )
+else :
+    process.p = cms.Path ( process.pdfWeights
+                           * process.leptonLinkedTracks
+                           * process.mergedSuperClusters
+                           * process.chargedMetProducer
+                           * process.metSequence
+                           * process.pfIsolationAllSequence
+                           * process.ourJetSequenceMCReduced
+                           * process.newBtaggingSequence 
+                           * process.newPFPUcorrJetBtaggingSequence
+                           * process.newPFNoPUJetBtaggingSequence
+                           * process.eIdSequence
+                           * process.FastjetForIsolation
+                           * process.treeDumper
+                           )

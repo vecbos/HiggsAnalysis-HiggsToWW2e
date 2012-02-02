@@ -176,6 +176,8 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                             # trigger results
                             dumpTriggerResults = cms.untracked.bool(False),
                             dumpHLTObjects = cms.untracked.bool(False),
+                            # PDFs
+                            dumpPdfWeight = cms.untracked.bool(False),
                             #tau discriminators
                             tauDiscrByLeadingTrackFindingTag = cms.InputTag("shrinkingConePFTauDiscriminationByLeadingTrackFinding"),
                             tauDiscrByLeadingTrackPtCutTag = cms.InputTag("shrinkingConePFTauDiscriminationByLeadingTrackPtCut"),
@@ -225,6 +227,13 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                             hpsTancTausDiscrByMediumIsolationTag = cms.InputTag("hpsTancTausDiscriminationByMediumIsolation"),
                             hpsTancTausDiscrByTightIsolationTag = cms.InputTag("hpsTancTausDiscriminationByTightIsolation"),
                             hpsTancTausDiscrByFlightPathTag = cms.InputTag("hpsTancTausDiscriminationByFlightPath"),
+                            # pdf
+                            pdfSet1 = cms.InputTag("pdfWeights:cteq66"),
+                            pdfSet2 = cms.InputTag("pdfWeights:MRST2006nnlo"),
+                            pdfSet3 = cms.InputTag("pdfWeights:NNPDF10"), # no _ are allowed in the names: NN10_100 => NN10
+                            namepdf1 = cms.untracked.string("CTEQ66"),
+                            namepdf2 = cms.untracked.string("MRST2006NNLO"),
+                            namepdf3 = cms.untracked.string("NNPDF10100"),
 
                             dumpTree = cms.untracked.bool(False),
                             PFJetsBTags = cms.untracked.PSet( combinedSecondaryVertexBJetTags = cms.InputTag("newCombinedSecondaryVertexBPFNoPUJetTags"),
