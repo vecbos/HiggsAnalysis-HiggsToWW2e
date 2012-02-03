@@ -48,7 +48,6 @@
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
 
-#include "DataFormats/EcalRecHit/interface/EcalSeverityLevel.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
 #include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgoRcd.h"
 
@@ -438,7 +437,7 @@ std::pair <DetId,int> CmsBasicClusterFiller::closestProblematic(const edm::Event
       iSetup.get<EcalSeverityLevelAlgoRcd>().get(sevlv);
 
       uint32_t sev = sevlv->severityLevel( jrh->id(), recHits );
-      if (sev == EcalSeverityLevel::kGood)
+      if (sev == EcalSeverityLevelAlgo::kGood)
         continue;
       //Find the closest DetId in eta,phi space (distance defined by deta^2 + dphi^2)
       int deta=distanceEta(EBDetId(seed),EBDetId(*it));
