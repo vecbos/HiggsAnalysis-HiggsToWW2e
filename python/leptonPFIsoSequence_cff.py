@@ -262,6 +262,10 @@ import WWAnalysis.Tools.muonPFIsoMapProd_cfi
 muonCombinedPFIsoMapProducer = WWAnalysis.Tools.muonPFIsoMapProd_cfi.muonPFIsoMapProd.clone()
 muonCombinedPFIsoMapProducer.vtxLabel = 'offlinePrimaryVertices' # if the event has the first vertex bad, will be discarded offline.
 
+# this is the PF candidate isolation with pfnopu input and custom vetoes
+from MyAnalysis.IsolationTools.electronPFIsolations_cff import *
+from MyAnalysis.IsolationTools.muonPFIsolations_cff import *
+
 from CommonTools.ParticleFlow.pfNoPileUp_cff import *
 pfPileUp.PFCandidates = "particleFlow"
 pfNoPileUp.bottomCollection = "particleFlow"
@@ -281,5 +285,7 @@ pfIsolationGenericNoOverlapDefault = cms.Sequence( muonPfGenericNoOverChargedDep
 
 pfIsolationCombined = cms.Sequence( electronCombinedPFIsoMapProducer * muonCombinedPFIsoMapProducer )
 
-pfIsolationAllSequence = cms.Sequence( pfPUSequence * pfIsoStdSequence * pfIsolationsDefault * pfIsolationGenericDefault * pfIsolationGenericNoOverlapDefault * pfIsolationCombined )
+pfIsolationSingleType = cms.Sequence( electronPFIsoChHad * electronPFIsoNHad * electronPFIsoPhoton * muonPFIsoChHad * muonPFIsoNHad * muonPFIsoPhoton )
+
+pfIsolationAllSequence = cms.Sequence( pfPUSequence * pfIsoStdSequence * pfIsolationsDefault * pfIsolationGenericDefault * pfIsolationGenericNoOverlapDefault * pfIsolationCombined * pfIsolationSingleType )
 

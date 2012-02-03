@@ -87,6 +87,9 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->pfGenericNoOverNeutralIso;
   delete privateData_->pfGenericNoOverPhotonIso;
   delete privateData_->pfCombinedIso;
+  delete privateData_->pfCandChargedIso;
+  delete privateData_->pfCandNeutralIso;
+  delete privateData_->pfCandPhotonIso;
 }
 
 
@@ -139,8 +142,11 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     iEvent.getByLabel( "electronPfGenericNoOverNeutralDeps", (*eIsoFromDepsValueMap_)[7] ); 
     iEvent.getByLabel( "electronPfGenericNoOverPhotonDeps", (*eIsoFromDepsValueMap_)[8] ); 
     
-    eIsoFromPFCandsValueMap_ = new isoContainer2(1);
+    eIsoFromPFCandsValueMap_ = new isoContainer2(4);
     iEvent.getByLabel( "electronCombinedPFIsoMapProducer", (*eIsoFromPFCandsValueMap_)[0] ); 
+    iEvent.getByLabel( "electronPFIsoChHad", (*eIsoFromPFCandsValueMap_)[1] );
+    iEvent.getByLabel( "electronPFIsoNHad", (*eIsoFromPFCandsValueMap_)[2] );
+    iEvent.getByLabel( "electronPFIsoPhoton", (*eIsoFromPFCandsValueMap_)[3] );
 
     // Read the tracks and calotowers collections for isolation
     try { iEvent.getByLabel(tracksProducer_, m_tracks); }
@@ -266,6 +272,9 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   const isoFromDepositsMap & electronsPfGenericNoOverNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[7] );
   const isoFromDepositsMap & electronsPfGenericNoOverPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[8] );
   const isoFromPFCandsMap & electronsPfCombinedIsoVal = *( (*eIsoFromPFCandsValueMap_)[0] );
+  const isoFromPFCandsMap & electronsPfCandChHadIsoVal = *( (*eIsoFromPFCandsValueMap_)[1] );
+  const isoFromPFCandsMap & electronsPfCandNHadIsoVal = *( (*eIsoFromPFCandsValueMap_)[2] );
+  const isoFromPFCandsMap & electronsPfCandPhotonIsoVal = *( (*eIsoFromPFCandsValueMap_)[3] );
 
   privateData_->pfChargedIso->push_back( electronsPfChargedIsoVal[electronRef] );
   privateData_->pfNeutralIso->push_back( electronsPfNeutralIsoVal[electronRef] );
@@ -277,6 +286,9 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   privateData_->pfGenericNoOverNeutralIso->push_back( electronsPfGenericNoOverNeutralIsoVal[electronRef] );
   privateData_->pfGenericNoOverPhotonIso->push_back( electronsPfGenericNoOverPhotonIsoVal[electronRef] );
   privateData_->pfCombinedIso->push_back( electronsPfCombinedIsoVal[electronRef] );
+  privateData_->pfCandChargedIso->push_back( electronsPfCandChHadIsoVal[electronRef] );
+  privateData_->pfCandNeutralIso->push_back( electronsPfCandNHadIsoVal[electronRef] );
+  privateData_->pfCandPhotonIso->push_back( electronsPfCandPhotonIsoVal[electronRef] );
 
 }
 
@@ -322,6 +334,9 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"pfGenericNoOverNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverNeutralIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfGenericNoOverPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericNoOverPhotonIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso"+colSuffix).c_str(),  *privateData_->pfCandChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso, nCandString.c_str(), 0, "Reco");
   
 }
 
@@ -367,6 +382,9 @@ void CmsEleIDTreeFillerData::initialise() {
   pfGenericNoOverNeutralIso  = new vector<float>;
   pfGenericNoOverPhotonIso   = new vector<float>;
   pfCombinedIso            = new vector<float>;
+  pfCandChargedIso         = new vector<float>;
+  pfCandNeutralIso         = new vector<float>;
+  pfCandPhotonIso          = new vector<float>;
 }
 
 void CmsEleIDTreeFillerData::clearTrkVectors() {
@@ -408,6 +426,9 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   pfGenericNoOverNeutralIso  ->clear();
   pfGenericNoOverPhotonIso   ->clear();
   pfCombinedIso   ->clear();
+  pfCandChargedIso         ->clear();
+  pfCandNeutralIso         ->clear();
+  pfCandPhotonIso          ->clear();
 }
 
 int CmsEleIDTreeFiller::stdEleIdClassify(const GsfElectron* electron) {

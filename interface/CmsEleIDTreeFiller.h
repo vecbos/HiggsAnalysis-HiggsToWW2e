@@ -52,6 +52,7 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *dr03HcalTowerSumEtFullCone, *dr04HcalTowerSumEtFullCone;
   vector<float> *pfChargedIso, *pfNeutralIso, *pfPhotonIso, *pfGenericChargedIso, *pfGenericNeutralIso, *pfGenericPhotonIso,
     *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso, *pfCombinedIso;
+  vector<float> *pfCandChargedIso, *pfCandNeutralIso, *pfCandPhotonIso;
 
   vector<float> *eleLik, *pflowMVA;
 

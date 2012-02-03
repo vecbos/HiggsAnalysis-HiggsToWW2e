@@ -142,7 +142,10 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->pfGenericNoOverNeutralIso;
   delete privateData_->pfGenericNoOverPhotonIso;
   delete privateData_->pfCombinedIso;
-  
+  delete privateData_->pfCandChargedIso;
+  delete privateData_->pfCandNeutralIso;
+  delete privateData_->pfCandPhotonIso;
+
   delete privateData_->ncand;
 
 }
@@ -193,7 +196,7 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     // for track link
     try { iEvent.getByLabel(generalTracks_, h_tracks); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsMuonFiller") << "Can't get general track collection: " << generalTracks_; }
 
     //read the PF isolation with iso deposits
     eIsoFromDepsValueMap_ = new isoContainer(9);
@@ -207,8 +210,11 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
     iEvent.getByLabel( "muonPfGenericNoOverNeutralDeps", (*eIsoFromDepsValueMap_)[7] ); 
     iEvent.getByLabel( "muonPfGenericNoOverPhotonDeps", (*eIsoFromDepsValueMap_)[8] ); 
 
-    eIsoFromPFCandsValueMap_ = new isoContainer2(1);
+    eIsoFromPFCandsValueMap_ = new isoContainer2(4);
     iEvent.getByLabel( "muonCombinedPFIsoMapProducer", (*eIsoFromPFCandsValueMap_)[0] ); 
+    iEvent.getByLabel( "muonPFIsoChHad", (*eIsoFromPFCandsValueMap_)[1] );
+    iEvent.getByLabel( "muonPFIsoNHad", (*eIsoFromPFCandsValueMap_)[2] );
+    iEvent.getByLabel( "muonPFIsoPhoton", (*eIsoFromPFCandsValueMap_)[3] );
 
     int imu=0;
     edm::View<reco::Candidate>::const_iterator cand;
@@ -344,7 +350,10 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     const isoFromDepositsMap & muonsPfGenericNoOverChargedIsoVal = *( (*eIsoFromDepsValueMap_)[6] );
     const isoFromDepositsMap & muonsPfGenericNoOverNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[7] );
     const isoFromDepositsMap & muonsPfGenericNoOverPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[8] );
-    const isoFromPFCandsMap & electronsPfCombinedIsoVal = *( (*eIsoFromPFCandsValueMap_)[0] );
+    const isoFromPFCandsMap & muonsPfCombinedIsoVal = *( (*eIsoFromPFCandsValueMap_)[0] );
+    const isoFromPFCandsMap & muonsPfCandChHadIsoVal = *( (*eIsoFromPFCandsValueMap_)[1] );
+    const isoFromPFCandsMap & muonsPfCandNHadIsoVal = *( (*eIsoFromPFCandsValueMap_)[2] );
+    const isoFromPFCandsMap & muonsPfCandPhotonIsoVal = *( (*eIsoFromPFCandsValueMap_)[3] );
     
     privateData_->pfChargedIso->push_back( muonsPfChargedIsoVal[muonRef] );
     privateData_->pfNeutralIso->push_back( muonsPfNeutralIsoVal[muonRef] );
@@ -355,7 +364,10 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfGenericNoOverChargedIso->push_back( muonsPfGenericNoOverChargedIsoVal[muonRef] );
     privateData_->pfGenericNoOverNeutralIso->push_back( muonsPfGenericNoOverNeutralIsoVal[muonRef] );
     privateData_->pfGenericNoOverPhotonIso->push_back( muonsPfGenericNoOverPhotonIsoVal[muonRef] );
-    privateData_->pfCombinedIso->push_back( electronsPfCombinedIsoVal[muonRef] );
+    privateData_->pfCombinedIso->push_back( muonsPfCombinedIsoVal[muonRef] );
+    privateData_->pfCandChargedIso->push_back( muonsPfCandChHadIsoVal[muonRef] );
+    privateData_->pfCandNeutralIso->push_back( muonsPfCandNHadIsoVal[muonRef] );
+    privateData_->pfCandPhotonIso->push_back( muonsPfCandPhotonIsoVal[muonRef] );
 
     // track kinks
     privateData_->kink->push_back(muonRef->combinedQuality().trkKink) ;
@@ -399,6 +411,9 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfGenericNoOverNeutralIso->push_back( -1 );
     privateData_->pfGenericNoOverPhotonIso->push_back( -1 );
     privateData_->pfCombinedIso->push_back( -1 );
+    privateData_->pfCandChargedIso->push_back( -1 );
+    privateData_->pfCandNeutralIso->push_back( -1 );
+    privateData_->pfCandPhotonIso->push_back( -1 );
 
     privateData_->kink->push_back( -1 );
 
@@ -448,6 +463,11 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"pfGenericNoOverNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverNeutralIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfGenericNoOverPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericNoOverPhotonIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
+
+  cmstree->column((colPrefix+"pfCandChargedIso"+colSuffix).c_str(),  *privateData_->pfCandChargedIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso, nCandString.c_str(), 0, "Reco");
+
   cmstree->column((colPrefix+"kink"+colSuffix).c_str(),  *privateData_->kink, nCandString.c_str(), 0, "Reco");
 
   //  Expected deposits in CALO
@@ -496,6 +516,9 @@ void CmsMuonFillerData::initialise() {
   pfGenericNoOverNeutralIso  = new vector<float>;
   pfGenericNoOverPhotonIso   = new vector<float>;
   pfCombinedIso            = new vector<float>;
+  pfCandChargedIso         = new vector<float>;
+  pfCandNeutralIso         = new vector<float>;
+  pfCandPhotonIso          = new vector<float>;
 
   kink = new vector<float>;
 
@@ -545,6 +568,9 @@ void CmsMuonFillerData::clearTrkVectors() {
   pfGenericNoOverNeutralIso  ->clear();
   pfGenericNoOverPhotonIso   ->clear();
   pfCombinedIso            ->clear();
+  pfCandChargedIso         ->clear();
+  pfCandNeutralIso         ->clear();
+  pfCandPhotonIso          ->clear();
 
   kink->clear();
 
