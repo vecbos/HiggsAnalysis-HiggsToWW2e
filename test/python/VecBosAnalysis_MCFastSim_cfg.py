@@ -33,6 +33,9 @@ process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
 process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
 process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+process.newPFNoPUJetTracksAssociatorAtVertex.jets = 'ak5PFNoPUJetsL1FastL2L3'
+process.newPFNoPUJetsSoftElectronTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
+process.newPFNoPUJetsSoftMuonTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -57,6 +60,17 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 
+#PDF systematics
+# Produce PDF weights (maximum is 3)
+process.pdfWeights = cms.EDProducer("PdfWeightProducer",
+                                    # Fix POWHEG if buggy (this PDF set will also appear on output,
+                                    # so only two more PDF sets can be added in PdfSetNames if not "")
+                                    #FixPOWHEG = cms.untracked.string("cteq66.LHgrid"),
+                                    GenTag = cms.untracked.InputTag("genParticles"),
+                                    PdfInfoTag = cms.untracked.InputTag("generator"),
+                                    PdfSetNames = cms.untracked.vstring("cteq66.LHgrid", "MRST2006nnlo.LHgrid", "NNPDF10_100.LHgrid")
+                                    )
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
@@ -64,13 +78,15 @@ process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
 process.treeDumper.jetCollection2 = 'ak5CaloJets::HLT'
 process.treeDumper.jetCollection3 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
-process.treeDumper.PFjetCollection1 = 'ak5PFJetsNoPUL1FastL2L3'
+process.treeDumper.PFjetCollection1 = 'ak5PFNoPUJetsL1FastL2L3'
+process.treeDumper.PFjetCollection3 = 'ak5PFNoPUJetsL2L3'
 process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
 process.treeDumper.PFpuCorrJetCollection3 = 'ak5PFJetsL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpLHE = False
+process.treeDumper.dumpPdfWeight = True
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpElectrons = True
@@ -107,18 +123,35 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
-                            fileNames = cms.untracked.vstring('file:batch5_msugra_600_600_10_0_1_razor.root')
+                            fileNames = cms.untracked.vstring('file:PYTHIA6_pMSSM_MCMC_1_369007_sftsht_7TeV_cff_py_GEN_FASTSIM_HLT_PU.root')
                             )
 
-process.p = cms.Path ( process.leptonLinkedTracks
+if(process.treeDumper.dumpPdfWeight == False) :
+    process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters
                        * process.chargedMetProducer
                        * process.metSequence
                        * process.pfIsolationAllSequence
-                       * process.kt6CaloJets
                        * process.ourJetSequenceMCReduced
-                       * process.newBtaggingSequence * process.newPFPUcorrJetBtaggingSequence
+                       * process.newBtaggingSequence
+                       * process.newPFPUcorrJetBtaggingSequence
+                       * process.newPFNoPUJetBtaggingSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
                        * process.treeDumper
                        )
+else :
+    process.p = cms.Path ( process.pdfWeights
+                           * process.leptonLinkedTracks
+                           * process.mergedSuperClusters
+                           * process.chargedMetProducer
+                           * process.metSequence
+                           * process.pfIsolationAllSequence
+                           * process.ourJetSequenceMCReduced
+                           * process.newBtaggingSequence 
+                           * process.newPFPUcorrJetBtaggingSequence
+                           * process.newPFNoPUJetBtaggingSequence
+                           * process.eIdSequence
+                           * process.FastjetForIsolation
+                           * process.treeDumper
+                           )
