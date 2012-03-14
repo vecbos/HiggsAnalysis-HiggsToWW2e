@@ -39,9 +39,15 @@ struct CmsMuonFillerData : public CmsCandidateFillerData {
   vector<float> *sumPt03, *emEt03, *hadEt03, *hoEt03, *nTrk03, *nJets03;
   vector<float> *sumPt05, *emEt05, *hadEt05, *hoEt05, *nTrk05, *nJets05;
   vector<int> *muonId, *type, *numberOfMatches;
-  vector<float> *pfChargedIso, *pfNeutralIso, *pfPhotonIso, *pfGenericChargedIso, *pfGenericNeutralIso, *pfGenericPhotonIso,
-    *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso, *pfCombinedIso;
-  vector<float> *pfCandChargedIso, *pfCandNeutralIso, *pfCandPhotonIso;
+  vector<float> *pfCombinedIso;
+  vector<float> *pfCandChargedIso01, *pfCandNeutralIso01, *pfCandPhotonIso01,
+    *pfCandChargedIso02, *pfCandNeutralIso02, *pfCandPhotonIso02,
+    *pfCandChargedIso03, *pfCandNeutralIso03, *pfCandPhotonIso03,
+    *pfCandChargedIso04, *pfCandNeutralIso04, *pfCandPhotonIso04,
+    *pfCandChargedIso05, *pfCandNeutralIso05, *pfCandPhotonIso05,
+    *pfCandChargedIso06, *pfCandNeutralIso06, *pfCandPhotonIso06,
+    *pfCandChargedIso07, *pfCandNeutralIso07, *pfCandPhotonIso07,
+    *pfCandChargedDirIso04, *pfCandNeutralDirIso04, *pfCandPhotonDirIso04;
   vector<float> *kink;
 
   vector<float> *EcalExpDepo, *HcalExpDepo, *HoExpDepo, *emS9, *hadS9, *hoS9, *CaloComp;
@@ -117,13 +123,9 @@ class CmsMuonFiller : public CmsCandidateFiller {
 
   edm::Handle< reco::TrackRefVector > h_tracks;
 
-  typedef edm::ValueMap<double> isoFromDepositsMap;
-  typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
-  isoContainer *eIsoFromDepsValueMap_;
-
   typedef edm::ValueMap<float> isoFromPFCandsMap;
-  typedef std::vector< edm::Handle<isoFromPFCandsMap> > isoContainer2;
-  isoContainer2 *eIsoFromPFCandsValueMap_;
+  typedef std::vector< edm::Handle<isoFromPFCandsMap> > isoContainer;
+  isoContainer *eIsoFromPFCandsValueMap_;
 
 };
 

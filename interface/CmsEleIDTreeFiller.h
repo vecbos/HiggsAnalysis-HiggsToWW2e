@@ -50,9 +50,15 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
   vector<float> *dr04TkSumPt, *dr04EcalRecHitSumEt, *dr04HcalTowerSumEt;
   vector<float> *scBasedEcalSum03, *scBasedEcalSum04;
   vector<float> *dr03HcalTowerSumEtFullCone, *dr04HcalTowerSumEtFullCone;
-  vector<float> *pfChargedIso, *pfNeutralIso, *pfPhotonIso, *pfGenericChargedIso, *pfGenericNeutralIso, *pfGenericPhotonIso,
-    *pfGenericNoOverChargedIso, *pfGenericNoOverNeutralIso, *pfGenericNoOverPhotonIso, *pfCombinedIso;
-  vector<float> *pfCandChargedIso, *pfCandNeutralIso, *pfCandPhotonIso;
+  vector<float> *pfCombinedIso, 
+    *pfCandChargedIso01, *pfCandNeutralIso01, *pfCandPhotonIso01,
+    *pfCandChargedIso02, *pfCandNeutralIso02, *pfCandPhotonIso02,
+    *pfCandChargedIso03, *pfCandNeutralIso03, *pfCandPhotonIso03,
+    *pfCandChargedIso04, *pfCandNeutralIso04, *pfCandPhotonIso04,
+    *pfCandChargedIso05, *pfCandNeutralIso05, *pfCandPhotonIso05,
+    *pfCandChargedIso06, *pfCandNeutralIso06, *pfCandPhotonIso06,
+    *pfCandChargedIso07, *pfCandNeutralIso07, *pfCandPhotonIso07,
+    *pfCandChargedDirIso04, *pfCandNeutralDirIso04, *pfCandPhotonDirIso04;
 
   vector<float> *eleLik, *pflowMVA;
 
@@ -127,13 +133,9 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   typedef std::vector< edm::Handle<eleIdMap> > eleIdContainer;
   eleIdContainer *eleIdResults_;
 
-  typedef edm::ValueMap<double> isoFromDepositsMap;
-  typedef std::vector< edm::Handle<isoFromDepositsMap> > isoContainer;
-  isoContainer *eIsoFromDepsValueMap_;
-
   typedef edm::ValueMap<float> isoFromPFCandsMap;
-  typedef std::vector< edm::Handle<isoFromPFCandsMap> > isoContainer2;
-  isoContainer2 *eIsoFromPFCandsValueMap_;
+  typedef std::vector< edm::Handle<isoFromPFCandsMap> > isoContainer;
+  isoContainer *eIsoFromPFCandsValueMap_;
 
   edm::Handle<CaloTowerCollection> m_calotowers;
   edm::Handle<reco::TrackCollection> m_tracks;

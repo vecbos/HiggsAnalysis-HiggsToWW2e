@@ -41,7 +41,7 @@ LeptonTrackFilter::select (edm::Handle<collection> input,
   // get the MuonCollection
   edm::Handle< edm::View<reco::Candidate> > muons;
   try { iEvent.getByLabel(m_MuonLabel, muons); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("LeptonTrackFilter") << "Can't get electron candidate collection: " << m_MuonLabel; }
+  catch ( cms::Exception& ex ) { edm::LogWarning("LeptonTrackFilter") << "Can't get muon candidate collection: " << m_MuonLabel; }
 
   // get the JetCollection
   edm::Handle< edm::View<reco::Candidate> > jets;

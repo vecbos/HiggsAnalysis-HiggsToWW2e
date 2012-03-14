@@ -132,19 +132,31 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->hoS9;
   delete privateData_->CaloComp;
 
-  delete privateData_->pfChargedIso;
-  delete privateData_->pfNeutralIso;
-  delete privateData_->pfPhotonIso;
-  delete privateData_->pfGenericChargedIso;
-  delete privateData_->pfGenericNeutralIso;
-  delete privateData_->pfGenericPhotonIso;
-  delete privateData_->pfGenericNoOverChargedIso;
-  delete privateData_->pfGenericNoOverNeutralIso;
-  delete privateData_->pfGenericNoOverPhotonIso;
   delete privateData_->pfCombinedIso;
-  delete privateData_->pfCandChargedIso;
-  delete privateData_->pfCandNeutralIso;
-  delete privateData_->pfCandPhotonIso;
+  delete privateData_->pfCandChargedIso01;
+  delete privateData_->pfCandNeutralIso01;
+  delete privateData_->pfCandPhotonIso01;
+  delete privateData_->pfCandChargedIso02;
+  delete privateData_->pfCandNeutralIso02;
+  delete privateData_->pfCandPhotonIso02;
+  delete privateData_->pfCandChargedIso03;
+  delete privateData_->pfCandNeutralIso03;
+  delete privateData_->pfCandPhotonIso03;
+  delete privateData_->pfCandChargedIso04;
+  delete privateData_->pfCandNeutralIso04;
+  delete privateData_->pfCandPhotonIso04;
+  delete privateData_->pfCandChargedIso05;
+  delete privateData_->pfCandNeutralIso05;
+  delete privateData_->pfCandPhotonIso05;
+  delete privateData_->pfCandChargedIso06;
+  delete privateData_->pfCandNeutralIso06;
+  delete privateData_->pfCandPhotonIso06;
+  delete privateData_->pfCandChargedIso07;
+  delete privateData_->pfCandNeutralIso07;
+  delete privateData_->pfCandPhotonIso07;
+  delete privateData_->pfCandChargedDirIso04;
+  delete privateData_->pfCandNeutralDirIso04;
+  delete privateData_->pfCandPhotonDirIso04;
 
   delete privateData_->ncand;
 
@@ -198,23 +210,33 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(generalTracks_, h_tracks); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsMuonFiller") << "Can't get general track collection: " << generalTracks_; }
 
-    //read the PF isolation with iso deposits
-    eIsoFromDepsValueMap_ = new isoContainer(9);
-    iEvent.getByLabel( "muonPfChargedDeps", (*eIsoFromDepsValueMap_)[0] ); 
-    iEvent.getByLabel( "muonPfNeutralDeps", (*eIsoFromDepsValueMap_)[1] ); 
-    iEvent.getByLabel( "muonPfPhotonDeps", (*eIsoFromDepsValueMap_)[2] ); 
-    iEvent.getByLabel( "muonPfGenericChargedDeps", (*eIsoFromDepsValueMap_)[3] ); 
-    iEvent.getByLabel( "muonPfGenericNeutralDeps", (*eIsoFromDepsValueMap_)[4] ); 
-    iEvent.getByLabel( "muonPfGenericPhotonDeps", (*eIsoFromDepsValueMap_)[5] ); 
-    iEvent.getByLabel( "muonPfGenericNoOverChargedDeps", (*eIsoFromDepsValueMap_)[6] ); 
-    iEvent.getByLabel( "muonPfGenericNoOverNeutralDeps", (*eIsoFromDepsValueMap_)[7] ); 
-    iEvent.getByLabel( "muonPfGenericNoOverPhotonDeps", (*eIsoFromDepsValueMap_)[8] ); 
-
-    eIsoFromPFCandsValueMap_ = new isoContainer2(4);
+    //read the PF isolation with PF candidates
+    eIsoFromPFCandsValueMap_ = new isoContainer(25);
     iEvent.getByLabel( "muonCombinedPFIsoMapProducer", (*eIsoFromPFCandsValueMap_)[0] ); 
-    iEvent.getByLabel( "muonPFIsoChHad", (*eIsoFromPFCandsValueMap_)[1] );
-    iEvent.getByLabel( "muonPFIsoNHad", (*eIsoFromPFCandsValueMap_)[2] );
-    iEvent.getByLabel( "muonPFIsoPhoton", (*eIsoFromPFCandsValueMap_)[3] );
+    iEvent.getByLabel( "muonPFIsoChHad01", (*eIsoFromPFCandsValueMap_)[1] );
+    iEvent.getByLabel( "muonPFIsoNHad01", (*eIsoFromPFCandsValueMap_)[2] );
+    iEvent.getByLabel( "muonPFIsoPhoton01", (*eIsoFromPFCandsValueMap_)[3] );
+    iEvent.getByLabel( "muonPFIsoChHad02", (*eIsoFromPFCandsValueMap_)[4] );
+    iEvent.getByLabel( "muonPFIsoNHad02", (*eIsoFromPFCandsValueMap_)[5] );
+    iEvent.getByLabel( "muonPFIsoPhoton02", (*eIsoFromPFCandsValueMap_)[6] );
+    iEvent.getByLabel( "muonPFIsoChHad03", (*eIsoFromPFCandsValueMap_)[7] );
+    iEvent.getByLabel( "muonPFIsoNHad03", (*eIsoFromPFCandsValueMap_)[8] );
+    iEvent.getByLabel( "muonPFIsoPhoton03", (*eIsoFromPFCandsValueMap_)[9] );
+    iEvent.getByLabel( "muonPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[10] );
+    iEvent.getByLabel( "muonPFIsoNHad04", (*eIsoFromPFCandsValueMap_)[11] );
+    iEvent.getByLabel( "muonPFIsoPhoton04", (*eIsoFromPFCandsValueMap_)[12] );
+    iEvent.getByLabel( "muonPFIsoChHad05", (*eIsoFromPFCandsValueMap_)[13] );
+    iEvent.getByLabel( "muonPFIsoNHad05", (*eIsoFromPFCandsValueMap_)[14] );
+    iEvent.getByLabel( "muonPFIsoPhoton05", (*eIsoFromPFCandsValueMap_)[15] );
+    iEvent.getByLabel( "muonPFIsoChHad06", (*eIsoFromPFCandsValueMap_)[16] );
+    iEvent.getByLabel( "muonPFIsoNHad06", (*eIsoFromPFCandsValueMap_)[17] );
+    iEvent.getByLabel( "muonPFIsoPhoton06", (*eIsoFromPFCandsValueMap_)[18] );
+    iEvent.getByLabel( "muonPFIsoChHad07", (*eIsoFromPFCandsValueMap_)[19] );
+    iEvent.getByLabel( "muonPFIsoNHad07", (*eIsoFromPFCandsValueMap_)[20] );
+    iEvent.getByLabel( "muonPFIsoPhoton07", (*eIsoFromPFCandsValueMap_)[21] );
+    iEvent.getByLabel( "muonDirPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[22] );
+    iEvent.getByLabel( "muonDirPFIsoNHad04", (*eIsoFromPFCandsValueMap_)[23] );
+    iEvent.getByLabel( "muonDirPFIsoPhoton04", (*eIsoFromPFCandsValueMap_)[24] );
 
     int imu=0;
     edm::View<reco::Candidate>::const_iterator cand;
@@ -341,33 +363,57 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->nJets05->push_back(Iso05.nJets);
 
     // PF isolation
-    const isoFromDepositsMap & muonsPfChargedIsoVal = *( (*eIsoFromDepsValueMap_)[0] );
-    const isoFromDepositsMap & muonsPfNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[1] );
-    const isoFromDepositsMap & muonsPfPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[2] );
-    const isoFromDepositsMap & muonsPfGenericChargedIsoVal = *( (*eIsoFromDepsValueMap_)[3] );
-    const isoFromDepositsMap & muonsPfGenericNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[4] );
-    const isoFromDepositsMap & muonsPfGenericPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[5] );
-    const isoFromDepositsMap & muonsPfGenericNoOverChargedIsoVal = *( (*eIsoFromDepsValueMap_)[6] );
-    const isoFromDepositsMap & muonsPfGenericNoOverNeutralIsoVal = *( (*eIsoFromDepsValueMap_)[7] );
-    const isoFromDepositsMap & muonsPfGenericNoOverPhotonIsoVal = *( (*eIsoFromDepsValueMap_)[8] );
     const isoFromPFCandsMap & muonsPfCombinedIsoVal = *( (*eIsoFromPFCandsValueMap_)[0] );
-    const isoFromPFCandsMap & muonsPfCandChHadIsoVal = *( (*eIsoFromPFCandsValueMap_)[1] );
-    const isoFromPFCandsMap & muonsPfCandNHadIsoVal = *( (*eIsoFromPFCandsValueMap_)[2] );
-    const isoFromPFCandsMap & muonsPfCandPhotonIsoVal = *( (*eIsoFromPFCandsValueMap_)[3] );
+    const isoFromPFCandsMap & muonsPfCandChHad01IsoVal = *( (*eIsoFromPFCandsValueMap_)[1] );
+    const isoFromPFCandsMap & muonsPfCandNHad01IsoVal = *( (*eIsoFromPFCandsValueMap_)[2] );
+    const isoFromPFCandsMap & muonsPfCandPhoton01IsoVal = *( (*eIsoFromPFCandsValueMap_)[3] );
+    const isoFromPFCandsMap & muonsPfCandChHad02IsoVal = *( (*eIsoFromPFCandsValueMap_)[4] );
+    const isoFromPFCandsMap & muonsPfCandNHad02IsoVal = *( (*eIsoFromPFCandsValueMap_)[5] );
+    const isoFromPFCandsMap & muonsPfCandPhoton02IsoVal = *( (*eIsoFromPFCandsValueMap_)[6] );
+    const isoFromPFCandsMap & muonsPfCandChHad03IsoVal = *( (*eIsoFromPFCandsValueMap_)[7] );
+    const isoFromPFCandsMap & muonsPfCandNHad03IsoVal = *( (*eIsoFromPFCandsValueMap_)[8] );
+    const isoFromPFCandsMap & muonsPfCandPhoton03IsoVal = *( (*eIsoFromPFCandsValueMap_)[9] );
+    const isoFromPFCandsMap & muonsPfCandChHad04IsoVal = *( (*eIsoFromPFCandsValueMap_)[10] );
+    const isoFromPFCandsMap & muonsPfCandNHad04IsoVal = *( (*eIsoFromPFCandsValueMap_)[11] );
+    const isoFromPFCandsMap & muonsPfCandPhoton04IsoVal = *( (*eIsoFromPFCandsValueMap_)[12] );
+    const isoFromPFCandsMap & muonsPfCandChHad05IsoVal = *( (*eIsoFromPFCandsValueMap_)[13] );
+    const isoFromPFCandsMap & muonsPfCandNHad05IsoVal = *( (*eIsoFromPFCandsValueMap_)[14] );
+    const isoFromPFCandsMap & muonsPfCandPhoton05IsoVal = *( (*eIsoFromPFCandsValueMap_)[15] );
+    const isoFromPFCandsMap & muonsPfCandChHad06IsoVal = *( (*eIsoFromPFCandsValueMap_)[16] );
+    const isoFromPFCandsMap & muonsPfCandNHad06IsoVal = *( (*eIsoFromPFCandsValueMap_)[17] );
+    const isoFromPFCandsMap & muonsPfCandPhoton06IsoVal = *( (*eIsoFromPFCandsValueMap_)[18] );
+    const isoFromPFCandsMap & muonsPfCandChHad07IsoVal = *( (*eIsoFromPFCandsValueMap_)[19] );
+    const isoFromPFCandsMap & muonsPfCandNHad07IsoVal = *( (*eIsoFromPFCandsValueMap_)[20] );
+    const isoFromPFCandsMap & muonsPfCandPhoton07IsoVal = *( (*eIsoFromPFCandsValueMap_)[21] );
+    const isoFromPFCandsMap & muonsPfCandChHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[22] );
+    const isoFromPFCandsMap & muonsPfCandNHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[23] );
+    const isoFromPFCandsMap & muonsPfCandPhoton04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[24] );
     
-    privateData_->pfChargedIso->push_back( muonsPfChargedIsoVal[muonRef] );
-    privateData_->pfNeutralIso->push_back( muonsPfNeutralIsoVal[muonRef] );
-    privateData_->pfPhotonIso->push_back( muonsPfPhotonIsoVal[muonRef] );
-    privateData_->pfGenericChargedIso->push_back( muonsPfGenericChargedIsoVal[muonRef] );
-    privateData_->pfGenericNeutralIso->push_back( muonsPfGenericNeutralIsoVal[muonRef] );
-    privateData_->pfGenericPhotonIso->push_back( muonsPfGenericPhotonIsoVal[muonRef] );
-    privateData_->pfGenericNoOverChargedIso->push_back( muonsPfGenericNoOverChargedIsoVal[muonRef] );
-    privateData_->pfGenericNoOverNeutralIso->push_back( muonsPfGenericNoOverNeutralIsoVal[muonRef] );
-    privateData_->pfGenericNoOverPhotonIso->push_back( muonsPfGenericNoOverPhotonIsoVal[muonRef] );
     privateData_->pfCombinedIso->push_back( muonsPfCombinedIsoVal[muonRef] );
-    privateData_->pfCandChargedIso->push_back( muonsPfCandChHadIsoVal[muonRef] );
-    privateData_->pfCandNeutralIso->push_back( muonsPfCandNHadIsoVal[muonRef] );
-    privateData_->pfCandPhotonIso->push_back( muonsPfCandPhotonIsoVal[muonRef] );
+    privateData_->pfCandChargedIso01->push_back( muonsPfCandChHad01IsoVal[muonRef] );
+    privateData_->pfCandNeutralIso01->push_back( muonsPfCandNHad01IsoVal[muonRef] );
+    privateData_->pfCandPhotonIso01->push_back( muonsPfCandPhoton01IsoVal[muonRef] );
+    privateData_->pfCandChargedIso02->push_back( muonsPfCandChHad02IsoVal[muonRef] );
+    privateData_->pfCandNeutralIso02->push_back( muonsPfCandNHad02IsoVal[muonRef] );
+    privateData_->pfCandPhotonIso02->push_back( muonsPfCandPhoton02IsoVal[muonRef] );
+    privateData_->pfCandChargedIso03->push_back( muonsPfCandChHad03IsoVal[muonRef] );
+    privateData_->pfCandNeutralIso03->push_back( muonsPfCandNHad03IsoVal[muonRef] );
+    privateData_->pfCandPhotonIso03->push_back( muonsPfCandPhoton03IsoVal[muonRef] );
+    privateData_->pfCandChargedIso04->push_back( muonsPfCandChHad04IsoVal[muonRef] );
+    privateData_->pfCandNeutralIso04->push_back( muonsPfCandNHad04IsoVal[muonRef] );
+    privateData_->pfCandPhotonIso04->push_back( muonsPfCandPhoton04IsoVal[muonRef] );
+    privateData_->pfCandChargedIso05->push_back( muonsPfCandChHad05IsoVal[muonRef] );
+    privateData_->pfCandNeutralIso05->push_back( muonsPfCandNHad05IsoVal[muonRef] );
+    privateData_->pfCandPhotonIso05->push_back( muonsPfCandPhoton05IsoVal[muonRef] );
+    privateData_->pfCandChargedIso06->push_back( muonsPfCandChHad06IsoVal[muonRef] );
+    privateData_->pfCandNeutralIso06->push_back( muonsPfCandNHad06IsoVal[muonRef] );
+    privateData_->pfCandPhotonIso06->push_back( muonsPfCandPhoton06IsoVal[muonRef] );
+    privateData_->pfCandChargedIso07->push_back( muonsPfCandChHad07IsoVal[muonRef] );
+    privateData_->pfCandNeutralIso07->push_back( muonsPfCandNHad07IsoVal[muonRef] );
+    privateData_->pfCandPhotonIso07->push_back( muonsPfCandPhoton07IsoVal[muonRef] );
+    privateData_->pfCandChargedDirIso04->push_back( muonsPfCandChHad04DirIsoVal[muonRef] );
+    privateData_->pfCandNeutralDirIso04->push_back( muonsPfCandNHad04DirIsoVal[muonRef] );
+    privateData_->pfCandPhotonDirIso04->push_back( muonsPfCandPhoton04DirIsoVal[muonRef] );
 
     // track kinks
     privateData_->kink->push_back(muonRef->combinedQuality().trkKink) ;
@@ -401,19 +447,31 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->nTrk05->push_back(-1.);
     privateData_->nJets05->push_back(-1.);
 
-    privateData_->pfChargedIso->push_back( -1 );
-    privateData_->pfNeutralIso->push_back( -1 );
-    privateData_->pfPhotonIso->push_back( -1 );
-    privateData_->pfGenericChargedIso->push_back( -1 );
-    privateData_->pfGenericNeutralIso->push_back( -1 );
-    privateData_->pfGenericPhotonIso->push_back( -1 );
-    privateData_->pfGenericNoOverChargedIso->push_back( -1 );
-    privateData_->pfGenericNoOverNeutralIso->push_back( -1 );
-    privateData_->pfGenericNoOverPhotonIso->push_back( -1 );
     privateData_->pfCombinedIso->push_back( -1 );
-    privateData_->pfCandChargedIso->push_back( -1 );
-    privateData_->pfCandNeutralIso->push_back( -1 );
-    privateData_->pfCandPhotonIso->push_back( -1 );
+    privateData_->pfCandChargedIso01->push_back( -1 );
+    privateData_->pfCandNeutralIso01->push_back( -1 );
+    privateData_->pfCandPhotonIso01->push_back( -1 );
+    privateData_->pfCandChargedIso02->push_back( -1 );
+    privateData_->pfCandNeutralIso02->push_back( -1 );
+    privateData_->pfCandPhotonIso02->push_back( -1 );
+    privateData_->pfCandChargedIso03->push_back( -1 );
+    privateData_->pfCandNeutralIso03->push_back( -1 );
+    privateData_->pfCandPhotonIso03->push_back( -1 );
+    privateData_->pfCandChargedIso04->push_back( -1 );
+    privateData_->pfCandNeutralIso04->push_back( -1 );
+    privateData_->pfCandPhotonIso04->push_back( -1 );
+    privateData_->pfCandChargedIso05->push_back( -1 );
+    privateData_->pfCandNeutralIso05->push_back( -1 );
+    privateData_->pfCandPhotonIso05->push_back( -1 );
+    privateData_->pfCandChargedIso06->push_back( -1 );
+    privateData_->pfCandNeutralIso06->push_back( -1 );
+    privateData_->pfCandPhotonIso06->push_back( -1 );
+    privateData_->pfCandChargedIso07->push_back( -1 );
+    privateData_->pfCandNeutralIso07->push_back( -1 );
+    privateData_->pfCandPhotonIso07->push_back( -1 );
+    privateData_->pfCandChargedDirIso04->push_back( -1 );
+    privateData_->pfCandNeutralDirIso04->push_back( -1 );
+    privateData_->pfCandPhotonDirIso04->push_back( -1 );
 
     privateData_->kink->push_back( -1 );
 
@@ -453,20 +511,31 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"nTrk05"+colSuffix).c_str(), *privateData_->nTrk05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nJets05"+colSuffix).c_str(), *privateData_->nJets05, nCandString.c_str(), 0, "Reco");
 
-  cmstree->column((colPrefix+"pfChargedIso"+colSuffix).c_str(), *privateData_->pfChargedIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfNeutralIso"+colSuffix).c_str(), *privateData_->pfNeutralIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfPhotonIso"+colSuffix).c_str(), *privateData_->pfPhotonIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfGenericChargedIso"+colSuffix).c_str(), *privateData_->pfGenericChargedIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfGenericNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNeutralIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfGenericPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericPhotonIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfGenericNoOverChargedIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverChargedIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfGenericNoOverNeutralIso"+colSuffix).c_str(), *privateData_->pfGenericNoOverNeutralIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfGenericNoOverPhotonIso"+colSuffix).c_str(),  *privateData_->pfGenericNoOverPhotonIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
-
-  cmstree->column((colPrefix+"pfCandChargedIso"+colSuffix).c_str(),  *privateData_->pfCandChargedIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso01"+colSuffix).c_str(),  *privateData_->pfCandChargedIso01, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso01"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso01, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso01"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso01, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso02"+colSuffix).c_str(),  *privateData_->pfCandChargedIso02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso02"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso02"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso02, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso03"+colSuffix).c_str(),  *privateData_->pfCandChargedIso03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso03"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso03"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedIso04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso05"+colSuffix).c_str(),  *privateData_->pfCandChargedIso05, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso05"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso05, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso05"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso05, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso06"+colSuffix).c_str(),  *privateData_->pfCandChargedIso06, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso06"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso06, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso06"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso06, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedIso07"+colSuffix).c_str(),  *privateData_->pfCandChargedIso07, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralIso07"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso07, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonIso07"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso07, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandChargedDirIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedDirIso04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandNeutralDirIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralDirIso04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfCandPhotonDirIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonDirIso04, nCandString.c_str(), 0, "Reco");
 
   cmstree->column((colPrefix+"kink"+colSuffix).c_str(),  *privateData_->kink, nCandString.c_str(), 0, "Reco");
 
@@ -506,19 +575,31 @@ void CmsMuonFillerData::initialise() {
   nTrk05 = new vector<float>;
   nJets05 = new vector<float>;
 
-  pfChargedIso             = new vector<float>;
-  pfNeutralIso             = new vector<float>;
-  pfPhotonIso              = new vector<float>;
-  pfGenericChargedIso      = new vector<float>;
-  pfGenericNeutralIso      = new vector<float>;
-  pfGenericPhotonIso       = new vector<float>;
-  pfGenericNoOverChargedIso  = new vector<float>;
-  pfGenericNoOverNeutralIso  = new vector<float>;
-  pfGenericNoOverPhotonIso   = new vector<float>;
-  pfCombinedIso            = new vector<float>;
-  pfCandChargedIso         = new vector<float>;
-  pfCandNeutralIso         = new vector<float>;
-  pfCandPhotonIso          = new vector<float>;
+  pfCombinedIso      = new vector<float>;
+  pfCandChargedIso01 = new vector<float>;
+  pfCandNeutralIso01 = new vector<float>;
+  pfCandPhotonIso01  = new vector<float>;
+  pfCandChargedIso02 = new vector<float>;
+  pfCandNeutralIso02 = new vector<float>;
+  pfCandPhotonIso02  = new vector<float>;
+  pfCandChargedIso03 = new vector<float>;
+  pfCandNeutralIso03 = new vector<float>;
+  pfCandPhotonIso03  = new vector<float>;
+  pfCandChargedIso04 = new vector<float>;
+  pfCandNeutralIso04 = new vector<float>;
+  pfCandPhotonIso04  = new vector<float>;
+  pfCandChargedIso05 = new vector<float>;
+  pfCandNeutralIso05 = new vector<float>;
+  pfCandPhotonIso05  = new vector<float>;
+  pfCandChargedIso06 = new vector<float>;
+  pfCandNeutralIso06 = new vector<float>;
+  pfCandPhotonIso06  = new vector<float>;
+  pfCandChargedIso07 = new vector<float>;
+  pfCandNeutralIso07 = new vector<float>;
+  pfCandPhotonIso07  = new vector<float>;
+  pfCandChargedDirIso04 = new vector<float>;
+  pfCandNeutralDirIso04 = new vector<float>;
+  pfCandPhotonDirIso04  = new vector<float>;
 
   kink = new vector<float>;
 
@@ -558,19 +639,31 @@ void CmsMuonFillerData::clearTrkVectors() {
   nTrk05->clear();
   nJets05->clear();
 
-  pfChargedIso             ->clear();
-  pfNeutralIso             ->clear();
-  pfPhotonIso              ->clear();
-  pfGenericChargedIso      ->clear();
-  pfGenericNeutralIso      ->clear();
-  pfGenericPhotonIso       ->clear();
-  pfGenericNoOverChargedIso  ->clear();
-  pfGenericNoOverNeutralIso  ->clear();
-  pfGenericNoOverPhotonIso   ->clear();
-  pfCombinedIso            ->clear();
-  pfCandChargedIso         ->clear();
-  pfCandNeutralIso         ->clear();
-  pfCandPhotonIso          ->clear();
+  pfCombinedIso    ->clear();
+  pfCandChargedIso01 ->clear();
+  pfCandNeutralIso01 ->clear();
+  pfCandPhotonIso01  ->clear();
+  pfCandChargedIso02 ->clear();
+  pfCandNeutralIso02 ->clear();
+  pfCandPhotonIso02  ->clear();
+  pfCandChargedIso03 ->clear();
+  pfCandNeutralIso03 ->clear();
+  pfCandPhotonIso03  ->clear();
+  pfCandChargedIso04 ->clear();
+  pfCandNeutralIso04 ->clear();
+  pfCandPhotonIso04  ->clear();
+  pfCandChargedIso05 ->clear();
+  pfCandNeutralIso05 ->clear();
+  pfCandPhotonIso05  ->clear();
+  pfCandChargedIso06 ->clear();
+  pfCandNeutralIso06 ->clear();
+  pfCandPhotonIso06  ->clear();
+  pfCandChargedIso07 ->clear();
+  pfCandNeutralIso07 ->clear();
+  pfCandPhotonIso07  ->clear();
+  pfCandChargedDirIso04 ->clear();
+  pfCandNeutralDirIso04 ->clear();
+  pfCandPhotonDirIso04  ->clear();
 
   kink->clear();
 
