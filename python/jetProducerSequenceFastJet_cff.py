@@ -16,7 +16,8 @@ from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 
 ##-------------------- Turn-on the FastJet density calculation -----------------------
 from RecoJets.JetProducers.kt4PFJets_cfi import *
-kt6PFJets= kt4PFJets.clone( rParam = 0.6, doRhoFastjet = True )
+kt6PFJets= kt4PFJets.clone( rParam = 0.6, doRhoFastjet = cms.bool(True), doAreaFastjet = cms.bool(True) )
+
 #kt6PFJets.doRhoFastjet = True
 ##-------------------- Turn-on the FastJet jet area calculation for your favorite algorithm -----------------------
 ak5PFJets.doAreaFastjet = True
@@ -31,7 +32,7 @@ from RecoJets.JetProducers.ak5PFJets_cfi import *
 ak5PFNoPUJets = ak5PFJets.clone( src = 'pfNoPileUp' )
 
 # calculate rho from this
-kt6PFJetsNoPU = kt4PFJets.clone( src = 'pfNoPileUp', rParam = 0.6, doRhoFastjet = True )
+kt6PFJetsNoPU = kt4PFJets.clone( src = 'pfNoPileUp', rParam = 0.6, doRhoFastjet = cms.bool(True), doAreaFastjet = cms.bool(True) )
 
 # uncorrected jet sequence
 FastjetForPFNoPU = cms.Sequence( kt6PFJetsNoPU * ak5PFNoPUJets )
@@ -44,7 +45,7 @@ FastjetForPFNoPU = cms.Sequence( kt6PFJetsNoPU * ak5PFNoPUJets )
 
 
 # correct the PFnoPU jets
-ak5PFNoPUL1Fastjet = ak5PFL1Fastjet.clone( srcRho = cms.InputTag('kt6PFJetsNoPU','rho') )
+ak5PFNoPUL1Fastjet = ak5PFL1Fastjet.clone( srcRho = cms.InputTag('kt6PFJets','rho') )
 ak5PFNoPUL1FastL2L3 = ak5PFL2L3.clone()
 ak5PFNoPUL1FastL2L3.correctors.insert(0,'ak5PFNoPUL1Fastjet')
 
@@ -73,7 +74,7 @@ PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL2L3Res
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
 ourJetSequenceData = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
-ourJetSequenceDataReduced = cms.Sequence( PFNoPUJetAK5SequenceData * PFJetAK5SequenceData * CaloJetSequenceData )
+ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData * CaloJetSequenceData )
 
 # MC sequeces use only L2L3 corrections
 CaloJetSequenceMC = cms.Sequence( ak5CaloJets * ak5CaloJetsL2L3 * kt6PFJets * ak5CaloJetsL1FastL2L3)  # not run for the moment
@@ -81,5 +82,5 @@ PFJetAK5SequenceMC = cms.Sequence( ak5PFJets * ak5PFJetsL2L3 * kt6PFJets * ak5PF
 PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL2L3 * ak5PFNoPUJetsL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
 ourJetSequenceMC = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC)
-ourJetSequenceMCReduced = cms.Sequence( PFNoPUJetAK5SequenceMC * PFJetAK5SequenceMC * CaloJetSequenceMC )
+ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC * CaloJetSequenceMC )
 
