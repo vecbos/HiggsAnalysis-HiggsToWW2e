@@ -533,6 +533,8 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 //else 
 //	sub1ptratio=0;
 
+  delete input_particles;
+
   QGLikelihoodVars vars;
   vars.ptD = PtD;
   vars.rmsCand = r;

@@ -46,6 +46,12 @@ process.newPFNoPUJetsSoftMuonTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
 #process.metMuonJESCorAK5.useTypeII = True
 #process.metMuonJESCorAK5.hasMuonsCorr = False
 
+# process.IgProfService = cms.Service("IgProfService",
+#                                     reportFirstEvent            = cms.untracked.int32(0),
+#                                     reportEventInterval         = cms.untracked.int32(50),
+#                                     reportToFileAtPostEvent     = cms.untracked.string("| gzip -c > YYYY.%I.gz")
+#                                     )
+
 # --- track sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.leptonLinkedTracks_cfi")
 
