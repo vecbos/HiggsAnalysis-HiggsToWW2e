@@ -147,13 +147,13 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
     rhoJets_nopu = 0.;
   cmstree->column("rhoJetsFastJet_nopu", rhoJets_nopu, float(0.), "Jets");
 
-  edm::Handle<double> rhoNoPuH;
-  float rho_nopu;
-  if (iEvent.getByLabel(edm::InputTag("kt6PFJetsNoPUForIsolation", "rho"), rhoNoPuH))
-    rho_nopu = *rhoNoPuH;
-  else
-    rho_nopu = 0.;
-  cmstree->column("rhoFastJet_nopu", rho_nopu, float(0.), "Iso");
+//   edm::Handle<double> rhoNoPuH;
+//   float rho_nopu;
+//   if (iEvent.getByLabel(edm::InputTag("kt6PFJetsNoPUForIsolation", "rho"), rhoNoPuH))
+//     rho_nopu = *rhoNoPuH;
+//   else
+//     rho_nopu = 0.;
+//   cmstree->column("rhoFastJet_nopu", rho_nopu, float(0.), "Iso");
 
 
 
