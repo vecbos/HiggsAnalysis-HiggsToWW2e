@@ -68,18 +68,18 @@ ak5PFNoPUJetsL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFNoPUJet
 #PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL1FastL2L3Residual)
 #JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
-CaloJetSequenceData = cms.Sequence( ak5CaloJets * ak5CaloJetsL2L3Residual * kt6PFJets * ak5CaloJetsL1FastL2L3Residual)   # not run for the moment                 
-PFJetAK5SequenceData = cms.Sequence( ak5PFJets * ak5PFJetsL2L3Residual * kt6PFJets * ak5PFJetsL1FastL2L3Residual)
-PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL2L3Residual * ak5PFNoPUJetsL1FastL2L3Residual)
+CaloJetSequenceData = cms.Sequence( ak5CaloJets * kt6PFJets * ak5CaloJetsL1FastL2L3Residual)   # not run for the moment                 
+PFJetAK5SequenceData = cms.Sequence( ak5PFJets * kt6PFJets * ak5PFJetsL1FastL2L3Residual)
+PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL1FastL2L3Residual)
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
 ourJetSequenceData = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
 ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData * CaloJetSequenceData )
 
 # MC sequeces use only L2L3 corrections
-CaloJetSequenceMC = cms.Sequence( ak5CaloJets * ak5CaloJetsL2L3 * kt6PFJets * ak5CaloJetsL1FastL2L3)  # not run for the moment
-PFJetAK5SequenceMC = cms.Sequence( ak5PFJets * ak5PFJetsL2L3 * kt6PFJets * ak5PFJetsL1FastL2L3 )
-PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL2L3 * ak5PFNoPUJetsL1FastL2L3)
+CaloJetSequenceMC = cms.Sequence( ak5CaloJets * kt6PFJets * ak5CaloJetsL1FastL2L3)  # not run for the moment
+PFJetAK5SequenceMC = cms.Sequence( ak5PFJets * kt6PFJets * ak5PFJetsL1FastL2L3 )
+PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
 ourJetSequenceMC = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC)
 ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC * CaloJetSequenceMC )
