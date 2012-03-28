@@ -383,6 +383,8 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
         iyiy = elESShape[1];
       }
 
+      delete gES;
+
       privateData_->esEffsIxIx->push_back(ixix);
       privateData_->esEffsIyIy->push_back(iyiy);
 
