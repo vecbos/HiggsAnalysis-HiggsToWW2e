@@ -294,7 +294,7 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
     if(dumpData) cmstree->dumpData();
 
-  delete trkIndexName_;
+    delete trkIndexName_;
 
 }
 

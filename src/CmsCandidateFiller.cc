@@ -124,6 +124,7 @@ CmsCandidateFiller::~CmsCandidateFiller() {
   delete privateData_->vertexX;
   delete privateData_->vertexY;
   delete privateData_->vertexZ;
+  delete privateData_->ncand;
   delete privateData_;
 
 }
@@ -259,6 +260,7 @@ void CmsCandidateFillerData::initialiseCandidate() {
   vertexX = new vector<float>;
   vertexY = new vector<float>;
   vertexZ = new vector<float>;
+  ncand = new int;
 }
 
 void CmsCandidateFillerData::clearTrkVectorsCandidate() {
