@@ -159,7 +159,7 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->pfCandPhotonDirIso04;
 
   delete privateData_->ncand;
-
+  delete privateData_;
 }
 
 

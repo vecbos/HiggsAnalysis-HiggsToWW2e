@@ -160,6 +160,7 @@ CmsPFlowElectronFiller::~CmsPFlowElectronFiller() {
   delete privateData_->phIso03noVeto;
   delete privateData_->phIso04noVeto;
   delete privateData_->phIso05noVeto;
+  delete privateData_;
 }
 
 

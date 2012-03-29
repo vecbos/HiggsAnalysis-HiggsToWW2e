@@ -151,7 +151,7 @@ CmsCaloTowerFiller::~CmsCaloTowerFiller() {
   delete privateData_->z;
   delete privateData_->CALO;
   delete privateData_->CaloIndex;
-
+  delete privateData_;
 }
 
 

@@ -92,6 +92,7 @@ CmsPFPreIdFiller::~CmsPFPreIdFiller() {
   delete privateData_->preided;
   delete privateData_->trackIndex;
   delete privateData_->ncand;
+  delete privateData_;
 }
 
 void CmsPFPreIdFiller::writeCollectionToTree(edm::InputTag PreIdMapLabel_, edm::InputTag TrackLabel_,

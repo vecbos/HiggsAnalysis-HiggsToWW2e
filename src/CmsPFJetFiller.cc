@@ -102,6 +102,7 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   // additional variables for Marini's likelihood:
   delete privateData_->ptD;
   delete privateData_->rmsCand;
+  delete privateData_;
 }
 
 

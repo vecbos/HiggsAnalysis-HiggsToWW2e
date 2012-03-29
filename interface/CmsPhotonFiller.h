@@ -85,7 +85,6 @@ class CmsPhotonFiller : public CmsCandidateFiller {
   std::string *trkIndexName_;
 
   CmsPhotonFillerData *privateData_;
-  edm::InputTag matchMap_;
 
   edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;
   edm::InputTag conversionsProducer_;

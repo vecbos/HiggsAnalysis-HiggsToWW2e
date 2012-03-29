@@ -139,7 +139,6 @@ class CmsTrackFiller {
   std::string *trkIndexName_;
 
   CmsTrackFillerData *privateData_;
-  edm::InputTag matchMap_;
 
   CmsTree *cmstree;
 

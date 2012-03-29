@@ -141,6 +141,7 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->regrCorr_phoSigma;
   delete privateData_->regrCorr_eleE;
   delete privateData_->regrCorr_eleSigma;
+  delete privateData_;
 }
 
 

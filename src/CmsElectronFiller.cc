@@ -148,6 +148,8 @@ CmsElectronFiller::~CmsElectronFiller() {
 
   delete privateData_->ncand;
 
+  delete privateData_;
+
 }
 
 

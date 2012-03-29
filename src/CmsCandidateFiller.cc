@@ -75,7 +75,6 @@ CmsCandidateFiller::CmsCandidateFiller(CmsTree *cmsTree, int maxTracks,
   cmstree=cmsTree;
 
   saveCand_=true;
-  doMcMatch_=false;
 
   trkIndexName_ = new std::string("n");
 
@@ -94,7 +93,6 @@ CmsCandidateFiller::CmsCandidateFiller(CmsTree *cmsTree, bool fatTree, int maxTr
   cmstree=cmsTree;
 
   saveCand_=true;
-  doMcMatch_=false;
 
   trkIndexName_ = new std::string("n");
 
@@ -126,17 +124,8 @@ CmsCandidateFiller::~CmsCandidateFiller() {
   delete privateData_->vertexX;
   delete privateData_->vertexY;
   delete privateData_->vertexZ;
-  delete privateData_->mass;
-  delete privateData_->mt;
-  delete privateData_->pdgId;
+  delete privateData_;
 
-  delete privateData_->mcIndex;
-  delete privateData_->ncand;
-  delete privateData_->nDau;
-  delete privateData_->d1Index;
-  delete privateData_->d2Index;
-  delete privateData_->d1pdgId;
-  delete privateData_->d2pdgId;
 }
 
 
@@ -149,10 +138,6 @@ CmsCandidateFiller::~CmsCandidateFiller() {
 
 
 void CmsCandidateFiller::saveCand(bool what) { saveCand_=what;}
-
-void CmsCandidateFiller::doMcMatch(bool what) { doMcMatch_=what;}
-
-
 
 
 void CmsCandidateFiller::writeCollectionToTree(edm::InputTag collectionTag,
@@ -217,32 +202,6 @@ void CmsCandidateFiller::writeCollectionToTree(edm::InputTag collectionTag,
 }
 
 
-
-
-void CmsCandidateFiller::writeMcIndicesToTree(edm::InputTag recoCollectionTag,
-					      const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					      edm::InputTag genCollectionTag,
-					      const std::string &columnPrefix, const std::string &columnSuffix,
-					      bool dumpData) {
-
-  edm::Handle< edm::View<reco::Candidate> > recoCollectionHandle;
-  try { iEvent.getByLabel(recoCollectionTag, recoCollectionHandle); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << recoCollectionTag; }
-  const edm::View<reco::Candidate> *recoCollection = recoCollectionHandle.product();
-
-  edm::Handle< edm::View<reco::Candidate> > genCollectionHandle;
-  try { iEvent.getByLabel(genCollectionTag, genCollectionHandle); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << genCollectionTag; }
-  const edm::View<reco::Candidate> *genCollection = genCollectionHandle.product();
-
-  writeMcMatchInfo(recoCollection, iEvent, iSetup, genCollection);
-  treeMcMatchInfo(columnPrefix, columnSuffix);
-
-}
-
-
-
-
 void CmsCandidateFiller::writeCandInfo(const Candidate *cand, 
 				       const edm::Event& iEvent, 
 				       const edm::EventSetup& iSetup) {
@@ -260,58 +219,6 @@ void CmsCandidateFiller::writeCandInfo(const Candidate *cand,
   privateData_->vertexX->push_back(cand->vx());
   privateData_->vertexY->push_back(cand->vy());
   privateData_->vertexZ->push_back(cand->vz());
-  privateData_->mass->push_back(cand->mass());
-  privateData_->mt->push_back(cand->mt());
-  privateData_->pdgId->push_back(cand->pdgId());
-  privateData_->nDau->push_back(cand->numberOfDaughters());
-  // only 2-body decays for now
-  if(cand->numberOfDaughters()==2 && daugCollectionList_.size()!=0) {
-    const Candidate *d1 = cand->daughter(0);
-    const Candidate *d2 = cand->daughter(1);
-
-    privateData_->d1pdgId->push_back(d1->pdgId());
-    privateData_->d2pdgId->push_back(d2->pdgId());
-
-    LogInfo("CmsCandidateFiller") << "d1->p4() = " << d1->p4() << std::endl
-				  << "d2->p4() = " << d2->p4();
-
-    vector<int> candIndex;
-    candIndex.reserve(daugCollectionList_.size());
-    int collectionIndex=0;
-    bool foundD1=false;
-    bool foundD2=false;
-    std::vector< const edm::View<reco::Candidate>* >::const_iterator daugCollection;
-    for(daugCollection=daugCollectionList_.begin(); daugCollection!=daugCollectionList_.end(); ++daugCollection) {
-      reco::CandidateView::const_iterator candOrig;
-      candIndex[collectionIndex]=0;
-      for(candOrig=(*daugCollection)->begin(); candOrig!=(*daugCollection)->end(); ++candOrig) {
-	OverlapChecker overlap_;
-	if( overlap_(*d1, *candOrig) ) {
-	  LogInfo("CmsCandidateFiller") << "candOrig->p4() = " << candOrig->p4();
-	  foundD1=true;
-	  privateData_->d1Index->push_back(candIndex[collectionIndex]);
-	  LogInfo("CmsCandidateFiller") << "candidate overlaps with d1!" << std::endl
-					<< "candOrig->pdgId() = " << candOrig->pdgId();
-	}
-	if( overlap_(*d2, *candOrig) ) {
-	  foundD2=true;
-	  privateData_->d2Index->push_back(candIndex[collectionIndex]);
-	  LogInfo("CmsCandidateFiller") << "candidate overlaps with d2!" << std::endl
-					<< "candOrig->pdgId() = " << candOrig->pdgId();
-	}
-	++candIndex[collectionIndex];
-      }
-      ++collectionIndex;
-    }
-    if(!foundD1) privateData_->d1Index->push_back(-1);
-    if(!foundD2) privateData_->d2Index->push_back(-1);
-  }
-  else {
-    privateData_->d1pdgId->push_back(-1);
-    privateData_->d2pdgId->push_back(-1);
-    privateData_->d1Index->push_back(-1);
-    privateData_->d2Index->push_back(-1);
-  }
 }
 
 
@@ -325,8 +232,6 @@ void CmsCandidateFiller::treeCandInfo(const std::string colPrefix, const std::st
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"charge"+colSuffix).c_str(), *privateData_->charge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
-  //  cmstree->column((colPrefix+"et"+colSuffix).c_str(), *privateData_->et, nCandString.c_str(), 0, "Reco");
-  //  cmstree->column((colPrefix+"momentum"+colSuffix).c_str(), *privateData_->momentum, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
@@ -336,57 +241,7 @@ void CmsCandidateFiller::treeCandInfo(const std::string colPrefix, const std::st
   cmstree->column((colPrefix+"vertexX"+colSuffix).c_str(), *privateData_->vertexX, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"vertexY"+colSuffix).c_str(), *privateData_->vertexY, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"vertexZ"+colSuffix).c_str(), *privateData_->vertexZ, nCandString.c_str(), 0, "Reco");
-//  cmstree->column((colPrefix+"mass"+colSuffix).c_str(), *privateData_->mass, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"mt"+colSuffix).c_str(), *privateData_->mt, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"pdgId"+colSuffix).c_str(), *privateData_->pdgId, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"nDau"+colSuffix).c_str(), *privateData_->nDau, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"d1Index"+colSuffix).c_str(), *privateData_->d1Index, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"d2Index"+colSuffix).c_str(), *privateData_->d2Index, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"d1pdgId"+colSuffix).c_str(), *privateData_->d1pdgId, nCandString.c_str(), 0, "Reco");
-//   cmstree->column((colPrefix+"d2pdgId"+colSuffix).c_str(), *privateData_->d2pdgId, nCandString.c_str(), 0, "Reco");
 }
-
-
-
-void CmsCandidateFiller::writeMcMatchInfo(const edm::View<reco::Candidate> *recoCollection, 
-					  const edm::Event& iEvent, const edm::EventSetup& iSetup,
-					  const edm::View<reco::Candidate> *genCollection) {
-  
-  Handle<GenParticleMatch> match;
-  iEvent.getByLabel( matchMap_, match);
-
-  if(recoCollection) {
-    edm::View<reco::Candidate>::const_iterator recoCand;
-    for(recoCand=recoCollection->begin(); recoCand!=recoCollection->end(); recoCand++) {
-      GenParticleRef mcRef = (*match)[recoCand->masterClone()];
-      if( mcRef.isNonnull() ) 
-	privateData_->mcIndex->push_back( mcRef.key() );
-      else privateData_->mcIndex->push_back(-1);
-    }
-  }
-}
-
-
-
-void CmsCandidateFiller::treeMcMatchInfo(const std::string colPrefix, const std::string colSuffix) {
-  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
-  cmstree->column((colPrefix+"index"+colSuffix).c_str(), *privateData_->mcIndex, nCandString.c_str(), 0, "Reco");
-}
-
-
-
-void CmsCandidateFiller::addDaughterCollection(edm::InputTag daugCollectionTag,
-					       const edm::Event& iEvent, const edm::EventSetup& iSetup) {
-
-  edm::Handle< edm::View<reco::Candidate> > collectionHandle;
-  try { iEvent.getByLabel(daugCollectionTag, collectionHandle); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsCandidateFiller") << "Can't get candidate collection: " << daugCollectionTag; }
-  const edm::View<reco::Candidate> *daugCollection = collectionHandle.product();
-
-  daugCollectionList_.push_back(daugCollection);
-
-}
-
 
 
 void CmsCandidateFillerData::initialiseCandidate() {
@@ -404,23 +259,9 @@ void CmsCandidateFillerData::initialiseCandidate() {
   vertexX = new vector<float>;
   vertexY = new vector<float>;
   vertexZ = new vector<float>;
-  mass = new vector<float>;
-  mt = new vector<float>;
-  pdgId = new vector<int>;
-  ncand = new int;
-  nDau = new vector<int>;
-  d1Index = new vector<int>;
-  d2Index = new vector<int>;
-  d1pdgId = new vector<int>;
-  d2pdgId = new vector<int>;
-
-  mcIndex = new vector<int>;
-
 }
 
 void CmsCandidateFillerData::clearTrkVectorsCandidate() {
-
-  mcIndex->clear();
   charge->clear();
   energy->clear();
   et->clear();
@@ -434,13 +275,4 @@ void CmsCandidateFillerData::clearTrkVectorsCandidate() {
   vertexX->clear();
   vertexY->clear();
   vertexZ->clear();
-  mass->clear();
-  mt->clear();
-  pdgId->clear();
-  nDau->clear();
-  d1Index->clear();
-  d2Index->clear();
-  d1pdgId->clear();
-  d2pdgId->clear();
-
 }

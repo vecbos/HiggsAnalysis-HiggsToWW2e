@@ -88,7 +88,7 @@ CmsV0CandidateFiller::~CmsV0CandidateFiller() {
   delete privateData_->dau2Index;
 
   delete privateData_->ncand;
-
+  delete privateData_;
 }
 
 

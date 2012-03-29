@@ -63,7 +63,7 @@ CmsPFCandidateFiller::~CmsPFCandidateFiller() {
   delete privateData_->trackRef;
   delete privateData_->gsfTrackRef;
   delete privateData_->superClusterRef;
-
+  delete privateData_;
 }
 
 

@@ -73,7 +73,6 @@ class CmsV0CandidateFiller : public CmsCandidateFiller {
   std::string *trkIndexName_;
 
   CmsV0CandidateFillerData *privateData_;
-  edm::InputTag matchMap_;
 
   CmsTree *cmstree;
 

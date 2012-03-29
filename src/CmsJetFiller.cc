@@ -135,7 +135,7 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->uncorrEnergy;
   delete privateData_->L2L3CorrEnergy;
   delete privateData_->area;
-
+  delete privateData_;
 }
 
 

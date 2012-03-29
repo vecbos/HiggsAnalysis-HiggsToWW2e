@@ -70,6 +70,7 @@ CmsGenInfoFiller::~CmsGenInfoFiller() {
   delete privateData_->weight;
   delete privateData_->alphaQCD;
   delete privateData_->alphaQED;
+  delete privateData_;
 }
 
 

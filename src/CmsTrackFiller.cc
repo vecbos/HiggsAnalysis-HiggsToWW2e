@@ -171,7 +171,7 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->numberOfValidMuonHits;
 
   delete privateData_->ncand;
-
+  delete privateData_;
 }
 
 //-------------

@@ -115,7 +115,6 @@ class CmsMuonFiller : public CmsCandidateFiller {
   std::string *trkIndexName_;
 
   CmsMuonFillerData *privateData_;
-  edm::InputTag matchMap_;
 
   edm::InputTag generalTracks_;
 

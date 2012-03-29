@@ -88,7 +88,6 @@ CmsPFTauFiller::~CmsPFTauFiller()
   delete privateData_->et;
   delete privateData_->momentum;
   delete privateData_->theta;
-  delete privateData_->pt;
   delete privateData_->eta;
   delete privateData_->phi;
   delete privateData_->x;
@@ -97,10 +96,6 @@ CmsPFTauFiller::~CmsPFTauFiller()
   delete privateData_->vertexX;
   delete privateData_->vertexY;
   delete privateData_->vertexZ;
-  delete privateData_->mass;
-  delete privateData_->mt;
-  delete privateData_->pdgId;
-  delete privateData_->nDau;
 
   // Leading Track: for Electrons
   delete privateData_->isolationPFChargedHadrCandsPtSum;
@@ -164,6 +159,7 @@ CmsPFTauFiller::~CmsPFTauFiller()
   delete privateData_->thehpsTancTausDiscrByFlightPath;
 
   delete privateData_->ncand;
+  delete privateData_;
 }
 
 
@@ -708,7 +704,6 @@ void CmsPFTauFiller::writePFTauBasicInfo(const reco::PFTau *tau, const edm::Even
   privateData_->et->push_back(tau->et());
   privateData_->momentum->push_back(tau->p());
   privateData_->theta->push_back(tau->theta());
-  privateData_->pt->push_back(tau->pt());
   privateData_->eta->push_back(tau->eta());
   privateData_->phi->push_back(tau->phi());
   privateData_->x->push_back(tau->momentum().x());
@@ -717,10 +712,6 @@ void CmsPFTauFiller::writePFTauBasicInfo(const reco::PFTau *tau, const edm::Even
   privateData_->vertexX->push_back(tau->vx());
   privateData_->vertexY->push_back(tau->vy());
   privateData_->vertexZ->push_back(tau->vz());
-  privateData_->mass->push_back(tau->mass());
-  privateData_->mt->push_back(tau->mt());
-  privateData_->pdgId->push_back(tau->pdgId());
-  privateData_->nDau->push_back(tau->numberOfDaughters());
 }
 
 void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCollection, int theTauJetIndex,
@@ -911,7 +902,6 @@ void CmsPFTauFiller::treePFTauBasicInfo(const std::string &colPrefix, const std:
   cmstree->column((colPrefix+"et"+colSuffix).c_str(), *privateData_->et, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"momentum"+colSuffix).c_str(), *privateData_->momentum, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pt"+colSuffix).c_str(), *privateData_->pt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"px"+colSuffix).c_str(), *privateData_->x, nCandString.c_str(), 0, "Reco");
@@ -920,10 +910,6 @@ void CmsPFTauFiller::treePFTauBasicInfo(const std::string &colPrefix, const std:
   cmstree->column((colPrefix+"vertexX"+colSuffix).c_str(), *privateData_->vertexX, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"vertexY"+colSuffix).c_str(), *privateData_->vertexY, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"vertexZ"+colSuffix).c_str(), *privateData_->vertexZ, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"mass"+colSuffix).c_str(), *privateData_->mass, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"mt"+colSuffix).c_str(), *privateData_->mt, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pdgId"+colSuffix).c_str(), *privateData_->pdgId, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"nDau"+colSuffix).c_str(), *privateData_->nDau, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -1007,26 +993,6 @@ void CmsPFTauFillerData::initialise()
   // from the basic
   pfJetIndex = new vector<int>;
   isNonNull = new vector<int>;
-  charge = new vector<int>;
-  energy = new vector<float>;
-  et = new vector<float>;
-  momentum = new vector<float>;
-  theta = new vector<float>;
-  pt = new vector<float>;
-  eta = new vector<float>;
-  phi = new vector<float>;
-  x = new vector<float>;
-  y = new vector<float>;
-  z = new vector<float>;
-  vertexX = new vector<float>;
-  vertexY = new vector<float>;
-  vertexZ = new vector<float>;
-  mass = new vector<float>;
-  mt = new vector<float>;
-  pdgId = new vector<int>;
-  ncand = new int;
-  nDau = new vector<int>;
-
   // from the Leading Track: for Electrons
   isolationPFChargedHadrCandsPtSum = new vector<float>;
   isolationPFGammaCandsEtSum = new vector<float>;
@@ -1092,24 +1058,6 @@ void CmsPFTauFillerData::clear()
 {
   // from the Basic
   pfJetIndex->clear();
-  charge->clear();
-  energy->clear();
-  et->clear();
-  momentum->clear();
-  theta->clear();
-  pt->clear();
-  eta->clear();
-  phi->clear();
-  x->clear();
-  y->clear();
-  z->clear();
-  vertexX->clear();
-  vertexY->clear();
-  vertexZ->clear();
-  mass->clear();
-  mt->clear();
-  pdgId->clear();
-  nDau->clear();
 
   // from the Leading Track: for Electrons
   isolationPFChargedHadrCandsPtSum->clear();

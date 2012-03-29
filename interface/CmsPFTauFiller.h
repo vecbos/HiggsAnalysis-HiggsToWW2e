@@ -49,14 +49,6 @@ struct CmsPFTauFillerData : public CmsCandidateFillerData {
   // from the basic
   vector<int> *pfJetIndex;
   vector<int> *isNonNull;
-  vector<int> *charge;
-  vector<float> *energy, *et, *momentum, *pt;
-  vector<float> *vertexX, *vertexY, *vertexZ;
-  vector<float> *theta, *eta, *phi;
-  vector<float> *x, *y, *z;
-  vector<float> *mass, *mt;
-  vector<int> *pdgId;
-  vector<int> *nDau;
 
   // from the Leading Track: for Electrons
   vector<float> *isolationPFChargedHadrCandsPtSum;

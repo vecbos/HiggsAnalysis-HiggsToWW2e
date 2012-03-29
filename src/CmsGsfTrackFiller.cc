@@ -79,6 +79,7 @@ CmsGsfTrackFiller::~CmsGsfTrackFiller() {
   delete privateData_->pyMode;
   delete privateData_->pzMode;
   delete privateData_->recoFlags;
+  delete privateData_;
 }
 
 void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,

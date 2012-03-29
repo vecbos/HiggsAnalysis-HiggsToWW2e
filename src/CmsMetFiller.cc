@@ -69,6 +69,7 @@ CmsMetFiller::~CmsMetFiller() {
   delete privateData_->mEtSig;
   delete privateData_->significance;
   delete privateData_->filterBits;
+  delete privateData_;
 }
 
 
@@ -220,8 +221,6 @@ void CmsMetFillerData::initialise() {
   mEtSig = new vector<float>;
   significance = new vector<float>;
   filterBits = new int;
-
-  mcIndex = new vector<int>;
 
 }
 

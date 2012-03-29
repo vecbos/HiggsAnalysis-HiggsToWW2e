@@ -32,6 +32,7 @@ CmsRunInfoFiller::~CmsRunInfoFiller() {
     delete privateData_->nInteractions;
     delete privateData_->bxPU;
   }
+  delete privateData_;
 }
 
 void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::EventSetup& iSetup,

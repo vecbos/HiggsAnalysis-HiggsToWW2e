@@ -69,8 +69,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   nameTree_      = iConfig.getUntrackedParameter<std::string>("nameTree", "BaseTree");
   dumpTree_      = iConfig.getUntrackedParameter<bool>("dumpTree", false);
   dumpMCTruth_   = iConfig.getUntrackedParameter<bool>("dumpMCTruth", false);
-  doMCEleMatch_  = iConfig.getUntrackedParameter<bool>("doMCEleMatch", false);
-  doMCMuonMatch_ = iConfig.getUntrackedParameter<bool>("doMCMuonMatch", false);
   
   // control level of Reco Adapters in the tree
   saveTrk_        = iConfig.getUntrackedParameter<bool>("saveTrk", false);
@@ -207,8 +205,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   genMetCollection_        = iConfig.getParameter<edm::InputTag>("genMetCollection");
   chargedMetCollection_    = iConfig.getParameter<edm::InputTag>("chargedMetCollection");
   mcTruthCollection_       = iConfig.getParameter<edm::InputTag>("mcTruthCollection");
-  electronMatchMap_        = iConfig.getParameter<edm::InputTag>("electronMatchMap");
-  muonMatchMap_            = iConfig.getParameter<edm::InputTag>("muonMatchMap");
   hepMcCollection_         = iConfig.getParameter<edm::InputTag>("hepMcCollection");
   genInfoCollection_       = iConfig.getParameter<edm::InputTag>("genInfoCollection");
   genWeightCollection_     = iConfig.getUntrackedParameter<std::string>("genWeightCollection");
@@ -392,15 +388,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // for custom isolation
     treeFill.setTracksProducer(trackCollection_);
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
-    treeFill.setMatchMap(electronMatchMap_);
     treeFill.saveEleID(true);
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
 
     treeFill.writeCollectionToTree(electronCollection_, iEvent, iSetup, prefix, suffix, false);
-    if(doMCEleMatch_) {
-      treeFill.writeMcIndicesToTree(electronCollection_, iEvent, iSetup, mcTruthCollection_, prefix, suffix, false);
-    }
 
   }
 
@@ -570,21 +562,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   // fill muons block
   if(dumpMuons_) {
-
     CmsMuonFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("Muon");
     treeFill.setGeneralTracks(trackCollection_);
     treeFill.saveCand(saveCand_);
     treeFill.saveFatTrk(saveFatTrk_);
-    treeFill.setMatchMap(muonMatchMap_);
-
     treeFill.writeCollectionToTree(muonCollection_, iEvent, iSetup, prefix, suffix, false);
-
-    if(doMCMuonMatch_) {
-      treeFill.writeMcIndicesToTree(muonCollection_, iEvent, iSetup, mcTruthCollection_, prefix, suffix, false);
-    }
-
   }
 
   // fill PFTau block

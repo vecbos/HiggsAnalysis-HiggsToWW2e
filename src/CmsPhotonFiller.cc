@@ -90,7 +90,7 @@ CmsPhotonFiller::~CmsPhotonFiller() {
   delete privateData_->hasMatchedConversion;
 
   delete privateData_->ncand;
-
+  delete privateData_;
 }
 
 

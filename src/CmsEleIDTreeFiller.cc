@@ -103,6 +103,7 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->pfCandNeutralDirIso04;
   delete privateData_->pfCandPhotonDirIso04;
 
+  delete privateData_;
 }
 
 

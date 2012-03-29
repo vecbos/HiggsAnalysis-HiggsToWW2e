@@ -132,7 +132,6 @@ private:
   std::string *trkIndexName_;
 
   CmsPFlowElectronFillerData *privateData_;
-  edm::InputTag matchMap_;
 
   CmsTree *cmstree;
 

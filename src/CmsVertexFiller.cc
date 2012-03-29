@@ -79,6 +79,7 @@ CmsVertexFiller::~CmsVertexFiller() {
   delete privateData_->pyChMet;
   delete privateData_->pzChMet;
   delete privateData_->isFake;  
+  delete privateData_;
 }
 
 

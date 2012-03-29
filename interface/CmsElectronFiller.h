@@ -130,7 +130,6 @@ class CmsElectronFiller : public CmsCandidateFiller {
   std::string *trkIndexName_;
 
   CmsElectronFillerData *privateData_;
-  edm::InputTag matchMap_;
 
   edm::InputTag generalTracks_;
   edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;

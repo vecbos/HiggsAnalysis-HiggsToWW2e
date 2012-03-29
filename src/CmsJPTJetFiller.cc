@@ -87,7 +87,7 @@ CmsJPTJetFiller::~CmsJPTJetFiller() {
   delete privateData_->trackCountingHighPurBJetTags;
   delete privateData_->trackCountingHighEffBJetTags;
   delete privateData_->uncorrEnergy;
-
+  delete privateData_;
 }
 
 
