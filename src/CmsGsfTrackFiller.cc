@@ -170,6 +170,8 @@ void CmsGsfTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
   if(dumpData) cmstree->dumpData();
 	
+  delete trkIndexName_;
+
 }
 
 void CmsGsfTrackFiller::writeGsfTrkInfo(GsfTrackRef trkRef) {

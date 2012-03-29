@@ -290,8 +290,9 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
-  
-  if(dumpData) cmstree->dumpData();
+    if(dumpData) cmstree->dumpData();
+
+  delete trkIndexName_;
 
 }
 

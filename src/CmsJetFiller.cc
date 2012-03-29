@@ -359,7 +359,9 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   if(saveJetExtras_) treeJetInfo(columnPrefix,columnSuffix);
 
   if(dumpData) cmstree->dumpData();
-	
+
+  delete trkIndexName_;
+
 }
 
 

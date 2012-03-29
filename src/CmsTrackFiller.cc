@@ -303,7 +303,9 @@ void CmsTrackFiller::writeCollectionToTree(edm::InputTag collectionTag,
   if(saveDeDx_) treeDeDxInfo(columnPrefix,columnSuffix);
 
   if(dumpData) cmstree->dumpData();
-	
+
+  delete trkIndexName_;
+
 }
 
 

@@ -214,7 +214,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
   delete hadDepth2Isolation03_;
   delete hadDepth1Isolation04_;
   delete hadDepth2Isolation04_;
-
+  delete trkIndexName_;
 }
 
 

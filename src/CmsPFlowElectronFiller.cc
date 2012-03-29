@@ -395,6 +395,8 @@ void CmsPFlowElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
   if(savePFEleIsoDep_) treePFEleIsoInfo(columnPrefix,columnSuffix);   
   if(dumpData) cmstree->dumpData();
 
+  delete trkIndexName_;
+
 }
 
 void CmsPFlowElectronFiller::writePFEleTrkInfo(const PFCandidateRef pflowCandRef, reco::GsfTrackRef gsfRef, reco::TrackRef kfTrackRef, const edm::EventSetup& iSetup ) {

@@ -692,6 +692,9 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
   if(savePFTauDiscriminators_) treehpsTancTausDiscInfo(columnPrefix,columnSuffix);
   if(saveLeadPFCand_) treeLeadPFCandInfo(columnPrefix,columnSuffix);
   if(dumpData) cmstree->dumpData();
+  
+  delete trkIndexName_;
+
 }
 
 

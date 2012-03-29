@@ -312,6 +312,8 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
   if(dumpData) cmstree->dumpData();
 	
+  delete trkIndexName_;
+
 }
 
 
