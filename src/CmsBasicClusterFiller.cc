@@ -452,7 +452,7 @@ std::pair <DetId,int> CmsBasicClusterFiller::closestProblematic(const edm::Event
   closestProb_ = closestProb;
   severityClosestProb_ = severityClosestProb;
   
-  return std::make_pair<DetId,int>(closestProb,severityClosestProb);
+  return std::make_pair(closestProb,severityClosestProb);
 }
 
 int CmsBasicClusterFiller::distanceEta(const EBDetId& a,const EBDetId& b)

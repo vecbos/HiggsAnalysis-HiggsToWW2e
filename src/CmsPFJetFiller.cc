@@ -572,7 +572,7 @@ std::pair<float,float> CmsPFJetFiller::calcDzPFJet( const PFJet* pfjet ) {
     dzjet1 = num1/denom;
     dzjet2 = num2/denom;
   }
-  return std::make_pair<float,float>(dzjet1,dzjet2);
+  return std::make_pair(dzjet1,dzjet2);
 }
 
 float CmsPFJetFiller::DzCorrected(reco::TrackRef trk, reco::Vertex vtx)
