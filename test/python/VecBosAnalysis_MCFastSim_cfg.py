@@ -76,12 +76,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
 process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
 process.treeDumper.jetCollection2 = 'ak5CaloJets::HLT'
-process.treeDumper.jetCollection3 = 'ak5CaloJetsL2L3'
 process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
 process.treeDumper.PFjetCollection1 = 'ak5PFNoPUJetsL1FastL2L3'
-process.treeDumper.PFjetCollection3 = 'ak5PFNoPUJetsL2L3'
 process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
-process.treeDumper.PFpuCorrJetCollection3 = 'ak5PFJetsL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
@@ -123,7 +120,7 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
-                            fileNames = cms.untracked.vstring('file:PYTHIA6_pMSSM_MCMC_1_369007_sftsht_7TeV_cff_py_GEN_FASTSIM_HLT_PU.root')
+                            fileNames = cms.untracked.vstring('file:AODFASTSIM.root')
                             )
 
 if(process.treeDumper.dumpPdfWeight == False) :
