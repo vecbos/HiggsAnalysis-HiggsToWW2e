@@ -1,7 +1,7 @@
 --- Recipe to build and run the H->WW / RAZOR 52X  ---
 
 setenv SCRAM_ARCH slc5_amd64_gcc462
-cmsrel CMSSW_5_2_3
+cmsrel CMSSW_5_2_3/src
 cmsenv
 
 cvs co -r V00-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
@@ -40,7 +40,7 @@ HiggsAnalysis/HiggsToWW2e/test/crab
 --- Recipe to build and run the H->WW / RAZOR 44X  ---
 
 cmsrel CMSSW_4_4_2
-cd CMSSW_4_4_2
+cd CMSSW_4_4_2/src
 cmsenv
 cvs co -r V04-4_4_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
@@ -78,11 +78,10 @@ HiggsAnalysis/HiggsToWW2e/test/crab
 
 --- Recipe to build and run the H->WW / V+jets analysis in 42X (Run2011 reprocessing data and Summer11 MC)  ---
 
-setenv SCRAM_ARCH slc5_amd64_gcc434
 cmsrel CMSSW_4_2_8_patch7
-cd CMSSW_4_2_8_patch7
+cd CMSSW_4_2_8_patch7/src
 cmsenv
-cvs co -r V40-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V41-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V03-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
