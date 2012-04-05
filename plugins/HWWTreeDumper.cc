@@ -705,8 +705,12 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeRecoFill2.writeCollectionToTree(TCmetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     // particle flow met
+    // [0] = uncorrected PF met
+    // [0] = Type-0 corrected PFMET
+    // [1] = Type-0 and Type-I corrected PFMET
+    // [2] = Type-0, Type-I, and Type-II corrected PFMET
     if ( dumpParticleFlowObjects_ ) {
-      CmsMetFiller pfMetFiller(tree_, true);
+      CmsMetFiller pfMetFiller(tree_, 4, 4, true);
       suffix = "PFMet";
       pfMetFiller.saveCand(saveCand_);
       pfMetFiller.isData(false); // the met flags are per event, dumped for caloMET
