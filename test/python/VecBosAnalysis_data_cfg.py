@@ -8,8 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.GlobalTag.globaltag = 'GR_R_44_V12::All'
-process.GlobalTag.globaltag = 'GR_R_42_V21::All'
+process.GlobalTag.globaltag = 'GR_R_42_V25::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -115,12 +114,12 @@ process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters 
                        * process.chargedMetProducer
                        * process.metOptionalFilterSequence
-                       * process.metSequence
                        * process.pfIsolationAllSequence
                        * process.ourJetSequenceDataReduced
                        * process.newBtaggingSequence
                        * process.newPFPUcorrJetBtaggingSequence
                        * process.newPFNoPUJetBtaggingSequence
+                       * process.metSequence
                        * process.eIdSequence
                        * process.FastjetForIsolation
                        * process.logErrorAnalysis

@@ -8,8 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-#process.GlobalTag.globaltag = 'START44_V10::All'
-process.GlobalTag.globaltag = 'START42_V14B::All'
+process.GlobalTag.globaltag = 'START42_V17::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
@@ -135,12 +134,12 @@ if(process.treeDumper.dumpPdfWeight == False) :
     process.p = cms.Path ( process.leptonLinkedTracks
                            * process.mergedSuperClusters
                            * process.chargedMetProducer
-                           * process.metSequence
                            * process.pfIsolationAllSequence
                            * process.ourJetSequenceMCReduced
                            * process.newBtaggingSequence 
                            * process.newPFPUcorrJetBtaggingSequence
                            * process.newPFNoPUJetBtaggingSequence
+                           * process.metSequence
                            * process.eIdSequence
                            * process.FastjetForIsolation
                            * process.treeDumper
@@ -150,12 +149,12 @@ else :
                            * process.leptonLinkedTracks
                            * process.mergedSuperClusters
                            * process.chargedMetProducer
-                           * process.metSequence
                            * process.pfIsolationAllSequence
                            * process.ourJetSequenceMCReduced
                            * process.newBtaggingSequence 
                            * process.newPFPUcorrJetBtaggingSequence
                            * process.newPFNoPUJetBtaggingSequence
+                           * process.metSequence
                            * process.eIdSequence
                            * process.FastjetForIsolation
                            * process.treeDumper
