@@ -17,7 +17,7 @@
 #include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
-#include "DataFormats/METReco/interface/AnomalousECALVariables.h"
+#include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
 
 #include <TTree.h>
 
