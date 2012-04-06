@@ -106,6 +106,7 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->rmsCand;
 
   // additional variables for PU studies
+  delete privateData_->jetIdMva;
   delete privateData_->betastar;
   delete privateData_->rmsCandsHand;
 }
@@ -155,6 +156,11 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get primary vertex collection: offlinePrimaryVertices"; }
   VertexCollection::const_iterator vMax = primaryVertexColl->begin();
   bestPrimaryVertex_ = *vMax;
+
+  // mva jetID
+  Handle<edm::ValueMap<float> > jetIDmvaMap_;
+  try { iEvent.getByLabel(PFjetMvaIdCollection_, jetIDmvaMap_); }
+  catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get mvaJetIDMapProd map"; }
 
   privateData_->clearTrkVectors();
 
@@ -227,6 +233,10 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
         privateData_->ptD->push_back( qgvars.ptD );
         privateData_->rmsCand->push_back( qgvars.rmsCand );
+
+	// compute CMG jetId mva
+	const PFJetRef thisPFJetRef = collection->refAt(index).castTo<PFJetRef>();
+	privateData_->jetIdMva->push_back( (*jetIDmvaMap_)[thisPFJetRef] );
 
 	float sumPt_cands,sumPt2_cands,rms_cands,sumTrkPtBetaStar,sumTrkPt,betastar_;
         sumPt_cands=sumPt2_cands=rms_cands=sumTrkPtBetaStar=sumTrkPt=betastar_=0.0;
@@ -316,6 +326,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	// for PU studies
 	privateData_->betastar->push_back(-1.);
 	privateData_->rmsCandsHand->push_back(-1.);
+	privateData_->jetIdMva->push_back(-1.);
       }
 
       // fill the btag algorithms output
@@ -417,6 +428,7 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"weightedDz2"+colSuffix).c_str(), *privateData_->weightedDz2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"betastar"+colSuffix).c_str(), *privateData_->betastar, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rmsCandsHand"+colSuffix).c_str(), *privateData_->rmsCandsHand, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"jetIdMva"+colSuffix).c_str(), *privateData_->jetIdMva, nCandString.c_str(), 0, "Reco");
 
   // for backward compatibility with existing trees 
   cmstree->column((colPrefix+"chargedEmEnergy"+colSuffix).c_str(), *privateData_->chargedEmEnergy, nCandString.c_str(), 0, "Reco");
@@ -478,6 +490,7 @@ void CmsPFJetFillerData::initialise() {
   ptD = new vector<float>;
   rmsCand = new vector<float>;
   betastar = new vector<float>;
+  jetIdMva = new vector<float>;
   rmsCandsHand = new vector<float>;
 }
 
@@ -514,6 +527,7 @@ void CmsPFJetFillerData::clearTrkVectors() {
   ptD->clear();
   rmsCand->clear();
   betastar -> clear();
+  jetIdMva -> clear();
   rmsCandsHand -> clear();
 }
 

@@ -82,6 +82,8 @@ process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.dumpPFCandidates = False
+process.treeDumper.PFjetMvaIdCollection   = 'mvaPFnoPUJetIDMapProdData'
+process.treeDumper.PFpujetMvaIdCollection = 'mvaJetIDMapProdData'
 process.treeDumper.dumpTree = True
 if (runOnAOD == 1) :
     process.treeDumper.saveFatTrk = False

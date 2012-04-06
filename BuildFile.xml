@@ -49,6 +49,8 @@
 <use   name="RecoVertex/KinematicFit"/>
 <use   name="HLTrigger/HLTcore"/>
 <use   name="HiggsAnalysis/HiggsToGammaGamma"/>
+<use   name="CMGTools/External"/>
+<use   name="CMG/JetIDAnalysis"/>
 <export>
   <lib   name="1"/>
 </export>

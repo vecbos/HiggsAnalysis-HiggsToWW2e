@@ -196,6 +196,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   PFJetsBTags_              = iConfig.getUntrackedParameter<edm::ParameterSet>("PFJetsBTags");
   PFPUcorrJetsBTags_        = iConfig.getUntrackedParameter<edm::ParameterSet>("PFPUcorrJetsBTags");
 
+  // MVA based jet id collection
+  PFjetMvaIdCollection_     = iConfig.getParameter<edm::InputTag>("PFjetMvaIdCollection");
+  PFpujetMvaIdCollection_   = iConfig.getParameter<edm::InputTag>("PFpujetMvaIdCollection");
+
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
   // corrmetCollection_       = iConfig.getParameter<edm::InputTag>("corrmetCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
@@ -757,6 +761,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       pfJetFiller.saveCand(saveCand_);
       pfJetFiller.saveJetBTag(saveJetBTag_);
       pfJetFiller.setBTags(PFJetsBTags_);
+      pfJetFiller.setMvaId(PFjetMvaIdCollection_);
       pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_, PFjetCollection3_);
     }
 
@@ -767,6 +772,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       pfPUcorrJetFiller.saveCand(saveCand_);
       pfPUcorrJetFiller.saveJetBTag(saveJetBTag_);
       pfPUcorrJetFiller.setBTags(PFPUcorrJetsBTags_);
+      pfPUcorrJetFiller.setMvaId(PFpujetMvaIdCollection_);
       pfPUcorrJetFiller.writeCollectionToTree(PFpuCorrJetCollection1_, iEvent, iSetup, prefix, suffix, false, PFpuCorrJetCollection2_, PFpuCorrJetCollection3_);
     }
 

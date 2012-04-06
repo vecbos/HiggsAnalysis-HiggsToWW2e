@@ -23,6 +23,7 @@
 #include "DataFormats/VertexReco/interface/Vertex.h"
 #include "DataFormats/JetReco/interface/Jet.h"
 #include "DataFormats/JetReco/interface/PFJet.h"
+#include "DataFormats/Common/interface/ValueMap.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -57,6 +58,7 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
   std::vector<float> *weightedDz1, *weightedDz2;
 
   std::vector<float> *betastar, *rmsCandsHand;
+  std::vector<float> *jetIdMva;
   
   // for backward compatibility with existing trees
   std::vector<float> *chargedEmEnergy, *neutralEmEnergy;
@@ -97,6 +99,8 @@ class CmsPFJetFiller : public CmsCandidateFiller {
                              edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""),
                              edm::InputTag L2L3correctedCollectionTag=edm::InputTag("",""));
 
+  void setMvaId( edm::InputTag PFjetMvaIdCollection) { PFjetMvaIdCollection_ = PFjetMvaIdCollection; }
+
  private:
   
   void writeJetInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&);
@@ -107,6 +111,7 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   bool saveJetBTag_;
 
   edm::ParameterSet BTagCollections_;
+  edm::InputTag PFjetMvaIdCollection_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;

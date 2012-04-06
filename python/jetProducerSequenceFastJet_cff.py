@@ -68,13 +68,28 @@ ak5PFNoPUJetsL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFNoPUJet
 #PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL1FastL2L3Residual)
 #JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
+# jetid
+from HiggsAnalysis.HiggsToWW2e.jetIdProducerSequence_cfi import *
+
+# default is for MC and standard PU removal. Clone for Other cases
+mvaJetIDMapProdData = mvaJetIDMapProd.clone()
+mvaJetIDMapProdData.corrJetLabel = "ak5PFJetsL1FastL2L3Residual"
+
+mvaPFnoPUJetIDMapProd = mvaJetIDMapProd.clone()
+mvaPFnoPUJetIDMapProd.corrJetLabel = "ak5PFNoPUJetsL1FastL2L3"
+
+mvaPFnoPUJetIDMapProdData = mvaJetIDMapProd.clone()
+mvaPFnoPUJetIDMapProdData.corrJetLabel = "ak5PFNoPUJetsL1FastL2L3Residual"
+
+
+
 CaloJetSequenceData = cms.Sequence( ak5CaloJets * kt6PFJets * ak5CaloJetsL1FastL2L3Residual)   # not run for the moment                 
 PFJetAK5SequenceData = cms.Sequence( ak5PFJets * kt6PFJets * ak5PFJetsL1FastL2L3Residual)
 PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL1FastL2L3Residual)
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 
 ourJetSequenceData = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
-ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData * CaloJetSequenceData )
+ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData * CaloJetSequenceData * mvaJetIDMapProdData * mvaPFnoPUJetIDMapProdData )
 
 # MC sequeces use only L2L3 corrections
 CaloJetSequenceMC = cms.Sequence( ak5CaloJets * kt6PFJets * ak5CaloJetsL1FastL2L3)  # not run for the moment
@@ -82,5 +97,5 @@ PFJetAK5SequenceMC = cms.Sequence( ak5PFJets * kt6PFJets * ak5PFJetsL1FastL2L3 )
 PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL1FastL2L3)
 JPTjetsAK5SequenceMC = cms.Sequence( ak5JPTJetsL2L3 ) # not run for the moment
 ourJetSequenceMC = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC)
-ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC * CaloJetSequenceMC )
+ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC * CaloJetSequenceMC * mvaJetIDMapProd * mvaPFnoPUJetIDMapProd)
 

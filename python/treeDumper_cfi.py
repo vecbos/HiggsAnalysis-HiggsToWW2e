@@ -44,6 +44,9 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                             PFpuCorrJetCollection1 = cms.InputTag("ak5PFJetsL1FastL2L3Residual"),
                             PFpuCorrJetCollection2 = cms.InputTag("ak5PFJets"), # absolutely raw energy
                             PFpuCorrJetCollection3 = cms.InputTag(""), # no name means do not dump L2L3
+                            # jet id MVA
+                            PFjetMvaIdCollection   = cms.InputTag("mvaPFnoPUJetIDMapProd"),
+                            PFpujetMvaIdCollection = cms.InputTag("mvaJetIDMapProd"),
                             metCollection = cms.InputTag("met"), # preselection
                             # corrmetCollection = cms.InputTag("metMuonJESCorAK5"), # type I and II corr applied
                             TCmetCollection = cms.InputTag("tcMet"),
