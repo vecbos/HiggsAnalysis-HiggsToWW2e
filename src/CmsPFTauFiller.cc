@@ -156,7 +156,6 @@ CmsPFTauFiller::~CmsPFTauFiller()
   delete privateData_->thehpsTancTausDiscrByLooseIsolation;
   delete privateData_->thehpsTancTausDiscrByMediumIsolation;
   delete privateData_->thehpsTancTausDiscrByTightIsolation;
-  delete privateData_->thehpsTancTausDiscrByFlightPath;
 
   delete privateData_->ncand;
   delete privateData_;
@@ -510,7 +509,6 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					   edm::InputTag hpsTancTausDiscrByLooseIsolationTag,
 					   edm::InputTag hpsTancTausDiscrByMediumIsolationTag,
 					   edm::InputTag hpsTancTausDiscrByTightIsolationTag,
-					   edm::InputTag hpsTancTausDiscrByFlightPathTag,
 					   bool dumpData) {
 
   edm::Handle<reco::PFTauCollection> collectionHandle;
@@ -641,11 +639,6 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTancTausDiscrByTightIsolationTag; }
 	const reco::PFTauDiscriminator *hpsTancTausDiscrByTightIsolation = hpsTancTausDiscrByTightIsolationHandle.product();
 
-	edm::Handle<reco::PFTauDiscriminator> hpsTancTausDiscrByFlightPathHandle;
-	try { iEvent.getByLabel(hpsTancTausDiscrByFlightPathTag, hpsTancTausDiscrByFlightPathHandle); }
-	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTancTausDiscrByFlightPathTag; }
-	const reco::PFTauDiscriminator *hpsTancTausDiscrByFlightPath = hpsTancTausDiscrByFlightPathHandle.product();
-
 	writePFTauDiscInfo(collectionHandle, iTauJet,
 			   hpsTancTausDiscrByLeadingTrackFinding,    
 			   hpsTancTausDiscrByLeadingTrackPtCut,	     
@@ -665,8 +658,7 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 			   hpsTancTausDiscrByVLooseIsolation,
 			   hpsTancTausDiscrByLooseIsolation, 
 			   hpsTancTausDiscrByMediumIsolation,
-			   hpsTancTausDiscrByTightIsolation,
-			   hpsTancTausDiscrByFlightPath
+			   hpsTancTausDiscrByTightIsolation
 			   );
       }
 
@@ -829,8 +821,7 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
 					const reco::PFTauDiscriminator *hpsTancTausDiscrByVLooseIsolation,
 					const reco::PFTauDiscriminator *hpsTancTausDiscrByLooseIsolation, 
 					const reco::PFTauDiscriminator *hpsTancTausDiscrByMediumIsolation,
-					const reco::PFTauDiscriminator *hpsTancTausDiscrByTightIsolation,
-					const reco::PFTauDiscriminator *hpsTancTausDiscrByFlightPath
+					const reco::PFTauDiscriminator *hpsTancTausDiscrByTightIsolation
 					)
 {
   if ( theTauJetIndex != -1 ) {
@@ -854,7 +845,6 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
     privateData_->thehpsTancTausDiscrByLooseIsolation->push_back((*hpsTancTausDiscrByLooseIsolation)[theTauJetRef]);
     privateData_->thehpsTancTausDiscrByMediumIsolation->push_back((*hpsTancTausDiscrByMediumIsolation)[theTauJetRef]);
     privateData_->thehpsTancTausDiscrByTightIsolation->push_back((*hpsTancTausDiscrByTightIsolation)[theTauJetRef]);
-    privateData_->thehpsTancTausDiscrByFlightPath->push_back((*hpsTancTausDiscrByFlightPath)[theTauJetRef]);
   } else {
     privateData_->thehpsTancTausDiscrByLeadingTrackFinding->push_back(-1);
     privateData_->thehpsTancTausDiscrByLeadingTrackPtCut->push_back(-1);
@@ -875,7 +865,6 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
     privateData_->thehpsTancTausDiscrByLooseIsolation->push_back(-1);
     privateData_->thehpsTancTausDiscrByMediumIsolation->push_back(-1);
     privateData_->thehpsTancTausDiscrByTightIsolation->push_back(-1);
-    privateData_->thehpsTancTausDiscrByFlightPath->push_back(-1);
   }
 }
 
@@ -971,7 +960,6 @@ void CmsPFTauFiller::treehpsTancTausDiscInfo(const std::string &colPrefix, const
   cmstree->column((colPrefix+"thehpsTancTausDiscrByLooseIsolation"+colSuffix).c_str(), *privateData_->thehpsTancTausDiscrByLooseIsolation, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"thehpsTancTausDiscrByMediumIsolation"+colSuffix).c_str(), *privateData_->thehpsTancTausDiscrByMediumIsolation, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"thehpsTancTausDiscrByTightIsolation"+colSuffix).c_str(), *privateData_->thehpsTancTausDiscrByTightIsolation, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"thehpsTancTausDiscrByFlightPath"+colSuffix).c_str(), *privateData_->thehpsTancTausDiscrByFlightPath, nCandString.c_str(), 0, "Reco");
 }
 
 void CmsPFTauFiller::treeLeadPFCandInfo(const std::string &colPrefix, const std::string &colSuffix)
@@ -1050,7 +1038,6 @@ void CmsPFTauFillerData::initialise()
   thehpsTancTausDiscrByLooseIsolation = new vector<float>;
   thehpsTancTausDiscrByMediumIsolation = new vector<float>;
   thehpsTancTausDiscrByTightIsolation = new vector<float>;
-  thehpsTancTausDiscrByFlightPath = new vector<float>;  
 }
 
 
@@ -1116,6 +1103,5 @@ void CmsPFTauFillerData::clear()
   thehpsTancTausDiscrByLooseIsolation->clear();
   thehpsTancTausDiscrByMediumIsolation->clear();
   thehpsTancTausDiscrByTightIsolation->clear();
-  thehpsTancTausDiscrByFlightPath->clear();
 
 }

@@ -109,7 +109,6 @@ struct CmsPFTauFillerData : public CmsCandidateFillerData {
   vector<float> *thehpsTancTausDiscrByLooseIsolation;
   vector<float> *thehpsTancTausDiscrByMediumIsolation;
   vector<float> *thehpsTancTausDiscrByTightIsolation;
-  vector<float> *thehpsTancTausDiscrByFlightPath;
 
 public:
   void initialise();
@@ -191,7 +190,6 @@ public:
 			     edm::InputTag hpsTancTausDiscrByLooseIsolationTag,
 			     edm::InputTag hpsTancTausDiscrByMediumIsolationTag,
 			     edm::InputTag hpsTancTausDiscrByTightIsolationTag,
-			     edm::InputTag hpsTancTausDiscrByFlightPathTag,
 			     bool dumpData=false);
 private:
   
@@ -251,8 +249,7 @@ private:
 			  const reco::PFTauDiscriminator *hpsTancTausDiscrByVLooseIsolation,
 			  const reco::PFTauDiscriminator *hpsTancTausDiscrByLooseIsolation,
 			  const reco::PFTauDiscriminator *hpsTancTausDiscrByMediumIsolation,
-			  const reco::PFTauDiscriminator *hpsTancTausDiscrByTightIsolation,
-			  const reco::PFTauDiscriminator *hpsTancTausDiscrByFlightPath
+			  const reco::PFTauDiscriminator *hpsTancTausDiscrByTightIsolation
 			  );
 
   void treePFTauBasicInfo(const std::string &colPrefix, const std::string &colSuffix);
