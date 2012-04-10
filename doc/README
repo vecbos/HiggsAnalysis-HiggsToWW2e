@@ -4,7 +4,7 @@ setenv SCRAM_ARCH slc5_amd64_gcc462
 cmsrel CMSSW_5_2_3/src
 cmsenv
 
-cvs co -r V00-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V02-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V03-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
@@ -16,6 +16,23 @@ cvs co -r edm-30March2012 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r edm-30March2012 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
 addpkg ElectroWeakAnalysis/Utilities
+cvs co -r V03-01-00 JetMETCorrections/Objects
+addpkg JetMETCorrections/Modules
+cvs up -r 1.4 JetMETCorrections/Modules/plugins/JetCorrectorOnTheFly.cc
+cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
+cvs co -r V04-06-03 JetMETCorrections/Type1MET
+cvs co -r V03-03-07 DataFormats/METReco
+addpkg ElectroWeakAnalysis/Utilities
+cvs co -d CMG/MetAnalysis UserCode/CMG/UserArea/MetAnalysis
+cvs co -d CMG/JetIDAnalysis UserCode/CMG/UserArea/JetIDAnalysis
+cvs co -d CMGTools/External UserCode/CMG/CMGTools/External
+rm CMG/JetIDAnalysis/interface/JetAnalyzer.h
+rm CMG/JetIDAnalysis/python/SingleGluonGun_cfi.py
+rm CMG/JetIDAnalysis/python/SingleQuarkGun_cfi.py
+rm CMG/JetIDAnalysis/python/phoidprod_cfi.py
+rm CMG/JetIDAnalysis/src/JetAnalyzer.cc
+rm CMG/JetIDAnalysis/src/PhoIDProd.cc
+rm CMG/MetAnalysis/plugins/PUCorrMetProducer.cc
 
 scram setup lhapdffull
 touch $CMSSW_BASE/src/ElectroWeakAnalysis/Utilities/CMS.BuildFile.xml
