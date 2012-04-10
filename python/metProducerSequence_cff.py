@@ -1,7 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 # produces  a collection with all the charged candidates to be used for chMET
-reducedPFCands = cms.EDProducer("ReducedCandidatesProducer",
+reducedPFCands = cms.EDProducer("HWWReducedCandidatesProducer",
                                 srcCands = cms.InputTag("particleFlow"),
                                 srcVertices = cms.InputTag("offlinePrimaryVertices"),
                                 dz = cms.double(0.1)
