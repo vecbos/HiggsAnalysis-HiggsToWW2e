@@ -23,9 +23,9 @@ cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 cvs co -r V04-06-03 JetMETCorrections/Type1MET
 cvs co -r V03-03-07 DataFormats/METReco
 addpkg ElectroWeakAnalysis/Utilities
-cvs co -d CMG/MetAnalysis UserCode/CMG/UserArea/MetAnalysis
-cvs co -d CMG/JetIDAnalysis UserCode/CMG/UserArea/JetIDAnalysis
-cvs co -d CMGTools/External UserCode/CMG/CMGTools/External
+cvs co -r V00-00-00 -d CMG/MetAnalysis UserCode/CMG/UserArea/MetAnalysis
+cvs co -r V00-00-00 -d CMG/JetIDAnalysis UserCode/CMG/UserArea/JetIDAnalysis
+cvs co -r V00-00-01 -d CMGTools/External UserCode/CMG/CMGTools/External
 rm CMG/JetIDAnalysis/interface/JetAnalyzer.h
 rm CMG/JetIDAnalysis/python/SingleGluonGun_cfi.py
 rm CMG/JetIDAnalysis/python/SingleQuarkGun_cfi.py
@@ -124,9 +124,9 @@ cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 cvs co -r V04-06-03 JetMETCorrections/Type1MET
 cvs co -r V03-03-07 DataFormats/METReco
 addpkg ElectroWeakAnalysis/Utilities
-cvs co -d CMG/MetAnalysis UserCode/CMG/UserArea/MetAnalysis
-cvs co -d CMG/JetIDAnalysis UserCode/CMG/UserArea/JetIDAnalysis
-cvs co -d CMGTools/External UserCode/CMG/CMGTools/External
+cvs co -r V00-00-00 -d CMG/MetAnalysis UserCode/CMG/UserArea/MetAnalysis
+cvs co -r V00-00-00 -d CMG/JetIDAnalysis UserCode/CMG/UserArea/JetIDAnalysis
+cvs co -r V00-00-01 -d CMGTools/External UserCode/CMG/CMGTools/External
 rm CMG/JetIDAnalysis/interface/JetAnalyzer.h
 rm CMG/JetIDAnalysis/python/SingleGluonGun_cfi.py
 rm CMG/JetIDAnalysis/python/SingleQuarkGun_cfi.py
