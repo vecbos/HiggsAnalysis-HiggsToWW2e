@@ -8,7 +8,7 @@ process.load("Configuration.StandardSequences.MagneticField_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'GR_R_42_V25::All'
+process.GlobalTag.globaltag = 'GR_R_52_V7::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -108,7 +108,7 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                             fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root')
+                             fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_DoubleEle2012.root')
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DoubleElectron_08Nov2011.root')
                             )
 
