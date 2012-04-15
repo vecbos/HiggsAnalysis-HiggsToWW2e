@@ -282,7 +282,23 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
                 break;
               }
             }
-            if(!isFirstVtx) sumTrkPtBetaStar += i_trk->pt();
+
+            bool isOtherVtx = false;
+            if (!isFirstVtx) {   // if not associated to PV check others... 
+              for(unsigned iotherVtx=1; iotherVtx<primaryVertexColl->size();iotherVtx++) {
+                if (!((*primaryVertexColl)[iotherVtx].isFake()) && 
+                    (*primaryVertexColl)[iotherVtx].ndof() >= 4 && 
+                    fabs((*primaryVertexColl)[iotherVtx].z()) <= 24) {
+                  for(reco::Vertex::trackRef_iterator i_vtxTrk = (*primaryVertexColl)[iotherVtx].tracks_begin(); 
+                      i_vtxTrk != (*primaryVertexColl)[iotherVtx].tracks_end(); ++i_vtxTrk) {
+                    reco::TrackRef trkRef(i_vtxTrk->castTo<reco::TrackRef>());
+                    if (trkRef == i_trk) {
+                      isOtherVtx=true;
+                      break;
+                    }
+                  }
+                }}}
+            if(!isFirstVtx && isOtherVtx) { sumTrkPtBetaStar += i_trk->pt(); } 
           }
         }  // loop overt tracks
         
@@ -622,6 +638,8 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 //	sub1ptratio=inclusive_jets.at(0).perp()/jtpt_s;
 //else 
 //	sub1ptratio=0;
+
+  delete input_particles;
 
   QGLikelihoodVars vars;
   vars.ptD = PtD;
