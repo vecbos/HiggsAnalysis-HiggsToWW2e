@@ -22,7 +22,7 @@ addpkg JetMETCorrections/Modules
 cvs up -r 1.4 JetMETCorrections/Modules/plugins/JetCorrectorOnTheFly.cc
 cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 cvs co -r V04-06-03 JetMETCorrections/Type1MET
-cvs co -r V03-03-07 DataFormats/METReco
+cvs co -r V03-03-11 DataFormats/METReco
 addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V00-00-00 -d CMG/MetAnalysis UserCode/CMG/UserArea/MetAnalysis
 cvs co -r V00-00-00 -d CMG/JetIDAnalysis UserCode/CMG/UserArea/JetIDAnalysis
