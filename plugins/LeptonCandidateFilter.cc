@@ -42,31 +42,23 @@ LeptonCandidateFilter::select (edm::Handle<collection> input,
 
   for(unsigned int itrk=0; itrk<input->size(); itrk++) {
 
+    bool used=false;
     reco::CandidateRef candRef(input, itrk);
+
+    // look if it is in a cone
+    for(unsigned int iele = 0; iele < electrons->size(); iele++) {
+      const reco::GsfElectronRef electronRef = electrons->refAt(iele).castTo<reco::GsfElectronRef>();
+      if ( !(electronRef.isNull()) && fabs(ROOT::Math::VectorUtil::DeltaR(electronRef->p4(),candRef->p4())) <= 0.1 ) {
+        m_selected.push_back(candRef);
+        used=true;
+      }
+    }
 
     // look if it is linked to a muon
     for(unsigned int imu = 0; imu < muons->size(); imu++) {
       const reco::MuonRef muonRef = muons->refAt(imu).castTo<reco::MuonRef>();
       if ( !(muonRef.isNull()) && fabs(ROOT::Math::VectorUtil::DeltaR(muonRef->p4(),candRef->p4())) <= 0.1 ) {
-        m_selected.push_back(candRef);
-      } else {
-        // look if it is in a cone
-        for(unsigned int iele = 0; iele < electrons->size(); iele++) {
-          const reco::GsfElectronRef electronRef = electrons->refAt(iele).castTo<reco::GsfElectronRef>();
-          if ( !(electronRef.isNull()) && fabs(ROOT::Math::VectorUtil::DeltaR(electronRef->p4(),candRef->p4())) <= 0.1 ) {
-            m_selected.push_back(candRef);
-          }
-        }
-      }
-    }
-
-    // if there are no muons in the event, check the electrons
-    if(muons->size()==0) {
-      for(unsigned int iele = 0; iele < electrons->size(); iele++) {
-        const reco::GsfElectronRef electronRef = electrons->refAt(iele).castTo<reco::GsfElectronRef>();
-        if ( !(electronRef.isNull()) && fabs(ROOT::Math::VectorUtil::DeltaR(electronRef->p4(),candRef->p4())) <= 0.1 ) {
-          m_selected.push_back(candRef);
-        }
+        if(!used) m_selected.push_back(candRef);
       }
     }
 
