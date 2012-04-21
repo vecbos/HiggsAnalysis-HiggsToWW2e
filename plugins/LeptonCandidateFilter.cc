@@ -58,7 +58,10 @@ LeptonCandidateFilter::select (edm::Handle<collection> input,
     for(unsigned int imu = 0; imu < muons->size(); imu++) {
       const reco::MuonRef muonRef = muons->refAt(imu).castTo<reco::MuonRef>();
       if ( !(muonRef.isNull()) && fabs(ROOT::Math::VectorUtil::DeltaR(muonRef->p4(),candRef->p4())) <= 0.1 ) {
-        if(!used) m_selected.push_back(candRef);
+        if(!used) {
+          m_selected.push_back(candRef);
+          used=true;
+        }
       }
     }
 
