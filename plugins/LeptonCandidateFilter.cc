@@ -42,6 +42,7 @@ LeptonCandidateFilter::select (edm::Handle<collection> input,
 
   for(unsigned int itrk=0; itrk<input->size(); itrk++) {
 
+    bool used=false;
     reco::CandidateRef candRef(input, itrk);
 
     // look if it is in a cone
@@ -49,6 +50,7 @@ LeptonCandidateFilter::select (edm::Handle<collection> input,
       const reco::GsfElectronRef electronRef = electrons->refAt(iele).castTo<reco::GsfElectronRef>();
       if ( !(electronRef.isNull()) && fabs(ROOT::Math::VectorUtil::DeltaR(electronRef->p4(),candRef->p4())) <= 0.1 ) {
         m_selected.push_back(candRef);
+        used=true;
       }
     }
 
@@ -56,7 +58,10 @@ LeptonCandidateFilter::select (edm::Handle<collection> input,
     for(unsigned int imu = 0; imu < muons->size(); imu++) {
       const reco::MuonRef muonRef = muons->refAt(imu).castTo<reco::MuonRef>();
       if ( !(muonRef.isNull()) && fabs(ROOT::Math::VectorUtil::DeltaR(muonRef->p4(),candRef->p4())) <= 0.1 ) {
-        m_selected.push_back(candRef);
+        if(!used) {
+          m_selected.push_back(candRef);
+          used=true;
+        }
       }
     }
 
