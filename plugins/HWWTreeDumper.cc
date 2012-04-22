@@ -197,9 +197,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   PFPUcorrJetsBTags_        = iConfig.getUntrackedParameter<edm::ParameterSet>("PFPUcorrJetsBTags");
 
   // MVA based jet id collection
-  PFjetMvaIdCollection_     = iConfig.getParameter<edm::InputTag>("PFjetMvaIdCollection");
-  PFpujetMvaIdCollection_   = iConfig.getParameter<edm::InputTag>("PFpujetMvaIdCollection");
-
+  PFjetMvaIdCollection_     = iConfig.getUntrackedParameter<std::vector<edm::InputTag> >("PFjetMvaIdCollection",std::vector<edm::InputTag>());
+  PFpujetMvaIdCollection_   = iConfig.getUntrackedParameter<std::vector<edm::InputTag> >("PFpujetMvaIdCollection",std::vector<edm::InputTag>());
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
   // corrmetCollection_       = iConfig.getParameter<edm::InputTag>("corrmetCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
@@ -277,6 +276,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hpsTancTausDiscrByLooseIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLooseIsolationTag");
   hpsTancTausDiscrByMediumIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByMediumIsolationTag");
   hpsTancTausDiscrByTightIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTightIsolationTag");
+  hpsTancTausDiscrByFlightPathTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByFlightPathTag");
 
   // Hcal collections
   hcalNoiseSummaryLabel_ = iConfig.getParameter<edm::InputTag>("hcalNoiseSummary");
@@ -651,6 +651,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 				     hpsTancTausDiscrByLooseIsolationTag_,
 				     hpsTancTausDiscrByMediumIsolationTag_,
 				     hpsTancTausDiscrByTightIsolationTag_,
+				     hpsTancTausDiscrByFlightPathTag_,
 				     false);
     }
 
