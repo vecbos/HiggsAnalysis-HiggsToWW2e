@@ -75,10 +75,13 @@ CmsVertexFiller::~CmsVertexFiller() {
   delete privateData_->rho;
   delete privateData_->ndof;
   delete privateData_->chi2;
+  delete privateData_->normChi2;
   delete privateData_->pxChMet;
   delete privateData_->pyChMet;
   delete privateData_->pzChMet;
   delete privateData_->isFake;  
+  delete privateData_->isValid;  
+  delete privateData_->trackSize;  
   delete privateData_;
 }
 
@@ -130,6 +133,7 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	privateData_->rho->push_back((*v).position().Rho());
 	privateData_->ndof->push_back((*v).ndof());
 	privateData_->chi2->push_back((*v).chi2());
+	privateData_->normChi2->push_back((*v).normalizedChi2());
         if(vertexRef.isNonnull()) {
           privateData_->pxChMet->push_back(((*chargedMets)[vertexRef]).px());
           privateData_->pyChMet->push_back(((*chargedMets)[vertexRef]).py());
@@ -141,6 +145,9 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
         }
 	if ((*v).isFake())   privateData_->isFake->push_back(1);
 	if (!(*v).isFake())  privateData_->isFake->push_back(0);
+	privateData_->isValid->push_back((*v).isValid());
+	privateData_->trackSize->push_back((*v).tracksSize());
+	
 	nVtx++;
       }
       ivtx++;
@@ -156,10 +163,13 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
     privateData_->rho->push_back(-1000.);
     privateData_->ndof->push_back(-1000.);
     privateData_->chi2->push_back(-1000.);
+    privateData_->normChi2->push_back(-1000.);
     privateData_->pxChMet->push_back(-1000.);
     privateData_->pyChMet->push_back(-1000.);
     privateData_->pzChMet->push_back(-1000.);
     privateData_->isFake->push_back(-1000.);
+    privateData_->isValid->push_back(-1000.);
+    privateData_->trackSize->push_back(-1000.);
   }
 
   *(privateData_->ncand) = nVtx;
@@ -188,10 +198,13 @@ void CmsVertexFiller::treeVertexInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"rho"+colSuffix).c_str(), *privateData_->rho, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ndof"+colSuffix).c_str(), *privateData_->ndof, nCandString.c_str(), 0, "Reco");  
   cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"normChi2"+colSuffix).c_str(), *privateData_->normChi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pxChMet"+colSuffix).c_str(), *privateData_->pxChMet, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pyChMet"+colSuffix).c_str(), *privateData_->pyChMet, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pzChMet"+colSuffix).c_str(), *privateData_->pzChMet, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"isFake"+colSuffix).c_str(), *privateData_->isFake, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"isValid"+colSuffix).c_str(), *privateData_->isValid, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trackSize"+colSuffix).c_str(), *privateData_->trackSize, nCandString.c_str(), 0, "Reco");
   
 }
 
@@ -207,10 +220,13 @@ void CmsVertexFillerData::initialise() {
   rho = new vector<float>;
   ndof = new vector<float>;
   chi2 = new vector<float>;
+  normChi2 = new vector<float>;
   pxChMet = new vector<float>;
   pyChMet = new vector<float>;
   pzChMet = new vector<float>;
   isFake = new vector<int>;
+  isValid = new vector<int>;
+  trackSize = new vector<int>;
 }
 
 void CmsVertexFillerData::clearTrkVectors() {
@@ -225,9 +241,12 @@ void CmsVertexFillerData::clearTrkVectors() {
   rho->clear();
   ndof->clear();
   chi2->clear();
+  normChi2->clear();
   pxChMet->clear();
   pyChMet->clear();
   pzChMet->clear();
   isFake->clear();
+  isValid->clear();
+  trackSize->clear();
 }
 
