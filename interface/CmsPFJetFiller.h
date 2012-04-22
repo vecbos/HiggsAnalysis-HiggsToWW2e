@@ -59,7 +59,13 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
 
   std::vector<float> *betastar, *rmsCandsHand;
   std::vector<float> *jetIdMva;
-  
+  std::vector<float> *nChargedIdMva, *nNeutralsIdMva;
+  std::vector<float> *dZIdMva, *nParticlesIdMva;
+  std::vector<float> *dR2MeanIdMva, *dRMeanIdMva;
+  std::vector<float> *frac01IdMva, *frac02IdMva, *frac03IdMva, *frac04IdMva, *frac05IdMva; 
+  std::vector<float> *betaIdMva, *betastarIdMva;
+  std::vector<float> *betastarclassicIdMva;
+
   // for backward compatibility with existing trees
   std::vector<float> *chargedEmEnergy, *neutralEmEnergy;
 
@@ -99,7 +105,7 @@ class CmsPFJetFiller : public CmsCandidateFiller {
                              edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""),
                              edm::InputTag L2L3correctedCollectionTag=edm::InputTag("",""));
 
-  void setMvaId( edm::InputTag PFjetMvaIdCollection) { PFjetMvaIdCollection_ = PFjetMvaIdCollection; }
+  void setMvaId( std::vector<edm::InputTag> PFjetMvaIdCollection) { PFjetMvaIdCollection_ = PFjetMvaIdCollection; }
 
  private:
   
@@ -111,7 +117,9 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   bool saveJetBTag_;
 
   edm::ParameterSet BTagCollections_;
-  edm::InputTag PFjetMvaIdCollection_;
+  std::vector<edm::InputTag> PFjetMvaIdCollection_;
+
+  std::vector<edm::ValueMap<float> > mvas_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
