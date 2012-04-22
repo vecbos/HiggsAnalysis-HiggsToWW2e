@@ -43,6 +43,7 @@
 #include "DataFormats/EcalDetId/interface/EcalSubdetector.h"
 
 #include "RecoEcal/EgammaCoreTools/interface/EcalClusterTools.h"
+#include "RecoEgamma/EgammaTools/interface/EcalClusterLocal.h"
 #include "Geometry/CaloGeometry/interface/CaloGeometry.h"
 #include "Geometry/CaloTopology/interface/CaloTopology.h"
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
@@ -107,6 +108,16 @@ CmsBasicClusterFiller::~CmsBasicClusterFiller()
   delete privateData_->covIEtaIEta;
   delete privateData_->covIEtaIPhi;
   delete privateData_->covIPhiIPhi;
+  delete privateData_->eTop;
+  delete privateData_->eBottom;
+  delete privateData_->eLeft;
+  delete privateData_->eRight;
+  delete privateData_->etaCrystal;
+  delete privateData_->phiCrystal;
+  delete privateData_->iEta;
+  delete privateData_->iPhi;
+  delete privateData_->thetaTilt;
+  delete privateData_->phiTilt;
   delete privateData_->time;
   delete privateData_->chi2;
   delete privateData_->recoFlag;
@@ -275,11 +286,36 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       float e2x2 = EcalClusterTools::e2x2( *cand, &(*rechits), topology );
       float e2nd = EcalClusterTools::e2nd( *cand, &(*rechits) );
 
+      float eTop    = EcalClusterTools::eTop    (*cand, &(*rechits), topology );
+      float eBottom = EcalClusterTools::eBottom (*cand, &(*rechits), topology );
+      float eLeft   = EcalClusterTools::eLeft   (*cand, &(*rechits), topology );
+      float eRight  = EcalClusterTools::eRight  (*cand, &(*rechits), topology );
+
       privateData_->e3x3->push_back(e3x3);
       privateData_->e5x5->push_back(e5x5);
       privateData_->eMax->push_back(eMax);
       privateData_->e2x2->push_back(e2x2);
       privateData_->e2nd->push_back(e2nd);
+
+      privateData_->eTop->    push_back(eTop);
+      privateData_->eBottom-> push_back(eBottom);
+      privateData_->eLeft->   push_back(eLeft);
+      privateData_->eRight->  push_back(eRight);
+
+      EcalClusterLocal _ecalLocal;
+      float etacry,phicry,thetatilt,phitilt;
+      int ieta,iphi;
+      if(cand->hitsAndFractions().at(0).first.subdetId() == EcalBarrel){
+	_ecalLocal.localCoordsEB(*cand,iSetup,etacry,phicry,ieta,iphi,thetatilt,phitilt);
+      }else{
+	_ecalLocal.localCoordsEE(*cand,iSetup,etacry,phicry,ieta,iphi,thetatilt,phitilt);
+      }
+      privateData_->etaCrystal->push_back(etacry);
+      privateData_->phiCrystal->push_back(phicry);
+      privateData_->iEta->push_back(ieta);
+      privateData_->iPhi->push_back(iphi);
+      privateData_->thetaTilt->push_back(thetatilt);
+      privateData_->phiTilt->push_back(phitilt);
 
       // local covariances: instead of using absolute eta/phi it counts crystals normalised
       std::vector<float> vLocCov = EcalClusterTools::localCovariances( *cand, &(*rechits), topology );
@@ -330,6 +366,10 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       privateData_->eMax->push_back(-1.);
       privateData_->e2x2->push_back(-1.);
       privateData_->e2nd->push_back(-1.);
+      privateData_->eTop->    push_back(-1.);
+      privateData_->eBottom-> push_back(-1.);
+      privateData_->eLeft->   push_back(-1.);
+      privateData_->eRight->  push_back(-1.);
       privateData_->covIEtaIEta->push_back(-1.);
       privateData_->covIEtaIPhi->push_back(-1.);
       privateData_->covIPhiIPhi->push_back(-1.);
@@ -361,6 +401,16 @@ void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e2x2"+colSuffix).c_str(), *privateData_->e2x2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e2nd"+colSuffix).c_str(), *privateData_->e2nd, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eTop"+colSuffix).c_str(), *privateData_->eTop, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eBottom"+colSuffix).c_str(), *privateData_->eBottom, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eLeft"+colSuffix).c_str(), *privateData_->eLeft, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eRight"+colSuffix).c_str(), *privateData_->eRight, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"etaCrystal"+colSuffix).c_str(), *privateData_->etaCrystal, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"phiCrystal"+colSuffix).c_str(), *privateData_->phiCrystal, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"iEta"+colSuffix).c_str(), *privateData_->iEta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"iPhi"+colSuffix).c_str(), *privateData_->iPhi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thetaTilt"+colSuffix).c_str(), *privateData_->thetaTilt, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"phiTilt"+colSuffix).c_str(), *privateData_->phiTilt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIEta"+colSuffix).c_str(), *privateData_->covIEtaIEta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIEtaIPhi"+colSuffix).c_str(), *privateData_->covIEtaIPhi, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"covIPhiIPhi"+colSuffix).c_str(), *privateData_->covIPhiIPhi, nCandString.c_str(), 0, "Reco");
@@ -484,6 +534,16 @@ void CmsBasicClusterFillerData::initialiseCandidate()
   eMax = new vector<float>;
   e2x2 = new vector<float>;
   e2nd = new vector<float>;
+  eTop    = new vector<float>;
+  eBottom = new vector<float>;
+  eLeft   = new vector<float>;
+  eRight  = new vector<float>;
+  etaCrystal = new vector<float>;
+  phiCrystal = new vector<float>;
+  iEta = new vector<int>;
+  iPhi = new vector<int>;
+  thetaTilt = new vector<float>;
+  phiTilt= new vector<float>;
   covIEtaIEta = new vector<float>;
   covIEtaIPhi = new vector<float>;
   covIPhiIPhi = new vector<float>;
@@ -510,6 +570,16 @@ void CmsBasicClusterFillerData::clear()
   eMax->clear();
   e2x2->clear();
   e2nd->clear();
+  eTop->clear();
+  eBottom->clear();
+  eLeft->clear();
+  eRight->clear();
+  etaCrystal->clear();
+  phiCrystal->clear();
+  iEta->clear();
+  iPhi->clear();
+  thetaTilt->clear();
+  phiTilt->clear();
   covIEtaIEta->clear();
   covIEtaIPhi->clear();
   covIPhiIPhi->clear();

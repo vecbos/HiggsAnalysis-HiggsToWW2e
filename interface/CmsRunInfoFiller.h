@@ -29,6 +29,9 @@ struct CmsRunInfoFillerData {
   int *nBX;
   vector<int> *nInteractions, *bxPU;
 
+  //beamspot
+  double *beamSpotX,*beamSpotY, *beamSpotZ;
+
   int isMC_;
 
 public:

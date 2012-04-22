@@ -1,6 +1,8 @@
 #include "DataFormats/L1GlobalTrigger/interface/L1GlobalTriggerReadoutRecord.h"
 #include "SimDataFormats/PileupSummaryInfo/interface/PileupSummaryInfo.h" 
+#include "DataFormats/BeamSpot/interface/BeamSpot.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsRunInfoFiller.h"
+
 
 using namespace edm;
 using namespace std;
@@ -32,6 +34,9 @@ CmsRunInfoFiller::~CmsRunInfoFiller() {
     delete privateData_->nInteractions;
     delete privateData_->bxPU;
   }
+  delete privateData_->beamSpotX;
+  delete privateData_->beamSpotY;
+  delete privateData_->beamSpotZ;
   delete privateData_;
 }
 
@@ -52,6 +57,13 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
     *(privateData_->bx) = -1;
     *(privateData_->orbit) = -1;
   }
+
+  Handle<reco::BeamSpot> beamSpotHandle;
+  iEvent.getByLabel( "offlineBeamSpot", beamSpotHandle);  
+  *(privateData_->beamSpotX) = beamSpotHandle->position().X();
+  *(privateData_->beamSpotY) = beamSpotHandle->position().Y();
+  *(privateData_->beamSpotZ) = beamSpotHandle->position().Z();
+		     
 
   Handle<L1GlobalTriggerReadoutRecord> gtReadoutRecord;
   iEvent.getByLabel( "gtDigis", gtReadoutRecord );
@@ -187,6 +199,10 @@ void CmsRunInfoFiller::treeRunInfo() {
   cmstree->column("lumiBlock", *privateData_->lumisection, 0, "L1T");
   cmstree->column("bunchCrossing", *privateData_->bx, 0, "L1T");
   cmstree->column("orbitNumber", *privateData_->orbit, 0, "L1T");
+
+  cmstree->column("beamSpotX",*privateData_->beamSpotX, 0., "L1T");
+  cmstree->column("beamSpotY",*privateData_->beamSpotY, 0., "L1T");
+  cmstree->column("beamSpotZ",*privateData_->beamSpotZ, 0., "L1T");
 
   if(isMC_) {
     cmstree->column("nBX", *(privateData_->nBX), 0, "Sim");
