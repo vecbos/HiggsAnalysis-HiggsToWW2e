@@ -60,11 +60,15 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
 
   Handle<reco::BeamSpot> beamSpotHandle;
   iEvent.getByLabel( "offlineBeamSpot", beamSpotHandle);  
-  *(privateData_->beamSpotX) = beamSpotHandle->position().X();
-  *(privateData_->beamSpotY) = beamSpotHandle->position().Y();
-  *(privateData_->beamSpotZ) = beamSpotHandle->position().Z();
-		     
-
+  if(beamSpotHandle.isValid()){
+    *(privateData_->beamSpotX) = beamSpotHandle->position().X();
+    *(privateData_->beamSpotY) = beamSpotHandle->position().Y();
+    *(privateData_->beamSpotZ) = beamSpotHandle->position().Z();
+  }else{
+    *(privateData_->beamSpotX) = 0.;
+    *(privateData_->beamSpotY) = 0.;
+    *(privateData_->beamSpotZ) = 0.;
+  }
   Handle<L1GlobalTriggerReadoutRecord> gtReadoutRecord;
   iEvent.getByLabel( "gtDigis", gtReadoutRecord );
 
@@ -230,6 +234,10 @@ void CmsRunInfoFillerData::initialise() {
     nInteractions = new vector<int>;
     bxPU = new vector<int>;
   }
+
+  beamSpotX = new double;
+  beamSpotY = new double;
+  beamSpotZ = new double;
 
 }
 
