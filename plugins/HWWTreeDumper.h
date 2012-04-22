@@ -142,7 +142,7 @@ private:
   //! btag collections (only PF, the other are hardcoded)
   edm::ParameterSet PFJetsBTags_, PFPUcorrJetsBTags_;
   //! jet id mva 
-  edm::InputTag PFjetMvaIdCollection_, PFpujetMvaIdCollection_;
+  std::vector<edm::InputTag> PFjetMvaIdCollection_, PFpujetMvaIdCollection_;
   //! track collections
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;

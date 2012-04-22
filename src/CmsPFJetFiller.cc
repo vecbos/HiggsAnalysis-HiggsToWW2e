@@ -107,6 +107,20 @@ CmsPFJetFiller::~CmsPFJetFiller() {
 
   // additional variables for PU studies
   delete privateData_->jetIdMva;
+  delete privateData_->nChargedIdMva;
+  delete privateData_->nNeutralsIdMva;
+  delete privateData_->dZIdMva;
+  delete privateData_->nParticlesIdMva;
+  delete privateData_->dR2MeanIdMva;
+  delete privateData_->dRMeanIdMva;
+  delete privateData_->frac01IdMva;
+  delete privateData_->frac02IdMva;
+  delete privateData_->frac03IdMva;
+  delete privateData_->frac04IdMva;
+  delete privateData_->frac05IdMva;
+  delete privateData_->betaIdMva;
+  delete privateData_->betastarIdMva;
+  delete privateData_->betastarclassicIdMva;
   delete privateData_->betastar;
   delete privateData_->rmsCandsHand;
 }
@@ -158,10 +172,14 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   bestPrimaryVertex_ = *vMax;
 
   // mva jetID
-  Handle<edm::ValueMap<float> > jetIDmvaMap_;
-  try { iEvent.getByLabel(PFjetMvaIdCollection_, jetIDmvaMap_); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get mvaJetIDMapProd map"; }
-
+  // mvas_.resize(PFjetMvaIdCollection_.size());
+  for(size_t iMvaVar=0; iMvaVar<PFjetMvaIdCollection_.size(); ++iMvaVar) {
+    Handle<ValueMap<float> > jetIDmvaMap_;
+    try { iEvent.getByLabel(PFjetMvaIdCollection_[iMvaVar],jetIDmvaMap_); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get mvaJetIDMapProd map"; }
+    mvas_.push_back(*jetIDmvaMap_);
+  }
+  
   privateData_->clearTrkVectors();
 
   if(collection) {
@@ -236,7 +254,21 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 	// compute CMG jetId mva
 	const PFJetRef thisPFJetRef = collection->refAt(index).castTo<PFJetRef>();
-	privateData_->jetIdMva->push_back( (*jetIDmvaMap_)[thisPFJetRef] );
+	privateData_->jetIdMva->push_back( ((mvas_[0])[thisPFJetRef]) );
+	privateData_->nChargedIdMva->push_back( ((mvas_[1])[thisPFJetRef]) );
+	privateData_->nNeutralsIdMva->push_back( ((mvas_[2])[thisPFJetRef]) );
+	privateData_->dZIdMva->push_back( ((mvas_[3])[thisPFJetRef]) );
+	privateData_->nParticlesIdMva->push_back( ((mvas_[4])[thisPFJetRef]) );
+	privateData_->dR2MeanIdMva->push_back( ((mvas_[5])[thisPFJetRef]) );
+	privateData_->dRMeanIdMva->push_back( ((mvas_[6])[thisPFJetRef]) );
+	privateData_->frac01IdMva->push_back( ((mvas_[7])[thisPFJetRef]) );
+	privateData_->frac02IdMva->push_back( ((mvas_[8])[thisPFJetRef]) );
+	privateData_->frac03IdMva->push_back( ((mvas_[9])[thisPFJetRef]) );
+	privateData_->frac04IdMva->push_back( ((mvas_[10])[thisPFJetRef]) );
+	privateData_->frac05IdMva->push_back( ((mvas_[11])[thisPFJetRef]) );
+	privateData_->betaIdMva->push_back( ((mvas_[12])[thisPFJetRef]) );
+	privateData_->betastarIdMva->push_back( ((mvas_[13])[thisPFJetRef]) );
+	privateData_->betastarclassicIdMva->push_back( ((mvas_[14])[thisPFJetRef]) );
 
 	float sumPt_cands,sumPt2_cands,rms_cands,sumTrkPtBetaStar,sumTrkPt,betastar_;
         sumPt_cands=sumPt2_cands=rms_cands=sumTrkPtBetaStar=sumTrkPt=betastar_=0.0;
@@ -282,7 +314,23 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
                 break;
               }
             }
-            if(!isFirstVtx) sumTrkPtBetaStar += i_trk->pt();
+
+            bool isOtherVtx = false;
+            if (!isFirstVtx) {   // if not associated to PV check others... 
+              for(unsigned iotherVtx=1; iotherVtx<primaryVertexColl->size();iotherVtx++) {
+                if (!((*primaryVertexColl)[iotherVtx].isFake()) && 
+                    (*primaryVertexColl)[iotherVtx].ndof() >= 4 && 
+                    fabs((*primaryVertexColl)[iotherVtx].z()) <= 24) {
+                  for(reco::Vertex::trackRef_iterator i_vtxTrk = (*primaryVertexColl)[iotherVtx].tracks_begin(); 
+                      i_vtxTrk != (*primaryVertexColl)[iotherVtx].tracks_end(); ++i_vtxTrk) {
+                    reco::TrackRef trkRef(i_vtxTrk->castTo<reco::TrackRef>());
+                    if (trkRef == i_trk) {
+                      isOtherVtx=true;
+                      break;
+                    }
+                  }
+                }}}
+            if(!isFirstVtx && isOtherVtx) { sumTrkPtBetaStar += i_trk->pt(); } 
           }
         }  // loop overt tracks
         
@@ -324,9 +372,23 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->neutralEmEnergy->push_back( -1. );
 
 	// for PU studies
-	privateData_->betastar->push_back(-1.);
-	privateData_->rmsCandsHand->push_back(-1.);
+	privateData_->betastar->push_back(-999.);            // chiara
+	privateData_->rmsCandsHand->push_back(-999.);        // chiara
 	privateData_->jetIdMva->push_back(-1.);
+	privateData_->nChargedIdMva->push_back(-1.);
+	privateData_->nNeutralsIdMva->push_back(-1.);
+	privateData_->dZIdMva->push_back(-1.);
+	privateData_->nParticlesIdMva->push_back(-1.);
+	privateData_->dR2MeanIdMva->push_back(-1.);
+	privateData_->dRMeanIdMva->push_back(-1.);
+	privateData_->frac01IdMva->push_back(-1.);
+	privateData_->frac02IdMva->push_back(-1.);
+	privateData_->frac03IdMva->push_back(-1.);
+	privateData_->frac04IdMva->push_back(-1.);
+	privateData_->frac05IdMva->push_back(-1.);
+	privateData_->betaIdMva->push_back(-1.);
+	privateData_->betastarIdMva->push_back(-1.);
+	privateData_->betastarclassicIdMva->push_back(-1.);
       }
 
       // fill the btag algorithms output
@@ -429,6 +491,20 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"betastar"+colSuffix).c_str(), *privateData_->betastar, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rmsCandsHand"+colSuffix).c_str(), *privateData_->rmsCandsHand, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"jetIdMva"+colSuffix).c_str(), *privateData_->jetIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nChargedIdMva"+colSuffix).c_str(), *privateData_->nChargedIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nNeutralsIdMva"+colSuffix).c_str(), *privateData_->nNeutralsIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dZIdMva"+colSuffix).c_str(), *privateData_->dZIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nParticlesIdMva"+colSuffix).c_str(), *privateData_->nParticlesIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dR2MeanIdMva"+colSuffix).c_str(), *privateData_->dR2MeanIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dRMeanIdMva"+colSuffix).c_str(), *privateData_->dRMeanIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"frac01IdMva"+colSuffix).c_str(), *privateData_->frac01IdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"frac02IdMva"+colSuffix).c_str(), *privateData_->frac02IdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"frac03IdMva"+colSuffix).c_str(), *privateData_->frac03IdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"frac04IdMva"+colSuffix).c_str(), *privateData_->frac04IdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"frac05IdMva"+colSuffix).c_str(), *privateData_->frac05IdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"betaIdMva"+colSuffix).c_str(), *privateData_->betaIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"betastarIdMva"+colSuffix).c_str(), *privateData_->betastarIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"betastarclassicIdMva"+colSuffix).c_str(), *privateData_->betastarclassicIdMva, nCandString.c_str(), 0, "Reco");
 
   // for backward compatibility with existing trees 
   cmstree->column((colPrefix+"chargedEmEnergy"+colSuffix).c_str(), *privateData_->chargedEmEnergy, nCandString.c_str(), 0, "Reco");
@@ -491,6 +567,20 @@ void CmsPFJetFillerData::initialise() {
   rmsCand = new vector<float>;
   betastar = new vector<float>;
   jetIdMva = new vector<float>;
+  nChargedIdMva = new vector<float>;
+  nNeutralsIdMva = new vector<float>;
+  dZIdMva = new vector<float>;
+  nParticlesIdMva = new vector<float>;
+  dR2MeanIdMva = new vector<float>;
+  dRMeanIdMva = new vector<float>;
+  frac01IdMva = new vector<float>;
+  frac02IdMva = new vector<float>;
+  frac03IdMva = new vector<float>;
+  frac04IdMva = new vector<float>;
+  frac05IdMva = new vector<float>;
+  betaIdMva = new vector<float>;
+  betastarIdMva = new vector<float>;
+  betastarclassicIdMva = new vector<float>;
   rmsCandsHand = new vector<float>;
 }
 
@@ -528,6 +618,20 @@ void CmsPFJetFillerData::clearTrkVectors() {
   rmsCand->clear();
   betastar -> clear();
   jetIdMva -> clear();
+  nChargedIdMva -> clear();
+  nNeutralsIdMva -> clear();
+  dZIdMva -> clear();
+  nParticlesIdMva -> clear();
+  dR2MeanIdMva -> clear();
+  dRMeanIdMva -> clear();
+  frac01IdMva -> clear();
+  frac02IdMva -> clear();
+  frac03IdMva -> clear();
+  frac04IdMva -> clear();
+  frac05IdMva -> clear();
+  betaIdMva -> clear(); 
+  betastarIdMva -> clear();
+  betastarclassicIdMva -> clear();
   rmsCandsHand -> clear();
 }
 
@@ -622,6 +726,8 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 //	sub1ptratio=inclusive_jets.at(0).perp()/jtpt_s;
 //else 
 //	sub1ptratio=0;
+
+  delete input_particles;
 
   QGLikelihoodVars vars;
   vars.ptD = PtD;

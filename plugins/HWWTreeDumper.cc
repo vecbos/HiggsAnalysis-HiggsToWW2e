@@ -197,9 +197,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   PFPUcorrJetsBTags_        = iConfig.getUntrackedParameter<edm::ParameterSet>("PFPUcorrJetsBTags");
 
   // MVA based jet id collection
-  PFjetMvaIdCollection_     = iConfig.getParameter<edm::InputTag>("PFjetMvaIdCollection");
-  PFpujetMvaIdCollection_   = iConfig.getParameter<edm::InputTag>("PFpujetMvaIdCollection");
-
+  PFjetMvaIdCollection_     = iConfig.getUntrackedParameter<std::vector<edm::InputTag> >("PFjetMvaIdCollection",std::vector<edm::InputTag>());
+  PFpujetMvaIdCollection_   = iConfig.getUntrackedParameter<std::vector<edm::InputTag> >("PFpujetMvaIdCollection",std::vector<edm::InputTag>());
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
   // corrmetCollection_       = iConfig.getParameter<edm::InputTag>("corrmetCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
