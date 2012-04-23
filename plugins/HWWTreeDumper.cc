@@ -38,6 +38,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFTauFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFPreIdFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPhotonFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsConversionFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
@@ -123,6 +124,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpLHE_            = iConfig.getUntrackedParameter<bool>("dumpLHE", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
   dumpPhotons_        = iConfig.getUntrackedParameter<bool>("dumpPhotons", false);
+  dumpConversions_    = iConfig.getUntrackedParameter<bool>("dumpConversions", false);
   dumpPFlowElectrons_ = iConfig.getUntrackedParameter<bool>("dumpPFlowElectrons", false);
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
   dumpBCs_            = iConfig.getUntrackedParameter<bool>("dumpBCs", false);
@@ -429,6 +431,13 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
     treeFill.writeCollectionToTree(photonCollection_, iEvent, iSetup, prefix, suffix, false);
+  }
+  if(dumpConversions_) {
+
+    CmsConversionFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("Conv");
+    treeFill.writeCollectionToTree(conversions_, iEvent, iSetup, prefix, suffix, false);
   }
 
   // fill SC block

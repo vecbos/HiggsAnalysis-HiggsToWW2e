@@ -80,6 +80,8 @@ private:
   bool dumpElectrons_;
   //! dump the photon block
   bool dumpPhotons_;
+  //! dump the conversion block
+  bool dumpConversions_;
   //! dump the particle flow electron block
   bool dumpPFlowElectrons_;
   //! dump the particle flow electron pre-identification block
