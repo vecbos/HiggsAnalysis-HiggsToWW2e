@@ -65,7 +65,7 @@ class CmsConversionFiller {
 
   // Dump everything
   CmsConversionFiller(CmsTree *, 
-		      edm::InputTag conversionCollection,
+		      //edm::InputTag conversionCollection,
 		      int maxConv=500, int maxMCConv=2000, 
 		      bool noOutputIfLimitsReached=false );
   
@@ -73,7 +73,6 @@ class CmsConversionFiller {
   virtual ~CmsConversionFiller();
 
   /// dump tracking related variables
-  void saveTrk(bool );
   // Operators
 
   /// write the muon related informations for the given collection

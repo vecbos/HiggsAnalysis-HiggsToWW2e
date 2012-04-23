@@ -54,13 +54,11 @@ using namespace reco;
 
 
 CmsConversionFiller::CmsConversionFiller(CmsTree *cmsTree, 
-			       edm::InputTag conversionCollection,
-			       int maxConv, int maxMCConv,
-			       bool noOutputIfLimitsReached):
+					 int maxConv, int maxMCConv,
+					 bool noOutputIfLimitsReached):
   privateData_(new CmsConversionFillerData)
 {
   cmstree=cmsTree;
-  conversionCollection_=conversionCollection;
 
   convIndexName_ = new std::string("n");
 
@@ -174,6 +172,7 @@ void CmsConversionFiller::writeCollectionToTree(edm::InputTag collectionTag,
       writeConvInfo(convRef , magfield, theTrackingGeometry );
     }
   } else {
+    edm::LogWarning("CmsConversionFiller") << "No Conversions!";
     *(privateData_->ncand) = 0;
   }
   
@@ -182,6 +181,7 @@ void CmsConversionFiller::writeCollectionToTree(edm::InputTag collectionTag,
   // tree 
 
   std::string nCandString = columnPrefix+(*convIndexName_)+columnSuffix; 
+  if( (int)collection->size() ) blockSize = collection->size();
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
 
   treeConvInfo(columnPrefix,columnSuffix);
