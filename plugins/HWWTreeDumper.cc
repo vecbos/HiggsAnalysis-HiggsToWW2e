@@ -278,7 +278,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hpsTancTausDiscrByLooseIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLooseIsolationTag");
   hpsTancTausDiscrByMediumIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByMediumIsolationTag");
   hpsTancTausDiscrByTightIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByTightIsolationTag");
-  hpsTancTausDiscrByFlightPathTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByFlightPathTag");
 
   // Hcal collections
   hcalNoiseSummaryLabel_ = iConfig.getParameter<edm::InputTag>("hcalNoiseSummary");
@@ -660,7 +659,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 				     hpsTancTausDiscrByLooseIsolationTag_,
 				     hpsTancTausDiscrByMediumIsolationTag_,
 				     hpsTancTausDiscrByTightIsolationTag_,
-				     hpsTancTausDiscrByFlightPathTag_,
 				     false);
     }
 

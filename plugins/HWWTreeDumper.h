@@ -198,8 +198,7 @@ private:
     hpsTancTausDiscrByLooseMuonRejectionTag_, hpsTancTausDiscrByTightMuonRejectionTag_,
     hpsTancTausDiscrByDecayModeSelectionTag_,
     hpsTancTausDiscrByVLooseIsolationTag_, hpsTancTausDiscrByLooseIsolationTag_,
-    hpsTancTausDiscrByMediumIsolationTag_, hpsTancTausDiscrByTightIsolationTag_,
-    hpsTancTausDiscrByFlightPathTag_;
+    hpsTancTausDiscrByMediumIsolationTag_, hpsTancTausDiscrByTightIsolationTag_;
 
   //! Hcal noise summary object
   edm::InputTag hcalNoiseSummaryLabel_;
