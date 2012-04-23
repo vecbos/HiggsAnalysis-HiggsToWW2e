@@ -63,6 +63,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
+process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
@@ -77,7 +78,8 @@ process.treeDumper.dumpGenJets = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = False
+process.treeDumper.dumpBCs = True
+process.treeDumper.dumpConversions = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
@@ -138,12 +140,13 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                             fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_DoubleEle2012.root')
+                             fileNames = cms.untracked.vstring('/store/data/Run2012A/HT/AOD/PromptReco-v1/000/191/830/981F9BAF-B58C-E111-A537-003048CFB40C.root')
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DoubleElectron_08Nov2011.root')
                             )
 
 process.p = cms.Path ( process.leptonLinkedTracks
                        * process.mergedSuperClusters 
+                       * process.mergedBasicClusters 
                        * process.chargedMetProducer
                        * process.metOptionalFilterSequence
                        * process.pfIsolationAllSequence
