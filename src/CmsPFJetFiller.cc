@@ -299,7 +299,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
             // first is Guillelmo's deltaZ method (below). second is Track dsz method.
             float dzCorr1 = DzCorrected(i_trk,bestPrimaryVertex_);
             float dzCorr2 = i_trk->dsz(bestPrimaryVertex_.position());
-            float pt = i_trk->pt();
+            float pt = (*pfcand)->pt();
             dznum1 += pt*pt * dzCorr1;
             dznum2 += pt*pt * dzCorr2;
             dzdenom += pt*pt;
@@ -416,7 +416,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         for(cand2=uncorrectedCollection->begin(); cand2!=uncorrectedCollection->end(); cand2++) {
           const PFJet *uncorrectedPFJet = dynamic_cast< const PFJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
-          if(  thisPFJet->jetArea() == uncorrectedPFJet->jetArea() ) {
+          if(  thisPFJet->jetArea() == uncorrectedPFJet->jetArea() && fabs(thisPFJet->eta() - uncorrectedPFJet->eta())<0.01 ) {
             rawEnergy = uncorrectedPFJet->energy();
             break;
           }
