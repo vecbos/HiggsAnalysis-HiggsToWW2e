@@ -161,6 +161,10 @@ CmsTrackFiller::~CmsTrackFiller() {
   delete privateData_->transvImpactParBiasedError;
 
   delete privateData_->pixelHits;
+  delete privateData_->d0;
+  delete privateData_->d0Error;
+  delete privateData_->dz;
+  delete privateData_->dzError;
   delete privateData_->expInnerLayers;
   delete privateData_->numberOfValidPixelBarrelHits;
   delete privateData_->numberOfValidPixelEndcapHits;
@@ -349,6 +353,11 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
     privateData_->px->push_back(trkRef->px());
     privateData_->py->push_back(trkRef->py());
     privateData_->pz->push_back(trkRef->pz());
+
+    privateData_->d0->push_back(trkRef->d0());
+    privateData_->d0Error->push_back(trkRef->d0Error());
+    privateData_->dz->push_back(trkRef->dz());
+    privateData_->dzError->push_back(trkRef->dzError());
 
     if(saveFatTrk_) {
       // Inner Tracker information
@@ -599,6 +608,11 @@ void CmsTrackFiller::treeTrkInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"trackVy"+colSuffix).c_str(),  *privateData_->trackVy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trackVz"+colSuffix).c_str(),  *privateData_->trackVz, nCandString.c_str(), 0, "Reco");
 
+  cmstree->column((colPrefix+"d0"+colSuffix).c_str(),  *privateData_->d0, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"d0Error"+colSuffix).c_str(),  *privateData_->d0Error, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dz"+colSuffix).c_str(),  *privateData_->dz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dzError"+colSuffix).c_str(),  *privateData_->dzError, nCandString.c_str(), 0, "Reco");
+
   if(saveFatTrk_) {
     cmstree->column((colPrefix+"pxAtOuter"+colSuffix).c_str(), *privateData_->pxAtOuter, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pyAtOuter"+colSuffix).c_str(), *privateData_->pyAtOuter, nCandString.c_str(), 0, "Reco");
@@ -668,6 +682,10 @@ void CmsTrackFillerData::initialise() {
   px = new vector<float>;
   py = new vector<float>;
   pz = new vector<float>;
+  d0 = new vector<float>;
+  d0Error = new vector<float>;
+  dz = new vector<float>;
+  dzError = new vector<float>;
   charge = new vector<float>;
   pterr = new vector<float>;
   recHitsSize  = new vector<float>;
@@ -727,6 +745,10 @@ void CmsTrackFillerData::clearTrkVectors() {
   px->clear();
   py->clear();
   pz->clear();
+  d0->clear();
+  d0Error->clear();
+  dz->clear();
+  dzError->clear();
   charge->clear();
   pterr->clear();
   recHitsSize->clear();
