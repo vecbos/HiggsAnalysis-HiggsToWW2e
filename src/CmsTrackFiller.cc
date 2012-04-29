@@ -37,6 +37,7 @@
 
 #include "TrackingTools/TransientTrack/interface/GsfTransientTrack.h"
 
+#include "DataFormats/Math/interface/deltaR.h"
 #include <TTree.h>
 
 #include <string>
@@ -332,6 +333,15 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
 	  for(VertexCollection::const_iterator v = primaryVertex_->begin();
 	      v != primaryVertex_->end(); ++v){
 	    double tmpw = v->trackWeight(trkRef);
+	    // attempt to manually match the track
+	    std::vector<edm::RefToBase<reco::Track> >::const_iterator  trkIt;
+	    for(trkIt = v->tracks_begin(); trkIt != v->tracks_end(); trkIt++){
+	      if( deltaR((*trkIt)->eta(),(*trkIt)->phi(),trkRef->eta(),trkRef->phi()) < 0.001 ){
+		tmpw = v->trackWeight(*trkIt);
+		break;
+	      }
+	    }
+ 
 	    if(tmpw > weight) {
 	      if(weight >0) edm::LogWarning("CmsTrackFiller") << "I found this track in two vertices!!!!!!" ;
 	      weight = tmpw;
@@ -342,6 +352,7 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
 	    counter++;
 	  }
 	}
+	else{ edm::LogWarning("CmsTrackFiller") << "Track Filler sees no vertices in the event!";}
       }
 
       // vertex information
