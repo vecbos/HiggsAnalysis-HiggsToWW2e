@@ -4,7 +4,7 @@ setenv SCRAM_ARCH slc5_amd64_gcc462
 cmsrel CMSSW_5_2_3/src
 cmsenv
 
-cvs co -r V05-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V07-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r edm-30March2012 HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V03-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
