@@ -167,7 +167,8 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
   ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
   ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
-  ecalPFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalPFClusterCollection");
+  ecalElePFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalElePFClusterCollection");
+  ecalPhoPFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalPhoPFClusterCollection");
   ecalBCCollection_        = iConfig.getParameter<edm::InputTag>("ecalBCCollection");
   ecalBarrelRecHits_       = iConfig.getParameter<edm::InputTag>("ecalBarrelRecHits");
   ecalEndcapRecHits_       = iConfig.getParameter<edm::InputTag>("ecalEndcapRecHits");
@@ -473,7 +474,17 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFillPF.setCalotowers(calotowersForIsolationProducer_);
       treeFillPF.setPositionCalc(posCalculator_);
       treeFillPF.setEnergyCorrectionFunction(energyCorrectionF);
-      treeFillPF.writeCollectionToTree(ecalPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
+      treeFillPF.writeCollectionToTree(ecalElePFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
+
+      CmsSuperClusterFiller treeFillPhoPF(tree_, 1000);
+      suffix = "PhoPFSC";
+      treeFillPhoPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPhoPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPhoPF.setESRecHits(esRecHits_);
+      treeFillPhoPF.setCalotowers(calotowersForIsolationProducer_);
+      treeFillPhoPF.setPositionCalc(posCalculator_);
+      treeFillPhoPF.setEnergyCorrectionFunction(energyCorrectionF);
+      treeFillPhoPF.writeCollectionToTree(ecalPhoPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
 
   }
 
@@ -487,6 +498,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
       treeFill.setEcalSuperClusters(ecalSCCollection_);
       treeFill.writeCollectionToTree(ecalBCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
+
+      CmsBasicClusterFiller treeFillPF(tree_, 250);
+      prefix="";
+      barrelSuffix="PFBC";
+      treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPF.setEcalSuperClusters(ecalPhoPFClusterCollection_);
+      treeFillPF.writeCollectionToTree(ecalPhoPFClusterCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
   }
 

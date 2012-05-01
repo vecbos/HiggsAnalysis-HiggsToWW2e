@@ -154,7 +154,7 @@ private:
   edm::InputTag PFCandidateCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
-  edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalPFClusterCollection_;
+  edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalElePFClusterCollection_, ecalPhoPFClusterCollection_;
   //! basiccluster collections in input
   edm::InputTag ecalBCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly
