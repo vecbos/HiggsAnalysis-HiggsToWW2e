@@ -65,6 +65,7 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
 # --- ECAL clusters merging in a unique collection ---
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
+process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 
 #PDF systematics
 # Produce PDF weights (maximum is 3)
@@ -94,7 +95,8 @@ process.treeDumper.dumpTracks = True
 process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = False
+process.treeDumper.dumpBCs = True
+process.treeDumper.dumpConversions = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
@@ -133,6 +135,7 @@ process.source = cms.Source("PoolSource",
 if(process.treeDumper.dumpPdfWeight == False) :
     process.p = cms.Path ( process.leptonLinkedTracks
                            * process.mergedSuperClusters
+                           * process.mergedBasicClusters
                            * process.chargedMetProducer
                            * process.pfIsolationAllSequence
                            * process.ourJetSequenceMCReduced
@@ -148,6 +151,7 @@ else :
     process.p = cms.Path ( process.pdfWeights
                            * process.leptonLinkedTracks
                            * process.mergedSuperClusters
+                           * process.mergedBasicClusters
                            * process.chargedMetProducer
                            * process.pfIsolationAllSequence
                            * process.ourJetSequenceMCReduced
