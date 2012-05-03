@@ -82,6 +82,9 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->seedEnergy;
   delete privateData_->seedX;
   delete privateData_->seedY;
+  delete privateData_->xPos;
+  delete privateData_->yPos;
+  delete privateData_->zPos;
   delete privateData_->eta;
   delete privateData_->theta;
   delete privateData_->phi;
@@ -245,6 +248,9 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
   privateData_->eta->push_back((float)cand->position().eta());
   privateData_->theta->push_back((float)cand->position().theta());
   privateData_->phi->push_back((float)cand->position().phi());
+  privateData_->xPos->push_back((float)cand->position().x());
+  privateData_->yPos->push_back((float)cand->position().y());
+  privateData_->zPos->push_back((float)cand->position().z());
   
   // fill the seed basic cluster shapes
   edm::ESHandle<CaloTopology> pTopology;
@@ -653,6 +659,9 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"xPos"+colSuffix).c_str(), *privateData_->xPos, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"yPos"+colSuffix).c_str(), *privateData_->yPos, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"zPos"+colSuffix).c_str(), *privateData_->zPos, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phiWidth"+colSuffix).c_str(), *privateData_->phiWidth, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"etaWidth"+colSuffix).c_str(), *privateData_->etaWidth, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
@@ -735,6 +744,9 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   eta = new vector<float>; 
   theta = new vector<float>; 
   phi = new vector<float>;
+  xPos = new vector<float>;
+  yPos = new vector<float>;
+  zPos = new vector<float>;
   phiWidth = new vector<float>;
   etaWidth = new vector<float>;
   e3x3 = new vector<float>;
@@ -809,6 +821,9 @@ void CmsSuperClusterFillerData::clear()
   eta->clear(); 
   theta->clear();
   phi->clear();
+  xPos->clear();
+  yPos->clear();
+  zPos->clear();
   phiWidth->clear();
   etaWidth->clear();
   e3x3->clear();
