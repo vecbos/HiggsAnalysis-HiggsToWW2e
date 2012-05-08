@@ -60,7 +60,7 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
   catch ( cms::Exception& ex ) { edm::LogWarning("HWWTreeDumper") << "Can't get MC Truth Collection: " << mcTruthCollection; }
   const reco::GenParticleCollection *genParticleCollection = genParticleHandle.product();
 
-  vector<float> pMC,massMC,thetaMC,etaMC,phiMC,energyMC;
+  vector<float> pMC,massMC,thetaMC,etaMC,phiMC,energyMC,vxMC,vyMC,vzMC;
   vector<float> xMC,yMC,zMC;
   vector<int> idMC,mothMC,nDauMC,statusMC;
 
@@ -76,6 +76,9 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
     etaMC.push_back(cand.eta());
     phiMC.push_back(cand.phi());
     energyMC.push_back(cand.energy());
+    vxMC.push_back(cand.vx());
+    vyMC.push_back(cand.vy());
+    vzMC.push_back(cand.vz());
     idMC.push_back(cand.pdgId());
     nDauMC.push_back(cand.numberOfDaughters());
     statusMC.push_back(cand.status());
@@ -125,6 +128,9 @@ void CmsMcTruthTreeFiller::writeCollectionToTree(edm::InputTag mcTruthCollection
   privateData_->cmstree->column(("eta"+theName).c_str(), etaMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("phi"+theName).c_str(), phiMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("energy"+theName).c_str(), energyMC, indName.c_str(), 0, theName.c_str());
+  privateData_->cmstree->column(("vx"+theName).c_str(), vxMC, indName.c_str(), 0, theName.c_str());
+  privateData_->cmstree->column(("vy"+theName).c_str(), vyMC, indName.c_str(), 0, theName.c_str());
+  privateData_->cmstree->column(("vz"+theName).c_str(), vzMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("id"+theName).c_str(), idMC, indName.c_str(), 0, theName.c_str());
   privateData_->cmstree->column(("moth"+theName).c_str(), mothMC, indName.c_str(), 0, theName.c_str());
   //  privateData_->cmstree->column(("nDau"+theName).c_str(), nDauMC, indName.c_str(), 0, theName.c_str());

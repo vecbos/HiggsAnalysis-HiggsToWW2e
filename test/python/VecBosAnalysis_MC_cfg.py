@@ -128,7 +128,7 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/data/AOD_WWSummer12.root')
+                            fileNames = cms.untracked.vstring('file:/tmp/amott/')
                             #fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
                             )
 
