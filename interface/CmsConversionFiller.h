@@ -48,8 +48,8 @@ struct CmsConversionFillerData {
   vector<float> *xVtx,*yVtx,*zVtx,*chi2Vtx,*chi2ProbVtx;
   vector<float> *mvaOutVtx;
   vector<int>   *nTracksVtx,*isValidVtx;
-  vector<float>   *trk1Dz,*trk1DzError,*trk1Charge,*trk1Algo,*trk1D0,*trk1Pout,*trk1Pin;
-  vector<float>   *trk2Dz,*trk2DzError,*trk2Charge,*trk2Algo,*trk2D0,*trk2Pout,*trk2Pin;
+  vector<float>   *trk1Dz,*trk1DzError,*trk1Charge,*trk1Algo,*trk1D0,*trk1Pout,*trk1Pin,*trk1Pt;
+  vector<float>   *trk2Dz,*trk2DzError,*trk2Charge,*trk2Algo,*trk2D0,*trk2Pout,*trk2Pin,*trk2Pt;
 
 public:
   void initialise();

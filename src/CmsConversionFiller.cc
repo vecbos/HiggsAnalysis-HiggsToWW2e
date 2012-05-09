@@ -104,6 +104,7 @@ CmsConversionFiller::~CmsConversionFiller() {
   delete privateData_->trk1DzError;
   delete privateData_->trk1Charge;
   delete privateData_->trk1Algo;
+  delete privateData_->trk1Pt;
   delete privateData_->trk1D0;
   delete privateData_->trk1Pout;
   delete privateData_->trk1Pin;
@@ -112,6 +113,7 @@ CmsConversionFiller::~CmsConversionFiller() {
   delete privateData_->trk2DzError;
   delete privateData_->trk2Charge;
   delete privateData_->trk2Algo;
+  delete privateData_->trk2Pt;
   delete privateData_->trk2D0;
   delete privateData_->trk2Pout;
   delete privateData_->trk2Pin;
@@ -242,6 +244,7 @@ void CmsConversionFiller::writeConvInfo(edm::RefToBase<reco::Conversion> convRef
       privateData_->trk1DzError->push_back(tracks[0]->dzError());
       privateData_->trk1Charge->push_back(tracks[0]->charge());
       privateData_->trk1Algo->push_back(tracks[0]->algo());
+      privateData_->trk1Pt->push_back(tracks[0]->pt());
       privateData_->trk1D0->push_back(convRef->tracksSigned_d0()[0]);
       privateData_->trk1Pout->push_back(sqrt(convRef->tracksPout()[0].Mag2()));
       privateData_->trk1Pin->push_back(sqrt(convRef->tracksPin()[0].Mag2()));
@@ -250,6 +253,7 @@ void CmsConversionFiller::writeConvInfo(edm::RefToBase<reco::Conversion> convRef
       privateData_->trk1DzError->push_back(-99);
       privateData_->trk1Charge->push_back(-99);
       privateData_->trk1Algo->push_back(-99);
+      privateData_->trk1Pt->push_back(-99);
       privateData_->trk1D0->push_back(-99);
       privateData_->trk1Pout->push_back(-99);
       privateData_->trk1Pin->push_back(-99);
@@ -259,6 +263,7 @@ void CmsConversionFiller::writeConvInfo(edm::RefToBase<reco::Conversion> convRef
       privateData_->trk2DzError->push_back(tracks[1]->dzError());
       privateData_->trk2Charge->push_back(tracks[1]->charge());
       privateData_->trk2Algo->push_back(tracks[1]->algo());
+      privateData_->trk2Pt->push_back(tracks[1]->pt());
       privateData_->trk2D0->push_back(convRef->tracksSigned_d0()[1]);
       privateData_->trk2Pout->push_back(sqrt(convRef->tracksPout()[1].Mag2()));
       privateData_->trk2Pin->push_back(sqrt(convRef->tracksPin()[1].Mag2()));
@@ -267,6 +272,7 @@ void CmsConversionFiller::writeConvInfo(edm::RefToBase<reco::Conversion> convRef
       privateData_->trk2DzError->push_back(-99);
       privateData_->trk2Charge->push_back(-99);
       privateData_->trk2Algo->push_back(-99);
+      privateData_->trk2Pt->push_back(-99);
       privateData_->trk2D0->push_back(-99);
       privateData_->trk2Pout->push_back(-99);
       privateData_->trk2Pin->push_back(-99);
@@ -307,6 +313,7 @@ void CmsConversionFiller::treeConvInfo(const std::string &colPrefix, const std::
   cmstree->column((colPrefix+"trk1DzError"+colSuffix).c_str(), *privateData_->trk1DzError, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk1Charge"+colSuffix).c_str(), *privateData_->trk1Charge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk1Algo"+colSuffix).c_str(), *privateData_->trk1Algo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trk1Pt"+colSuffix).c_str(), *privateData_->trk1Pt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk1D0"+colSuffix).c_str(), *privateData_->trk1D0, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk1Pout"+colSuffix).c_str(), *privateData_->trk1Pout, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk1Pin"+colSuffix).c_str(), *privateData_->trk1Pin, nCandString.c_str(), 0, "Reco");
@@ -315,6 +322,7 @@ void CmsConversionFiller::treeConvInfo(const std::string &colPrefix, const std::
   cmstree->column((colPrefix+"trk2DzError"+colSuffix).c_str(), *privateData_->trk2DzError, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk2Charge"+colSuffix).c_str(), *privateData_->trk2Charge, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk2Algo"+colSuffix).c_str(), *privateData_->trk2Algo, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trk2Pt"+colSuffix).c_str(), *privateData_->trk2Pt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk2D0"+colSuffix).c_str(), *privateData_->trk2D0, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk2Pout"+colSuffix).c_str(), *privateData_->trk2Pout, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"trk2Pin"+colSuffix).c_str(), *privateData_->trk2Pin, nCandString.c_str(), 0, "Reco");
@@ -353,6 +361,7 @@ void CmsConversionFillerData::initialise() {
   trk1DzError = new vector<float>;
   trk1Charge = new vector<float>;
   trk1Algo = new vector<float>;
+  trk1Pt = new vector<float>;
   trk1D0 = new vector<float>;
   trk1Pout = new vector<float>;
   trk1Pin = new vector<float>;
@@ -361,6 +370,7 @@ void CmsConversionFillerData::initialise() {
   trk2DzError = new vector<float>;
   trk2Charge = new vector<float>;
   trk2Algo = new vector<float>;
+  trk2Pt = new vector<float>;
   trk2D0 = new vector<float>;
   trk2Pout = new vector<float>;
   trk2Pin = new vector<float>;
@@ -394,6 +404,7 @@ void CmsConversionFillerData::clearConvVectors() {
   trk1DzError->clear();
   trk1Charge->clear();
   trk1Algo->clear();
+  trk1Pt->clear();
   trk1D0->clear();
   trk1Pout->clear();
   trk1Pin->clear();
@@ -402,6 +413,7 @@ void CmsConversionFillerData::clearConvVectors() {
   trk2DzError->clear();
   trk2Charge->clear();
   trk2Algo->clear();
+  trk2Pt->clear();
   trk2D0->clear();
   trk2Pout->clear();
   trk2Pin->clear();
