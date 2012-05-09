@@ -596,6 +596,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string prefix("");
     std::string suffix("Muon");
     treeFill.setGeneralTracks(trackCollection_);
+    treeFill.setVertexCollection(vertexCollection_);
+    treeFill.setMuonIsoMVA(fMuonIsoMVA);
     treeFill.saveCand(saveCand_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.writeCollectionToTree(muonCollection_, iEvent, iSetup, prefix, suffix, false);
@@ -868,6 +870,22 @@ void HWWTreeDumper::beginJob() {
   trgNames_ = new vector<std::string>;
   LHEComments_ = new vector<std::string>;
 
+  // initialize MVAs...
+  // muon isolation
+  fMuonIsoMVA = new MuonMVAEstimator();
+  vector<string> muoniso_weightfiles;
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-BarrelPt5To10_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-EndcapPt5To10_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-BarrelPt10ToInf_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-EndcapPt10ToInf_V0_BDTG.weights.xml").fullPath());                 
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-Tracker_V0_BDTG.weights.xml").fullPath());
+  muoniso_weightfiles.push_back(edm::FileInPath("Muon/MuonAnalysisTools/data/MuonIsoMVA_sixie-Global_V0_BDTG.weights.xml").fullPath());
+  fMuonIsoMVA->initialize("MuonIso_BDTG_IsoRings",
+                          MuonMVAEstimator::kIsoRings,
+                          true,
+                          muoniso_weightfiles);
+  fMuonIsoMVA->SetPrintMVADebug(false);
+
 }
 
 void HWWTreeDumper::beginRun( const Run & iRun, const EventSetup & iSetup )
@@ -905,6 +923,8 @@ void  HWWTreeDumper::endJob() {
   treeEventsOut->Write();
 
   fileOut_->Close();
+  
+  delete fMuonIsoMVA;
 
 }
 

@@ -65,6 +65,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 
+# --- good vertex filter ---
+process.load("HiggsAnalysis.HiggsToWW2e.vertexFiltering_cff")
+
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_data.root'
@@ -78,7 +81,7 @@ process.treeDumper.dumpGenJets = False
 process.treeDumper.dumpTracks = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = True
+process.treeDumper.dumpBCs = False
 process.treeDumper.dumpConversions = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
@@ -144,20 +147,32 @@ process.source = cms.Source("PoolSource",
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DoubleElectron_08Nov2011.root')
                             )
 
-process.p = cms.Path ( process.leptonLinkedTracks
-                       * process.mergedSuperClusters 
-                       * process.mergedBasicClusters 
-                       * process.chargedMetProducer
-                       * process.metOptionalFilterSequence
-                       * process.pfIsolationAllSequence
-                       * process.ourJetSequenceDataReduced
-                       * process.newBtaggingSequence
-                       * process.newPFPUcorrJetBtaggingSequence
-                       * process.newPFNoPUJetBtaggingSequence
-                       * process.metSequence
-                       * process.eIdSequence
-                       * process.FastjetForIsolation
-                       * process.logErrorAnalysis
-                       * process.treeDumper
-                       )
+process.prejets = cms.Sequence( process.leptonLinkedTracks
+                                * process.mergedSuperClusters
+                                * process.mergedBasicClusters
+                                * process.chargedMetProducer
+                                * process.metOptionalFilterSequence
+                                * process.pfIsolationAllSequence )
 
+process.jets = cms.Sequence( process.ourJetSequenceDataReduced
+                             * process.newBtaggingSequence 
+                             * process.newPFPUcorrJetBtaggingSequence
+                             * process.newPFNoPUJetBtaggingSequence
+                             * process.metSequence )
+
+process.postjets = cms.Sequence( process.eIdSequence
+                                 * process.FastjetForIsolation
+                                 * process.logErrorAnalysis
+                                 * process.treeDumper )
+
+# In order to use the good primary vertices everywhere (It would be nicer to set the proper inputTags in the first place)
+from PhysicsTools.PatAlgos.tools.helpers import *
+massSearchReplaceAnyInputTag(process.prejets,cms.InputTag("offlinePrimaryVertices"), cms.InputTag("goodPrimaryVertices"),True)
+massSearchReplaceAnyInputTag(process.jets,cms.InputTag("offlinePrimaryVertices"), cms.InputTag("goodPrimaryVertices"),True)
+massSearchReplaceAnyInputTag(process.postjets,cms.InputTag("offlinePrimaryVertices"), cms.InputTag("goodPrimaryVertices"),True)
+
+process.p = cms.Path ( process.goodPrimaryVertices
+                       * process.prejets
+                       * process.jets
+                       * process.postjets
+                       )

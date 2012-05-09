@@ -31,6 +31,8 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMuonFiller.h"
 
+#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
+
 #include <TTree.h>
 
 #include <string>
@@ -68,7 +70,7 @@ CmsMuonFiller::CmsMuonFiller(CmsTree *cmsTree,
 
   privateData_->initialise();
 
-  
+  firstVtx = 0;
 }
 
 CmsMuonFiller::CmsMuonFiller(CmsTree *cmsTree, 
@@ -91,6 +93,9 @@ CmsMuonFiller::CmsMuonFiller(CmsTree *cmsTree,
   maxMCTracks_=maxMCTracks;
 
   privateData_->initialise();
+
+  firstVtx = 0;
+
 }
 
 
@@ -106,9 +111,10 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->combinedTrackIndex;
 
   delete privateData_->muonId;
+  delete privateData_->pfmuonId;
   delete privateData_->type;
   delete privateData_->numberOfMatches;
-
+  
   delete privateData_->  sumPt03;
   delete privateData_->  emEt03;
   delete privateData_->  hadEt03;
@@ -157,6 +163,7 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->pfCandChargedDirIso04;
   delete privateData_->pfCandNeutralDirIso04;
   delete privateData_->pfCandPhotonDirIso04;
+  delete privateData_->mvaiso;
 
   delete privateData_->ncand;
   delete privateData_;
@@ -175,6 +182,10 @@ void CmsMuonFiller::saveTrk(bool what) { saveTrk_=what;}
 
 void CmsMuonFiller::saveFatTrk(bool what) { saveFatTrk_=what;}
 
+void CmsMuonFiller::setVertexCollection(edm::InputTag collectionTag) {
+  m_vxtCollectionTag = collectionTag;
+}
+
 void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
@@ -184,6 +195,16 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsMuonFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
+
+  Handle<double> hRho;
+  edm::InputTag tag("kt6PFJets","rho");
+  iEvent.getByLabel(tag,hRho);
+  double Rho = *hRho;
+
+  try { iEvent.getByLabel(m_vxtCollectionTag, primaryVertex); }
+  catch(cms::Exception& ex ) {edm::LogWarning("CmsVertexFiller") << "Can't get candidate collection: " << m_vxtCollectionTag; }
+
+  iEvent.getByLabel("particleFlow",pfCands);
 
   privateData_->clearTrkVectors();
 
@@ -248,7 +269,7 @@ void CmsMuonFiller::writeCollectionToTree(edm::InputTag collectionTag,
       const reco::Muon *muon = dynamic_cast< const reco::Muon *> ( &(*cand));
       const reco::MuonRef muonRef = collection->refAt(imu).castTo<reco::MuonRef>();
 
-      if(saveMuonExtras_) writeMuonInfo(&(*cand),iEvent,iSetup,&(*muon),muonRef);
+      if(saveMuonExtras_) writeMuonInfo(&(*cand),iEvent,iSetup,&(*muon),muonRef,Rho);
 
       // fill tracks extra informations (only if the muon has a tracker track)
       if(saveTrk_) writeTrkInfo(&(*cand),iEvent,iSetup,&(*muon));
@@ -315,7 +336,8 @@ void CmsMuonFiller::treeTrkInfo(const std::string &colPrefix, const std::string 
 }
 
 void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEvent, 
-				  const edm::EventSetup& iSetup, const Muon *muon, const reco::MuonRef muonRef) {
+				  const edm::EventSetup& iSetup, const Muon *muon, const reco::MuonRef muonRef,
+                                  double Rho) {
   if(muon) {
 
     // now put muon ID codified:
@@ -343,6 +365,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
       ( TMLastStationOptimizedLowPtLoose << 1 ) | TMLastStationOptimizedLowPtTight;
 
     privateData_->muonId->push_back(packed_sel);
+    privateData_->pfmuonId->push_back(muon->isPFMuon());
     privateData_->type->push_back(muon->type());
     privateData_->numberOfMatches->push_back(muon->numberOfMatches());
 
@@ -429,9 +452,22 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->hoS9->push_back(muon->calEnergy().hoS9);
     privateData_->CaloComp->push_back(muon->caloCompatibility());
 
+    const reco::GsfElectronCollection dummyIdentifiedEleCollection;
+    const reco::MuonCollection dummyIdentifiedMuCollection;
+
+    // PF MVA isolation
+    double isomva = fMuonIsoMVA->mvaValue( *muon, 
+                                           primaryVertex->front(), 
+                                           *pfCands, 
+                                           Rho, 
+                                           MuonEffectiveArea::kMuEAFall11MC, 
+                                           dummyIdentifiedEleCollection,
+                                           dummyIdentifiedMuCollection);
+    privateData_->mvaiso->push_back(isomva);
   } else {
 
     privateData_->muonId->push_back(0);
+    privateData_->pfmuonId->push_back(-1);
     privateData_->type->push_back(-1);
     privateData_->numberOfMatches->push_back(-1);
     // default isolation variables 0.3
@@ -475,6 +511,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfCandNeutralDirIso04->push_back( -1 );
     privateData_->pfCandPhotonDirIso04->push_back( -1 );
 
+    privateData_->mvaiso->push_back( -1 );
     privateData_->kink->push_back( -1 );
 
     // Expected deposits in CALO
@@ -494,6 +531,7 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
    
   // muon id 
   cmstree->column((colPrefix+"muonId"+colSuffix).c_str(), *privateData_->muonId, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfmuonId"+colSuffix).c_str(), *privateData_->pfmuonId, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"type"+colSuffix).c_str(), *privateData_->type, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"numberOfMatches"+colSuffix).c_str(), *privateData_->numberOfMatches, nCandString.c_str(), 0, "Reco");
 
@@ -513,6 +551,7 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"nTrk05"+colSuffix).c_str(), *privateData_->nTrk05, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nJets05"+colSuffix).c_str(), *privateData_->nJets05, nCandString.c_str(), 0, "Reco");
 
+  // PF isolation rings
   cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCandChargedIso01"+colSuffix).c_str(),  *privateData_->pfCandChargedIso01, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCandNeutralIso01"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso01, nCandString.c_str(), 0, "Reco");
@@ -540,6 +579,7 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"pfCandPhotonDirIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonDirIso04, nCandString.c_str(), 0, "Reco");
 
   cmstree->column((colPrefix+"kink"+colSuffix).c_str(),  *privateData_->kink, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"mvaiso"+colSuffix).c_str(),  *privateData_->mvaiso, nCandString.c_str(), 0, "Reco");
 
   //  Expected deposits in CALO
   cmstree->column((colPrefix+"EcalExpDepo"+colSuffix).c_str(), *privateData_->EcalExpDepo, nCandString.c_str(), 0, "Reco");
@@ -561,6 +601,7 @@ void CmsMuonFillerData::initialise() {
   combinedTrackIndex = new vector<int>;
 
   muonId = new vector<int>;
+  pfmuonId = new vector<bool>;
   type = new vector<int>;
   numberOfMatches = new vector<int>;
 
@@ -604,6 +645,7 @@ void CmsMuonFillerData::initialise() {
   pfCandPhotonDirIso04  = new vector<float>;
 
   kink = new vector<float>;
+  mvaiso = new vector<float>;
 
   EcalExpDepo = new vector<float>;
   HcalExpDepo = new vector<float>;
@@ -624,6 +666,7 @@ void CmsMuonFillerData::clearTrkVectors() {
   combinedTrackIndex->clear();
  
   muonId->clear();
+  pfmuonId->clear();
   type->clear();
   numberOfMatches->clear();
 
@@ -668,6 +711,7 @@ void CmsMuonFillerData::clearTrkVectors() {
   pfCandPhotonDirIso04  ->clear();
 
   kink->clear();
+  mvaiso->clear();
 
   EcalExpDepo->clear();
   HcalExpDepo->clear();

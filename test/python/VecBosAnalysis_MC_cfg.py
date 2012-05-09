@@ -67,6 +67,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
 process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
 
+# --- good vertex filter ---
+process.load("HiggsAnalysis.HiggsToWW2e.vertexFiltering_cff")
+
 #PDF systematics
 # Produce PDF weights (maximum is 3)
 process.pdfWeights = cms.EDProducer("PdfWeightProducer",
@@ -127,39 +130,43 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
-#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23_2/emanuele/Pool/AODSIM_Winter10_FlatPU.root')
-                            fileNames = cms.untracked.vstring('file:/tmp/amott/')
+                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/AODSummer12/00514868-B47A-E111-803E-001D0967DDC3.root')
+#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/HZZ4l_mH125_Summer12.root')
                             #fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
                             )
 
+process.prejets = cms.Sequence( process.leptonLinkedTracks
+                                * process.mergedSuperClusters
+                                * process.mergedBasicClusters
+                                * process.chargedMetProducer
+                                * process.pfIsolationAllSequence )
+
+process.jets = cms.Sequence( process.ourJetSequenceMCReduced
+                             * process.newBtaggingSequence 
+                             * process.newPFPUcorrJetBtaggingSequence
+                             * process.newPFNoPUJetBtaggingSequence
+                             * process.metSequence )
+
+process.postjets = cms.Sequence( process.eIdSequence
+                                 * process.FastjetForIsolation
+                                 * process.treeDumper )
+
+# In order to use the good primary vertices everywhere (It would be nicer to set the proper inputTags in the first place)
+from PhysicsTools.PatAlgos.tools.helpers import *
+massSearchReplaceAnyInputTag(process.prejets,cms.InputTag("offlinePrimaryVertices"), cms.InputTag("goodPrimaryVertices"),True)
+massSearchReplaceAnyInputTag(process.jets,cms.InputTag("offlinePrimaryVertices"), cms.InputTag("goodPrimaryVertices"),True)
+massSearchReplaceAnyInputTag(process.postjets,cms.InputTag("offlinePrimaryVertices"), cms.InputTag("goodPrimaryVertices"),True)
+
 if(process.treeDumper.dumpPdfWeight == False) :
-    process.p = cms.Path ( process.leptonLinkedTracks
-                           * process.mergedSuperClusters
-                           * process.mergedBasicClusters
-                           * process.chargedMetProducer
-                           * process.pfIsolationAllSequence
-                           * process.ourJetSequenceMCReduced
-                           * process.newBtaggingSequence 
-                           * process.newPFPUcorrJetBtaggingSequence
-                           * process.newPFNoPUJetBtaggingSequence
-                           * process.metSequence
-                           * process.eIdSequence
-                           * process.FastjetForIsolation
-                           * process.treeDumper
+    process.p = cms.Path ( process.goodPrimaryVertices
+                           * process.prejets
+                           * process.jets
+                           * process.postjets
                            )
 else :
     process.p = cms.Path ( process.pdfWeights
-                           * process.leptonLinkedTracks
-                           * process.mergedSuperClusters
-                           * process.mergedBasicClusters
-                           * process.chargedMetProducer
-                           * process.pfIsolationAllSequence
-                           * process.ourJetSequenceMCReduced
-                           * process.newBtaggingSequence 
-                           * process.newPFPUcorrJetBtaggingSequence
-                           * process.newPFNoPUJetBtaggingSequence
-                           * process.metSequence
-                           * process.eIdSequence
-                           * process.FastjetForIsolation
-                           * process.treeDumper
+                           * process.goodPrimaryVertices
+                           * process.prejets
+                           * process.jets
+                           * process.postjets
                            )
