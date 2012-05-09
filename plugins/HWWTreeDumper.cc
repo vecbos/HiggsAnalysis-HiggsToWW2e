@@ -395,7 +395,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     // for custom MVA id
     treeFill.setVertexCollection(vertexCollection_);
-    treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVANonTrig);
+    //treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVANonTrig);
     treeFill.saveEleID(true);
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
@@ -600,7 +600,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string suffix("Muon");
     treeFill.setGeneralTracks(trackCollection_);
     treeFill.setVertexCollection(vertexCollection_);
-    treeFill.setMuonIsoMVA(fMuonIsoMVA);
+    //treeFill.setMuonIsoMVA(fMuonIsoMVA);
     treeFill.saveCand(saveCand_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.writeCollectionToTree(muonCollection_, iEvent, iSetup, prefix, suffix, false);
@@ -875,6 +875,7 @@ void HWWTreeDumper::beginJob() {
 
   // initialize MVAs...
   // electron IDs
+  /*
   std::vector<std::string> myManualCatWeigths;
   myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat1.weights.xml").fullPath());
   myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat2.weights.xml").fullPath());
@@ -920,7 +921,7 @@ void HWWTreeDumper::beginJob() {
                           true,
                           muoniso_weightfiles);
   fMuonIsoMVA->SetPrintMVADebug(false);
-
+  */
 }
 
 void HWWTreeDumper::beginRun( const Run & iRun, const EventSetup & iSetup )
@@ -959,9 +960,9 @@ void  HWWTreeDumper::endJob() {
 
   fileOut_->Close();
 
-  delete fEleIdMVATrig;
-  delete fEleIdMVANonTrig;
-  delete fMuonIsoMVA;
+  //delete fEleIdMVATrig;
+  //delete fEleIdMVANonTrig;
+  //delete fMuonIsoMVA;
 
 }
 

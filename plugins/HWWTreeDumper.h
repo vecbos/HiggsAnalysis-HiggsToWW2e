@@ -26,8 +26,8 @@
 #include "CondFormats/EcalObjects/interface/EcalFunctionParameters.h" 
 
 #include "RecoEcal/EgammaCoreTools/interface/PositionCalc.h"
-#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
-#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
+//#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
+//#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
 
 class HWWTreeDumper : public edm::EDAnalyzer {
 public:
@@ -123,8 +123,8 @@ private:
   //! save the calotowers
   bool dumpCaloTowers_;
   //! MVAs
-  MuonMVAEstimator *fMuonIsoMVA;
-  EGammaMvaEleEstimator *fEleIdMVANonTrig, *fEleIdMVATrig;
+  //MuonMVAEstimator *fMuonIsoMVA;
+  //EGammaMvaEleEstimator *fEleIdMVANonTrig, *fEleIdMVATrig;
 
   bool usePhotonFix_;
 
