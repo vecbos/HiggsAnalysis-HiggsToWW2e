@@ -147,14 +147,19 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
   cmstree->column("sigmaFastjet", sigma, float(0.), "Iso");
 
   // get the rho parameter from Fastjet computation - jets
-  edm::Handle<double> rhoHjets;
-  float rhoJets;
+  edm::Handle<double> rhoHjets, rhoHjetsCentralNeutral;
+  float rhoJets, rhojetsCentralNeutral;
   if( iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"),rhoHjets) )
     rhoJets = *rhoHjets;
   else
     rhoJets = 0.;
   cmstree->column("rhoJetsFastJet", rhoJets, float(0.), "Jets");
 
+  if( iEvent.getByLabel(edm::InputTag("kt6PFJetsCentralNeutral","rho"),rhoHjetsCentralNeutral) )
+    rhojetsCentralNeutral = *rhoHjetsCentralNeutral;
+  else
+    rhojetsCentralNeutral = 0.;
+  cmstree->column("rhoJetsCentralNeutralFastJet", rhojetsCentralNeutral, float(0.), "Jets");
 
   edm::Handle<double> rhoNoPuAllH;
   float rhoJets_nopu;
