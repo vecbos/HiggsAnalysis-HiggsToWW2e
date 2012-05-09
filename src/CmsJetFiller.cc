@@ -47,6 +47,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsJetFiller.h"
+#include "JetMETCorrections/Objects/interface/JetCorrector.h"
 
 #include <TTree.h>
 
@@ -76,6 +77,7 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
   saveJetExtras_=true;
 
   saveJetBTag_ = false;
+  m_genjets=false;
   
   trkIndexName_ = new std::string("n");
   
@@ -100,6 +102,7 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
   saveJetExtras_=true;
 
   saveJetBTag_ = false;
+  m_genjets=false;
 
   hitLimitsMeansNoOutput_ = noOutputIfLimitsReached;
   maxTracks_=maxTracks;
@@ -133,7 +136,6 @@ CmsJetFiller::~CmsJetFiller() {
   delete privateData_->trackCountingHighEffBJetTags;
   delete privateData_->trackCountingVeryHighEffBJetTags;
   delete privateData_->uncorrEnergy;
-  delete privateData_->L2L3CorrEnergy;
   delete privateData_->area;
   delete privateData_;
 }
@@ -153,12 +155,19 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					 const edm::Event& iEvent, const edm::EventSetup& iSetup,
 					 const std::string &columnPrefix, const std::string &columnSuffix,
 					 bool dumpData,
-                                         edm::InputTag uncorrectedCollectionTag, edm::InputTag L2L3correctedCollectionTag) {
+                                         edm::InputTag uncorrectedCollectionTag) {
 
   edm::Handle< edm::View<reco::Candidate> > collectionHandle;
   try { iEvent.getByLabel(collectionTag, collectionHandle); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << collectionTag; }
   const edm::View<reco::Candidate> *collection = collectionHandle.product();
+
+  // the same, but in PFJetCollection format
+  edm::Handle<reco::CaloJetCollection> jets;      
+  if(!m_genjets) {
+    try { iEvent.getByLabel(collectionTag, jets); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << collectionTag; }
+  }
 
   const edm::View<reco::CaloJet> *uncorrectedCollection = 0;
   if(uncorrectedCollectionTag.label() != std::string("")) {
@@ -168,14 +177,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     uncorrectedCollection = uncorrectedCollectionHandle.product();
   }
 
-  const edm::View<reco::CaloJet> *L2L3correctedCollection = 0;
-  if(L2L3correctedCollectionTag.label() != std::string("")) {
-    edm::Handle< edm::View<reco::CaloJet> > L2L3correctedCollectionHandle;
-    try { iEvent.getByLabel(L2L3correctedCollectionTag, L2L3correctedCollectionHandle); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsJetFiller") << "Can't get candidate collection: " << L2L3correctedCollectionTag; }
-    L2L3correctedCollection = L2L3correctedCollectionHandle.product();
-  }
-  
   privateData_->clearTrkVectors();
 
   if(collection) {
@@ -213,6 +214,8 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       iEvent.getByLabel("newTrackCountingVeryHighEffBJetTags", trackCountingVeryHighEffBJetTags);
     }
 
+    const JetCorrector* corrector = JetCorrector::getJetCorrector (m_jcs, iSetup);
+
     edm::Handle<reco::JetIDValueMap> hJetIDMap;
     if(saveJetExtras_) {
       if ( iEvent.getByLabel( "ak5JetID", hJetIDMap ) ) {}
@@ -228,6 +231,8 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     int index = 0;
     edm::View<reco::Candidate>::const_iterator cand;
+    reco::CaloJetCollection::const_iterator jetit;
+    if(!m_genjets) jetit=jets->begin();
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       const CaloJet *thisRecoJet = dynamic_cast< const CaloJet * > ( &(*cand) );
       // fill basic kinematics
@@ -269,10 +274,18 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->trackCountingVeryHighEffBJetTags->push_back( -1. );
       }
 
+      // run the correction on the fly. Reversed because input is corrected jets 
+      if(!m_genjets) {
+        CaloJet  correctedJet = *jetit;
+        double scale = corrector->correction(correctedJet,iEvent,iSetup);
+        correctedJet.scaleEnergy(1.0/scale);
+        privateData_->uncorrEnergy->push_back(correctedJet.energy());
+      } else {
+        privateData_->uncorrEnergy->push_back(-999.);
+      }
+
       // if an uncorrected jet collection is provided, save also the uncorrected energy
       if(uncorrectedCollection) {
-        dumpUncorrEnergy_ = true;
-        float rawEnergy = -999.;
         float fHPD, covEtaEta, covPhiPhi, fLS, fOOT;
         fHPD = covEtaEta = covPhiPhi = fLS = fOOT = -999.;
         int Id, nHit, nHit90;
@@ -282,8 +295,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
           const CaloJet *uncorrectedRecoJet = dynamic_cast< const CaloJet * > ( &(*cand2) );
           // corrected and uncorrected jets differ only for jet PT 
           if( thisRecoJet->jetArea() == uncorrectedRecoJet->jetArea() && fabs(thisRecoJet->eta() - uncorrectedRecoJet->eta())<0.01 ) {
-
-            rawEnergy = uncorrectedRecoJet->energy();
 
             if(saveJetExtras_) { // jet ID has to be done on uncorrected jets
               unsigned int idx = cand2 - uncorrectedCollection->begin();
@@ -312,7 +323,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
             break;
           }
         }
-        privateData_->uncorrEnergy->push_back(rawEnergy);
         privateData_->Id->push_back(Id);
         privateData_->nHit->push_back(nHit);
         privateData_->nHit90->push_back(nHit90);
@@ -321,26 +331,7 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->covPhiPhi->push_back(covPhiPhi);
         privateData_->fLS->push_back(fLS);
         privateData_->fOOT->push_back(fOOT);
-      } else dumpUncorrEnergy_ = false;
-
-
-      // if an L2L3corrected jet collection is provided, save also the L2L3corrected energy
-      if(L2L3correctedCollection) {
-        dumpL2L3CorrEnergy_ = true;
-        float L2L3Energy = -999.;
-        edm::View<reco::CaloJet>::const_iterator cand2;
-        for(cand2=L2L3correctedCollection->begin(); cand2!=L2L3correctedCollection->end(); cand2++) {
-          const CaloJet *L2L3correctedRecoJet = dynamic_cast< const CaloJet * > ( &(*cand2) );
-          // corrected and uncorrected jets differ only for jet PT 
-          if( thisRecoJet->jetArea() == L2L3correctedRecoJet->jetArea() ) {
-
-            L2L3Energy = L2L3correctedRecoJet->energy();
-            break;
-
-          }
-        }
-        privateData_->L2L3CorrEnergy->push_back(L2L3Energy);
-      } else dumpL2L3CorrEnergy_ = false;
+      }
       index++;
     }
   }
@@ -396,12 +387,7 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
     cmstree->column((colPrefix+"trackCountingHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighEffBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingVeryHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingVeryHighEffBJetTags, nCandString.c_str(), 0, "Reco");
   }
-  if(dumpUncorrEnergy_) {
-    cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
-  }
-  if(dumpL2L3CorrEnergy_) {
-    cmstree->column((colPrefix+"L2L3CorrEnergy"+colSuffix).c_str(), *privateData_->L2L3CorrEnergy, nCandString.c_str(), 0, "Reco");
-  }
+  cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -430,7 +416,6 @@ void CmsJetFillerData::initialise() {
   trackCountingHighEffBJetTags = new vector<float>;
   trackCountingVeryHighEffBJetTags = new vector<float>;
   uncorrEnergy = new vector<float>;
-  L2L3CorrEnergy = new vector<float>;
 }
 
 
@@ -457,5 +442,4 @@ void CmsJetFillerData::clearTrkVectors() {
   trackCountingHighEffBJetTags->clear();
   trackCountingVeryHighEffBJetTags->clear();
   uncorrEnergy->clear();
-  L2L3CorrEnergy->clear();
 }

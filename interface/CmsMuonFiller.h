@@ -32,7 +32,7 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
-//#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
+#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
 
 #include <TTree.h>
 
@@ -95,7 +95,7 @@ class CmsMuonFiller : public CmsCandidateFiller {
   //! set the vertices collection (needed for MVA isolation)
   void setVertexCollection(edm::InputTag collectionTag);
   //! set the muon MVA algo
-  //void setMuonIsoMVA(MuonMVAEstimator* algo) { fMuonIsoMVA = algo; } //doesn't work in 42X
+  void setMuonIsoMVA(MuonMVAEstimator* algo) { fMuonIsoMVA = algo; }
 
   // Operators
 
@@ -137,9 +137,9 @@ class CmsMuonFiller : public CmsCandidateFiller {
   typedef std::vector< edm::Handle<isoFromPFCandsMap> > isoContainer;
   isoContainer *eIsoFromPFCandsValueMap_;
 
-  //MuonMVAEstimator *fMuonIsoMVA; //doesn't work in 42X
+  MuonMVAEstimator *fMuonIsoMVA;
   reco::Vertex *firstVtx;
-  //edm::Handle<reco::PFCandidateCollection> pfCands; //doesn't work in 42X
+  edm::Handle<reco::PFCandidateCollection> pfCands;
   edm::Handle<reco::VertexCollection> primaryVertex;
 
 };

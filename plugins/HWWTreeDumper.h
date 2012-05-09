@@ -26,8 +26,8 @@
 #include "CondFormats/EcalObjects/interface/EcalFunctionParameters.h" 
 
 #include "RecoEcal/EgammaCoreTools/interface/PositionCalc.h"
-//#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
-//#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
+#include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
+#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
 
 class HWWTreeDumper : public edm::EDAnalyzer {
 public:
@@ -123,8 +123,8 @@ private:
   //! save the calotowers
   bool dumpCaloTowers_;
   //! MVAs
-  //MuonMVAEstimator *fMuonIsoMVA;
-  //EGammaMvaEleEstimator *fEleIdMVANonTrig, *fEleIdMVATrig;
+  MuonMVAEstimator *fMuonIsoMVA;
+  EGammaMvaEleEstimator *fEleIdMVANonTrig, *fEleIdMVATrig;
 
   bool usePhotonFix_;
 
@@ -136,13 +136,14 @@ private:
   //! candidate collections in input
   edm::InputTag electronCollection_, muonCollection_,pflowElectronCollection_;
   edm::InputTag photonCollection_;
-  edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_, jetCollection3_;
+  edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
   edm::InputTag PFpuCorrJetCollection1_, PFpuCorrJetCollection2_, PFpuCorrJetCollection3_;
+  std::string PFJetCorrectionService_, JetCorrectionService_;
   edm::InputTag metCollection_, TCmetCollection_, genMetCollection_;
   // edm::InputTag corrmetCollection_;
   edm::InputTag vertexCollection_;
   edm::InputTag K0sCollection_;
-  edm::InputTag PFjetCollection1_, PFjetCollection2_, PFjetCollection3_, PFmetCollection_, PFChMetCollection_;
+  edm::InputTag PFjetCollection1_, PFmetCollection_, PFChMetCollection_;
   edm::InputTag leptonLinkedPFCandidates_;
   edm::InputTag JPTjetCollection1_, JPTjetCollection2_;
   edm::InputTag chargedMetCollection_;

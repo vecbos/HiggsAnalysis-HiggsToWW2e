@@ -5,6 +5,12 @@ import FWCore.ParameterSet.Config as cms
 from JetMETCorrections.Configuration.DefaultJEC_cff import *
 #from JetMETCorrections.Configuration.JetCorrectionCondDB_cff import *
 
+from JetMETCorrections.Configuration.JetCorrectionServices_cff  import ak5PFL1FastL2L3
+from JetMETCorrections.Configuration.JetCorrectionServices_cff  import ak5PFL1FastL2L3Residual
+
+from JetMETCorrections.Configuration.JetCorrectionServices_cff  import ak5CaloL1FastL2L3
+from JetMETCorrections.Configuration.JetCorrectionServices_cff  import ak5CaloL1FastL2L3Residual
+
 # ESSources for JPT corrections from file (until JPT corrections are not in DB)
 from HiggsAnalysis.HiggsToWW2e.jptL2L3Corrections_cff import *
 
@@ -81,10 +87,8 @@ mvaPFnoPUJetIDMapProd.corrJetLabel = "ak5PFNoPUJetsL1FastL2L3"
 mvaPFnoPUJetIDMapProdData = mvaJetIDMapProd.clone()
 mvaPFnoPUJetIDMapProdData.corrJetLabel = "ak5PFNoPUJetsL1FastL2L3Residual"
 
-
-
 CaloJetSequenceData = cms.Sequence( ak5CaloJets * kt6PFJets * ak5CaloJetsL1FastL2L3Residual)   # not run for the moment                 
-PFJetAK5SequenceData = cms.Sequence( ak5PFJets * kt6PFJets * ak5PFJetsL1FastL2L3Residual)
+PFJetAK5SequenceData = cms.Sequence( ak5PFJets * kt6PFJets * ak5PFJetsL1FastL2L3Residual )
 PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU * ak5PFNoPUJetsL1FastL2L3Residual)
 JPTjetsAK5SequenceData = cms.Sequence( ak5JPTJetsL2L3Residual ) # not run for the moment
 

@@ -185,13 +185,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   genJetCollection_        = iConfig.getParameter<edm::InputTag>("genJetCollection");
   jetCollection1_          = iConfig.getParameter<edm::InputTag>("jetCollection1");
   jetCollection2_          = iConfig.getParameter<edm::InputTag>("jetCollection2");
-  jetCollection3_          = iConfig.getParameter<edm::InputTag>("jetCollection3");
   PFjetCollection1_        = iConfig.getParameter<edm::InputTag>("PFjetCollection1");
-  PFjetCollection2_        = iConfig.getParameter<edm::InputTag>("PFjetCollection2");
-  PFjetCollection3_        = iConfig.getParameter<edm::InputTag>("PFjetCollection3");
   PFpuCorrJetCollection1_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection1");
-  PFpuCorrJetCollection2_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection2");
-  PFpuCorrJetCollection3_  = iConfig.getParameter<edm::InputTag>("PFpuCorrJetCollection3");
+  PFJetCorrectionService_  = iConfig.getParameter<std::string>("PFJetCorrectionService");
+  JetCorrectionService_    = iConfig.getParameter<std::string>("JetCorrectionService");
   JPTjetCollection1_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection1");
   JPTjetCollection2_       = iConfig.getParameter<edm::InputTag>("JPTjetCollection2");
 
@@ -395,7 +392,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     // for custom MVA id
     treeFill.setVertexCollection(vertexCollection_);
-    //treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVANonTrig);
+    treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVANonTrig);
     treeFill.saveEleID(true);
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
@@ -600,7 +597,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string suffix("Muon");
     treeFill.setGeneralTracks(trackCollection_);
     treeFill.setVertexCollection(vertexCollection_);
-    //treeFill.setMuonIsoMVA(fMuonIsoMVA);
+    treeFill.setMuonIsoMVA(fMuonIsoMVA);
     treeFill.saveCand(saveCand_);
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.writeCollectionToTree(muonCollection_, iEvent, iSetup, prefix, suffix, false);
@@ -782,7 +779,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     caloJetFiller.saveCand(saveCand_);
     caloJetFiller.saveJetExtras(true);
     caloJetFiller.saveJetBTag(saveJetBTag_);
-    caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_, jetCollection3_);
+    caloJetFiller.setJetCorrectionService(JetCorrectionService_);
+    caloJetFiller.writeCollectionToTree(jetCollection1_, iEvent, iSetup, prefix, suffix, false, jetCollection2_);
 
     // particle flow jets
     if ( dumpParticleFlowObjects_ ) {  
@@ -792,7 +790,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       pfJetFiller.saveJetBTag(saveJetBTag_);
       pfJetFiller.setBTags(PFJetsBTags_);
       pfJetFiller.setMvaId(PFjetMvaIdCollection_);
-      pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false, PFjetCollection2_, PFjetCollection3_);
+      pfJetFiller.setJetCorrectionService(PFJetCorrectionService_);
+      pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
     }
 
     // particle flow jets with correction for pileup
@@ -803,7 +802,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       pfPUcorrJetFiller.saveJetBTag(saveJetBTag_);
       pfPUcorrJetFiller.setBTags(PFPUcorrJetsBTags_);
       pfPUcorrJetFiller.setMvaId(PFpujetMvaIdCollection_);
-      pfPUcorrJetFiller.writeCollectionToTree(PFpuCorrJetCollection1_, iEvent, iSetup, prefix, suffix, false, PFpuCorrJetCollection2_, PFpuCorrJetCollection3_);
+      pfPUcorrJetFiller.setJetCorrectionService(PFJetCorrectionService_);
+      pfPUcorrJetFiller.writeCollectionToTree(PFpuCorrJetCollection1_, iEvent, iSetup, prefix, suffix, false);
     }
 
     // Jet Plus Tracks jets: not used for the moment
@@ -820,6 +820,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       suffix = "AK5GenJet";
       genJetFiller.saveJetExtras(false);
       genJetFiller.saveJetBTag(false);
+      genJetFiller.setJetCorrectionService(JetCorrectionService_);
+      genJetFiller.isGenJets(true);
       genJetFiller.writeCollectionToTree(genJetCollection_, iEvent, iSetup, prefix, suffix, false);
 
     }
@@ -875,7 +877,6 @@ void HWWTreeDumper::beginJob() {
 
   // initialize MVAs...
   // electron IDs
-  /*
   std::vector<std::string> myManualCatWeigths;
   myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat1.weights.xml").fullPath());
   myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat2.weights.xml").fullPath());
@@ -921,7 +922,7 @@ void HWWTreeDumper::beginJob() {
                           true,
                           muoniso_weightfiles);
   fMuonIsoMVA->SetPrintMVADebug(false);
-  */
+
 }
 
 void HWWTreeDumper::beginRun( const Run & iRun, const EventSetup & iSetup )
@@ -960,9 +961,9 @@ void  HWWTreeDumper::endJob() {
 
   fileOut_->Close();
 
-  //delete fEleIdMVATrig;
-  //delete fEleIdMVANonTrig;
-  //delete fMuonIsoMVA;
+  delete fEleIdMVATrig;
+  delete fEleIdMVANonTrig;
+  delete fMuonIsoMVA;
 
 }
 

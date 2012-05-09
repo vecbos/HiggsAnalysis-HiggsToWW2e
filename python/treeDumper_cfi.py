@@ -36,15 +36,12 @@ treeDumper = cms.EDAnalyzer("HWWTreeDumper",
                             genJetCollection = cms.InputTag("ak5GenJets"),
                             jetCollection1 = cms.InputTag("ak5CaloJetsL1FastL2L3Residual"),
                             jetCollection2 = cms.InputTag("ak5CaloJets","","RECO"), # the process name is needed because that collection only has the jet ID attached
-                            jetCollection3 = cms.InputTag(""), # no name means do not dump L2L3
                             JPTjetCollection1 = cms.InputTag("ak5JPTJetsL2L3Residual"),
                             JPTjetCollection2 = cms.InputTag("JetPlusTrackZSPCorJetAntiKt5"),
                             PFjetCollection1 = cms.InputTag("ak5PFNoPUJetsL1FastL2L3Residual"),
-                            PFjetCollection2 = cms.InputTag("ak5PFNoPUJets"),
-                            PFjetCollection3 = cms.InputTag(""), # no name means do not dump L2L3
+                            PFJetCorrectionService = cms.string("ak5PFL1FastL2L3Residual"),
+                            JetCorrectionService = cms.string("ak5CaloL1FastL2L3Residual"),
                             PFpuCorrJetCollection1 = cms.InputTag("ak5PFJetsL1FastL2L3Residual"),
-                            PFpuCorrJetCollection2 = cms.InputTag("ak5PFJets"), # absolutely raw energy
-                            PFpuCorrJetCollection3 = cms.InputTag(""), # no name means do not dump L2L3
                             # jet id MVA
                             PFjetMvaIdCollection = cms.untracked.VInputTag(cms.InputTag("mvaPFnoPUJetIDMapProd:mva"),
                                                                            cms.InputTag("mvaPFnoPUJetIDMapProd:nCharged"),

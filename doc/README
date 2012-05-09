@@ -109,6 +109,8 @@ cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Tools UserCode/Mangano/WWAnaly
 cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
 cvs co -r V02-03-00 JetMETCorrections/Algorithms
+cvs co -r V00-00-10 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTools
+cvs co -r V00-00-11 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 rm -f JetMETCorrections/Algorithms/interface/L1JPTOffsetCorrector.h
 rm -f JetMETCorrections/Algorithms/src/L1JPTOffsetCorrector.cc
 cvs co -r V03-01-00 JetMETCorrections/Objects

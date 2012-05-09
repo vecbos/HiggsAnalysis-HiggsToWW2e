@@ -37,7 +37,7 @@ struct CmsJetFillerData : public CmsCandidateFillerData {
     *trackCountingHighPurBJetTags,
     *trackCountingHighEffBJetTags,
     *trackCountingVeryHighEffBJetTags;
-  std::vector<float> *uncorrEnergy, *L2L3CorrEnergy;
+  std::vector<float> *uncorrEnergy;
 
 public:
   void initialise();
@@ -69,6 +69,8 @@ class CmsJetFiller : public CmsCandidateFiller {
   void saveJetExtras(bool );
 
   void saveJetBTag(bool );
+  void setJetCorrectionService(std::string jcs) { m_jcs = jcs; }
+  void isGenJets(bool what) { m_genjets = what; }
 
   // Operators
 
@@ -78,8 +80,7 @@ class CmsJetFiller : public CmsCandidateFiller {
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false,
-                             edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""),
-                             edm::InputTag L2L3correctedCollectionTag=edm::InputTag("",""));
+                             edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""));
 
  private:
   
@@ -94,11 +95,11 @@ class CmsJetFiller : public CmsCandidateFiller {
   int maxTracks_;
   int maxMCTracks_;
 
-  bool dumpUncorrEnergy_, dumpL2L3CorrEnergy_;
-
   std::string *trkIndexName_;
 
   CmsJetFillerData *privateData_;
+  std::string m_jcs;
+  bool m_genjets;
 
   CmsTree *cmstree;
 

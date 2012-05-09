@@ -52,6 +52,7 @@
 <use   name="CMGTools/External"/>
 <use   name="Muon/MuonAnalysisTools"/>
 <use   name="EGamma/EGammaAnalysisTools"/>
+<use   name="JetMETCorrections/Objects"/>
 <export>
   <lib   name="1"/>
 </export>

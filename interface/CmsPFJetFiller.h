@@ -47,7 +47,7 @@ struct CmsPFJetFillerData : public CmsCandidateFillerData {
   std::vector<int> *chargedHadronMultiplicity, *neutralHadronMultiplicity, 
     *photonMultiplicity, *electronMultiplicity, *muonMultiplicity,
     *HFHadronMultiplicity, *HFEMMultiplicity;
-  std::vector<float> *uncorrEnergy, *L2L3CorrEnergy, *area;
+  std::vector<float> *uncorrEnergy, *area;
   std::vector<float> *ptD, *rmsCand;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *simpleSecondaryVertexHighEffBJetTags,
@@ -93,6 +93,7 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   void saveJetBTag(bool );
 
   void setBTags(edm::ParameterSet btagcollections);
+  void setJetCorrectionService(std::string jcs) { m_jcs = jcs; }
 
   // Operators
 
@@ -101,9 +102,7 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   void writeCollectionToTree(edm::InputTag collectionTag,
 			     const edm::Event&, const edm::EventSetup&,
 			     const std::string &columnPrefix, const std::string &columnSuffix,
-			     bool dumpData=false,
-                             edm::InputTag uncorrectedCollectionTag=edm::InputTag("",""),
-                             edm::InputTag L2L3correctedCollectionTag=edm::InputTag("",""));
+			     bool dumpData=false);
 
   void setMvaId( std::vector<edm::InputTag> PFjetMvaIdCollection) { PFjetMvaIdCollection_ = PFjetMvaIdCollection; }
 
@@ -125,11 +124,10 @@ class CmsPFJetFiller : public CmsCandidateFiller {
   int maxTracks_;
   int maxMCTracks_;
 
-  bool dumpUncorrEnergy_, dumpL2L3CorrEnergy_;
-
   std::string *trkIndexName_;
 
   CmsPFJetFillerData *privateData_;
+  std::string m_jcs;
 
   CmsTree *cmstree;
 
