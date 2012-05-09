@@ -41,6 +41,8 @@ using namespace edm;
 using namespace reco;
 using namespace muon;
 
+#define CMSSW_4_2_X
+
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
 //		----------------------------------------
@@ -365,7 +367,11 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
       ( TMLastStationOptimizedLowPtLoose << 1 ) | TMLastStationOptimizedLowPtTight;
 
     privateData_->muonId->push_back(packed_sel);
+#ifdef CMSSW_4_2_X
+    privateData_->pfmuonId->push_back(0);
+#else
     privateData_->pfmuonId->push_back(muon->isPFMuon());
+#endif
     privateData_->type->push_back(muon->type());
     privateData_->numberOfMatches->push_back(muon->numberOfMatches());
 

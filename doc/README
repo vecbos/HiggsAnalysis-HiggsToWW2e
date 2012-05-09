@@ -111,6 +111,9 @@ cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/Energ
 cvs co -r V02-03-00 JetMETCorrections/Algorithms
 cvs co -r V00-00-10 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTools
 cvs co -r V00-00-11 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs co -r CMSSW_4_2_8 RecoEgamma/EgammaTools
+cvs co -r CMSSW_5_2_4 RecoEgamma/EgammaTools/src/EcalClusterLocal.cc
+cvs co -r CMSSW_5_2_4 RecoEgamma/EgammaTools/interface/EcalClusterLocal.h
 rm -f JetMETCorrections/Algorithms/interface/L1JPTOffsetCorrector.h
 rm -f JetMETCorrections/Algorithms/src/L1JPTOffsetCorrector.cc
 cvs co -r V03-01-00 JetMETCorrections/Objects

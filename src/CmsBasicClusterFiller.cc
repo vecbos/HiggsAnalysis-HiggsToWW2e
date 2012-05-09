@@ -49,9 +49,9 @@
 #include "Geometry/Records/interface/CaloGeometryRecord.h"
 #include "Geometry/CaloEventSetup/interface/CaloTopologyRecord.h"
 
-#include "DataFormats/EcalRecHit/interface/EcalSeverityLevel.h"
-#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
-#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgoRcd.h"
+//#include "DataFormats/EcalRecHit/interface/EcalSeverityLevel.h"
+//#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgo.h"
+//#include "RecoLocalCalo/EcalRecAlgos/interface/EcalSeverityLevelAlgoRcd.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsBasicClusterFiller.h"
@@ -82,8 +82,8 @@ CmsBasicClusterFiller::CmsBasicClusterFiller(CmsTree *cmsTree, int maxBC):  priv
   trkIndexName_ = new std::string("n");
   maxBC_=maxBC;
   privateData_->initialiseCandidate();
-  closestProb_ = DetId(0);
-  severityClosestProb_ = -1;
+  //closestProb_ = DetId(0);
+  //severityClosestProb_ = -1;
 
 }
 
@@ -121,9 +121,9 @@ CmsBasicClusterFiller::~CmsBasicClusterFiller()
   delete privateData_->time;
   delete privateData_->chi2;
   delete privateData_->recoFlag;
-  delete privateData_->sevClosProbl;
-  delete privateData_->idClosProbl;
-  delete privateData_->fracClosProbl;
+  //delete privateData_->sevClosProbl;
+  //delete privateData_->idClosProbl;
+  //delete privateData_->fracClosProbl;
   delete privateData_->indexSC;
 }
 
@@ -342,24 +342,6 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       iSetup.get<EcalChannelStatusRcd>().get(pChannelStatus);
       const EcalChannelStatus *ch_status = pChannelStatus.product();
 
-      if( fabs(seedEta) < 1.479 ) {
-        float frac = fractionAroundClosestProblematic( iSetup, *cand, *rechits, *ch_status, topology);
-        privateData_->fracClosProbl->push_back(frac);
-        if( closestProb_.null() ) {
-          privateData_->idClosProbl->push_back(-1);
-          privateData_->sevClosProbl->push_back(-1);
-        } else {
-          privateData_->idClosProbl->push_back(closestProb_.rawId());
-          privateData_->sevClosProbl->push_back(severityClosestProb_);
-        }
-      } else {
-        privateData_->fracClosProbl->push_back(-1);
-        privateData_->idClosProbl->push_back(-1);
-        privateData_->idClosProbl->push_back(-1);
-        privateData_->sevClosProbl->push_back(-1);
-      }
-
-
     } else {
       privateData_->e3x3->push_back(-1.);
       privateData_->e5x5->push_back(-1.);
@@ -377,10 +359,6 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       privateData_->chi2->push_back(-999.);
       privateData_->recoFlag->push_back(-1);
       privateData_->seedEnergy->push_back(-1.);
-      privateData_->fracClosProbl->push_back(-1);
-      privateData_->idClosProbl->push_back(-1);
-      privateData_->idClosProbl->push_back(-1);
-      privateData_->sevClosProbl->push_back(-1);
       privateData_->indexSC->push_back(-1);
     }
   }
@@ -418,12 +396,9 @@ void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"time"+colSuffix).c_str(), *privateData_->time, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"chi2"+colSuffix).c_str(), *privateData_->chi2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"seedEnergy"+colSuffix).c_str(), *privateData_->seedEnergy, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"idClosProbl"+colSuffix).c_str(), *privateData_->idClosProbl, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"sevClosProbl"+colSuffix).c_str(), *privateData_->sevClosProbl, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"fracClosProbl"+colSuffix).c_str(), *privateData_->fracClosProbl, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"indexSC"+colSuffix).c_str(), *privateData_->indexSC, nCandString.c_str(), 0, "Reco");
 }
-
+/*
 // copied from: RecoEcal/EgammaCoreTools/src/EcalClusterSeverityLevelAlgo.cc
 float CmsBasicClusterFiller::fractionAroundClosestProblematic( const edm::EventSetup& iSetup, const reco::CaloCluster & cluster,
                                                                const EcalRecHitCollection & recHits, const EcalChannelStatus & chStatus, const CaloTopology* topology )
@@ -504,7 +479,7 @@ std::pair <DetId,int> CmsBasicClusterFiller::closestProblematic(const edm::Event
   
   return std::make_pair(closestProb,severityClosestProb);
 }
-
+*/
 int CmsBasicClusterFiller::distanceEta(const EBDetId& a,const EBDetId& b)
 {
   if (a.ieta() * b.ieta() > 0)
@@ -551,9 +526,9 @@ void CmsBasicClusterFillerData::initialiseCandidate()
   time = new vector<float>;
   chi2 = new vector<float>;
   seedEnergy = new vector<float>;
-  idClosProbl = new vector<int>;
-  sevClosProbl = new vector<int>;
-  fracClosProbl = new vector<float>;
+  //idClosProbl = new vector<int>;
+  //sevClosProbl = new vector<int>;
+  //fracClosProbl = new vector<float>;
   indexSC = new vector<int>;
   nBC =  new int;
 }
@@ -587,8 +562,8 @@ void CmsBasicClusterFillerData::clear()
   time->clear();
   chi2->clear();
   seedEnergy->clear();
-  idClosProbl->clear();
-  sevClosProbl->clear();
-  fracClosProbl->clear();
+  //idClosProbl->clear();
+  //sevClosProbl->clear();
+  //fracClosProbl->clear();
   indexSC->clear();
 }
