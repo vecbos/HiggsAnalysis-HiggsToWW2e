@@ -51,6 +51,7 @@
 <use   name="HiggsAnalysis/HiggsToGammaGamma"/>
 <use   name="CMGTools/External"/>
 <use   name="Muon/MuonAnalysisTools"/>
+<use   name="EGamma/EGammaAnalysisTools"/>
 <export>
   <lib   name="1"/>
 </export>

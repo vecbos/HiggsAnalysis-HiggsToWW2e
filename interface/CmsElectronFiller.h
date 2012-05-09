@@ -25,6 +25,8 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
+#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
+
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
 #include <TTree.h>
@@ -105,6 +107,10 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void setCalotowersProducer( edm::InputTag calotowersProducer ) { calotowersProducer_ = calotowersProducer; }
   //! set conversions collection
   void setConversionsProdcer(  edm::InputTag conversionsProducer ) { conversionsProducer_ = conversionsProducer; }
+  //! set the vertex collection
+  void setVertexCollection(edm::InputTag collectionTag) { m_vxtCollectionTag = collectionTag; }
+  //! set the eleID MVA algos
+  void setEleIdMVAs(EGammaMvaEleEstimator* algotrig, EGammaMvaEleEstimator* algonontrig) { myMVATrig = algotrig; myMVANonTrig = algonontrig; }
 
  private:
   
@@ -145,12 +151,15 @@ class CmsElectronFiller : public CmsCandidateFiller {
   edm::InputTag tracksProducer_;
   edm::InputTag calotowersProducer_;
   edm::InputTag conversionsProducer_;
+  edm::InputTag m_vxtCollectionTag;
 
   edm::Handle< reco::TrackRefVector > h_tracks;
   edm::Handle< reco::TrackCollection > h_tracksTot;
 
   edm::Handle<reco::ConversionCollection> hConversions;
   edm::Handle<reco::BeamSpot> bsHandle;
+
+  EGammaMvaEleEstimator* myMVANonTrig, *myMVATrig;
 
   int barrelSuperClustersSize;
 

@@ -17,6 +17,7 @@ cvs co -r edm-30March2012 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r edm-30March2012 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
 cvs co -r V00-00-10 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTools
+cvs co -r V00-00-11 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V03-01-00 JetMETCorrections/Objects
 addpkg JetMETCorrections/Modules

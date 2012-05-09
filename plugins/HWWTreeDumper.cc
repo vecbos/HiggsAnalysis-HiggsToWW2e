@@ -393,6 +393,9 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // for custom isolation
     treeFill.setTracksProducer(trackCollection_);
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
+    // for custom MVA id
+    treeFill.setVertexCollection(vertexCollection_);
+    treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVANonTrig);
     treeFill.saveEleID(true);
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
@@ -871,6 +874,38 @@ void HWWTreeDumper::beginJob() {
   LHEComments_ = new vector<std::string>;
 
   // initialize MVAs...
+  // electron IDs
+  std::vector<std::string> myManualCatWeigths;
+  myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat1.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat2.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat3.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat4.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat5.weights.xml").fullPath());
+  myManualCatWeigths.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_NonTrigV0_Cat6.weights.xml").fullPath());
+
+  Bool_t manualCat = true;
+  
+  fEleIdMVANonTrig = new EGammaMvaEleEstimator();
+  fEleIdMVANonTrig->initialize("BDT",
+                               EGammaMvaEleEstimator::kNonTrig,
+                               manualCat, 
+                               myManualCatWeigths);
+  
+  // NOTE: it is better if you copy the MVA weight files locally. See the previous remark
+  std::vector<std::string> myManualCatWeigthsTrig;
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV0_Cat1.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV0_Cat2.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV0_Cat3.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV0_Cat4.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV0_Cat5.weights.xml").fullPath());
+  myManualCatWeigthsTrig.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV0_Cat6.weights.xml").fullPath());
+
+  fEleIdMVATrig = new EGammaMvaEleEstimator();
+  fEleIdMVATrig->initialize("BDT",
+                        EGammaMvaEleEstimator::kTrig,
+                        manualCat,
+                        myManualCatWeigthsTrig);
+
   // muon isolation
   fMuonIsoMVA = new MuonMVAEstimator();
   vector<string> muoniso_weightfiles;
@@ -923,7 +958,9 @@ void  HWWTreeDumper::endJob() {
   treeEventsOut->Write();
 
   fileOut_->Close();
-  
+
+  delete fEleIdMVATrig;
+  delete fEleIdMVANonTrig;
   delete fMuonIsoMVA;
 
 }

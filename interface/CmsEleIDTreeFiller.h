@@ -31,6 +31,9 @@
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
 #include "RecoEgamma/EgammaIsolationAlgos/interface/EgammaTowerIsolation.h"
+#include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
+#include "TrackingTools/Records/interface/TransientTrackRecord.h"
+#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -60,7 +63,7 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
     *pfCandChargedIso07, *pfCandNeutralIso07, *pfCandPhotonIso07,
     *pfCandChargedDirIso04, *pfCandNeutralDirIso04, *pfCandPhotonDirIso04;
 
-  vector<float> *eleLik, *pflowMVA;
+  vector<float> *eleLik, *pflowMVA, *mvaidtrig, *mvaidnontrig;
 
 public:
   void initialise();
@@ -98,7 +101,11 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   void setTracksProducer( edm::InputTag tracksProducer ) { tracksProducer_ = tracksProducer; }
   //! set the calotower producer for calorimetric isolation
   void setCalotowersProducer( edm::InputTag calotowersProducer ) { calotowersProducer_ = calotowersProducer; }
-  
+  //! set the vertex collection
+  void setVertexCollection(edm::InputTag collectionTag) { m_vxtCollectionTag = collectionTag; }
+  //! set the eleID MVA algos
+  void setEleIdMVAs(EGammaMvaEleEstimator* algotrig, EGammaMvaEleEstimator* algonontrig) { myMVATrig = algotrig; myMVANonTrig = algonontrig; }
+
   //! set to false if the column with the block size is set by another object
   void setStandalone(bool );
 
@@ -126,6 +133,8 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   edm::InputTag tracksProducer_;
   edm::InputTag calotowersProducer_;
 
+  edm::InputTag m_vxtCollectionTag;
+
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
 
@@ -142,6 +151,10 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
 
   EgammaTowerIsolation *hadDepth1Isolation03_, *hadDepth2Isolation03_, 
     *hadDepth1Isolation04_, *hadDepth2Isolation04_;
+
+  EGammaMvaEleEstimator* myMVANonTrig, *myMVATrig;
+  edm::Handle<reco::VertexCollection> primaryVertex;
+  edm::ESHandle<TransientTrackBuilder> trackBuilder_;
 
   const CaloGeometry* caloGeo;
 };

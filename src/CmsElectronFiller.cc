@@ -289,6 +289,8 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     // those for private H->WW isolations
     eIDFiller.setTracksProducer(tracksProducer_);
     eIDFiller.setCalotowersProducer(calotowersProducer_);
+    eIDFiller.setVertexCollection(m_vxtCollectionTag);
+    eIDFiller.setEleIdMVAs(myMVATrig,myMVANonTrig);
     eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
