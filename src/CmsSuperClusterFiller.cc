@@ -91,6 +91,9 @@ CmsSuperClusterFiller::~CmsSuperClusterFiller()
   delete privateData_->phiWidth;
   delete privateData_->etaWidth;
   delete privateData_->e3x3;
+  delete privateData_->e3x1;
+  delete privateData_->e1x3;
+  delete privateData_->e4x4;
   delete privateData_->e5x5;
   delete privateData_->eMax;
   delete privateData_->e2x2;
@@ -275,6 +278,9 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
 
       float eMax = EcalClusterTools::eMax( *theSeed, &(*rechits) );
       float e3x3 = EcalClusterTools::e3x3( *theSeed, &(*rechits), topology );
+      float e3x1 = EcalClusterTools::e3x1( *theSeed, &(*rechits), topology );
+      float e1x3 = EcalClusterTools::e1x3( *theSeed, &(*rechits), topology );
+      float e4x4 = EcalClusterTools::e4x4( *theSeed, &(*rechits), topology );
       float e5x5 = EcalClusterTools::e5x5( *theSeed, &(*rechits), topology );
       float e2x2 = EcalClusterTools::e2x2( *theSeed, &(*rechits), topology );
       float e2nd = EcalClusterTools::e2nd( *theSeed, &(*rechits) );
@@ -294,6 +300,9 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
                              EcalClusterTools::eBottom( *theSeed, &(*rechits), topology ) );
 
       privateData_->e3x3->push_back(e3x3);
+      privateData_->e3x1->push_back(e3x1);
+      privateData_->e1x3->push_back(e1x3);
+      privateData_->e4x4->push_back(e4x4);
       privateData_->e5x5->push_back(e5x5);
       privateData_->eMax->push_back(eMax);
       privateData_->e2x2->push_back(e2x2);
@@ -614,6 +623,9 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
 
   } else {
     privateData_->e3x3->push_back(-1.);
+    privateData_->e3x1->push_back(-1.);
+    privateData_->e1x3->push_back(-1.);
+    privateData_->e4x4->push_back(-1.);
     privateData_->e5x5->push_back(-1.);
     privateData_->eMax->push_back(-1.);
     privateData_->e2x2->push_back(-1.);
@@ -665,6 +677,9 @@ void CmsSuperClusterFiller::treeSCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"phiWidth"+colSuffix).c_str(), *privateData_->phiWidth, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"etaWidth"+colSuffix).c_str(), *privateData_->etaWidth, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e3x3"+colSuffix).c_str(), *privateData_->e3x3, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e3x1"+colSuffix).c_str(), *privateData_->e3x1, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e1x3"+colSuffix).c_str(), *privateData_->e1x3, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e4x4"+colSuffix).c_str(), *privateData_->e4x4, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e5x5"+colSuffix).c_str(), *privateData_->e5x5, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eMax"+colSuffix).c_str(), *privateData_->eMax, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"e2x2"+colSuffix).c_str(), *privateData_->e2x2, nCandString.c_str(), 0, "Reco");
@@ -750,6 +765,9 @@ void CmsSuperClusterFillerData::initialiseCandidate()
   phiWidth = new vector<float>;
   etaWidth = new vector<float>;
   e3x3 = new vector<float>;
+  e3x1 = new vector<float>;
+  e1x3 = new vector<float>;
+  e4x4 = new vector<float>;
   e5x5 = new vector<float>;
   eMax = new vector<float>;
   e2x2 = new vector<float>;
@@ -827,6 +845,9 @@ void CmsSuperClusterFillerData::clear()
   phiWidth->clear();
   etaWidth->clear();
   e3x3->clear();
+  e3x1->clear();
+  e1x3->clear();
+  e4x4->clear();
   e5x5->clear();
   eMax->clear();
   e2x2->clear();
