@@ -41,7 +41,7 @@ using namespace edm;
 using namespace reco;
 using namespace muon;
 
-#define CMSSW_4_2_X
+//#define CMSSW_4_2_X
 
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
