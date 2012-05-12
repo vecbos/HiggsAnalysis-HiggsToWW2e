@@ -255,6 +255,10 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hpsTauDiscrByLooseIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByLooseIsolationTag");
   hpsTauDiscrByMediumIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByMediumIsolationTag");
   hpsTauDiscrByTightIsolationTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByTightIsolationTag");
+  hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorrTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorrTag");
+  hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag");
+  hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag");
+  hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag");
   // HPS Tanc Tau Discriminators
   hpsTancTausDiscrByLeadingTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLeadingTrackFindingTag");
   hpsTancTausDiscrByLeadingTrackPtCutTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLeadingTrackPtCutTag");
@@ -619,7 +623,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
                                      tauDiscrByTrackIsolationTag_,
                                      tauDiscrByTrackIsolationUsingLeadingPionTag_,
                                      tauDiscrByECALIsolationTag_,
-                                     tauDiscrByECALIsolationUsingLeadingPionTag_, 
+                                     tauDiscrByECALIsolationUsingLeadingPionTag_,
                                      tauDiscrAgainstMuonTag_,
                                      tauDiscrAgainstElectronTag_,
                                      tauDiscrByTaNCTag_,
@@ -649,6 +653,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
                                      hpsTauDiscrByLooseIsolationTag_,
                                      hpsTauDiscrByMediumIsolationTag_,
                                      hpsTauDiscrByTightIsolationTag_,
+                                     hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorrTag_,
+                                     hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag_,
+                                     hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag_,
+                                     hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag_,                                     
                                      false);
     }
 
@@ -660,26 +668,26 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.savePFTauBasic(savePFTauBasic_);
       treeFill.saveLeadPFCand(saveLeadPFCand_);
       treeFill.writeCollectionToTree(hpsTancTausCollection_, iEvent, iSetup, prefix, suffix,
-				     hpsTancTausDiscrByLeadingTrackFindingTag_,
-				     hpsTancTausDiscrByLeadingTrackPtCutTag_,
-				     hpsTancTausDiscrByLeadingPionPtCutTag_,
-				     hpsTancTausDiscrByTancTag_,
-				     hpsTancTausDiscrByTancRawTag_,
-				     hpsTancTausDiscrByTancVLooseTag_,
-				     hpsTancTausDiscrByTancLooseTag_,
-				     hpsTancTausDiscrByTancMediumTag_,
-				     hpsTancTausDiscrByTancTightTag_,
-				     hpsTancTausDiscrByLooseElectronRejectionTag_,
-				     hpsTancTausDiscrByMediumElectronRejectionTag_,
-				     hpsTancTausDiscrByTightElectronRejectionTag_,
-				     hpsTancTausDiscrByLooseMuonRejectionTag_,
-				     hpsTancTausDiscrByTightMuonRejectionTag_,
-				     hpsTancTausDiscrByDecayModeSelectionTag_,
-				     hpsTancTausDiscrByVLooseIsolationTag_,
-				     hpsTancTausDiscrByLooseIsolationTag_,
-				     hpsTancTausDiscrByMediumIsolationTag_,
-				     hpsTancTausDiscrByTightIsolationTag_,
-				     false);
+                                     hpsTancTausDiscrByLeadingTrackFindingTag_,
+                                     hpsTancTausDiscrByLeadingTrackPtCutTag_,
+                                     hpsTancTausDiscrByLeadingPionPtCutTag_,
+                                     hpsTancTausDiscrByTancTag_,
+                                     hpsTancTausDiscrByTancRawTag_,
+                                     hpsTancTausDiscrByTancVLooseTag_,
+                                     hpsTancTausDiscrByTancLooseTag_,
+                                     hpsTancTausDiscrByTancMediumTag_,
+                                     hpsTancTausDiscrByTancTightTag_,
+                                     hpsTancTausDiscrByLooseElectronRejectionTag_,
+                                     hpsTancTausDiscrByMediumElectronRejectionTag_,
+                                     hpsTancTausDiscrByTightElectronRejectionTag_,
+                                     hpsTancTausDiscrByLooseMuonRejectionTag_,
+                                     hpsTancTausDiscrByTightMuonRejectionTag_,
+                                     hpsTancTausDiscrByDecayModeSelectionTag_,
+                                     hpsTancTausDiscrByVLooseIsolationTag_,
+                                     hpsTancTausDiscrByLooseIsolationTag_,
+                                     hpsTancTausDiscrByMediumIsolationTag_,
+                                     hpsTancTausDiscrByTightIsolationTag_,
+                                     false);
     }
 
   // PF candidates

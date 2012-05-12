@@ -88,6 +88,10 @@ struct CmsPFTauFillerData : public CmsCandidateFillerData {
   vector<float> *thehpsTauDiscrByLooseIsolation;
   vector<float> *thehpsTauDiscrByMediumIsolation;
   vector<float> *thehpsTauDiscrByTightIsolation;
+  vector<float> *thehpsTauDiscrByVLooseCombinedIsolationDBSumPtCorr;
+  vector<float> *thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr;
+  vector<float> *thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr;
+  vector<float> *thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr;
 
   // from the Discriminator for HPS TaNC
   vector<float> *thehpsTancTausDiscrByLeadingTrackFinding;
@@ -166,6 +170,10 @@ public:
 			     edm::InputTag hpsTauDiscrByLooseIsolationTag,
 			     edm::InputTag hpsTauDiscrByMediumIsolationTag,
 			     edm::InputTag hpsTauDiscrByTightIsolationTag,
+			     edm::InputTag hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorrTag,
+			     edm::InputTag hpsTauDisrcByLooseCombinedIsolationDBSumPtCorrTag,
+			     edm::InputTag hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag,
+			     edm::InputTag hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag,
 			     bool dumpData=false);
 
   void writeCollectionToTree(edm::InputTag collectionTag,
@@ -218,17 +226,21 @@ private:
                           );
 
   void writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCollection, int theTauJetIndex,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByLooseElectronRejection,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByMediumElectronRejection,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByTightElectronRejection,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByLooseMuonRejection,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByTightMuonRejection,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByDecayModeFinding,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByVLooseIsolation,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByLooseIsolation,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByMediumIsolation,
-			 const reco::PFTauDiscriminator *hpsTauDiscrByTightIsolation
-			 );
+			  const reco::PFTauDiscriminator *hpsTauDiscrByLooseElectronRejection,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByMediumElectronRejection,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByTightElectronRejection,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByLooseMuonRejection,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByTightMuonRejection,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByDecayModeFinding,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByVLooseIsolation,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByLooseIsolation,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByMediumIsolation,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByTightIsolation,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorr,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByLooseCombinedIsolationDBSumPtCorr,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByMediumCombinedIsolationDBSumPtCorr,
+			  const reco::PFTauDiscriminator *hpsTauDiscrByTightCombinedIsolationDBSumPtCorr
+			  );
 
   void writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCollection, int theTauJetIndex,
 			  const reco::PFTauDiscriminator *hpsTancTausDiscrByLeadingTrackFinding,

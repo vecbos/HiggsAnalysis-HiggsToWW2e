@@ -198,7 +198,9 @@ private:
     hpsTauDiscrByLooseMuonRejectionTag_, hpsTauDiscrByTightMuonRejectionTag_,
     hpsTauDiscrByDecayModeFindingTag_,
     hpsTauDiscrByVLooseIsolationTag_, hpsTauDiscrByLooseIsolationTag_,
-    hpsTauDiscrByMediumIsolationTag_, hpsTauDiscrByTightIsolationTag_;
+    hpsTauDiscrByMediumIsolationTag_, hpsTauDiscrByTightIsolationTag_,
+    hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorrTag_, hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag_,
+    hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag_, hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag_;
   //! HPS Tanc Tau Discriminators
   edm::InputTag hpsTancTausDiscrByLeadingTrackFindingTag_, hpsTancTausDiscrByLeadingTrackPtCutTag_, hpsTancTausDiscrByLeadingPionPtCutTag_,
     hpsTancTausDiscrByTancTag_, hpsTancTausDiscrByTancRawTag_,
