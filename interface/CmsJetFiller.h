@@ -23,7 +23,15 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include <TTree.h>
 
-struct CmsJetFillerData : public CmsCandidateFillerData {
+struct CmsJetFillerData {
+
+  // candidate. Repeated because we want to store the corrected jets energies
+  vector<int> *charge;
+  vector<float> *energy, *et, *momentum;
+  vector<float> *vertexX, *vertexY, *vertexZ;
+  vector<float> *theta, *eta, *phi;
+  vector<float> *x, *y, *z;
+  int *ncand;
 
   std::vector<float> *emFrac, *hadFrac, *area;
   std::vector<int> *Id;
@@ -71,7 +79,6 @@ class CmsJetFiller : public CmsCandidateFiller {
   void saveJetBTag(bool );
   void setJetCorrectionService(std::string jcs) { m_jcs = jcs; }
   void isGenJets(bool what) { m_genjets = what; }
-
   // Operators
 
   // run number and all of that --- to implement
@@ -84,6 +91,7 @@ class CmsJetFiller : public CmsCandidateFiller {
 
  private:
   
+  void treeCandInfo(const std::string colPrefix, const std::string colSuffix);
   void writeJetInfo(const reco::Candidate *cand, const edm::Event&, const edm::EventSetup&);
   void treeJetInfo(const std::string &colPrefix, const std::string &colSuffix);
 

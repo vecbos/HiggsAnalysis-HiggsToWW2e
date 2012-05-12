@@ -27,15 +27,15 @@ process.load("MyAnalysis.METFlags.logErrorAnalysisProducer_cff")
 
 # do not use residual corrections in MC
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
-process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
-process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
-process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
-process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-process.newPFNoPUJetTracksAssociatorAtVertex.jets = 'ak5PFNoPUJetsL1FastL2L3'
-process.newPFNoPUJetsSoftElectronTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
-process.newPFNoPUJetsSoftMuonTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
+#process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
+#process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
+#process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
+#process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
+#process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+#process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
+#process.newPFNoPUJetTracksAssociatorAtVertex.jets = 'ak5PFNoPUJetsL1FastL2L3'
+#process.newPFNoPUJetsSoftElectronTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
+#process.newPFNoPUJetsSoftMuonTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
 
 # to correct calo met ---
 #process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
@@ -84,10 +84,10 @@ process.pdfWeights = cms.EDProducer("PdfWeightProducer",
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
-process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
-process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
-process.treeDumper.PFjetCollection1 = 'ak5PFNoPUJetsL1FastL2L3'
-process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
+#process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
+#process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
+#process.treeDumper.PFjetCollection1 = 'ak5PFNoPUJetsL1FastL2L3'
+#process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
 process.treeDumper.PFJetCorrectionService = 'ak5PFL1FastL2L3'
 process.treeDumper.JetCorrectionService = 'ak5CaloL1FastL2L3'
 process.treeDumper.dumpTriggerResults = True
@@ -126,7 +126,7 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),

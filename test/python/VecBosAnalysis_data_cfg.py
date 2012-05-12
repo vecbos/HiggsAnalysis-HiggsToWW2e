@@ -87,38 +87,6 @@ process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.dumpPFCandidates = False
-#process.treeDumper.PFjetMvaIdCollection   = 'mvaPFnoPUJetIDMapProdData'
-#process.treeDumper.PFpujetMvaIdCollection = 'mvaJetIDMapProdData'
-process.treeDumper.PFjetMvaIdCollection   = cms.untracked.VInputTag(cms.InputTag("mvaPFnoPUJetIDMapProdData:mva"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:nCharged"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:nNeutrals"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:dZ"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:nParticles"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:dR2Mean"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:dRMean"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:frac01"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:frac02"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:frac03"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:frac04"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:frac05"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:beta"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:betastar"),
-                                                                    cms.InputTag("mvaPFnoPUJetIDMapProdData:betastarclassic"))
-process.treeDumper.PFpujetMvaIdCollection = cms.untracked.VInputTag(cms.InputTag("mvaJetIDMapProdData:mva"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:nCharged"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:nNeutrals"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:dZ"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:nParticles"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:dR2Mean"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:dRMean"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:frac01"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:frac02"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:frac03"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:frac04"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:frac05"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:beta"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:betastar"),
-                                                                    cms.InputTag("mvaJetIDMapProdData:betastarclassic"))
 process.treeDumper.dumpTree = True
 if (runOnAOD == 1) :
     process.treeDumper.saveFatTrk = False
@@ -137,7 +105,7 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(600) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),

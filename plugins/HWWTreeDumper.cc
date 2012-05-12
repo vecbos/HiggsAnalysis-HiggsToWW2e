@@ -197,8 +197,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   PFPUcorrJetsBTags_        = iConfig.getUntrackedParameter<edm::ParameterSet>("PFPUcorrJetsBTags");
 
   // MVA based jet id collection
-  PFjetMvaIdCollection_     = iConfig.getUntrackedParameter<std::vector<edm::InputTag> >("PFjetMvaIdCollection",std::vector<edm::InputTag>());
-  PFpujetMvaIdCollection_   = iConfig.getUntrackedParameter<std::vector<edm::InputTag> >("PFpujetMvaIdCollection",std::vector<edm::InputTag>());
+  puJetIDAlgos_            = iConfig.getParameter<std::vector<edm::ParameterSet> >("puJetIDAlgos");
   metCollection_           = iConfig.getParameter<edm::InputTag>("metCollection");
   // corrmetCollection_       = iConfig.getParameter<edm::InputTag>("corrmetCollection");
   TCmetCollection_         = iConfig.getParameter<edm::InputTag>("TCmetCollection");
@@ -789,7 +788,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       pfJetFiller.saveCand(saveCand_);
       pfJetFiller.saveJetBTag(saveJetBTag_);
       pfJetFiller.setBTags(PFJetsBTags_);
-      pfJetFiller.setMvaId(PFjetMvaIdCollection_);
+      pfJetFiller.setjetMVAAlgos(_jetId_algos);
+      pfJetFiller.setVertexCollection(vertexCollection_);
       pfJetFiller.setJetCorrectionService(PFJetCorrectionService_);
       pfJetFiller.writeCollectionToTree(PFjetCollection1_, iEvent, iSetup, prefix, suffix, false);
     }
@@ -801,7 +801,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       pfPUcorrJetFiller.saveCand(saveCand_);
       pfPUcorrJetFiller.saveJetBTag(saveJetBTag_);
       pfPUcorrJetFiller.setBTags(PFPUcorrJetsBTags_);
-      pfPUcorrJetFiller.setMvaId(PFpujetMvaIdCollection_);
+      pfPUcorrJetFiller.setjetMVAAlgos(_jetId_algos);
+      pfPUcorrJetFiller.setVertexCollection(vertexCollection_);
       pfPUcorrJetFiller.setJetCorrectionService(PFJetCorrectionService_);
       pfPUcorrJetFiller.writeCollectionToTree(PFpuCorrJetCollection1_, iEvent, iSetup, prefix, suffix, false);
     }
@@ -922,6 +923,12 @@ void HWWTreeDumper::beginJob() {
                           true,
                           muoniso_weightfiles);
   fMuonIsoMVA->SetPrintMVADebug(false);
+
+  // jet ID
+  _jetId_algos.resize(puJetIDAlgos_.size());
+  for(unsigned int imva=0; imva<puJetIDAlgos_.size(); imva++){
+    _jetId_algos[imva] = new PileupJetIdAlgo((puJetIDAlgos_.at(imva)));
+  }
 
 }
 

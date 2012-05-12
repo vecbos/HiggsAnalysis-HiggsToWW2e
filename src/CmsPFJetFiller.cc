@@ -73,6 +73,24 @@ CmsPFJetFiller::CmsPFJetFiller(CmsTree *cmsTree,
 CmsPFJetFiller::~CmsPFJetFiller() {
   
   // delete here the vector ptr's
+  delete privateData_->charge;
+  delete privateData_->energy;
+  delete privateData_->et;
+  delete privateData_->momentum;
+  delete privateData_->theta;
+  delete privateData_->eta;
+  delete privateData_->phi;
+  delete privateData_->x;
+  delete privateData_->y;
+  delete privateData_->z;
+  delete privateData_->uncorrx;
+  delete privateData_->uncorry;
+  delete privateData_->uncorrz;
+  delete privateData_->vertexX;
+  delete privateData_->vertexY;
+  delete privateData_->vertexZ;
+  delete privateData_->ncand;
+
   delete privateData_->chargedHadronEnergy;
   delete privateData_->neutralHadronEnergy;
   delete privateData_->photonEnergy;
@@ -88,6 +106,9 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->HFHadronMultiplicity;
   delete privateData_->HFEMMultiplicity;
   delete privateData_->combinedSecondaryVertexBJetTags;
+  delete privateData_->combinedSecondaryVertexMVABJetTags; 
+  delete privateData_->jetBProbabilityBJetTags; 
+  delete privateData_->jetProbabilityBJetTags;
   delete privateData_->simpleSecondaryVertexHighEffBJetTags;
   delete privateData_->simpleSecondaryVertexHighPurBJetTags;
   delete privateData_->trackCountingHighPurBJetTags;
@@ -107,11 +128,12 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->rmsCand;
 
   // additional variables for PU studies
-  delete privateData_->jetIdMva;
+  delete privateData_->jetIdMvaSimple;
+  delete privateData_->jetIdMvaFull;
+  delete privateData_->jetIdMvaPhilV1;
   delete privateData_->nChargedIdMva;
   delete privateData_->nNeutralsIdMva;
   delete privateData_->dZIdMva;
-  delete privateData_->nParticlesIdMva;
   delete privateData_->dR2MeanIdMva;
   delete privateData_->dRMeanIdMva;
   delete privateData_->frac01IdMva;
@@ -124,6 +146,8 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->betastarclassicIdMva;
   delete privateData_->betastar;
   delete privateData_->rmsCandsHand;
+  delete privateData_;
+
 }
 
 
@@ -155,20 +179,11 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get candidate collection: " << collectionTag; }
 
   edm::Handle< reco::VertexCollection>  primaryVertexColl  ;
-  try { iEvent.getByLabel("offlinePrimaryVertices", primaryVertexColl); }
+  try { iEvent.getByLabel(_verticesTag, primaryVertexColl); }
   catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get primary vertex collection: offlinePrimaryVertices"; }
   VertexCollection::const_iterator vMax = primaryVertexColl->begin();
   bestPrimaryVertex_ = *vMax;
 
-  // mva jetID
-  // mvas_.resize(PFjetMvaIdCollection_.size());
-  for(size_t iMvaVar=0; iMvaVar<PFjetMvaIdCollection_.size(); ++iMvaVar) {
-    Handle<ValueMap<float> > jetIDmvaMap_;
-    try { iEvent.getByLabel(PFjetMvaIdCollection_[iMvaVar],jetIDmvaMap_); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFJetFiller") << "Can't get mvaJetIDMapProd map"; }
-    mvas_.push_back(*jetIDmvaMap_);
-  }
-  
   privateData_->clearTrkVectors();
 
   if(collection) {
@@ -191,6 +206,9 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     *(privateData_->ncand) = collection->size();
 
     edm::Handle<reco::JetTagCollection> combinedSecondaryVertexBJetTags,
+      combinedSecondaryVertexMVABJetTags, 
+      jetBProbabilityBJetTags, 
+      jetProbabilityBJetTags,
       simpleSecondaryVertexHighEffBJetTags,
       simpleSecondaryVertexHighPurBJetTags,
       trackCountingHighPurBJetTags,
@@ -199,6 +217,9 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     if(saveJetBTag_) {
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("combinedSecondaryVertexBJetTags"), combinedSecondaryVertexBJetTags);
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("combinedSecondaryVertexMVABJetTags"), combinedSecondaryVertexMVABJetTags); 
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("jetBProbabilityBJetTags"), jetBProbabilityBJetTags); 
+      iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("jetProbabilityBJetTags"), jetProbabilityBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("simpleSecondaryVertexHighEffBJetTags"), simpleSecondaryVertexHighEffBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("simpleSecondaryVertexHighPurBJetTags"), simpleSecondaryVertexHighPurBJetTags);
       iEvent.getByLabel(BTagCollections_.getParameter<edm::InputTag>("trackCountingHighPurBJetTags"), trackCountingHighPurBJetTags);
@@ -212,8 +233,6 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     edm::View<reco::Candidate>::const_iterator cand;
     reco::PFJetCollection::const_iterator jetit=jets->begin();
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
-      // fill basic kinematics
-      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
       // fill jet extra informations
 
       // em, had fractions
@@ -244,40 +263,6 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
         privateData_->ptD->push_back( qgvars.ptD );
         privateData_->rmsCand->push_back( qgvars.rmsCand );
-
-	// compute CMG jetId mva
-        //PileupJetIdAlgo jetMVACalculator(*(jetMVAAlgos.begin()));
-        //PileupJetIdentifier jetIdentifer_vars = jetMVACalculator.computeIdVariables(&(*thisPFJet), scale, selectedVtx, vertexCollection);
-        //         for(unsigned int imva=0; imva<jetMVAAlgos.size(); imva++){
-        //           PileupJetIdAlgo* ialgo = (jetId_algos[imva]);
-        //           ialgo->set(jetIdentifer_vars);
-        //           PileupJetIdentifier id = ialgo->computeMva();
-        //           if (jetMVAAlgos.size() != 3) cout << "problem with jet mva" << endl;
-        //           // mva values
-        //           if (imva==0) jetIdSimple_mva_pfakt5[nJet_pfakt5]   = id.mva() ;
-        //           if (imva==1) jetIdFull_mva_pfakt5[nJet_pfakt5]     = id.mva() ;
-        //           if (imva==2) jetIdCutBased_mva_pfakt5[nJet_pfakt5] = id.mva() ;
-        //           // WP
-        //           if (imva==0) jetIdSimple_wp_pfakt5[nJet_pfakt5]   = id.idFlag() ;
-        //           if (imva==1) jetIdFull_wp_pfakt5[nJet_pfakt5]     = id.idFlag() ;
-        //           if (imva==2) jetIdCutBased_wp_pfakt5[nJet_pfakt5] = id.idFlag() ;
-        //         }
-
-	privateData_->jetIdMva->push_back( ((mvas_[0])[thisPFJetRef]) );
-	privateData_->nChargedIdMva->push_back( ((mvas_[1])[thisPFJetRef]) );
-	privateData_->nNeutralsIdMva->push_back( ((mvas_[2])[thisPFJetRef]) );
-	privateData_->dZIdMva->push_back( ((mvas_[3])[thisPFJetRef]) );
-	privateData_->nParticlesIdMva->push_back( ((mvas_[4])[thisPFJetRef]) );
-	privateData_->dR2MeanIdMva->push_back( ((mvas_[5])[thisPFJetRef]) );
-	privateData_->dRMeanIdMva->push_back( ((mvas_[6])[thisPFJetRef]) );
-	privateData_->frac01IdMva->push_back( ((mvas_[7])[thisPFJetRef]) );
-	privateData_->frac02IdMva->push_back( ((mvas_[8])[thisPFJetRef]) );
-	privateData_->frac03IdMva->push_back( ((mvas_[9])[thisPFJetRef]) );
-	privateData_->frac04IdMva->push_back( ((mvas_[10])[thisPFJetRef]) );
-	privateData_->frac05IdMva->push_back( ((mvas_[11])[thisPFJetRef]) );
-	privateData_->betaIdMva->push_back( ((mvas_[12])[thisPFJetRef]) );
-	privateData_->betastarIdMva->push_back( ((mvas_[13])[thisPFJetRef]) );
-	privateData_->betastarclassicIdMva->push_back( ((mvas_[14])[thisPFJetRef]) );
 
 	float sumPt_cands,sumPt2_cands,rms_cands,sumTrkPtBetaStar,sumTrkPt,betastar_;
         sumPt_cands=sumPt2_cands=rms_cands=sumTrkPtBetaStar=sumTrkPt=betastar_=0.0;
@@ -382,26 +367,30 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	// for PU studies
 	privateData_->betastar->push_back(-999.);            // chiara
 	privateData_->rmsCandsHand->push_back(-999.);        // chiara
-	privateData_->jetIdMva->push_back(-1.);
-	privateData_->nChargedIdMva->push_back(-1.);
-	privateData_->nNeutralsIdMva->push_back(-1.);
-	privateData_->dZIdMva->push_back(-1.);
-	privateData_->nParticlesIdMva->push_back(-1.);
-	privateData_->dR2MeanIdMva->push_back(-1.);
-	privateData_->dRMeanIdMva->push_back(-1.);
-	privateData_->frac01IdMva->push_back(-1.);
-	privateData_->frac02IdMva->push_back(-1.);
-	privateData_->frac03IdMva->push_back(-1.);
-	privateData_->frac04IdMva->push_back(-1.);
-	privateData_->frac05IdMva->push_back(-1.);
-	privateData_->betaIdMva->push_back(-1.);
-	privateData_->betastarIdMva->push_back(-1.);
-	privateData_->betastarclassicIdMva->push_back(-1.);
+ 	privateData_->jetIdMvaSimple->push_back(-1.);
+ 	privateData_->jetIdMvaFull->push_back(-1.);
+ 	privateData_->jetIdMvaPhilV1->push_back(-1.);
+ 	privateData_->nChargedIdMva->push_back(-1.);
+ 	privateData_->nNeutralsIdMva->push_back(-1.);
+ 	privateData_->dZIdMva->push_back(-1.);
+ 	privateData_->dR2MeanIdMva->push_back(-1.);
+ 	privateData_->dRMeanIdMva->push_back(-1.);
+ 	privateData_->frac01IdMva->push_back(-1.);
+ 	privateData_->frac02IdMva->push_back(-1.);
+ 	privateData_->frac03IdMva->push_back(-1.);
+ 	privateData_->frac04IdMva->push_back(-1.);
+ 	privateData_->frac05IdMva->push_back(-1.);
+ 	privateData_->betaIdMva->push_back(-1.);
+ 	privateData_->betastarIdMva->push_back(-1.);
+ 	privateData_->betastarclassicIdMva->push_back(-1.);
       }
 
       // fill the btag algorithms output
       if(saveJetBTag_) {
         privateData_->combinedSecondaryVertexBJetTags->push_back( (*combinedSecondaryVertexBJetTags)[index].second );
+        privateData_->combinedSecondaryVertexMVABJetTags->push_back( (*combinedSecondaryVertexMVABJetTags)[index].second ); 
+        privateData_->jetBProbabilityBJetTags->push_back( (*jetBProbabilityBJetTags)[index].second ); 
+        privateData_->jetProbabilityBJetTags->push_back( (*jetProbabilityBJetTags)[index].second );
         privateData_->simpleSecondaryVertexHighEffBJetTags->push_back( (*simpleSecondaryVertexHighEffBJetTags)[index].second );
         privateData_->simpleSecondaryVertexHighPurBJetTags->push_back( (*simpleSecondaryVertexHighPurBJetTags)[index].second );
         privateData_->trackCountingHighPurBJetTags->push_back( (*trackCountingHighPurBJetTags)[index].second );
@@ -409,6 +398,9 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->trackCountingVeryHighEffBJetTags->push_back( (*trackCountingVeryHighEffBJetTags)[index].second );
       } else {
         privateData_->combinedSecondaryVertexBJetTags->push_back( -1. );
+        privateData_->combinedSecondaryVertexMVABJetTags->push_back( -1. ); 
+        privateData_->jetBProbabilityBJetTags->push_back( -1. ); 
+        privateData_->jetProbabilityBJetTags->push_back( -1. );
         privateData_->simpleSecondaryVertexHighEffBJetTags->push_back( -1. );
         privateData_->simpleSecondaryVertexHighPurBJetTags->push_back( -1. );
         privateData_->trackCountingHighPurBJetTags->push_back( -1. );
@@ -416,11 +408,53 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->trackCountingVeryHighEffBJetTags->push_back( -1. );
       }
 
-      // run the correction on the fly. Reversed because input is corrected jets 
+      // run the correction on the fly.
       PFJet  correctedJet = *jetit;
       float scale = corrector->correction(correctedJet,iEvent,iSetup);
-      correctedJet.scaleEnergy(1.0/scale);
-      privateData_->uncorrEnergy->push_back((float)correctedJet.energy());
+      correctedJet.scaleEnergy(scale);
+
+      privateData_->charge->push_back((int)correctedJet.charge());
+      privateData_->energy->push_back(correctedJet.energy());
+      privateData_->et->push_back(correctedJet.et());
+      privateData_->momentum->push_back(correctedJet.p());
+      privateData_->theta->push_back(correctedJet.theta());
+      privateData_->eta->push_back(correctedJet.eta());
+      privateData_->phi->push_back(correctedJet.phi());
+      privateData_->x->push_back(correctedJet.momentum().x());
+      privateData_->y->push_back(correctedJet.momentum().y());
+      privateData_->z->push_back(correctedJet.momentum().z());
+      privateData_->vertexX->push_back(correctedJet.vx());
+      privateData_->vertexY->push_back(correctedJet.vy());
+      privateData_->vertexZ->push_back(correctedJet.vz());
+      privateData_->uncorrx->push_back(thisPFJet->momentum().x());
+      privateData_->uncorry->push_back(thisPFJet->momentum().y());
+      privateData_->uncorrz->push_back(thisPFJet->momentum().z());
+      privateData_->uncorrEnergy->push_back(thisPFJet->energy());
+
+      PileupJetIdentifier jetIdentifer_vars = _jetId_algos[0]->computeIdVariables(&correctedJet, scale, &bestPrimaryVertex_, *(primaryVertexColl.product()));
+      privateData_->dRMeanIdMva->push_back( jetIdentifer_vars.dRMean() );
+      privateData_->frac01IdMva->push_back( jetIdentifer_vars.frac01() );
+      privateData_->frac02IdMva->push_back( jetIdentifer_vars.frac02() );
+      privateData_->frac03IdMva->push_back( jetIdentifer_vars.frac03() );
+      privateData_->frac04IdMva->push_back( jetIdentifer_vars.frac04() );
+      privateData_->frac05IdMva->push_back( jetIdentifer_vars.frac05() );
+      privateData_->nNeutralsIdMva->push_back( jetIdentifer_vars.nNeutrals() );
+      privateData_->betaIdMva->push_back( jetIdentifer_vars.beta() );
+      privateData_->betastarIdMva->push_back( jetIdentifer_vars.betaStar() );
+      privateData_->dZIdMva->push_back( jetIdentifer_vars.dZ() );
+      privateData_->nChargedIdMva->push_back( jetIdentifer_vars.nCharged() );
+      privateData_->dR2MeanIdMva->push_back( jetIdentifer_vars.dR2Mean() );
+      privateData_->betastarclassicIdMva->push_back( jetIdentifer_vars.betaStarClassic() );
+
+      for(unsigned int imva=0; imva<_jetId_algos.size(); imva++){
+        PileupJetIdAlgo* ialgo = (_jetId_algos[imva]);
+        ialgo->set(jetIdentifer_vars);
+        PileupJetIdentifier id = ialgo->computeMva();
+        // mva values
+        if (imva==0) privateData_->jetIdMvaSimple->push_back( id.mva() );
+        if (imva==1) privateData_->jetIdMvaFull->push_back( id.mva() );
+        if (imva==2) privateData_->jetIdMvaPhilV1->push_back( id.mva() );
+      }
 
       index++;
       jetit++;
@@ -443,6 +477,25 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
 }
 
+void CmsPFJetFiller::treeCandInfo(const std::string colPrefix, const std::string colSuffix) {
+
+  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
+  cmstree->column((colPrefix+"charge"+colSuffix).c_str(), *privateData_->charge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"uncorrenergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"px"+colSuffix).c_str(), *privateData_->x, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"py"+colSuffix).c_str(), *privateData_->y, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pz"+colSuffix).c_str(), *privateData_->z, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"uncorrpx"+colSuffix).c_str(), *privateData_->uncorrx, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"uncorrpy"+colSuffix).c_str(), *privateData_->uncorry, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"uncorrpz"+colSuffix).c_str(), *privateData_->uncorrz, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"vertexX"+colSuffix).c_str(), *privateData_->vertexX, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"vertexY"+colSuffix).c_str(), *privateData_->vertexY, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"vertexZ"+colSuffix).c_str(), *privateData_->vertexZ, nCandString.c_str(), 0, "Reco");
+}
 
 void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &colSuffix) {
 
@@ -466,11 +519,12 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"weightedDz2"+colSuffix).c_str(), *privateData_->weightedDz2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"betastar"+colSuffix).c_str(), *privateData_->betastar, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rmsCandsHand"+colSuffix).c_str(), *privateData_->rmsCandsHand, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"jetIdMva"+colSuffix).c_str(), *privateData_->jetIdMva, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"jetIdMvaSimple"+colSuffix).c_str(), *privateData_->jetIdMvaSimple, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"jetIdMvaFull"+colSuffix).c_str(), *privateData_->jetIdMvaFull, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"jetIdMvaPhilV1"+colSuffix).c_str(), *privateData_->jetIdMvaPhilV1, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nChargedIdMva"+colSuffix).c_str(), *privateData_->nChargedIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nNeutralsIdMva"+colSuffix).c_str(), *privateData_->nNeutralsIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dZIdMva"+colSuffix).c_str(), *privateData_->dZIdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"nParticlesIdMva"+colSuffix).c_str(), *privateData_->nParticlesIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dR2MeanIdMva"+colSuffix).c_str(), *privateData_->dR2MeanIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dRMeanIdMva"+colSuffix).c_str(), *privateData_->dRMeanIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"frac01IdMva"+colSuffix).c_str(), *privateData_->frac01IdMva, nCandString.c_str(), 0, "Reco");
@@ -487,13 +541,15 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"neutralEmEnergy"+colSuffix).c_str(), *privateData_->neutralEmEnergy, nCandString.c_str(), 0, "Reco");
   if(saveJetBTag_) {
     cmstree->column((colPrefix+"combinedSecondaryVertexBJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexBJetTags, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"combinedSecondaryVertexMVABJetTags"+colSuffix).c_str(), *privateData_->combinedSecondaryVertexMVABJetTags, nCandString.c_str(), 0, "Reco"); 
+    cmstree->column((colPrefix+"jetBProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetBProbabilityBJetTags, nCandString.c_str(), 0, "Reco"); 
+    cmstree->column((colPrefix+"jetProbabilityBJetTags"+colSuffix).c_str(), *privateData_->jetProbabilityBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"simpleSecondaryVertexHighEffBJetTags"+colSuffix).c_str(), *privateData_->simpleSecondaryVertexHighEffBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"simpleSecondaryVertexHighPurBJetTags"+colSuffix).c_str(), *privateData_->simpleSecondaryVertexHighPurBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingHighPurBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighPurBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingHighEffBJetTags, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"trackCountingVeryHighEffBJetTags"+colSuffix).c_str(), *privateData_->trackCountingVeryHighEffBJetTags, nCandString.c_str(), 0, "Reco");
   }
-  cmstree->column((colPrefix+"uncorrEnergy"+colSuffix).c_str(), *privateData_->uncorrEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rmsCand"+colSuffix).c_str(), *privateData_->rmsCand, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ptD"+colSuffix).c_str(), *privateData_->ptD, nCandString.c_str(), 0, "Reco");
 }
@@ -506,7 +562,24 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
 
 void CmsPFJetFillerData::initialise() {
 
-  initialiseCandidate();
+  charge = new vector<int>;
+  energy = new vector<float>;
+  et = new vector<float>;
+  momentum = new vector<float>;
+  theta = new vector<float>;
+  eta = new vector<float>;
+  phi = new vector<float>;
+  x = new vector<float>;
+  y = new vector<float>;
+  z = new vector<float>;
+  uncorrx = new vector<float>;
+  uncorry = new vector<float>;
+  uncorrz = new vector<float>;
+  vertexX = new vector<float>;
+  vertexY = new vector<float>;
+  vertexZ = new vector<float>;
+  ncand = new int;
+
   chargedHadronEnergy = new vector<float>;
   neutralHadronEnergy = new vector<float>;
   chargedEmEnergy = new vector<float>;
@@ -524,6 +597,9 @@ void CmsPFJetFillerData::initialise() {
   HFHadronMultiplicity = new vector<int>;
   HFEMMultiplicity = new vector<int>;
   combinedSecondaryVertexBJetTags = new vector<float>;
+  combinedSecondaryVertexMVABJetTags = new vector<float>; 
+  jetBProbabilityBJetTags = new vector<float>; 
+  jetProbabilityBJetTags = new vector<float>;
   simpleSecondaryVertexHighEffBJetTags = new vector<float>;
   simpleSecondaryVertexHighPurBJetTags = new vector<float>;
   trackCountingHighPurBJetTags = new vector<float>;
@@ -536,11 +612,12 @@ void CmsPFJetFillerData::initialise() {
   ptD = new vector<float>;
   rmsCand = new vector<float>;
   betastar = new vector<float>;
-  jetIdMva = new vector<float>;
+  jetIdMvaSimple = new vector<float>;
+  jetIdMvaFull = new vector<float>;
+  jetIdMvaPhilV1 = new vector<float>;
   nChargedIdMva = new vector<float>;
   nNeutralsIdMva = new vector<float>;
   dZIdMva = new vector<float>;
-  nParticlesIdMva = new vector<float>;
   dR2MeanIdMva = new vector<float>;
   dRMeanIdMva = new vector<float>;
   frac01IdMva = new vector<float>;
@@ -556,7 +633,23 @@ void CmsPFJetFillerData::initialise() {
 
 void CmsPFJetFillerData::clearTrkVectors() {
 
-  clearTrkVectorsCandidate();
+  charge->clear();
+  energy->clear();
+  et->clear();
+  momentum->clear();
+  theta->clear();
+  eta->clear();
+  phi->clear();
+  x->clear();
+  y->clear();
+  z->clear();
+  uncorrx->clear();
+  uncorry->clear();
+  uncorrz->clear();
+  vertexX->clear();
+  vertexY->clear();
+  vertexZ->clear();
+
   chargedHadronEnergy->clear();
   neutralHadronEnergy->clear();
   chargedEmEnergy->clear();
@@ -574,6 +667,9 @@ void CmsPFJetFillerData::clearTrkVectors() {
   HFHadronMultiplicity->clear();
   HFEMMultiplicity->clear();
   combinedSecondaryVertexBJetTags->clear();
+  combinedSecondaryVertexMVABJetTags->clear(); 
+  jetBProbabilityBJetTags->clear(); 
+  jetProbabilityBJetTags->clear();
   simpleSecondaryVertexHighEffBJetTags->clear();
   simpleSecondaryVertexHighPurBJetTags->clear();
   trackCountingHighPurBJetTags->clear();
@@ -586,11 +682,12 @@ void CmsPFJetFillerData::clearTrkVectors() {
   ptD->clear();
   rmsCand->clear();
   betastar -> clear();
-  jetIdMva -> clear();
+  jetIdMvaSimple -> clear();
+  jetIdMvaFull -> clear();
+  jetIdMvaPhilV1 -> clear();
   nChargedIdMva -> clear();
   nNeutralsIdMva -> clear();
   dZIdMva -> clear();
-  nParticlesIdMva -> clear();
   dR2MeanIdMva -> clear();
   dRMeanIdMva -> clear();
   frac01IdMva -> clear();

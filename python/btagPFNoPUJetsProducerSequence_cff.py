@@ -7,7 +7,7 @@ from RecoBTag.Configuration.RecoBTag_cff import *
 # create a new jets and tracks association
 import RecoJets.JetAssociationProducers.ak5JTA_cff
 newPFNoPUJetTracksAssociatorAtVertex = RecoJets.JetAssociationProducers.ak5JTA_cff.ak5JetTracksAssociatorAtVertex.clone()
-newPFNoPUJetTracksAssociatorAtVertex.jets = "ak5PFNoPUJetsL1FastL2L3Residual"
+newPFNoPUJetTracksAssociatorAtVertex.jets = "ak5PFNoPUJets"
 newPFNoPUJetTracksAssociatorAtVertex.tracks = "generalTracks"
 
 # impact parameter b-tag
@@ -45,7 +45,7 @@ newCombinedSecondaryVertexMVABPFNoPUJetTags.tagInfos = cms.VInputTag( cms.InputT
 
 # soft electron b-tag
 newPFNoPUJetsSoftElectronTagInfos = RecoBTag.Configuration.RecoBTag_cff.softElectronTagInfos.clone()
-newPFNoPUJetsSoftElectronTagInfos.jets = "ak5PFJetsL2L3Residual"
+newPFNoPUJetsSoftElectronTagInfos.jets = "ak5PFNoPUJets"
 newSoftElectronBPFNoPUJetTags = RecoBTag.Configuration.RecoBTag_cff.softElectronBJetTags.clone()
 newSoftElectronBPFNoPUJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFNoPUJetsSoftElectronTagInfos") )
 newSoftElectronByIP3dBPFNoPUJetTags = RecoBTag.Configuration.RecoBTag_cff.softElectronByIP3dBJetTags.clone()
@@ -55,7 +55,7 @@ newSoftElectronByPtBPFNoPUJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFN
 
 # soft muon b-tag
 newPFNoPUJetsSoftMuonTagInfos = RecoBTag.Configuration.RecoBTag_cff.softMuonTagInfos.clone()
-newPFNoPUJetsSoftMuonTagInfos.jets = "ak5PFJetsL2L3Residual"
+newPFNoPUJetsSoftMuonTagInfos.jets = "ak5PFNoPUJets"
 newSoftMuonBPFNoPUJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonBJetTags.clone()
 newSoftMuonBPFNoPUJetTags.tagInfos = cms.VInputTag( cms.InputTag("newPFNoPUJetsSoftMuonTagInfos") )
 newSoftMuonByIP3dBPFNoPUJetTags = RecoBTag.Configuration.RecoBTag_cff.softMuonByIP3dBJetTags.clone()
@@ -72,7 +72,9 @@ newPFNoPUJetBtaggingIP = cms.Sequence(
     newPFNoPUJetsImpactParameterTagInfos * (
        newTrackCountingVeryHighEffBPFNoPUJetTags +
        newTrackCountingHighEffBPFNoPUJetTags +
-       newTrackCountingHighPurBPFNoPUJetTags )
+       newTrackCountingHighPurBPFNoPUJetTags +
+       newJetProbabilityBPFNoPUJetTags +
+       newJetBProbabilityBPFNoPUJetTags )
     )
 
 newPFNoPUJetBtaggingSV = cms.Sequence(
@@ -80,7 +82,8 @@ newPFNoPUJetBtaggingSV = cms.Sequence(
     newPFNoPUJetsSecondaryVertexTagInfos * (
        newSimpleSecondaryVertexHighEffBPFNoPUJetTags +
        newSimpleSecondaryVertexHighPurBPFNoPUJetTags +
-       newCombinedSecondaryVertexBPFNoPUJetTags )
+       newCombinedSecondaryVertexBPFNoPUJetTags +
+        newCombinedSecondaryVertexMVABPFNoPUJetTags )
     )
 
 newPFNoPUJetBtaggingEle = cms.Sequence(

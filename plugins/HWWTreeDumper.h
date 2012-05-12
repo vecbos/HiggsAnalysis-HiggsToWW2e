@@ -28,6 +28,8 @@
 #include "RecoEcal/EgammaCoreTools/interface/PositionCalc.h"
 #include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
 #include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
+#include "CMGTools/External/interface/PileupJetIdAlgo.h"
+#include "CMGTools/External/interface/PileupJetIdentifier.h"
 
 class HWWTreeDumper : public edm::EDAnalyzer {
 public:
@@ -125,6 +127,7 @@ private:
   //! MVAs
   MuonMVAEstimator *fMuonIsoMVA;
   EGammaMvaEleEstimator *fEleIdMVANonTrig, *fEleIdMVATrig;
+  std::vector<PileupJetIdAlgo* > _jetId_algos;
 
   bool usePhotonFix_;
 
@@ -150,7 +153,7 @@ private:
   //! btag collections (only PF, the other are hardcoded)
   edm::ParameterSet PFJetsBTags_, PFPUcorrJetsBTags_;
   //! jet id mva 
-  std::vector<edm::InputTag> PFjetMvaIdCollection_, PFpujetMvaIdCollection_;
+  std::vector<edm::ParameterSet> puJetIDAlgos_;
   //! track collections
   edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;

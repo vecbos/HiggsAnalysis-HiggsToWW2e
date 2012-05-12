@@ -119,6 +119,22 @@ CmsJetFiller::CmsJetFiller(CmsTree *cmsTree,
 CmsJetFiller::~CmsJetFiller() {
 
   // delete here the vector ptr's
+
+  delete privateData_->charge;
+  delete privateData_->energy;
+  delete privateData_->et;
+  delete privateData_->momentum;
+  delete privateData_->theta;
+  delete privateData_->eta;
+  delete privateData_->phi;
+  delete privateData_->x;
+  delete privateData_->y;
+  delete privateData_->z;
+  delete privateData_->vertexX;
+  delete privateData_->vertexY;
+  delete privateData_->vertexZ;
+  delete privateData_->ncand;
+
   delete privateData_->emFrac;
   delete privateData_->hadFrac;
   delete privateData_->Id;
@@ -235,8 +251,6 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
     if(!m_genjets) jetit=jets->begin();
     for(cand=collection->begin(); cand!=collection->end(); cand++) {
       const CaloJet *thisRecoJet = dynamic_cast< const CaloJet * > ( &(*cand) );
-      // fill basic kinematics
-      if(saveCand_) writeCandInfo(&(*cand),iEvent,iSetup);
       // fill jet extra informations
       if(saveJetExtras_) { 
 
@@ -274,14 +288,42 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->trackCountingVeryHighEffBJetTags->push_back( -1. );
       }
 
-      // run the correction on the fly. Reversed because input is corrected jets 
+      // run the correction on the fly.
       if(!m_genjets) {
         CaloJet  correctedJet = *jetit;
         double scale = corrector->correction(correctedJet,iEvent,iSetup);
-        correctedJet.scaleEnergy(1.0/scale);
-        privateData_->uncorrEnergy->push_back(correctedJet.energy());
+        correctedJet.scaleEnergy(scale);
+
+        privateData_->charge->push_back((int)correctedJet.charge());
+        privateData_->energy->push_back(correctedJet.energy());
+        privateData_->et->push_back(correctedJet.et());
+        privateData_->momentum->push_back(correctedJet.p());
+        privateData_->theta->push_back(correctedJet.theta());
+        privateData_->eta->push_back(correctedJet.eta());
+        privateData_->phi->push_back(correctedJet.phi());
+        privateData_->x->push_back(correctedJet.momentum().x());
+        privateData_->y->push_back(correctedJet.momentum().y());
+        privateData_->z->push_back(correctedJet.momentum().z());
+        privateData_->vertexX->push_back(correctedJet.vx());
+        privateData_->vertexY->push_back(correctedJet.vy());
+        privateData_->vertexZ->push_back(correctedJet.vz());
+        privateData_->uncorrEnergy->push_back(thisRecoJet->energy());
+        jetit++;
       } else {
-        privateData_->uncorrEnergy->push_back(-999.);
+        privateData_->charge->push_back((int)cand->charge());
+        privateData_->energy->push_back(cand->energy());
+        privateData_->et->push_back(cand->et());
+        privateData_->momentum->push_back(cand->p());
+        privateData_->theta->push_back(cand->theta());
+        privateData_->eta->push_back(cand->eta());
+        privateData_->phi->push_back(cand->phi());
+        privateData_->x->push_back(cand->momentum().x());
+        privateData_->y->push_back(cand->momentum().y());
+        privateData_->z->push_back(cand->momentum().z());
+        privateData_->vertexX->push_back(cand->vx());
+        privateData_->vertexY->push_back(cand->vy());
+        privateData_->vertexZ->push_back(cand->vz());
+        privateData_->uncorrEnergy->push_back(cand->energy()); // for genjets, does not make sense uncorrected energy
       }
 
       // if an uncorrected jet collection is provided, save also the uncorrected energy
@@ -338,7 +380,7 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   else {
     *(privateData_->ncand) = 0;
   }
-  
+
   // The class member vectors containing the relevant quantities 
   // have all been filled. Now transfer those we want into the 
   // tree 
@@ -346,6 +388,8 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
+  // for the jets, we pass the uncorrected collection, but we write the kinematics of the corrected collection
+  // this is because the correction on the fly goes only in the direction uncorr => corr
   if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
   if(saveJetExtras_) treeJetInfo(columnPrefix,columnSuffix);
 
@@ -356,8 +400,21 @@ void CmsJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 }
 
 
+void CmsJetFiller::treeCandInfo(const std::string colPrefix, const std::string colSuffix) {
 
-
+  std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
+  cmstree->column((colPrefix+"charge"+colSuffix).c_str(), *privateData_->charge, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"energy"+colSuffix).c_str(), *privateData_->energy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"theta"+colSuffix).c_str(), *privateData_->theta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"eta"+colSuffix).c_str(), *privateData_->eta, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"phi"+colSuffix).c_str(), *privateData_->phi, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"px"+colSuffix).c_str(), *privateData_->x, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"py"+colSuffix).c_str(), *privateData_->y, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pz"+colSuffix).c_str(), *privateData_->z, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"vertexX"+colSuffix).c_str(), *privateData_->vertexX, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"vertexY"+colSuffix).c_str(), *privateData_->vertexY, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"vertexZ"+colSuffix).c_str(), *privateData_->vertexZ, nCandString.c_str(), 0, "Reco");
+}
 
 
 
@@ -397,7 +454,22 @@ void CmsJetFiller::treeJetInfo(const std::string &colPrefix, const std::string &
 
 
 void CmsJetFillerData::initialise() {
-  initialiseCandidate();
+
+  charge = new vector<int>;
+  energy = new vector<float>;
+  et = new vector<float>;
+  momentum = new vector<float>;
+  theta = new vector<float>;
+  eta = new vector<float>;
+  phi = new vector<float>;
+  x = new vector<float>;
+  y = new vector<float>;
+  z = new vector<float>;
+  vertexX = new vector<float>;
+  vertexY = new vector<float>;
+  vertexZ = new vector<float>;
+  ncand = new int;
+
   emFrac = new vector<float>;
   hadFrac = new vector<float>;
   area = new vector<float>;
@@ -423,7 +495,20 @@ void CmsJetFillerData::initialise() {
 
 void CmsJetFillerData::clearTrkVectors() {
 
-  clearTrkVectorsCandidate();
+  charge->clear();
+  energy->clear();
+  et->clear();
+  momentum->clear();
+  theta->clear();
+  eta->clear();
+  phi->clear();
+  x->clear();
+  y->clear();
+  z->clear();
+  vertexX->clear();
+  vertexY->clear();
+  vertexZ->clear();
+
   emFrac->clear();
   hadFrac->clear();
   area->clear();
