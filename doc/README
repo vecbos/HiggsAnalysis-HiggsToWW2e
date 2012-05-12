@@ -6,7 +6,7 @@ cmsenv
 
 cvs co -r V12-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r edm-30March2012 HiggsAnalysis/HiggsToWW2Leptons
-cvs co -r V06-00-01 -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V06-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
 cvs co -r V01-5_2_X -d PhysicsTools/EcalAnomalousEventFilter UserCode/emanuele/PhysicsTools/EcalAnomalousEventFilter
@@ -48,52 +48,14 @@ cmsRun VecBosAnalysis_MC_cfg.py
 HiggsAnalysis/HiggsToWW2e/test/crab
 
 
---- Recipe to build and run the H->WW / RAZOR 44X  ---
-
-cmsrel CMSSW_4_4_2
-cd CMSSW_4_4_2/src
-cmsenv
-cvs co -r V04-4_4_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V00-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
-cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
-cvs co -r V110523_BE -d DataFormats/AnomalousEcalDataFormats UserCode/csander/DataFormats/AnomalousEcalDataFormats
-cvs co -r V110523_BE -d PhysicsTools/EcalAnomalousEventFilter UserCode/csander/PhysicsTools/EcalAnomalousEventFilter
-cvs co -r V110523_BE -d Sandbox UserCode/csander/Sandbox
-cvs co -r V19MAY2011_v3 JetMETAnalysis/ecalDeadCellTools
-cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
-cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
-cvs co -r R42X_S1_V05_S2_V02_S3_V00 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
-cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
-addpkg ElectroWeakAnalysis/Utilities
-
-scram setup lhapdffull
-touch $CMSSW_BASE/src/ElectroWeakAnalysis/Utilities/CMS.BuildFile.xml
-scram b
-
-* To produce the trees on AOD:
-- cd HiggsAnalysis/HiggsToWW2e/test/python
-- change in the following cfg.py's: 'runOnAOD = 1' at the beginning of the file
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-
-* To produce the trees on RECO (more complete than the AOD ones):
-- cd HiggsAnalysis/HiggsToWW2e/test/python
-- change in the following cfg.py's: 'runOnAOD = 0' at the beginning of the file
-cmsRun VecBosAnalysis_data_cfg.py
-cmsRun VecBosAnalysis_MC_cfg.py
-
-* crab and multicrab cfgs examples are in:
-HiggsAnalysis/HiggsToWW2e/test/crab
-
-
 --- Recipe to build and run the H->WW / V+jets analysis in 42X (Run2011 reprocessing data and Summer11 MC)  ---
 
 cmsrel CMSSW_4_2_8_patch7
 cd CMSSW_4_2_8_patch7/src
 cmsenv
-cvs co -r V49-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
-cvs co -r V03-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
+cvs co -r V50-4_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+sed -i 's|//#define CMSSW_4_2_X|#define CMSSW_4_2_X|g' src/CmsMuonFiller.cc
+cvs co -r V06-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
 cvs co -r V110523_BE -d DataFormats/AnomalousEcalDataFormats UserCode/csander/DataFormats/AnomalousEcalDataFormats
@@ -123,7 +85,7 @@ cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 cvs co -r V04-06-03 JetMETCorrections/Type1MET
 cvs co -r V03-03-07 DataFormats/METReco
 addpkg ElectroWeakAnalysis/Utilities
-cvs co -r V00-00-06 -d CMGTools/External UserCode/CMG/CMGTools/External
+cvs co -r V00-00-09 -d CMGTools/External UserCode/CMG/CMGTools/External
 
 scram setup lhapdffull
 touch $CMSSW_BASE/src/ElectroWeakAnalysis/Utilities/CMS.BuildFile.xml
