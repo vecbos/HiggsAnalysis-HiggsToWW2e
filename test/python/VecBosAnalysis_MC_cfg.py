@@ -1,5 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
+is42X = False
 runOnAOD = 1
 
 process = cms.Process("VecBosAnalysis")
@@ -8,7 +9,10 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.Geometry_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-process.GlobalTag.globaltag = 'START52_V9::All'
+if(is42X):
+    process.GlobalTag.globaltag = 'START42_V14B::All'
+else:
+    process.GlobalTag.globaltag = 'START52_V9::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
 
 # --- jet met sequences ---
@@ -27,23 +31,6 @@ process.load("MyAnalysis.METFlags.logErrorAnalysisProducer_cff")
 
 # do not use residual corrections in MC
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
-#process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3'
-#process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
-#process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3'
-#process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3'
-#process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-#process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3'
-#process.newPFNoPUJetTracksAssociatorAtVertex.jets = 'ak5PFNoPUJetsL1FastL2L3'
-#process.newPFNoPUJetsSoftElectronTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
-#process.newPFNoPUJetsSoftMuonTagInfos.jets = 'ak5PFNoPUJetsL1FastL2L3'
-
-# to correct calo met ---
-#process.load('JetMETCorrections.Configuration.DefaultJEC_cff')
-#from JetMETCorrections.Type1MET.MetType1Corrections_cff import metJESCorAK5CaloJet
-#process.metMuonJESCorAK5 = metJESCorAK5CaloJet.clone()
-#process.metMuonJESCorAK5.inputUncorMetLabel = "met"
-#process.metMuonJESCorAK5.useTypeII = True
-#process.metMuonJESCorAK5.hasMuonsCorr = False
 
 # process.IgProfService = cms.Service("IgProfService",
 #                                     reportFirstEvent            = cms.untracked.int32(0),
@@ -84,10 +71,6 @@ process.pdfWeights = cms.EDProducer("PdfWeightProducer",
 # --- tree dumper ---
 process.load("HiggsAnalysis.HiggsToWW2e.treeDumper_cfi")
 process.treeDumper.nameFile = 'default_MC.root'
-#process.treeDumper.jetCollection1 = 'ak5CaloJetsL1FastL2L3'
-#process.treeDumper.JPTjetCollection1 = 'ak5JPTJetsL2L3'
-#process.treeDumper.PFjetCollection1 = 'ak5PFNoPUJetsL1FastL2L3'
-#process.treeDumper.PFpuCorrJetCollection1 = 'ak5PFJetsL1FastL2L3'
 process.treeDumper.PFJetCorrectionService = 'ak5PFL1FastL2L3'
 process.treeDumper.JetCorrectionService = 'ak5CaloL1FastL2L3'
 process.treeDumper.dumpTriggerResults = True
@@ -100,7 +83,7 @@ process.treeDumper.dumpTracks = True
 process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = True
+process.treeDumper.dumpBCs = False
 process.treeDumper.dumpConversions = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
@@ -122,6 +105,14 @@ else :
     process.treeDumper.dumpHcalNoiseFlags = True
     process.treeDumper.AODHcalNoiseFlags = False
 
+# this replaces the collections with existing ones (even if they are saved already)
+if(is42X==True):
+    process.treeDumper.hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorrTag = cms.InputTag("hpsPFTauDiscriminationByVLooseIsolation")
+    process.treeDumper.hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag = cms.InputTag("hpsPFTauDiscriminationByLooseIsolation")
+    process.treeDumper.hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag = cms.InputTag("hpsPFTauDiscriminationByMediumIsolation")
+    process.treeDumper.hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag = cms.InputTag("hpsPFTauDiscriminationByTightIsolation")   
+
+
 process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
@@ -131,17 +122,16 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc23/emanuele/data/Pool/jpsiEE_Fall10.root') # RECO
-                            fileNames = cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/AODSummer12/00514868-B47A-E111-803E-001D0967DDC3.root')
-#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/HZZ4l_mH125_Summer12.root')
-                            #fileNames = cms.untracked.vstring('file:/cmsrm/pc25/emanuele/data/DYToEE_Fall11_44X.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root') if is42X else cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/AODSummer12/00514868-B47A-E111-803E-001D0967DDC3.root') 
                             )
 
 process.prejets = cms.Sequence( process.leptonLinkedTracks
                                 * process.mergedSuperClusters
-                                * process.mergedBasicClusters
                                 * process.chargedMetProducer
                                 * process.pfIsolationAllSequence )
+
+if(process.treeDumper.dumpBCs==True):
+    process.prejets *= process.mergedBasicClusters
 
 process.jets = cms.Sequence( process.ourJetSequenceMCReduced
                              * process.newBtaggingSequence 
