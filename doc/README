@@ -1,7 +1,8 @@
 --- Recipe to build and run the H->WW / RAZOR 52X  ---
 
 setenv SCRAM_ARCH slc5_amd64_gcc462
-cmsrel CMSSW_5_2_3/src
+cmsrel CMSSW_5_2_3
+cd CMSSW_5_2_3/src
 cmsenv
 
 cvs co -r V14-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
