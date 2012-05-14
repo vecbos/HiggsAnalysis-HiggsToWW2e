@@ -33,12 +33,6 @@ process.load("HiggsAnalysis.HiggsToWW2e.METOptionalFilterFlags_cff")
 process.load("MyAnalysis.METFlags.logErrorAnalysisProducer_cff")
 
 process.load("HiggsAnalysis.HiggsToWW2e.jetProducerSequenceFastJet_cff")
-process.newJetTracksAssociatorAtVertex.jets = 'ak5CaloJetsL1FastL2L3Residual'
-process.newSoftElectronTagInfos.jets = 'ak5CaloJetsL1FastL2L3Residual'
-process.newSoftMuonTagInfos.jets = 'ak5CaloJetsL1FastL2L3Residual'
-process.newPFPUcorrJetTracksAssociatorAtVertex.jets = 'ak5PFJetsL1FastL2L3Residual'
-process.newPFPUcorrJetsSoftElectronTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
-process.newPFPUcorrJetsSoftMuonTagInfos.jets = 'ak5PFJetsL1FastL2L3Residual'
 
 # --- track sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.leptonLinkedTracks_cfi")
