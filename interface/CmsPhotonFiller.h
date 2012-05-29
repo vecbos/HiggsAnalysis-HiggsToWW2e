@@ -24,6 +24,10 @@
 #include "DataFormats/EgammaReco/interface/SuperClusterFwd.h"
 #include "DataFormats/EgammaCandidates/interface/Photon.h"
 #include "DataFormats/EgammaCandidates/interface/PhotonFwd.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"                                                                             
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"             
+#include "DataFormats/VertexReco/interface/Vertex.h"
+#include "DataFormats/VertexReco/interface/VertexFwd.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -35,11 +39,13 @@ struct CmsPhotonFillerData : public CmsCandidateFillerData {
   // going into the tree.
   vector<int> *fiducialFlags, *recoFlags;
   vector<int> *superClusterIndex, *PFsuperClusterIndex;
-  vector<float> *hOverE, *dr03TkSumPt, *dr03HollowTkSumPt, *dr03EcalRecHitSumEt, *dr03HcalTowerSumEt,
+  vector<float> *hOverE, *hTowOverE, *dr03TkSumPt, *dr03HollowTkSumPt, *dr03EcalRecHitSumEt, *dr03HcalTowerSumEt,
     *dr04TkSumPt, *dr04HollowTkSumPt, *dr04EcalRecHitSumEt, *dr04HcalTowerSumEt;
   vector<float> *chargedHadronIso, *neutralHadronIso, *photonIso;
   vector<int> *hasPixelSeed;
   vector<bool> *hasMatchedConversion;
+
+  vector<float > *dr03chPFIso, *dr03nhPFIso, *dr03phPFIso;
 
   void initialise();
   void clearTrkVectors();
@@ -71,6 +77,8 @@ class CmsPhotonFiller : public CmsCandidateFiller {
   //! set conversions collection
   void setConversionsProdcer(  edm::InputTag conversionsProducer ) { conversionsProducer_ = conversionsProducer; }
 
+  void setPFCandidates( edm::InputTag pfCands) { pfCandidates_ = pfCands; }
+  void setPrimaryVertices( edm::InputTag pv) {primaryVertices_ = pv; }
  private:
   
   void writeEcalInfo(const reco::PhotonRef, const edm::Event&, const edm::EventSetup&, 
@@ -88,9 +96,13 @@ class CmsPhotonFiller : public CmsCandidateFiller {
 
   edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;
   edm::InputTag conversionsProducer_;
+  edm::InputTag pfCandidates_;
+  edm::InputTag primaryVertices_;
 
   edm::Handle<reco::ConversionCollection> hConversions;
   edm::Handle<reco::BeamSpot> bsHandle;
+  edm::Handle<reco::PFCandidateCollection> pfCands;
+  edm::Handle<reco::VertexCollection> PVs;
 
   int barrelSuperClustersSize;
 

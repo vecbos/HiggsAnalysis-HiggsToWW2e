@@ -43,7 +43,7 @@ struct CmsBasicClusterFillerData {
   vector<int>  *nCrystals, *recoFlag, *sevClosProbl, *idClosProbl, *indexSC;
   vector<float> *energy, *seedEnergy, *eta, *theta, *phi, *time, *chi2, *fracClosProbl;
   vector<float> *e3x3, * e5x5, *eMax, *e2x2, *e2nd, *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi;
-  vector<float> *eTop, *eBottom, *eLeft, *eRight;
+  vector<float> *eTop, *eBottom, *eLeft, *eRight, *e2x5Max, *e2x5Top,*e2x5Bottom,*e2x5Left,*e2x5Right;
   vector<float> *etaCrystal,*phiCrystal,*thetaTilt,*phiTilt;
   vector<int> *iEta,*iPhi;
   int *nBC;

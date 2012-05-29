@@ -25,7 +25,14 @@
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPhotonFiller.h"
 
+#include "DataFormats/RecoCandidate/interface/IsoDeposit.h"                                                                                      
+#include "DataFormats/RecoCandidate/interface/IsoDepositDirection.h"                                                                             
+#include "DataFormats/RecoCandidate/interface/IsoDepositVetos.h"              
+
+
 #include <TTree.h>
+#include <TVector3.h>
+#include <TMath.h>
 
 #include "FWCore/Utilities/interface/EDMException.h"
 #include "FWCore/Utilities/interface/Exception.h"
@@ -34,7 +41,7 @@
 
 using namespace edm;
 using namespace reco;
-
+using namespace reco::isodeposit;
 
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
@@ -75,6 +82,7 @@ CmsPhotonFiller::~CmsPhotonFiller() {
   delete privateData_->PFsuperClusterIndex;
   
   delete privateData_->hOverE;
+  delete privateData_->hTowOverE;
   delete privateData_->dr03HollowTkSumPt;
   delete privateData_->dr03TkSumPt;
   delete privateData_->dr03EcalRecHitSumEt;
@@ -88,6 +96,10 @@ CmsPhotonFiller::~CmsPhotonFiller() {
   delete privateData_->photonIso;
   delete privateData_->hasPixelSeed;
   delete privateData_->hasMatchedConversion;
+
+  delete privateData_->dr03chPFIso;
+  delete privateData_->dr03nhPFIso;
+  delete privateData_->dr03phPFIso;  
 
   delete privateData_->ncand;
   delete privateData_;
@@ -146,6 +158,11 @@ void CmsPhotonFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iEvent.getByLabel(conversionsProducer_, hConversions); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsPhotonFiller") << "Can't get conversions collection " << conversionsProducer_; }
 
+    try{
+      iEvent.getByLabel(pfCandidates_,pfCands);
+      iEvent.getByLabel(primaryVertices_,PVs);
+    }catch ( cms::Exception& ex ) { edm::LogWarning("CmsPhotonFiller") << "Couldn't get PFCandidates/PVs:  " << pfCandidates_ << "/" << primaryVertices_;}
+
     for(int index = 0; index < (int)collection->size(); index++) {
 
       // fill basic kinematics
@@ -181,6 +198,10 @@ void CmsPhotonFiller::writeCollectionToTree(edm::InputTag collectionTag,
   std::string nCandString = columnPrefix+(*trkIndexName_)+columnSuffix; 
   cmstree->column(nCandString.c_str(),blockSize,0,"Reco");
   
+  int blockSizePerPV = (PVs.isValid()) ? blockSize*PVs->size() : 0;
+  std::string nCandPVString = columnPrefix+(*trkIndexName_)+"PerPV"+columnSuffix; 
+  cmstree->column(nCandPVString.c_str(),blockSizePerPV,0,"Reco");
+  
   if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
   treeEcalInfo(columnPrefix,columnSuffix);
   
@@ -195,7 +216,8 @@ void CmsPhotonFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef, 
 				      const edm::Event& iEvent, const edm::EventSetup& iSetup, 
-                                    SuperClusterRef sclusRef, SuperClusterRef pfclusRef) {
+                                    SuperClusterRef sclusRef, SuperClusterRef pfclusRef){
+				
 
   if(photonRef.isNonnull()) {
 
@@ -244,6 +266,7 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     
     // isolations
     privateData_->hOverE->push_back(photonRef->hadronicOverEm());
+    privateData_->hTowOverE->push_back(photonRef->hadTowOverEm());
     privateData_->dr03TkSumPt->push_back(photonRef->trkSumPtSolidConeDR03());
     privateData_->dr03HollowTkSumPt->push_back(photonRef->trkSumPtHollowConeDR03());
     privateData_->dr03EcalRecHitSumEt->push_back(photonRef->ecalRecHitSumEtConeDR03());
@@ -261,6 +284,58 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     bool matchesConv = ConversionTools::hasMatchedConversion(*sclusRef,hConversions,bsHandle->position());
     privateData_->hasMatchedConversion->push_back(matchesConv);
 
+    //do the PF Isolation w.r.t. EVERY vertex
+
+    TVector3 phoPos(photonRef->caloPosition().x(),photonRef->caloPosition().y(),photonRef->caloPosition().z());
+
+    PFCandidateCollection::const_iterator cand;
+    VertexCollection::const_iterator vtx;
+    AbsVetos emptyVetos;
+    
+    // neutral hadron and photon pf isolation are always computed with respect to 0,0,0
+    // charged hadron isolation is computed w.r.t. each vertex
+    Direction pfDirFromOrigin(phoPos.Eta(),phoPos.Phi());
+			      
+    for(vtx = PVs->begin(); vtx != PVs->end(); vtx++){ 
+      //calculate the vector w.r.t. this vtx
+      TVector3 vtxPos(vtx->x(),vtx->y(),vtx->z());
+      TVector3 d = (phoPos-vtxPos).Unit();
+      Direction pfDirFromVtx(d.Eta(),d.Phi());
+      IsoDeposit chIsoDep(pfDirFromVtx);
+      IsoDeposit nhIsoDep(pfDirFromVtx);
+      IsoDeposit phIsoDep(pfDirFromVtx);
+      for(cand = pfCands->begin(); cand != pfCands->end(); cand++){
+	if( fabs(cand->energy() - photonRef->energy()) < 1e-6 
+	    && fabs(cand->eta() - photonRef->eta())    < 1e-6
+	    && fabs(cand->phi() - photonRef->phi())    < 1e-6) continue; // this candidate is the photon!
+	TVector3 candPos;
+	candPos.SetPtEtaPhi(cand->pt(), cand->eta(), cand->phi());
+	TVector3 candD = (candPos - vtxPos);
+	Direction candDirFromVtx(candD.Eta(),candD.Phi());
+
+	double dRFromVtx = pfDirFromVtx.deltaR(candDirFromVtx);
+	if( cand->particleId() == 1) {   // charged
+	  if( dRFromVtx > 0.02 // require 0.04 in the endcap
+	      && ( fabs(phoPos.Eta()) < 1.48 || dRFromVtx > 0.04 ) //0.02 in the barrel
+	      && fabs(cand->vertex().z() - vtx->z()) < 0.2  // z position compatibility
+	      && cand->pt() > 0.1
+	      && TMath::Sqrt(TMath::Power(cand->vertex().x() - vtx->x(),2) +  //dxy < 0.1
+			     TMath::Power(cand->vertex().y() - vtx->y(),2)) < 0.1 ) {    // hardcoded!!
+	    chIsoDep.addDeposit(candDirFromVtx, cand->pt());
+	  }
+	}
+	if(vtx!=PVs->begin()) continue; // only fill these for the first PV
+	Direction candDirFromOrigin(candPos.Eta(),candPos.Phi());
+	if( fabs(candPos.Eta()-phoPos.Eta()) < 0.015) continue; //inner deltaEta veto 
+	if(pfDirFromOrigin.deltaR(candDirFromOrigin) < 0.07 && fabs(candPos.Eta()) > 1.48) continue; // inner dr veto in endcap 
+	if( cand->particleId() == 5) nhIsoDep.addDeposit(candDirFromOrigin, cand->pt());            // neutral
+	if( cand->particleId() == 4) phIsoDep.addDeposit(candDirFromOrigin, cand->pt());            // gamma
+      } // end pfCand loop
+      privateData_->dr03chPFIso->push_back(chIsoDep.depositAndCountWithin( 0.3, emptyVetos, true ).first);
+      privateData_->dr03nhPFIso->push_back(nhIsoDep.depositAndCountWithin( 0.3, emptyVetos, true ).first);
+      privateData_->dr03phPFIso->push_back(phIsoDep.depositAndCountWithin( 0.3, emptyVetos, true ).first);
+    } // end vertex loop
+
   } else {
     privateData_->fiducialFlags->push_back(-1);
     privateData_->recoFlags->push_back(-1);
@@ -268,6 +343,7 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     privateData_->PFsuperClusterIndex->push_back( -1 );
 
     privateData_->hOverE->push_back(-999.);
+    privateData_->hTowOverE->push_back(-999.);
     privateData_->dr03TkSumPt->push_back(-999.);
     privateData_->dr03HollowTkSumPt->push_back(-999.);
     privateData_->dr03EcalRecHitSumEt->push_back(-999.);
@@ -282,6 +358,11 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     privateData_->hasPixelSeed->push_back(0);
     privateData_->hasMatchedConversion->push_back(false);
 
+    for(unsigned int i=0;i<PVs->size();i++){
+      privateData_->dr03chPFIso->push_back(-999.);
+      privateData_->dr03nhPFIso->push_back(-999.);
+      privateData_->dr03phPFIso->push_back(-999.);
+    }
   }
 
 }
@@ -294,6 +375,7 @@ void CmsPhotonFiller::treeEcalInfo(const std::string &colPrefix, const std::stri
   cmstree->column((colPrefix+"superClusterIndex"+colSuffix).c_str(), *privateData_->superClusterIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PFsuperClusterIndex"+colSuffix).c_str(), *privateData_->PFsuperClusterIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hOverE"+colSuffix).c_str(), *privateData_->hOverE, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"hTowOverE"+colSuffix).c_str(), *privateData_->hTowOverE, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr03TkSumPt"+colSuffix).c_str(), *privateData_->dr03TkSumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr03HollowTkSumPt"+colSuffix).c_str(), *privateData_->dr03HollowTkSumPt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dr03EcalRecHitSumEt"+colSuffix).c_str(), *privateData_->dr03EcalRecHitSumEt, nCandString.c_str(), 0, "Reco");
@@ -307,7 +389,12 @@ void CmsPhotonFiller::treeEcalInfo(const std::string &colPrefix, const std::stri
   cmstree->column((colPrefix+"photonIso"+colSuffix).c_str(), *privateData_->photonIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hasPixelSeed"+colSuffix).c_str(), *privateData_->hasPixelSeed, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"hasMatchedConversion"+colSuffix).c_str(),  *privateData_->hasMatchedConversion, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr03nhPFIso"+colSuffix).c_str(),  *privateData_->dr03nhPFIso, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"dr03phPFIso"+colSuffix).c_str(),  *privateData_->dr03phPFIso, nCandString.c_str(), 0, "Reco");
 
+  std::string nCandPVString = colPrefix+(*trkIndexName_)+"PerPV"+colSuffix; 
+  cmstree->column((colPrefix+"dr03chPFIso"+colSuffix).c_str(),  *privateData_->dr03chPFIso, nCandPVString.c_str(), 0, "Reco");
+  
 }
 
 
@@ -324,6 +411,7 @@ void CmsPhotonFillerData::initialise() {
   PFsuperClusterIndex = new vector<int>;
 
   hOverE                   = new vector<float>;
+  hTowOverE                = new vector<float>;
   dr03TkSumPt              = new vector<float>;
   dr03HollowTkSumPt        = new vector<float>;
   dr03EcalRecHitSumEt      = new vector<float>;
@@ -337,6 +425,10 @@ void CmsPhotonFillerData::initialise() {
   photonIso                = new vector<float>;
   hasPixelSeed             = new vector<int>;
   hasMatchedConversion     = new vector<bool>;
+  
+  dr03chPFIso              = new vector<float>;
+  dr03nhPFIso              = new vector<float>;
+  dr03phPFIso              = new vector<float>;
 
 }
 
@@ -365,4 +457,7 @@ void CmsPhotonFillerData::clearTrkVectors() {
   hasPixelSeed             ->clear();
   hasMatchedConversion     ->clear();
 
+  dr03chPFIso              ->clear();
+  dr03nhPFIso              ->clear();
+  dr03phPFIso              ->clear();
 }

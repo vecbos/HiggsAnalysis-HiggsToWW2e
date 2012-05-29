@@ -112,6 +112,11 @@ CmsBasicClusterFiller::~CmsBasicClusterFiller()
   delete privateData_->eBottom;
   delete privateData_->eLeft;
   delete privateData_->eRight;
+  delete privateData_->e2x5Max;
+  delete privateData_->e2x5Top;
+  delete privateData_->e2x5Bottom;
+  delete privateData_->e2x5Left;
+  delete privateData_->e2x5Right;
   delete privateData_->etaCrystal;
   delete privateData_->phiCrystal;
   delete privateData_->iEta;
@@ -291,6 +296,14 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       float eLeft   = EcalClusterTools::eLeft   (*cand, &(*rechits), topology );
       float eRight  = EcalClusterTools::eRight  (*cand, &(*rechits), topology );
 
+      float e2x5Max    = EcalClusterTools::e2x5Max    (*cand, &(*rechits), topology );
+      float e2x5Top    = EcalClusterTools::e2x5Top    (*cand, &(*rechits), topology );
+      float e2x5Bottom = EcalClusterTools::e2x5Bottom (*cand, &(*rechits), topology );
+      float e2x5Left   = EcalClusterTools::e2x5Left   (*cand, &(*rechits), topology );
+      float e2x5Right  = EcalClusterTools::e2x5Right  (*cand, &(*rechits), topology );
+
+      
+
       privateData_->e3x3->push_back(e3x3);
       privateData_->e5x5->push_back(e5x5);
       privateData_->eMax->push_back(eMax);
@@ -301,6 +314,12 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       privateData_->eBottom-> push_back(eBottom);
       privateData_->eLeft->   push_back(eLeft);
       privateData_->eRight->  push_back(eRight);
+
+      privateData_->e2x5Max->    push_back(e2x5Max);
+      privateData_->e2x5Top->    push_back(e2x5Top);
+      privateData_->e2x5Bottom-> push_back(e2x5Bottom);
+      privateData_->e2x5Left->   push_back(e2x5Left);
+      privateData_->e2x5Right->  push_back(e2x5Right);
 
       EcalClusterLocal _ecalLocal;
       float etacry,phicry,thetatilt,phitilt;
@@ -352,6 +371,11 @@ void CmsBasicClusterFiller::writeBCInfo(const BasicCluster *cand,
       privateData_->eBottom-> push_back(-1.);
       privateData_->eLeft->   push_back(-1.);
       privateData_->eRight->  push_back(-1.);
+      privateData_->e2x5Max->    push_back(-1.);
+      privateData_->e2x5Top->    push_back(-1.);
+      privateData_->e2x5Bottom-> push_back(-1.);
+      privateData_->e2x5Left->   push_back(-1.);
+      privateData_->e2x5Right->  push_back(-1.);
       privateData_->covIEtaIEta->push_back(-1.);
       privateData_->covIEtaIPhi->push_back(-1.);
       privateData_->covIPhiIPhi->push_back(-1.);
@@ -383,6 +407,11 @@ void CmsBasicClusterFiller::treeBCInfo(const std::string colPrefix, const std::s
   cmstree->column((colPrefix+"eBottom"+colSuffix).c_str(), *privateData_->eBottom, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eLeft"+colSuffix).c_str(), *privateData_->eLeft, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"eRight"+colSuffix).c_str(), *privateData_->eRight, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Max"+colSuffix).c_str(), *privateData_->e2x5Max, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Top"+colSuffix).c_str(), *privateData_->e2x5Top, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Bottom"+colSuffix).c_str(), *privateData_->e2x5Bottom, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Left"+colSuffix).c_str(), *privateData_->e2x5Left, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"e2x5Right"+colSuffix).c_str(), *privateData_->e2x5Right, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"etaCrystal"+colSuffix).c_str(), *privateData_->etaCrystal, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"phiCrystal"+colSuffix).c_str(), *privateData_->phiCrystal, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"iEta"+colSuffix).c_str(), *privateData_->iEta, nCandString.c_str(), 0, "Reco");
@@ -513,6 +542,11 @@ void CmsBasicClusterFillerData::initialiseCandidate()
   eBottom = new vector<float>;
   eLeft   = new vector<float>;
   eRight  = new vector<float>;
+  e2x5Max    = new vector<float>;
+  e2x5Top    = new vector<float>;
+  e2x5Bottom = new vector<float>;
+  e2x5Left   = new vector<float>;
+  e2x5Right  = new vector<float>;
   etaCrystal = new vector<float>;
   phiCrystal = new vector<float>;
   iEta = new vector<int>;
@@ -549,6 +583,11 @@ void CmsBasicClusterFillerData::clear()
   eBottom->clear();
   eLeft->clear();
   eRight->clear();
+  e2x5Max->clear();
+  e2x5Top->clear();
+  e2x5Bottom->clear();
+  e2x5Left->clear();
+  e2x5Right->clear();
   etaCrystal->clear();
   phiCrystal->clear();
   iEta->clear();

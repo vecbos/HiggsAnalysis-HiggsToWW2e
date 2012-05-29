@@ -431,6 +431,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveCand(saveCand_);
     treeFill.setEcalBarrelSuperClusters(ecalBarrelSCCollection_);
     treeFill.setEcalEndcapSuperClusters(ecalEndcapSCCollection_);
+    treeFill.setPFCandidates(PFCandidateCollection_);
+    treeFill.setPrimaryVertices(vertexCollection_);
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
     treeFill.writeCollectionToTree(photonCollection_, iEvent, iSetup, prefix, suffix, false);
