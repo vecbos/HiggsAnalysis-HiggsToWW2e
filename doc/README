@@ -5,7 +5,7 @@ cmsrel CMSSW_5_2_3
 cd CMSSW_5_2_3/src
 cmsenv
 
-cvs co -r V16-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V17-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r edm-30March2012 HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V06-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
