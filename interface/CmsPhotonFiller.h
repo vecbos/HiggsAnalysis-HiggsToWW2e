@@ -45,7 +45,12 @@ struct CmsPhotonFillerData : public CmsCandidateFillerData {
   vector<int> *hasPixelSeed;
   vector<bool> *hasMatchedConversion;
 
+  vector<float > *dr01chPFIso, *dr01nhPFIso, *dr01phPFIso;
+  vector<float > *dr02chPFIso, *dr02nhPFIso, *dr02phPFIso;
   vector<float > *dr03chPFIso, *dr03nhPFIso, *dr03phPFIso;
+  vector<float > *dr04chPFIso, *dr04nhPFIso, *dr04phPFIso;
+  vector<float > *dr05chPFIso, *dr05nhPFIso, *dr05phPFIso;
+  vector<float > *dr06chPFIso, *dr06nhPFIso, *dr06phPFIso;
 
   void initialise();
   void clearTrkVectors();
