@@ -331,8 +331,9 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
 	TVector3 candPos;
 	candPos.SetPtEtaPhi(cand->pt(), cand->eta(), cand->phi());
 	TVector3 candD = (candPos - vtxPos);
+	if(candD.Pt()==0) continue; //protect against TVector3::Eta() errors
 	Direction candDirFromVtx(candD.Eta(),candD.Phi());
-
+	
 	double dRFromVtx = pfDirFromVtx.deltaR(candDirFromVtx);
 	if( cand->particleId() == 1) {   // charged
 	  if( dRFromVtx > 0.02 // require 0.04 in the endcap
