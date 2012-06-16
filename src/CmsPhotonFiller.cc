@@ -306,72 +306,120 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
 
     //do the PF Isolation w.r.t. EVERY vertex
 
-    TVector3 phoPos(photonRef->caloPosition().x(),photonRef->caloPosition().y(),photonRef->caloPosition().z());
-
     PFCandidateCollection::const_iterator cand;
     VertexCollection::const_iterator vtx;
     AbsVetos emptyVetos;
     
     // neutral hadron and photon pf isolation are always computed with respect to 0,0,0
     // charged hadron isolation is computed w.r.t. each vertex
-    Direction pfDirFromOrigin(phoPos.Eta(),phoPos.Phi());
-    IsoDeposit nhIsoDep(pfDirFromOrigin);
-    IsoDeposit phIsoDep(pfDirFromOrigin);
       
+    TVector3 phoPos(photonRef->superCluster()->x(),photonRef->superCluster()->y(),photonRef->superCluster()->z());
+    //vetoes
+    //photon
+    const float dRVetoBarrel_p = 0.;
+    const float dRVetoEndcap_p = 0.07;
+    const float etaStripBarrel_p = 0.015;
+    const float etaStripEndcap_p = 0.;
+    //charged
+    const float dRVetoBarrel_c = 0.02;
+    const float dRVetoEndcap_c = 0.02;
+    const float dzMax_c = 0.2;
+    const float dxyMax_c  = 0.1;
+
+    float dRVeto_p = dRVetoEndcap_p;
+    float etaStrip_p = etaStripEndcap_p;
+    float dRVeto_c = dRVetoEndcap_c;
+    if(fabs(phoPos.Eta()) < 1.48){ //barrel
+      dRVeto_p = dRVetoBarrel_p;
+      etaStrip_p = etaStripBarrel_p;
+      dRVeto_c = dRVetoBarrel_c;
+    }
+    const int nCones=6;
+    float neutralIsos[nCones], photonIsos[nCones]; 
+    for(int i=0;i<nCones;i++){
+      neutralIsos[i]=0; photonIsos[i]=0;
+    }
+
     for(vtx = PVs->begin(); vtx != PVs->end(); vtx++){ 
       //calculate the vector w.r.t. this vtx
       TVector3 vtxPos(vtx->x(),vtx->y(),vtx->z());
-      TVector3 d = (phoPos-vtxPos).Unit();
-      Direction pfDirFromVtx(d.Eta(),d.Phi());
-      IsoDeposit chIsoDep(pfDirFromVtx);
+      TVector3 phoDirFromVtx = (phoPos-vtxPos).Unit();
+
+      float chargedIsos[nCones];
+      for(int i=0;i<nCones;i++) chargedIsos[i] = 0;
+
       for(cand = pfCands->begin(); cand != pfCands->end(); cand++){
 	if( fabs(cand->energy() - photonRef->energy()) < 1e-6 
 	    && fabs(cand->eta() - photonRef->eta())    < 1e-6
 	    && fabs(cand->phi() - photonRef->phi())    < 1e-6) continue; // this candidate is the photon!
 	TVector3 candPos;
 	candPos.SetPtEtaPhi(cand->pt(), cand->eta(), cand->phi());
-	TVector3 candD = (candPos - vtxPos);
-	if(candD.Pt()==0) continue; //protect against TVector3::Eta() errors
-	Direction candDirFromVtx(candD.Eta(),candD.Phi());
-	
-	double dRFromVtx = pfDirFromVtx.deltaR(candDirFromVtx);
-	if( cand->particleId() == 1) {   // charged
-	  if( dRFromVtx > 0.02 // require 0.04 in the endcap
-	      && ( fabs(phoPos.Eta()) < 1.48 || dRFromVtx > 0.04 ) //0.02 in the barrel
-	      && fabs(cand->vertex().z() - vtx->z()) < 0.2  // z position compatibility
-	      && cand->pt() > 0.1
-	      && TMath::Sqrt(TMath::Power(cand->vertex().x() - vtx->x(),2) +  //dxy < 0.1
-			     TMath::Power(cand->vertex().y() - vtx->y(),2)) < 0.1 ) {    // hardcoded!!
-	    chIsoDep.addDeposit(candDirFromVtx, cand->pt());
+
+	//if(candD.Pt()==0) continue;
+	if( cand->particleId() == reco::PFCandidate::h) {   // charged
+	  float dz = fabs(cand->trackRef()->dz(vtx->position()));
+	  if (dz > dzMax_c) continue;  //vertex of this cand not compatible with this reco vtx
+	  float dxy = fabs(cand->trackRef()->dxy(vtx->position()));
+	  if(fabs(dxy) > dxyMax_c) continue;
+
+	  float dR = phoDirFromVtx.DeltaR(candPos);
+	  if(dR < dRVeto_c) continue;
+	  for(int i=0;i<nCones;i++){
+	    if(dR > 0.1*(i+1)) continue; // fill cones in increasing 0.1 radius
+	    chargedIsos[i] += cand->pt();
+	  }
+	} // end charged 
+      
+	if(vtx!=PVs->begin()) continue; // only fill these for the first PV
+
+	TVector3 candVtx(cand->vertex().x(),cand->vertex().y(),cand->vertex().z());
+	TVector3 phoDirFromCandVtx = phoPos-candVtx;
+
+	//neutral VETO
+	if( cand->particleId() == reco::PFCandidate::h0){
+	  float dR = phoDirFromCandVtx.DeltaR(candPos);
+	  for(int i=0;i<nCones;i++){
+	    if(dR > 0.1*(i+1))continue;
+	    neutralIsos[i]+=cand->pt();
+	  }	  
+	}
+
+	//PHOTON ISO
+	if( cand->particleId() == reco::PFCandidate::gamma){
+	  if(cand->superClusterRef().isNonnull() && photonRef->superCluster().isNonnull()){
+	    if(cand->superClusterRef()== photonRef->superCluster()) continue; // veto the candidate matched if its a pfPhoton matched to the reco::Photon
+	  }
+
+	  float dEta = fabs(phoDirFromCandVtx.Eta() - cand->momentum().Eta());
+	  if (dEta < etaStrip_p) continue;
+	  float dR = phoDirFromCandVtx.DeltaR(candPos);
+	  if(dR < dRVeto_p) continue;
+	  for(int i=0;i<nCones;i++){
+	    if(dR > 0.1*(i+1))continue;
+	    photonIsos[i]+=cand->pt();
 	  }
 	}
-	if(vtx!=PVs->begin()) continue; // only fill these for the first PV
-	Direction candDirFromOrigin(candPos.Eta(),candPos.Phi());
-	if( fabs(candPos.Eta()-phoPos.Eta()) < 0.015) continue; //inner deltaEta veto 
-	if(pfDirFromOrigin.deltaR(candDirFromOrigin) < 0.07 && fabs(candPos.Eta()) > 1.48) continue; // inner dr veto in endcap 
-	if( cand->particleId() == 5) nhIsoDep.addDeposit(candDirFromOrigin, cand->pt());            // neutral
-	if( cand->particleId() == 4) phIsoDep.addDeposit(candDirFromOrigin, cand->pt());            // gamma
       } // end pfCand loop
-      privateData_->dr01chPFIso->push_back(chIsoDep.depositAndCountWithin( 0.1, emptyVetos, true ).first);
-      privateData_->dr02chPFIso->push_back(chIsoDep.depositAndCountWithin( 0.2, emptyVetos, true ).first);
-      privateData_->dr03chPFIso->push_back(chIsoDep.depositAndCountWithin( 0.3, emptyVetos, true ).first);
-      privateData_->dr04chPFIso->push_back(chIsoDep.depositAndCountWithin( 0.4, emptyVetos, true ).first);
-      privateData_->dr05chPFIso->push_back(chIsoDep.depositAndCountWithin( 0.5, emptyVetos, true ).first);
-      privateData_->dr06chPFIso->push_back(chIsoDep.depositAndCountWithin( 0.6, emptyVetos, true ).first);
+      privateData_->dr01chPFIso->push_back(chargedIsos[0]);
+      privateData_->dr02chPFIso->push_back(chargedIsos[1]);
+      privateData_->dr03chPFIso->push_back(chargedIsos[2]);
+      privateData_->dr04chPFIso->push_back(chargedIsos[3]);
+      privateData_->dr05chPFIso->push_back(chargedIsos[4]);
+      privateData_->dr06chPFIso->push_back(chargedIsos[5]);
 
     } // end vertex loop
-    privateData_->dr01nhPFIso->push_back(nhIsoDep.depositAndCountWithin( 0.1, emptyVetos, true ).first);
-    privateData_->dr01phPFIso->push_back(phIsoDep.depositAndCountWithin( 0.1, emptyVetos, true ).first);
-    privateData_->dr02nhPFIso->push_back(nhIsoDep.depositAndCountWithin( 0.2, emptyVetos, true ).first);
-    privateData_->dr02phPFIso->push_back(phIsoDep.depositAndCountWithin( 0.2, emptyVetos, true ).first);
-    privateData_->dr03nhPFIso->push_back(nhIsoDep.depositAndCountWithin( 0.3, emptyVetos, true ).first);
-    privateData_->dr03phPFIso->push_back(phIsoDep.depositAndCountWithin( 0.3, emptyVetos, true ).first);
-    privateData_->dr04nhPFIso->push_back(nhIsoDep.depositAndCountWithin( 0.4, emptyVetos, true ).first);
-    privateData_->dr04phPFIso->push_back(phIsoDep.depositAndCountWithin( 0.4, emptyVetos, true ).first);
-    privateData_->dr05nhPFIso->push_back(nhIsoDep.depositAndCountWithin( 0.5, emptyVetos, true ).first);
-    privateData_->dr05phPFIso->push_back(phIsoDep.depositAndCountWithin( 0.5, emptyVetos, true ).first);
-    privateData_->dr06nhPFIso->push_back(nhIsoDep.depositAndCountWithin( 0.6, emptyVetos, true ).first);
-    privateData_->dr06phPFIso->push_back(phIsoDep.depositAndCountWithin( 0.6, emptyVetos, true ).first);
+    privateData_->dr01nhPFIso->push_back(neutralIsos[0]);
+    privateData_->dr01phPFIso->push_back(photonIsos[0]);
+    privateData_->dr02nhPFIso->push_back(neutralIsos[1]);
+    privateData_->dr02phPFIso->push_back(photonIsos[1]);
+    privateData_->dr03nhPFIso->push_back(neutralIsos[2]);
+    privateData_->dr03phPFIso->push_back(photonIsos[2]);
+    privateData_->dr04nhPFIso->push_back(neutralIsos[3]);
+    privateData_->dr04phPFIso->push_back(photonIsos[3]);
+    privateData_->dr05nhPFIso->push_back(neutralIsos[4]);
+    privateData_->dr05phPFIso->push_back(photonIsos[4]);
+    privateData_->dr06nhPFIso->push_back(neutralIsos[5]);
+    privateData_->dr06phPFIso->push_back(photonIsos[5]);
 
   } else {
     privateData_->fiducialFlags->push_back(-1);
