@@ -117,12 +117,16 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(50) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root') if is42X else cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/AODSummer12/00514868-B47A-E111-803E-001D0967DDC3.root') 
+    ## This is an example of an event causing the crach.  The dataset is
+    ## /DYToMuMu_M_20_FSRFilter_8_TuneZ2star_8TeV_pythia6_GEN_SIM_v3/veverka-_step3_RAW2DIGI_L1Reco_RECO_PU_v3-90a3c643a4855c1621ba3bfcbef2e742/USER
+    ## published in http://cmsdbsprod.cern.ch/cms_dbs_ph_analysis_01/servlet/DBSServlet
+                            fileNames = cms.untracked.vstring('file:/mnt/tier2/store/user/veverka/DYToMuMu_M_20_FSRFilter_8_TuneZ2star_8TeV_pythia6_GEN_SIM_v3/_step3_RAW2DIGI_L1Reco_RECO_PU_v3/90a3c643a4855c1621ba3bfcbef2e742/step3_RAW2DIGI_L1Reco_RECO_PU_35_1_ZhG.root'), 
+                            skipEvents = cms.untracked.uint32(403)
                             )
 
 process.prejets = cms.Sequence( process.leptonLinkedTracks
