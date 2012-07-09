@@ -349,13 +349,13 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
       for(int i=0;i<nCones;i++) chargedIsos[i] = 0;
 
       for(cand = pfCands->begin(); cand != pfCands->end(); cand++){
+	if(cand->pt() < 0.0001) continue;
 	if( fabs(cand->energy() - photonRef->energy()) < 1e-6 
 	    && fabs(cand->eta() - photonRef->eta())    < 1e-6
 	    && fabs(cand->phi() - photonRef->phi())    < 1e-6) continue; // this candidate is the photon!
 	TVector3 candPos;
 	candPos.SetPtEtaPhi(cand->pt(), cand->eta(), cand->phi());
 
-	//if(candD.Pt()==0) continue;
 	if( cand->particleId() == reco::PFCandidate::h) {   // charged
 	  float dz = fabs(cand->trackRef()->dz(vtx->position()));
 	  if (dz > dzMax_c) continue;  //vertex of this cand not compatible with this reco vtx
