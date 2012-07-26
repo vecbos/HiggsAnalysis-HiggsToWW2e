@@ -79,14 +79,14 @@ class CmsTrackFiller {
   // Dump everything
   CmsTrackFiller(CmsTree *, 
 		 edm::InputTag vertexCollection,
-		 int maxTracks=500, int maxMCTracks=2000, 
+		 int maxTracks=2000, int maxMCTracks=2000, 
 		 bool noOutputIfLimitsReached=false );
   
   // Dump  everything if fatTree is true and less informations otherwise
   CmsTrackFiller(CmsTree *, 
 		 edm::InputTag vertexCollection,
 		 bool fatTree, 
-		 int maxTracks=500, int maxMCTracks=2000, 
+		 int maxTracks=2000, int maxMCTracks=2000, 
 		 bool noOutputIfLimitsReached=false, bool vtxtrack=false);
   
   // Destructor
