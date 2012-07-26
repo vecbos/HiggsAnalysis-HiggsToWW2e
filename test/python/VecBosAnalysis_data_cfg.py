@@ -5,15 +5,15 @@ runOnAOD = 1
 
 process = cms.Process("VecBosAnalysis")
 
-process.load("Configuration.StandardSequences.MagneticField_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
-process.load("Configuration.StandardSequences.Reconstruction_cff")
+process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
+process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
+process.load("Configuration.StandardSequences.Reconstruction_Data_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(is42X):
     process.GlobalTag.globaltag = 'GR_R_42_V25::All'
 else:
-    process.GlobalTag.globaltag = 'GR_R_52_V7::All'
+    process.GlobalTag.globaltag = 'GR_R_52_V7C::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -103,7 +103,9 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root') if is42X else cms.untracked.vstring('/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/191/226/9E7EF5CF-DA87-E111-8BC6-5404A63886C6.root')
+#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root') if is42X else cms.untracked.vstring('/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/191/226/9E7EF5CF-DA87-E111-8BC6-5404A63886C6.root')
+#                            fileNames = cms.untracked.vstring('/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/191/830/6C397AE1-CA8C-E111-9CA2-003048F1C424.root')
+                            fileNames = cms.untracked.vstring('file:./pickevents.root')
                             )
 
 process.prejets = cms.Sequence( process.leptonLinkedTracks

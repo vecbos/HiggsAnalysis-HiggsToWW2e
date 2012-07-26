@@ -6,7 +6,7 @@ runOnAOD = 1
 process = cms.Process("VecBosAnalysis")
 
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
-process.load("Configuration.StandardSequences.Geometry_cff")
+process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 if(is42X):
@@ -117,12 +117,12 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(500) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root') if is42X else cms.untracked.vstring('rfio:/castor/cern.ch/user/e/emanuele/AODSummer12/00514868-B47A-E111-803E-001D0967DDC3.root') 
+                            fileNames = cms.untracked.vstring('/store/mc/Summer12/DYToMuMu_M-20_CT10_TuneZ2star_8TeV-powheg-pythia6/AODSIM/PU_S8_START52_V9-v2/0000/8696787E-F298-E111-BA4A-001A928116BC.root')
                             )
 
 process.prejets = cms.Sequence( process.leptonLinkedTracks
