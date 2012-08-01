@@ -312,6 +312,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   /// fill the run info (run number, event, ...)
   if(dumpRunInfo_) {
     CmsRunInfoFiller runFiller( tree_, dumpMCTruth_ );
+    runFiller.dumpL1Trigger(dumpTriggerResults_);
     runFiller.writeRunInfoToTree(iEvent,iSetup,false);
   }
 
