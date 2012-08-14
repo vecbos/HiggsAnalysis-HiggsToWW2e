@@ -53,6 +53,7 @@ struct CmsMuonFillerData : public CmsCandidateFillerData {
     *pfCandChargedIso06, *pfCandNeutralIso06, *pfCandPhotonIso06,
     *pfCandChargedIso07, *pfCandNeutralIso07, *pfCandPhotonIso07,
     *pfCandChargedDirIso04, *pfCandNeutralDirIso04, *pfCandPhotonDirIso04,
+    *pfIsolationSumPUPtR03, *pfIsolationSumPUPtR04,
     *mvaiso;
   vector<float> *kink;
 

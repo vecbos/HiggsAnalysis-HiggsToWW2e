@@ -165,6 +165,8 @@ CmsMuonFiller::~CmsMuonFiller() {
   delete privateData_->pfCandChargedDirIso04;
   delete privateData_->pfCandNeutralDirIso04;
   delete privateData_->pfCandPhotonDirIso04;
+  delete privateData_->pfIsolationSumPUPtR03;
+  delete privateData_->pfIsolationSumPUPtR04;
   delete privateData_->mvaiso;
 
   delete privateData_->ncand;
@@ -446,6 +448,10 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfCandNeutralDirIso04->push_back( muonsPfCandNHad04DirIsoVal[muonRef] );
     privateData_->pfCandPhotonDirIso04->push_back( muonsPfCandPhoton04DirIsoVal[muonRef] );
 
+    // deltabeta corrected isolation
+    privateData_->pfIsolationSumPUPtR03->push_back(muonRef->pfIsolationR03().sumPUPt );
+    privateData_->pfIsolationSumPUPtR04->push_back(muonRef->pfIsolationR04().sumPUPt );
+
     // track kinks
     privateData_->kink->push_back(muonRef->combinedQuality().trkKink) ;
 
@@ -516,6 +522,8 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfCandChargedDirIso04->push_back( -1 );
     privateData_->pfCandNeutralDirIso04->push_back( -1 );
     privateData_->pfCandPhotonDirIso04->push_back( -1 );
+    privateData_->pfIsolationSumPUPtR03->push_back( -1 );
+    privateData_->pfIsolationSumPUPtR04->push_back( -1 );
 
     privateData_->mvaiso->push_back( -1 );
     privateData_->kink->push_back( -1 );
@@ -583,6 +591,8 @@ void CmsMuonFiller::treeMuonInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"pfCandChargedDirIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedDirIso04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCandNeutralDirIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralDirIso04, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCandPhotonDirIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonDirIso04, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfIsolationSumPUPtR03"+colSuffix).c_str(),  *privateData_->pfIsolationSumPUPtR03, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pfIsolationSumPUPtR04"+colSuffix).c_str(),  *privateData_->pfIsolationSumPUPtR04, nCandString.c_str(), 0, "Reco");
 
   cmstree->column((colPrefix+"kink"+colSuffix).c_str(),  *privateData_->kink, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"mvaiso"+colSuffix).c_str(),  *privateData_->mvaiso, nCandString.c_str(), 0, "Reco");
@@ -649,6 +659,8 @@ void CmsMuonFillerData::initialise() {
   pfCandChargedDirIso04 = new vector<float>;
   pfCandNeutralDirIso04 = new vector<float>;
   pfCandPhotonDirIso04  = new vector<float>;
+  pfIsolationSumPUPtR03  = new vector<float>;
+  pfIsolationSumPUPtR04  = new vector<float>;
 
   kink = new vector<float>;
   mvaiso = new vector<float>;
@@ -715,6 +727,8 @@ void CmsMuonFillerData::clearTrkVectors() {
   pfCandChargedDirIso04 ->clear();
   pfCandNeutralDirIso04 ->clear();
   pfCandPhotonDirIso04  ->clear();
+  pfIsolationSumPUPtR03->clear();
+  pfIsolationSumPUPtR04->clear();
 
   kink->clear();
   mvaiso->clear();
