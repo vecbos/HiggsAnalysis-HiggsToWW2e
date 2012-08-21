@@ -759,6 +759,7 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 	float SumDphi=0;
 	float SumDphi2=0;
 	float SumDetaDphi=0;
+	float SumDR=0;
 	
 	float Eta0=pfjet->eta();
 	float Phi0=pfjet->phi();
@@ -768,8 +769,13 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 		double pt=pfjet->getJetConstituentsQuick()[i]->pt();
 		double eta=pfjet->getJetConstituentsQuick()[i]->eta();
 		double phi=pfjet->getJetConstituentsQuick()[i]->phi();
+		TLorentzVector cand;
+		cand.SetPtEtaPhiE(pt, eta, phi, pt); //only interested in direction
+		TLorentzVector jet;
+		jet.SetPtEtaPhiE(pfjet->pt(), pfjet->eta(), pfjet->phi(), pfjet->pt()); //only interested in direction
 		double dphi = 2*atan(tan((phi-Phi0)/2));      
 		double deta = eta-Eta0;
+		double dR = jet.DeltaR(cand);
 		SumW+=pt;
 		SumW2+=pt*pt;
 		SumDeta+=pt*pt*deta;
@@ -777,6 +783,7 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 		SumDphi+=pt*pt*dphi;
 		SumDphi2+=pt*pt*dphi*dphi;
 		SumDetaDphi+=pt*pt*deta*dphi;
+		SumDR+=pt*pt*dR*dR;
 		}
 	float ave_deta = SumDeta/SumW2;
 	float ave_dphi = SumDphi/SumW2;
@@ -795,7 +802,10 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
       if (c != 0) {
         tana = 0.5*(b-a+delta)/c;
       }	
+
       ptD =sqrt( SumW2/ (SumW*SumW));
+      rmsCand = SumDR/SumW2;
+
       if(pfjet->nConstituents()>0)r_ch=pfjet->getJetConstituentsQuick()[0]->pt()/SumW;
 	//-------calculate pull------
     	float ddetaR_sum(0.0), ddphiR_sum(0.0),ddetaR_sum_QC(0.0), ddphiR_sum_QC(0.0);
