@@ -38,6 +38,11 @@ struct QGLikelihoodVars {
 
   float ptD;
   float rmsCand;
+  float axis1;
+  float axis2;
+  float pull;
+  float r_ch;
+  float tana;
 
 };
 
@@ -59,7 +64,7 @@ struct CmsPFJetFillerData {
     *photonMultiplicity, *electronMultiplicity, *muonMultiplicity,
     *HFHadronMultiplicity, *HFEMMultiplicity;
   std::vector<float> *uncorrEnergy, *area;
-  std::vector<float> *ptD, *rmsCand;
+  std::vector<float> *ptD, *rmsCand, *axis1, *axis2, *pull, *r_ch, *tana;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *combinedSecondaryVertexMVABJetTags, 
     *jetBProbabilityBJetTags, 

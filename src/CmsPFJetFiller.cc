@@ -126,6 +126,11 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   // additional variables for Marini's likelihood:
   delete privateData_->ptD;
   delete privateData_->rmsCand;
+  delete privateData_->axis1;
+  delete privateData_->axis2;
+  delete privateData_->pull;
+  delete privateData_->r_ch;
+  delete privateData_->tana;
 
   // additional variables for PU studies
   delete privateData_->jetIdMvaSimple;
@@ -263,6 +268,11 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
         privateData_->ptD->push_back( qgvars.ptD );
         privateData_->rmsCand->push_back( qgvars.rmsCand );
+        privateData_->axis1->push_back( qgvars.axis1 );
+        privateData_->axis2->push_back( qgvars.axis2 );
+        privateData_->pull->push_back( qgvars.pull );
+        privateData_->r_ch->push_back( qgvars.r_ch );
+        privateData_->tana->push_back( qgvars.tana );
 
 	float sumPt_cands,sumPt2_cands,rms_cands,sumTrkPtBetaStar,sumTrkPt,betastar_;
         sumPt_cands=sumPt2_cands=rms_cands=sumTrkPtBetaStar=sumTrkPt=betastar_=0.0;
@@ -552,6 +562,11 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   }
   cmstree->column((colPrefix+"rmsCand"+colSuffix).c_str(), *privateData_->rmsCand, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"ptD"+colSuffix).c_str(), *privateData_->ptD, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"axis1"+colSuffix).c_str(), *privateData_->axis1, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"axis2"+colSuffix).c_str(), *privateData_->axis2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pull"+colSuffix).c_str(), *privateData_->pull, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"r_ch"+colSuffix).c_str(), *privateData_->r_ch, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"tana"+colSuffix).c_str(), *privateData_->tana, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -611,6 +626,11 @@ void CmsPFJetFillerData::initialise() {
   weightedDz2 = new vector<float>;
   ptD = new vector<float>;
   rmsCand = new vector<float>;
+  axis1 = new vector<float>;
+  axis2 = new vector<float>;
+  pull = new vector<float>;
+  r_ch = new vector<float>;
+  tana = new vector<float>;
   betastar = new vector<float>;
   jetIdMvaSimple = new vector<float>;
   jetIdMvaFull = new vector<float>;
@@ -681,6 +701,11 @@ void CmsPFJetFillerData::clearTrkVectors() {
   weightedDz2->clear();
   ptD->clear();
   rmsCand->clear();
+  axis1->clear();
+  axis2->clear();
+  pull->clear();
+  r_ch->clear();
+  tana->clear();
   betastar -> clear();
   jetIdMvaSimple -> clear();
   jetIdMvaFull -> clear();
@@ -716,88 +741,94 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
                       ) );
      }
 
-  fastjet::JetDefinition ak_def(fastjet::antikt_algorithm, R);
-  fastjet::JetDefinition ak_def1(fastjet::antikt_algorithm, 0.04);
-  fastjet::JetDefinition ak_def2(fastjet::antikt_algorithm, 0.25);
   
-  fastjet::ClusterSequence seq(*input_particles, ak_def);
-  fastjet::ClusterSequence seq1(*input_particles,ak_def1);
-  fastjet::ClusterSequence seq2(*input_particles,ak_def2);
-  
-  float jtpt = pfjet->pt();
-
-  //recompute ptmin
-  float ptmin = ptratio * jtpt;
-  
-  //now I want to know how many subjets there are with pt>ptmin
-  vector<fastjet::PseudoJet> inclusive_jets;
-  
-  inclusive_jets = sorted_by_pt(seq1.inclusive_jets(jtpt*0.30));
-  //int nsubjets1=inclusive_jets.size();
-  
-  inclusive_jets = sorted_by_pt(seq2.inclusive_jets(jtpt*0.05));
-  //  int nsubjets2=inclusive_jets.size();
-  
-  inclusive_jets = sorted_by_pt(seq.inclusive_jets(ptmin));
-  //  int nsubjets =  inclusive_jets.size(); 
-  
-  //cerco il raggio del jet
-  //the next definition of WEIGHT is used in the radius: Pt^2
-  Double_t jtpt_s=0;//sum to get the jtpt that I see after clustering
-  if(inclusive_jets.size()>0)
-    {
-    jtpt_s=0;
-    for(unsigned int i = 0; i<inclusive_jets.size(); i++ )
-    		jtpt_s+=inclusive_jets.at(i).perp();
-  }
-  #define WEIGHT (inclusive_jets.at(i).perp()*inclusive_jets.at(i).perp())
-  float r=0.;
-  if(inclusive_jets.size()>0)
+  //Compute rmsCand
+  float rmsCand=  -999.;
+  float ptD=      -999.;
+  float axis1=    -999.;
+  float axis2=    -999.;
+  float pull=     -999.;
+  float r_ch=     -999.;
+  float tana =    -999.;
+	//compute the variables
   {
-  Double_t eta0=0,phi0=0,Sum=0.0;
-  for(unsigned int i=0;i<inclusive_jets.size();i++)
-    {
-    Sum+= WEIGHT ;
-    eta0+= WEIGHT * inclusive_jets.at(i).eta();
-    //problema con phi
-    if(1.5<inclusive_jets.at(0).phi()&&inclusive_jets.at(0).phi()<4.6)
-    	phi0+= WEIGHT * inclusive_jets.at(i).phi();
-    else
-    	phi0+= WEIGHT * inclusive_jets.at(i).phi_std();
-    }
-  eta0/=Sum;
-  phi0/=Sum;
-  r=0.;
-  for(unsigned int i=0;i<inclusive_jets.size();i++)
-    {
-    if(1.5<inclusive_jets.at(0).phi()&&inclusive_jets.at(0).phi()<4.6)
-    r+= ((inclusive_jets.at(i).eta()-eta0)*(inclusive_jets.at(i).eta()-eta0) 
-    		+ (inclusive_jets.at(i).phi()-phi0)*(inclusive_jets.at(i).phi()-phi0)) * WEIGHT ;
-    else
-    r+=((inclusive_jets.at(i).eta()-eta0)*(inclusive_jets.at(i).eta()-eta0) 
-    		+ (inclusive_jets.at(i).phi_std()-phi0)*(inclusive_jets.at(i).phi_std()-phi0))*WEIGHT;
-    }
-    r/=Sum;
-  }else r=0;
-  //I want to compute the PtD =\sqrt( \sum_j (Pt_j/Pt_jet) ^ 2)
-  float PtD=0.0;
-  for(unsigned int i=0 ; i < inclusive_jets.size(); i++ )
-    {
-    PtD+=inclusive_jets.at(i).perp2()/(jtpt_s*jtpt_s);
-    }
-  PtD=sqrt(PtD);
+	float SumW=0;
+	float SumW2=0;
+	float SumDeta=0;
+	float SumDeta2=0;
+	float SumDphi=0;
+	float SumDphi2=0;
+	float SumDetaDphi=0;
+	
+	float Eta0=pfjet->eta();
+	float Phi0=pfjet->phi();
+	
+	for(int i=0;i<pfjet->nConstituents();++i)
+		{
+		double pt=pfjet->getJetConstituentsQuick()[i]->pt();
+		double eta=pfjet->getJetConstituentsQuick()[i]->eta();
+		double phi=pfjet->getJetConstituentsQuick()[i]->phi();
+		double dphi = 2*atan(tan((phi-Phi0)/2));      
+		double deta = eta-Eta0;
+		SumW+=pt;
+		SumW2+=pt*pt;
+		SumDeta+=pt*pt*deta;
+		SumDeta2+=pt*pt*deta*deta;
+		SumDphi+=pt*pt*dphi;
+		SumDphi2+=pt*pt*dphi*dphi;
+		SumDetaDphi+=pt*pt*deta*dphi;
+		}
+	float ave_deta = SumDeta/SumW2;
+	float ave_dphi = SumDphi/SumW2;
+	float  ave_deta2 = SumDeta2/SumW2;
+	float  ave_dphi2 = SumDphi2/SumW2;
+      float a = ave_deta2-ave_deta*ave_deta;
+      float b = ave_dphi2-ave_dphi*ave_dphi;
+      float c = -(SumDetaDphi/SumW2-ave_deta*ave_dphi);
+      float delta = sqrt(fabs((a-b)*(a-b)+4*c*c));
+      if (a+b+delta > 0) {
+        axis1 = sqrt(0.5*(a+b+delta));
+      }
+      if (a+b-delta > 0) {  
+        axis2 = sqrt(0.5*(a+b-delta));
+      }
+      if (c != 0) {
+        tana = 0.5*(b-a+delta)/c;
+      }	
+      ptD =sqrt( SumW2/ (SumW*SumW));
+      if(pfjet->nConstituents()>0)r_ch=pfjet->getJetConstituentsQuick()[0]->pt()/SumW;
+	//-------calculate pull------
+    	float ddetaR_sum(0.0), ddphiR_sum(0.0),ddetaR_sum_QC(0.0), ddphiR_sum_QC(0.0);
+    	for(int i=0; i<pfjet->nConstituents(); ++i) {
+			double pt=pfjet->getJetConstituentsQuick()[i]->pt();
+			double eta=pfjet->getJetConstituentsQuick()[i]->eta();
+			double phi=pfjet->getJetConstituentsQuick()[i]->phi();
+			double dphi = 2*atan(tan((phi-Phi0)/2));      
+			double deta = eta-Eta0;
+  		    float weight = pt*pt;
+  		    float ddeta, ddphi,ddR;
+  		    ddeta = deta - ave_deta ;//jetPart_deta[i] - ave_deta ; 
+  		    ddphi = 2*atan(tan(( dphi - ave_dphi)/2.)) ;
+  		    ddR = sqrt(ddeta*ddeta + ddphi*ddphi);
+  		    ddetaR_sum += ddR*ddeta*weight;
+  		    ddphiR_sum += ddR*ddphi*weight;
+  		  }//second loop over constituents  
+  		  if (SumW2 > 0) {
+  		    float ddetaR_ave = ddetaR_sum/SumW2;
+  		    float ddphiR_ave = ddphiR_sum/SumW2;
+  		    pull = sqrt(ddetaR_ave*ddetaR_ave+ddphiR_ave*ddphiR_ave);
+  		  }
+  } //close compute brackets
   
-//  //I compute sub1ptratio
-//if (inclusive_jets.size()>0)
-//	sub1ptratio=inclusive_jets.at(0).perp()/jtpt_s;
-//else 
-//	sub1ptratio=0;
-
-  delete input_particles;
-
+  //export variables
   QGLikelihoodVars vars;
-  vars.ptD = PtD;
-  vars.rmsCand = r;
+  vars.ptD = ptD;
+  vars.rmsCand = rmsCand;
+  vars.axis1= axis1;
+  vars.axis2= axis2;
+  vars.pull=  pull;
+  vars.r_ch=  r_ch;
+  vars.tana = tana;
 
   return vars;
 
