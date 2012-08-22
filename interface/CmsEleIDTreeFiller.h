@@ -27,6 +27,8 @@
 #include "DataFormats/EcalRecHit/interface/EcalRecHitCollections.h"
 #include "DataFormats/Candidate/interface/Candidate.h"
 #include "DataFormats/Candidate/interface/CandidateFwd.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 #include "DataFormats/EgammaCandidates/interface/GsfElectronFwd.h"
 
@@ -63,7 +65,7 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
     *pfCandChargedIso07, *pfCandNeutralIso07, *pfCandPhotonIso07,
     *pfCandChargedDirIso04, *pfCandNeutralDirIso04, *pfCandPhotonDirIso04;
 
-  vector<float> *eleLik, *pflowMVA, *mvaidtrig, *mvaidnontrig;
+  vector<float> *eleLik, *pflowMVA, *mvaidtrig, *mvaidisotrig, *mvaidnontrig;
 
 public:
   void initialise();
@@ -103,8 +105,10 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   void setCalotowersProducer( edm::InputTag calotowersProducer ) { calotowersProducer_ = calotowersProducer; }
   //! set the vertex collection
   void setVertexCollection(edm::InputTag collectionTag) { m_vxtCollectionTag = collectionTag; }
+  //! set the PF candidates collection
+  void setPFCandidateCollection(edm::InputTag collectionTag) { m_pfcandCollectionTag = collectionTag; }
   //! set the eleID MVA algos
-  void setEleIdMVAs(EGammaMvaEleEstimator* algotrig, EGammaMvaEleEstimator* algonontrig) { myMVATrig = algotrig; myMVANonTrig = algonontrig; }
+  void setEleIdMVAs(EGammaMvaEleEstimator* algotrig, EGammaMvaEleEstimator* algotrigidiso, EGammaMvaEleEstimator* algonontrig) { myMVATrig = algotrig; myMVATrigIdIsoCombined = algotrigidiso; myMVANonTrig = algonontrig; }
 
   //! set to false if the column with the block size is set by another object
   void setStandalone(bool );
@@ -132,8 +136,8 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
 
   edm::InputTag tracksProducer_;
   edm::InputTag calotowersProducer_;
-
   edm::InputTag m_vxtCollectionTag;
+  edm::InputTag m_pfcandCollectionTag;
 
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;
@@ -152,9 +156,12 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   EgammaTowerIsolation *hadDepth1Isolation03_, *hadDepth2Isolation03_, 
     *hadDepth1Isolation04_, *hadDepth2Isolation04_;
 
-  EGammaMvaEleEstimator* myMVANonTrig, *myMVATrig;
+  EGammaMvaEleEstimator* myMVANonTrig, *myMVATrig, *myMVATrigIdIsoCombined;
   edm::Handle<reco::VertexCollection> primaryVertex;
   edm::ESHandle<TransientTrackBuilder> trackBuilder_;
+  edm::Handle<reco::PFCandidateCollection> pfcandidates_;
+
+  edm::Handle<double> rho_;
 
   const CaloGeometry* caloGeo;
 };

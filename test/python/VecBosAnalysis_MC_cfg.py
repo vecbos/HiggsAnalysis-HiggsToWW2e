@@ -50,9 +50,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.leptonPFIsoSequence_cff")
 # --- calotowers sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
-# --- ECAL clusters merging in a unique collection ---
-process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
-process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
+# --- ECAL clusters merging in a unique collection and seeds filtering ---
+process.load("HiggsAnalysis.HiggsToWW2e.electronAndPhotonSuperClusters_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.seedBasicClusters_cff")
 
 # --- good vertex filter ---
 process.load("HiggsAnalysis.HiggsToWW2e.vertexFiltering_cff")
@@ -79,16 +79,15 @@ process.treeDumper.dumpGenInfo = True
 process.treeDumper.dumpLHE = False
 process.treeDumper.dumpPdfWeight = False
 process.treeDumper.dumpSignalKfactor = False
-process.treeDumper.dumpTracks = True
+process.treeDumper.dumpTracks = False
 process.treeDumper.dumpElectrons = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = False
+process.treeDumper.dumpBCs = True
 process.treeDumper.dumpConversions = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
-process.treeDumper.trackCollection = cms.InputTag("leptonLinkedTracks")
 #process.treeDumper.dumpParticleFlowObjects = False
 process.treeDumper.dumpParticleFlowObjects = True
 process.treeDumper.dumpPFCandidates = False
@@ -118,21 +117,21 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('/store/mc/Summer12/DYToMuMu_M-20_CT10_TuneZ2star_8TeV-powheg-pythia6/AODSIM/PU_S8_START52_V9-v2/0000/8696787E-F298-E111-BA4A-001A928116BC.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc21_2/emanuele/data/AOD_WWSummer12.root')
                             )
 
-process.prejets = cms.Sequence( process.leptonLinkedTracks
-                                * process.mergedSuperClusters
+process.prejets = cms.Sequence( process.leptonLinkedTracks 
+                                * process.electronAndPhotonSuperClustersSequence
                                 * process.chargedMetProducer
                                 * process.pfIsolationAllSequence )
 
 if(process.treeDumper.dumpBCs==True):
-    process.prejets *= process.mergedBasicClusters
+    process.prejets *= process.seedBasicClustersSequence 
 
 process.jets = cms.Sequence( process.ourJetSequenceMCReduced
                              * process.newBtaggingSequence 

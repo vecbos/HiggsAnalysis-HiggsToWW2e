@@ -40,7 +40,7 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<int> *fiducialFlags, *recoFlags, *scPixCharge;
 
   vector<int> *superClusterIndex, *PFsuperClusterIndex;
-  vector<float> *ecal, *eraw, *caloEta, *caloPhi;
+  vector<float> *correctedEcalEnergy;
   vector<int> *energyCorrections;
 
   vector<float> *convDist, *convDcot, *convRadius;
@@ -89,10 +89,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
 
   //! set the general tracks (reduced collection)
   void setGeneralTracks( edm::InputTag generalTracks) { generalTracks_ = generalTracks; }
-  //! set the superclusters for ECAL barrel
-  void setEcalBarrelSuperClusters( edm::InputTag EcalBarrelSuperClusters) { EcalBarrelSuperClusters_ = EcalBarrelSuperClusters; }
-  //! set the superclusters for ECAL endcap
-  void setEcalEndcapSuperClusters( edm::InputTag EcalEndcapSuperClusters) { EcalEndcapSuperClusters_ = EcalEndcapSuperClusters; }
+  //! set the merged ECAL superclusters collection
+  void setEcalSuperClusters( edm::InputTag EcalSuperClusters ) { EcalSuperClusters_ = EcalSuperClusters; }
   //! set the rechits for ECAL barrel (needed for cluster shapes)
   void setEcalBarrelRecHits( edm::InputTag EcalBarrelRecHits ) { EcalBarrelRecHits_ = EcalBarrelRecHits; }
   //! set the rechits for ECAL endcap (needed for cluster shapes)
@@ -109,8 +107,11 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void setConversionsProdcer(  edm::InputTag conversionsProducer ) { conversionsProducer_ = conversionsProducer; }
   //! set the vertex collection
   void setVertexCollection(edm::InputTag collectionTag) { m_vxtCollectionTag = collectionTag; }
+  //! set the PF candidates collection
+  void setPFCandidateCollection(edm::InputTag collectionTag) { m_pfcandCollectionTag = collectionTag; }
+  
   //! set the eleID MVA algos
-  void setEleIdMVAs(EGammaMvaEleEstimator* algotrig, EGammaMvaEleEstimator* algonontrig) { myMVATrig = algotrig; myMVANonTrig = algonontrig; }
+  void setEleIdMVAs(EGammaMvaEleEstimator* algotrig, EGammaMvaEleEstimator* algotrigidiso, EGammaMvaEleEstimator* algonontrig) { myMVATrig = algotrig; myMVATrigIdIsoCombined = algotrigidiso; myMVANonTrig = algonontrig; }
 
  private:
   
@@ -138,7 +139,7 @@ class CmsElectronFiller : public CmsCandidateFiller {
   CmsElectronFillerData *privateData_;
 
   edm::InputTag generalTracks_;
-  edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;
+  edm::InputTag EcalSuperClusters_;
 
   edm::InputTag EcalBarrelRecHits_;
   edm::InputTag EcalEndcapRecHits_;
@@ -152,16 +153,16 @@ class CmsElectronFiller : public CmsCandidateFiller {
   edm::InputTag calotowersProducer_;
   edm::InputTag conversionsProducer_;
   edm::InputTag m_vxtCollectionTag;
+  edm::InputTag m_pfcandCollectionTag;
 
   edm::Handle< reco::TrackRefVector > h_tracks;
   edm::Handle< reco::TrackCollection > h_tracksTot;
+  edm::Handle< reco::SuperClusterCollection> h_superclusters;
 
   edm::Handle<reco::ConversionCollection> hConversions;
   edm::Handle<reco::BeamSpot> bsHandle;
 
-  EGammaMvaEleEstimator* myMVANonTrig, *myMVATrig;
-
-  int barrelSuperClustersSize;
+  EGammaMvaEleEstimator* myMVANonTrig, *myMVATrig, *myMVATrigIdIsoCombined;
 
   CmsTree *cmstree;
 

@@ -75,10 +75,8 @@ class CmsPhotonFiller : public CmsCandidateFiller {
 			     const std::string &columnPrefix, const std::string &columnSuffix,
 			     bool dumpData=false);
 
-  //! set the superclusters for ECAL barrel
-  void setEcalBarrelSuperClusters( edm::InputTag EcalBarrelSuperClusters) { EcalBarrelSuperClusters_ = EcalBarrelSuperClusters; }
-  //! set the superclusters for ECAL endcap
-  void setEcalEndcapSuperClusters( edm::InputTag EcalEndcapSuperClusters) { EcalEndcapSuperClusters_ = EcalEndcapSuperClusters; }
+  //! set the merged ECAL superclusters collection
+  void setEcalSuperClusters( edm::InputTag EcalSuperClusters ) { EcalSuperClusters_ = EcalSuperClusters; }
   //! set conversions collection
   void setConversionsProdcer(  edm::InputTag conversionsProducer ) { conversionsProducer_ = conversionsProducer; }
 
@@ -99,7 +97,7 @@ class CmsPhotonFiller : public CmsCandidateFiller {
 
   CmsPhotonFillerData *privateData_;
 
-  edm::InputTag EcalBarrelSuperClusters_, EcalEndcapSuperClusters_;
+  edm::InputTag EcalSuperClusters_;
   edm::InputTag conversionsProducer_;
   edm::InputTag pfCandidates_;
   edm::InputTag primaryVertices_;
@@ -108,8 +106,7 @@ class CmsPhotonFiller : public CmsCandidateFiller {
   edm::Handle<reco::BeamSpot> bsHandle;
   edm::Handle<reco::PFCandidateCollection> pfCands;
   edm::Handle<reco::VertexCollection> PVs;
-
-  int barrelSuperClustersSize;
+  edm::Handle<reco::SuperClusterCollection> hSuperClusters;
 
   CmsTree *cmstree;
 

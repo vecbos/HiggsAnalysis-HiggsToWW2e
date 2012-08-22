@@ -126,7 +126,7 @@ private:
   bool dumpCaloTowers_;
   //! MVAs
   MuonMVAEstimator *fMuonIsoMVA;
-  EGammaMvaEleEstimator *fEleIdMVANonTrig, *fEleIdMVATrig;
+  EGammaMvaEleEstimator *fEleIdMVANonTrig, *fEleIdMVATrig, *fEleIdMVATrigIdIsoCombined;
   std::vector<PileupJetIdAlgo* > _jetId_algos;
 
   bool usePhotonFix_;
@@ -155,7 +155,7 @@ private:
   //! jet id mva 
   std::vector<edm::ParameterSet> puJetIDAlgos_;
   //! track collections
-  edm::InputTag trackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
+  edm::InputTag trackCollection_, generalTrackCollection_, refittedForDeDxTrackCollection_, gsfTrackCollection_;
   edm::InputTag globalMuonTrackCollection_, standAloneMuonTrackCollection_;
   //! taus
   edm::InputTag pfTauCollection_, hpspfTauCollection_, hpsTancTausCollection_;
@@ -163,7 +163,7 @@ private:
   edm::InputTag PFCandidateCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
-  edm::InputTag ecalBarrelSCCollection_, ecalEndcapSCCollection_, ecalElePFClusterCollection_, ecalPhoPFClusterCollection_;
+  edm::InputTag ecalElePFClusterCollection_, ecalPhoPFClusterCollection_;
   //! basiccluster collections in input
   edm::InputTag ecalBCCollection_;
   //! ECAL rechits to compute the cluster shapes on the fly

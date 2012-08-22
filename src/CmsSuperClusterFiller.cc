@@ -42,10 +42,11 @@
 #include <TTree.h>
 
 #include <string>
+#include <iostream>
 
 using namespace edm;
 using namespace reco;
-
+using namespace std;
 
 
 
@@ -276,7 +277,7 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     if( fabs(seedEta) < 1.479 ) rechits = EBRecHits;
     else rechits = EERecHits; 
 
-      float eMax = EcalClusterTools::eMax( *theSeed, &(*rechits) );
+    float eMax = EcalClusterTools::eMax( *theSeed, &(*rechits) );
       float e3x3 = EcalClusterTools::e3x3( *theSeed, &(*rechits), topology );
       float e3x1 = EcalClusterTools::e3x1( *theSeed, &(*rechits), topology );
       float e1x3 = EcalClusterTools::e1x3( *theSeed, &(*rechits), topology );
@@ -336,8 +337,6 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
       privateData_->sMin->push_back(moments.sMin);
       // angle between sMaj and phi direction:
       privateData_->alpha->push_back(moments.alpha);
-
-
 
       std::pair<DetId, float> maxRH = EcalClusterTools::getMaximum( *theSeed, &(*rechits) );
       DetId seedCrystalId = maxRH.first;
@@ -654,8 +653,6 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
     privateData_->regrCorr_phoE->push_back(-1);
     privateData_->regrCorr_phoSigma->push_back(-1);
   }
-
-
 
 }
 

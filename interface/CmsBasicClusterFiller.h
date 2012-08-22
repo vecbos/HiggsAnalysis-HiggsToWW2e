@@ -40,10 +40,8 @@
 struct CmsBasicClusterFillerData {
   // All the vectors that will store the stuff
   // going into the tree.
-  vector<int>  *nCrystals, *recoFlag, *sevClosProbl, *idClosProbl, *indexSC;
-  vector<float> *energy, *seedEnergy, *eta, *theta, *phi, *time, *chi2, *fracClosProbl;
-  vector<float> *e3x3, * e5x5, *eMax, *e2x2, *e2nd, *covIEtaIEta, *covIEtaIPhi, *covIPhiIPhi;
-  vector<float> *eTop, *eBottom, *eLeft, *eRight, *e2x5Max, *e2x5Top,*e2x5Bottom,*e2x5Left,*e2x5Right;
+  vector<int>  *indexSC;
+  vector<float> *eta, *theta, *phi;
   vector<float> *etaCrystal,*phiCrystal,*thetaTilt,*phiTilt;
   vector<int> *iEta,*iPhi;
   int *nBC;
@@ -89,17 +87,6 @@ public:
 
 protected:
   
-  // fraction of SC energy around closest problematic
-  //float fractionAroundClosestProblematic( const edm::EventSetup & , const reco::CaloCluster & , const EcalRecHitCollection &,  const EcalChannelStatus &, const CaloTopology* topology );
-  // retrieve closest problematic channel and its severity wrt seed crystal using as distance sqrt(ieta^2+ieta^2+iphi^2+iphi^2). Return a null detId in case not found within a search region of 11 (ieta) x 51 (iphi)  
-  //std::pair<DetId,int> closestProblematic( const edm::EventSetup & , const reco::CaloCluster & , const EcalRecHitCollection &,  const EcalChannelStatus &, const CaloTopology* topology );
-
-
-  //return the distance in eta units between two EBDetId
-  static int distanceEta(const EBDetId& a,const EBDetId& b); 
-  //return the distance in phi units between two EBDetId
-  static int distancePhi(const EBDetId& a,const EBDetId& b);
-
   virtual void writeBCInfo(const reco::BasicCluster *cand, 
 			   const edm::Event&, const edm::EventSetup&,
                            const EcalRecHitCollection *EBRecHits, const EcalRecHitCollection *EERecHits, 

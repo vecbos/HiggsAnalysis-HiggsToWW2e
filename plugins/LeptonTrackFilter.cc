@@ -75,10 +75,10 @@ LeptonTrackFilter::select (edm::Handle<collection> input,
     }
 
     // look if it is in a cone DR < 0.5 wrt jet (temporary for calojet ID)
-    edm::View<reco::Candidate>::const_iterator jet;
-    for(jet=jets->begin(); jet!=jets->end(); jet++) {
-      if(jet->pt()>15. && reco::deltaR(jet->eta(),jet->phi(),trackRef->eta(),trackRef->phi())<0.5) m_selected.push_back(trackRef);
-    }
+    //     edm::View<reco::Candidate>::const_iterator jet;
+    //     for(jet=jets->begin(); jet!=jets->end(); jet++) {
+    //       if(jet->pt()>15. && reco::deltaR(jet->eta(),jet->phi(),trackRef->eta(),trackRef->phi())<0.5) m_selected.push_back(trackRef);
+    //     }
 
   }
 

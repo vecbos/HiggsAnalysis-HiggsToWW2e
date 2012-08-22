@@ -79,8 +79,8 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->eleLik;
   delete privateData_->pflowMVA;
   delete privateData_->mvaidtrig;
+  delete privateData_->mvaidisotrig;
   delete privateData_->mvaidnontrig;
-
   delete privateData_->pfCombinedIso;
   delete privateData_->pfCandChargedIso01;
   delete privateData_->pfCandNeutralIso01;
@@ -189,6 +189,12 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     try { iSetup.get<TransientTrackRecord>().get("TransientTrackBuilder", trackBuilder_); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get TransientTrackBuilder from Event Setup."; }
 
+    // the full pf candidates to make the combined ID+ISO MVA
+    try { iEvent.getByLabel(m_pfcandCollectionTag, pfcandidates_); }
+    catch(cms::Exception& ex ) {edm::LogWarning("CmsVertexFiller") << "Can't get candidate collection: " << m_pfcandCollectionTag; }
+    
+    iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"),rho_);
+
     // HCAL isolation in the full cone (to be used w/o H/E)
     float egHcalIsoConeSizeOutSmall=0.3, egHcalIsoConeSizeOutLarge=0.4;
     float egHcalIsoConeSizeIn=0.0, egHcalIsoPtMin=0.0;
@@ -279,6 +285,15 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
                                          false);
   privateData_->mvaidtrig->push_back(mvaidtrig);
 
+  double mvaidisotrig = myMVATrigIdIsoCombined->IDIsoCombinedMvaValue(*ele,
+                                                                      primaryVertex->front(),
+                                                                      thebuilder,
+                                                                      lazyTools,
+                                                                      *pfcandidates_,
+                                                                      *rho_,
+                                                                      ElectronEffectiveArea::kEleEAData2012,
+                                                                      false);
+  privateData_->mvaidisotrig->push_back(mvaidisotrig);
 
   // --- isolations ---
 
@@ -400,6 +415,7 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"mvaidnontrig"+colSuffix).c_str(), *privateData_->mvaidnontrig, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"mvaidtrig"+colSuffix).c_str(), *privateData_->mvaidtrig, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"mvaidisotrig"+colSuffix).c_str(), *privateData_->mvaidisotrig, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCandChargedIso01"+colSuffix).c_str(),  *privateData_->pfCandChargedIso01, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pfCandNeutralIso01"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso01, nCandString.c_str(), 0, "Reco");
@@ -462,6 +478,7 @@ void CmsEleIDTreeFillerData::initialise() {
   pflowMVA                 = new vector<float>;
   mvaidnontrig             = new vector<float>;
   mvaidtrig                = new vector<float>;
+  mvaidisotrig             = new vector<float>;
   pfCombinedIso            = new vector<float>;
   pfCandChargedIso01       = new vector<float>;
   pfCandNeutralIso01       = new vector<float>;
@@ -519,7 +536,8 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   eleLik                   ->clear();
   pflowMVA                 ->clear();
   mvaidnontrig -> clear();
-  mvaidtrig -> clear();
+  mvaidtrig    -> clear();
+  mvaidisotrig -> clear();
   pfCombinedIso    ->clear();
   pfCandChargedIso01 ->clear();
   pfCandNeutralIso01 ->clear();

@@ -165,8 +165,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hpsTancTausCollection_   = iConfig.getParameter<edm::InputTag>("hpsTancTausCollection");
   PFCandidateCollection_   = iConfig.getParameter<edm::InputTag>("PFCandidateCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
-  ecalBarrelSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalBarrelSCCollection");
-  ecalEndcapSCCollection_  = iConfig.getParameter<edm::InputTag>("ecalEndcapSCCollection");
   ecalElePFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalElePFClusterCollection");
   ecalPhoPFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalPhoPFClusterCollection");
   ecalBCCollection_        = iConfig.getParameter<edm::InputTag>("ecalBCCollection");
@@ -176,6 +174,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   calotowersForIsolationProducer_ = iConfig.getParameter<edm::InputTag>("calotowersForIsolationProducer");
   conversions_             = iConfig.getParameter<edm::InputTag>("conversionCollection");
   trackCollection_         = iConfig.getParameter<edm::InputTag>("trackCollection");
+  generalTrackCollection_  = iConfig.getParameter<edm::InputTag>("generalTrackCollection");
   refittedForDeDxTrackCollection_ = iConfig.getParameter<edm::InputTag>("refittedForDeDxTrackCollection");
   gsfTrackCollection_      = iConfig.getParameter<edm::InputTag>("gsfTrackCollection");
   globalMuonTrackCollection_ = iConfig.getParameter<edm::InputTag>("globalMuonTrackCollection");
@@ -387,8 +386,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.saveFatEcal(saveFatEcal_);
     treeFill.setGeneralTracks(trackCollection_);
-    treeFill.setEcalBarrelSuperClusters(ecalBarrelSCCollection_);
-    treeFill.setEcalEndcapSuperClusters(ecalEndcapSCCollection_);
+    treeFill.setEcalSuperClusters(ecalSCCollection_);
     treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
     treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
     // for custom isolation
@@ -396,7 +394,8 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     // for custom MVA id
     treeFill.setVertexCollection(vertexCollection_);
-    treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVANonTrig);
+    treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVATrigIdIsoCombined,fEleIdMVANonTrig);
+    treeFill.setPFCandidateCollection(PFCandidateCollection_);
     treeFill.saveEleID(true);
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
@@ -430,8 +429,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string prefix("");
     std::string suffix("Pho");
     treeFill.saveCand(saveCand_);
-    treeFill.setEcalBarrelSuperClusters(ecalBarrelSCCollection_);
-    treeFill.setEcalEndcapSuperClusters(ecalEndcapSCCollection_);
+    treeFill.setEcalSuperClusters(ecalSCCollection_);
     treeFill.setPFCandidates(PFCandidateCollection_);
     treeFill.setPrimaryVertices(vertexCollection_);
     // for full vertex fit conversion veto
@@ -510,12 +508,20 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       barrelSuffix="PFBC";
       treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
       treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPF.setEcalSuperClusters(ecalElePFClusterCollection_);
+      treeFillPF.writeCollectionToTree(ecalElePFClusterCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
+
+      CmsBasicClusterFiller treeFillPhoPF(tree_, 350);
+      prefix="";
+      barrelSuffix="PhoPFBC";
+      treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
       treeFillPF.setEcalSuperClusters(ecalPhoPFClusterCollection_);
       treeFillPF.writeCollectionToTree(ecalPhoPFClusterCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
   }
 
-  // fill track block
+  // fill general track block
   if(dumpTracks_) {
 
     CmsTrackFiller treeFiller(tree_, vertexCollection_, true);
@@ -528,11 +534,22 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.saveVtxTrk(true);
 
     std::string prefix("");
-    std::string suffix("Track");
+    std::string suffix("GeneralTrack");
 
-    treeFiller.writeCollectionToTree(trackCollection_, iEvent, iSetup, prefix, suffix, false);
+    treeFiller.writeCollectionToTree(generalTrackCollection_, iEvent, iSetup, prefix, suffix, false);
 
   }
+
+  // always fill the leptonLinkedTracks
+  CmsTrackFiller leptonLLTreeFiller(tree_, vertexCollection_, true);
+  leptonLLTreeFiller.saveFatTrk(saveFatTrk_);
+  leptonLLTreeFiller.isGsf(false);
+  leptonLLTreeFiller.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
+  leptonLLTreeFiller.saveDeDx(saveTrackDeDx_);
+  leptonLLTreeFiller.saveVtxTrk(true);
+  std::string prefix("");
+  std::string suffix("Track");
+  leptonLLTreeFiller.writeCollectionToTree(trackCollection_, iEvent, iSetup, prefix, suffix, false);
 
   if(dumpGsfTracks_) {
 
@@ -920,6 +937,21 @@ void HWWTreeDumper::beginJob() {
                         manualCat,
                         myManualCatWeigthsTrig);
 
+  std::vector<std::string> myManualCatWeigthsTrigIdIsoCombined;
+  myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat1.weights.xml").fullPath());
+  myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat2.weights.xml").fullPath());
+  myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat3.weights.xml").fullPath());
+  myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat4.weights.xml").fullPath());
+  myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat5.weights.xml").fullPath());
+  myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat6.weights.xml").fullPath());
+
+  fEleIdMVATrigIdIsoCombined = new EGammaMvaEleEstimator();
+  fEleIdMVATrigIdIsoCombined->initialize("BDT",
+                                         EGammaMvaEleEstimator::kTrigIDIsoCombined,
+                                         manualCat,
+                                         myManualCatWeigthsTrigIdIsoCombined);
+
+
   // muon isolation
   fMuonIsoMVA = new MuonMVAEstimator();
   vector<string> muoniso_weightfiles;
@@ -980,6 +1012,7 @@ void  HWWTreeDumper::endJob() {
   fileOut_->Close();
 
   delete fEleIdMVATrig;
+  delete fEleIdMVATrigIdIsoCombined;
   delete fEleIdMVANonTrig;
   delete fMuonIsoMVA;
 

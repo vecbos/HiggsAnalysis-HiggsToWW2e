@@ -11,6 +11,8 @@
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWEleAmbiguityResolve.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/LeptonTrackFilter.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/LeptonCandidateFilter.h"
+#include "HiggsAnalysis/HiggsToWW2e/plugins/SuperClusterSeedsProducer.h"
+#include "HiggsAnalysis/HiggsToWW2e/plugins/ElectronAndPhotonSuperClusterProducer.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/ChargedPFMetProducer.h"
 #include "HiggsAnalysis/HiggsToWW2e/plugins/HWWTreeDumper.h"
 
@@ -34,8 +36,10 @@ typedef CollectionCombiner< reco::PFMETCollection > PfMetCombiner;
 DEFINE_FWK_MODULE (AmbResolver) ;
 DEFINE_FWK_MODULE (leptonTrackFilter);
 DEFINE_FWK_MODULE (leptonCandidateFilter);
+DEFINE_FWK_MODULE (SuperClusterSeedsProducer);
+DEFINE_FWK_MODULE (ElectronAndPhotonSuperClusterProducer);
 DEFINE_FWK_MODULE (ChargedPFMetProducer);
-DEFINE_FWK_MODULE(SuperClusterCombiner);
 DEFINE_FWK_MODULE(BasicClusterCombiner);
+DEFINE_FWK_MODULE(SuperClusterCombiner);
 DEFINE_FWK_MODULE(PfMetCombiner);
 DEFINE_FWK_MODULE (HWWTreeDumper);  

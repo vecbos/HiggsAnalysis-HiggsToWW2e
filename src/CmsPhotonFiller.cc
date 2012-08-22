@@ -162,15 +162,8 @@ void CmsPhotonFiller::writeCollectionToTree(edm::InputTag collectionTag,
     *(privateData_->ncand) = collection->size();
 
     // superclusters
-    Handle<SuperClusterCollection> EcalBarrelSuperClusters;
-    try { iEvent.getByLabel(EcalBarrelSuperClusters_, EcalBarrelSuperClusters); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPhotonFiller") << "Can't get ECAL barrel supercluster Collection" << EcalBarrelSuperClusters_; }
-    
-    Handle<SuperClusterCollection> EcalEndcapSuperClusters;
-    try { iEvent.getByLabel(EcalEndcapSuperClusters_, EcalEndcapSuperClusters); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsPhotonFiller") << "Can't get ECAL endcap supercluster Collection" << EcalEndcapSuperClusters_; }
-    
-    barrelSuperClustersSize = EcalBarrelSuperClusters->size();
+    try { iEvent.getByLabel(EcalSuperClusters_, hSuperClusters); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get merged ECAL supercluster collection: " << EcalSuperClusters_; }
 
     // for conversions with full vertex fit
     iEvent.getByLabel("offlineBeamSpot", bsHandle);
@@ -235,7 +228,7 @@ void CmsPhotonFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
 
 void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef, 
-				      const edm::Event& iEvent, const edm::EventSetup& iSetup, 
+                                    const edm::Event& iEvent, const edm::EventSetup& iSetup, 
                                     SuperClusterRef sclusRef, SuperClusterRef pfclusRef){
 				
 
@@ -267,11 +260,18 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     //    privateData_->recoFlags->push_back( packed_reco );
     privateData_->recoFlags->push_back( -1 );
 
-    // link to the supercluster (collections are merged: barrel + endcap in this order)
-    //    if ( isStdPho && sclusRef.isNonnull() ) {
+    // link to the supercluster. We have to match manually because in the merged collection
+    // the reference is broken.
     if ( sclusRef.isNonnull() ) {
-      int offset = ( fabs(sclusRef->eta() ) < 1.479 ) ? 0 : barrelSuperClustersSize;
-      privateData_->superClusterIndex->push_back( sclusRef.key() + offset );
+      int scInd=-1;
+      for(unsigned int isclu=0; isclu!=hSuperClusters->size(); ++isclu) {
+        const reco::SuperClusterRef thisScRef(hSuperClusters,isclu);
+        if(sclusRef->energy()==thisScRef->energy() && sclusRef->position()==thisScRef->position()) {
+          scInd = thisScRef.key();
+          break;
+        }
+      }
+      privateData_->superClusterIndex->push_back( scInd );
     } else {
       privateData_->superClusterIndex->push_back( -1 );
     }

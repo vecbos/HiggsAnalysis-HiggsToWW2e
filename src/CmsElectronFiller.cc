@@ -134,6 +134,7 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->recoFlags;
   delete privateData_->energyCorrections;
   delete privateData_->scPixCharge;
+  delete privateData_->correctedEcalEnergy;
 
   delete privateData_->superClusterIndex;
   delete privateData_->PFsuperClusterIndex;
@@ -202,17 +203,6 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     *(privateData_->ncand) = collection->size();
 
-    // superclusters
-    Handle<SuperClusterCollection> EcalBarrelSuperClusters;
-    try { iEvent.getByLabel(EcalBarrelSuperClusters_, EcalBarrelSuperClusters); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL barrel supercluster Collection" << EcalBarrelSuperClusters_; }
-    
-    Handle<SuperClusterCollection> EcalEndcapSuperClusters;
-    try { iEvent.getByLabel(EcalEndcapSuperClusters_, EcalEndcapSuperClusters); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get ECAL endcap supercluster Collection" << EcalEndcapSuperClusters_; }
-    
-    barrelSuperClustersSize = EcalBarrelSuperClusters->size();
-
     // for cluster shape variables
     Handle< EcalRecHitCollection > EcalBarrelRecHits;
     try { iEvent.getByLabel(EcalBarrelRecHits_, EcalBarrelRecHits); }
@@ -227,6 +217,10 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     // for track link
     try { iEvent.getByLabel(generalTracks_, h_tracks); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
+
+    // for ECAL supercluster link
+    try { iEvent.getByLabel(EcalSuperClusters_, h_superclusters); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get merged ECAL supercluster collection: " << EcalSuperClusters_; }
 
     // for conversions with partner track
     try { iEvent.getByLabel("generalTracks", h_tracksTot); }
@@ -290,7 +284,8 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     eIDFiller.setTracksProducer(tracksProducer_);
     eIDFiller.setCalotowersProducer(calotowersProducer_);
     eIDFiller.setVertexCollection(m_vxtCollectionTag);
-    eIDFiller.setEleIdMVAs(myMVATrig,myMVANonTrig);
+    eIDFiller.setEleIdMVAs(myMVATrig,myMVATrigIdIsoCombined,myMVANonTrig);
+    eIDFiller.setPFCandidateCollection(m_pfcandCollectionTag);
     eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
@@ -423,10 +418,18 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     packed_reco = ( isEcalDriven << 1 ) | isTrackerDriven;
     privateData_->recoFlags->push_back( packed_reco );
 
-    // link to the supercluster (collections are merged: barrel + endcap in this order)
+    // link to the supercluster. We have to match manually because in the merged collection
+    // the reference is broken.
     if ( isEcalDriven && sclusRef.isNonnull() ) {
-      int offset = ( fabs(sclusRef->eta() ) < 1.479 ) ? 0 : barrelSuperClustersSize;
-      privateData_->superClusterIndex->push_back( sclusRef.key() + offset );
+      int scInd=-1;
+      for(unsigned int isclu=0; isclu!=h_superclusters->size(); ++isclu) {
+        const reco::SuperClusterRef thisScRef(h_superclusters,isclu);
+        if(sclusRef->energy()==thisScRef->energy() && sclusRef->position()==thisScRef->position()) {
+          scInd = thisScRef.key();
+          break;
+        }
+      }
+      privateData_->superClusterIndex->push_back( scInd );
     } else {
       privateData_->superClusterIndex->push_back( -1 );
     }
@@ -441,6 +444,7 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     int isEcalEnergyCorrected = ( electronRef->isEcalEnergyCorrected() ) ? 1 : 0;
     packed_corr = isEcalEnergyCorrected;
     privateData_->energyCorrections->push_back( packed_corr );
+    privateData_->correctedEcalEnergy->push_back( electronRef->correctedEcalEnergy() );
 
   } else {
     privateData_->fiducialFlags->push_back(-1);
@@ -458,6 +462,7 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"fiducialFlags"+colSuffix).c_str(), *privateData_->fiducialFlags, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"recoFlags"+colSuffix).c_str(), *privateData_->recoFlags, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energyCorrections"+colSuffix).c_str(), *privateData_->energyCorrections, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"correctedEcalEnergy"+colSuffix).c_str(), *privateData_->correctedEcalEnergy, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"superClusterIndex"+colSuffix).c_str(), *privateData_->superClusterIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PFsuperClusterIndex"+colSuffix).c_str(), *privateData_->PFsuperClusterIndex, nCandString.c_str(), 0, "Reco");
 
@@ -473,6 +478,7 @@ void CmsElectronFillerData::initialise() {
   fiducialFlags = new vector<int>;
   recoFlags = new vector<int>;
   energyCorrections = new vector<int>;
+  correctedEcalEnergy = new vector<float>;
 
   superClusterIndex = new vector<int>;
   PFsuperClusterIndex = new vector<int>;
@@ -495,6 +501,7 @@ void CmsElectronFillerData::clearTrkVectors() {
   fiducialFlags->clear();
   recoFlags->clear();
   energyCorrections->clear();
+  correctedEcalEnergy->clear();
 
   superClusterIndex->clear();
   PFsuperClusterIndex->clear();

@@ -47,8 +47,8 @@ process.load("HiggsAnalysis.HiggsToWW2e.leptonPFIsoSequence_cff")
 process.load("HiggsAnalysis.HiggsToWW2e.lowThrCaloTowers_cfi")
 
 # --- ECAL clusters merging in a unique collection ---
-process.load("HiggsAnalysis.HiggsToWW2e.superClusterMerger_cfi")
-process.load("HiggsAnalysis.HiggsToWW2e.basicClusterMerger_cfi")
+process.load("HiggsAnalysis.HiggsToWW2e.electronAndPhotonSuperClusters_cff")
+process.load("HiggsAnalysis.HiggsToWW2e.seedBasicClusters_cff")
 
 # --- good vertex filter ---
 process.load("HiggsAnalysis.HiggsToWW2e.vertexFiltering_cff")
@@ -63,11 +63,10 @@ process.treeDumper.dumpMCTruth = False
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpGenMet = False
 process.treeDumper.dumpGenJets = False
-process.treeDumper.dumpTracks = True
+process.treeDumper.dumpTracks = False
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
-process.treeDumper.dumpBCs = False
-process.treeDumper.trackCollection = cms.InputTag("leptonLinkedTracks")
+process.treeDumper.dumpBCs = True
 process.treeDumper.dumpConversions = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
@@ -104,19 +103,19 @@ process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-#                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root') if is42X else cms.untracked.vstring('/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/191/226/9E7EF5CF-DA87-E111-8BC6-5404A63886C6.root')
+                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root') if is42X else cms.untracked.vstring('/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/191/226/9E7EF5CF-DA87-E111-8BC6-5404A63886C6.root')
 #                            fileNames = cms.untracked.vstring('/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/191/830/6C397AE1-CA8C-E111-9CA2-003048F1C424.root')
-                            fileNames = cms.untracked.vstring('file:./pickevents.root')
+#                            fileNames = cms.untracked.vstring('file:./pickevents.root')
                             )
 
 process.prejets = cms.Sequence( process.leptonLinkedTracks
-                                * process.mergedSuperClusters
+                                * process.electronAndPhotonSuperClustersSequence
                                 * process.chargedMetProducer
                                 * process.metOptionalFilterSequence
                                 * process.pfIsolationAllSequence )
 
 if(process.treeDumper.dumpBCs==True):
-    process.prejets *= process.mergedBasicClusters
+    process.prejets *= process.seedBasicClustersSequence
 
 process.jets = cms.Sequence( process.ourJetSequenceDataReduced
                              * process.newBtaggingSequence 
