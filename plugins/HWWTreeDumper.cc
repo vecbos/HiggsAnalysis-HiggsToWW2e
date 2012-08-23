@@ -164,6 +164,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hpspfTauCollection_      = iConfig.getParameter<edm::InputTag>("hpspfTauCollection");
   hpsTancTausCollection_   = iConfig.getParameter<edm::InputTag>("hpsTancTausCollection");
   PFCandidateCollection_   = iConfig.getParameter<edm::InputTag>("PFCandidateCollection");
+  PFNoPUCandidateCollection_  = iConfig.getParameter<edm::InputTag>("PFNoPUCandidateCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
   ecalElePFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalElePFClusterCollection");
   ecalPhoPFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalPhoPFClusterCollection");
@@ -395,7 +396,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     // for custom MVA id
     treeFill.setVertexCollection(vertexCollection_);
     treeFill.setEleIdMVAs(fEleIdMVATrig,fEleIdMVATrigIdIsoCombined,fEleIdMVANonTrig);
-    treeFill.setPFCandidateCollection(PFCandidateCollection_);
+    treeFill.setPFCandidateCollection(PFNoPUCandidateCollection_);
     treeFill.saveEleID(true);
     // for full vertex fit conversion veto
     treeFill.setConversionsProdcer(conversions_);
@@ -720,7 +721,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.writeCollectionToTree(PFCandidateCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 
-  // PF candidates. Only the ones in a cone 0.1 from leptons to correct ChMET. In Candidate format to save space
+  // PF candidates. Only the ones in a cone 0.5 from leptons to correct ChMET. In Candidate format to save space
   if(dumpParticleFlowObjects_) {
     CmsCandidateFiller treeFill(tree_);
     std::string prefix("");
