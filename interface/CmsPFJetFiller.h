@@ -44,6 +44,19 @@ struct QGLikelihoodVars {
   float r_ch;
   float tana;
 
+  float ptD_QC;
+  float rmsCand_QC;
+  float axis1_QC;
+  float axis2_QC;
+  float pull_QC;
+  float r_ch_QC;
+  float tana_QC;
+
+  int nChg_ptCut;
+  int nChg_QC;
+  int nChg_ptCut_QC;
+  int nNeutral_ptCut;
+
 };
 
 
@@ -65,6 +78,8 @@ struct CmsPFJetFillerData {
     *HFHadronMultiplicity, *HFEMMultiplicity;
   std::vector<float> *uncorrEnergy, *area;
   std::vector<float> *ptD, *rmsCand, *axis1, *axis2, *pull, *r_ch, *tana;
+  std::vector<float> *ptD_QC, *rmsCand_QC, *axis1_QC, *axis2_QC, *pull_QC, *r_ch_QC, *tana_QC;
+  std::vector<int> *nChg_ptCut, *nChg_QC, *nChg_ptCut_QC, *nNeutral_ptCut;
   std::vector<float> *combinedSecondaryVertexBJetTags, 
     *combinedSecondaryVertexMVABJetTags, 
     *jetBProbabilityBJetTags, 

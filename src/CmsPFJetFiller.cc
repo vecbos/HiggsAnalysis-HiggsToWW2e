@@ -34,7 +34,7 @@ using namespace reco;
 
 
 
-QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R=0., float ptratio=0.);
+QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::VertexCollection> recVtxs );
 
 
 //		----------------------------------------
@@ -131,6 +131,19 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->pull;
   delete privateData_->r_ch;
   delete privateData_->tana;
+
+  delete privateData_->ptD_QC;
+  delete privateData_->rmsCand_QC;
+  delete privateData_->axis1_QC;
+  delete privateData_->axis2_QC;
+  delete privateData_->pull_QC;
+  delete privateData_->r_ch_QC;
+  delete privateData_->tana_QC;
+
+  delete privateData_->nChg_ptCut;
+  delete privateData_->nChg_QC;
+  delete privateData_->nChg_ptCut_QC;
+  delete privateData_->nNeutral_ptCut;
 
   // additional variables for PU studies
   delete privateData_->jetIdMvaSimple;
@@ -265,7 +278,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->area->push_back( thisPFJet->jetArea() );
 
         // compute marini's variables
-        QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet);
+        QGLikelihoodVars qgvars = computeQGLikelihoodVars(thisPFJet, primaryVertexColl);
         privateData_->ptD->push_back( qgvars.ptD );
         privateData_->rmsCand->push_back( qgvars.rmsCand );
         privateData_->axis1->push_back( qgvars.axis1 );
@@ -273,6 +286,20 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->pull->push_back( qgvars.pull );
         privateData_->r_ch->push_back( qgvars.r_ch );
         privateData_->tana->push_back( qgvars.tana );
+
+        privateData_->ptD_QC->push_back( qgvars.ptD_QC );
+        privateData_->rmsCand_QC->push_back( qgvars.rmsCand_QC );
+        privateData_->axis1_QC->push_back( qgvars.axis1_QC );
+        privateData_->axis2_QC->push_back( qgvars.axis2_QC );
+        privateData_->pull_QC->push_back( qgvars.pull_QC );
+        privateData_->r_ch_QC->push_back( qgvars.r_ch_QC );
+        privateData_->tana_QC->push_back( qgvars.tana_QC );
+
+        privateData_->nChg_ptCut->push_back( qgvars.nChg_ptCut );
+        privateData_->nChg_QC->push_back( qgvars.nChg_QC );
+        privateData_->nChg_ptCut_QC->push_back( qgvars.nChg_ptCut_QC );
+        privateData_->nNeutral_ptCut->push_back( qgvars.nNeutral_ptCut );
+
 
 	float sumPt_cands,sumPt2_cands,rms_cands,sumTrkPtBetaStar,sumTrkPt,betastar_;
         sumPt_cands=sumPt2_cands=rms_cands=sumTrkPtBetaStar=sumTrkPt=betastar_=0.0;
@@ -567,6 +594,19 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"pull"+colSuffix).c_str(), *privateData_->pull, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"r_ch"+colSuffix).c_str(), *privateData_->r_ch, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"tana"+colSuffix).c_str(), *privateData_->tana, nCandString.c_str(), 0, "Reco");
+
+  cmstree->column((colPrefix+"rmsCand_QC"+colSuffix).c_str(), *privateData_->rmsCand_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"ptD_QC"+colSuffix).c_str(), *privateData_->ptD_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"axis1_QC"+colSuffix).c_str(), *privateData_->axis1_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"axis2_QC"+colSuffix).c_str(), *privateData_->axis2_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pull_QC"+colSuffix).c_str(), *privateData_->pull_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"r_ch_QC"+colSuffix).c_str(), *privateData_->r_ch_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"tana_QC"+colSuffix).c_str(), *privateData_->tana_QC, nCandString.c_str(), 0, "Reco");
+
+  cmstree->column((colPrefix+"nChg_ptCut"+colSuffix).c_str(), *privateData_->nChg_ptCut, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nChg_QC"+colSuffix).c_str(), *privateData_->nChg_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nChg_ptCut_QC"+colSuffix).c_str(), *privateData_->nChg_ptCut_QC, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"nNeutral_ptCut"+colSuffix).c_str(), *privateData_->nNeutral_ptCut, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -624,6 +664,7 @@ void CmsPFJetFillerData::initialise() {
   area = new vector<float>;
   weightedDz1 = new vector<float>;
   weightedDz2 = new vector<float>;
+
   ptD = new vector<float>;
   rmsCand = new vector<float>;
   axis1 = new vector<float>;
@@ -631,6 +672,20 @@ void CmsPFJetFillerData::initialise() {
   pull = new vector<float>;
   r_ch = new vector<float>;
   tana = new vector<float>;
+
+  ptD_QC = new vector<float>;
+  rmsCand_QC = new vector<float>;
+  axis1_QC = new vector<float>;
+  axis2_QC = new vector<float>;
+  pull_QC = new vector<float>;
+  r_ch_QC = new vector<float>;
+  tana_QC = new vector<float>;
+
+  nChg_ptCut = new vector<int>;
+  nChg_QC = new vector<int>;
+  nChg_ptCut_QC = new vector<int>;
+  nNeutral_ptCut = new vector<int>;
+
   betastar = new vector<float>;
   jetIdMvaSimple = new vector<float>;
   jetIdMvaFull = new vector<float>;
@@ -699,6 +754,7 @@ void CmsPFJetFillerData::clearTrkVectors() {
   area->clear();
   weightedDz1->clear();
   weightedDz2->clear();
+
   ptD->clear();
   rmsCand->clear();
   axis1->clear();
@@ -706,6 +762,20 @@ void CmsPFJetFillerData::clearTrkVectors() {
   pull->clear();
   r_ch->clear();
   tana->clear();
+
+  ptD_QC->clear();
+  rmsCand_QC->clear();
+  axis1_QC->clear();
+  axis2_QC->clear();
+  pull_QC->clear();
+  r_ch_QC->clear();
+  tana_QC->clear();
+
+  nChg_ptCut->clear();
+  nChg_QC->clear();
+  nChg_ptCut_QC->clear();
+  nNeutral_ptCut->clear();
+
   betastar -> clear();
   jetIdMvaSimple -> clear();
   jetIdMvaFull -> clear();
@@ -728,7 +798,7 @@ void CmsPFJetFillerData::clearTrkVectors() {
 
 
 
-QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptratio ) {
+QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::VertexCollection> recVtxs ) {
 
   std::vector<fastjet::PseudoJet> *input_particles = new std::vector<fastjet::PseudoJet>;
 
@@ -750,6 +820,15 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
   float pull=     -999.;
   float r_ch=     -999.;
   float tana =    -999.;
+  float rmsCand_QC=  -999.;
+  float ptD_QC=      -999.;
+  float axis1_QC=    -999.;
+  float axis2_QC=    -999.;
+  float pull_QC=     -999.;
+  float r_ch_QC=     -999.;
+  float tana_QC =    -999.;
+  float pTMax(0.0),pTMaxChg(0.0),pTMaxNeutral(0.0),pTMaxChg_QC(0.0);
+  int nChg_QC(0),nChg_ptCut(0),nChg_ptCut_QC(0),nNeutral_ptCut(0);
 	//compute the variables
   {
 	float SumW=0;
@@ -760,14 +839,90 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 	float SumDphi2=0;
 	float SumDetaDphi=0;
 	
+	float SumW_QC=0;
+	float SumW2_QC=0;
+	float SumDeta_QC=0;
+	float SumDeta2_QC=0;
+	float SumDphi_QC=0;
+	float SumDphi2_QC=0;
+	float SumDetaDphi_QC=0;
+	
 	float Eta0=pfjet->eta();
 	float Phi0=pfjet->phi();
+
+      std::vector<bool> jetPart_forMult,jetPart_forAxis;
+
 	
 	for(int i=0;i<pfjet->nConstituents();++i)
 		{
-		double pt=pfjet->getJetConstituentsQuick()[i]->pt();
-		double eta=pfjet->getJetConstituentsQuick()[i]->eta();
-		double phi=pfjet->getJetConstituentsQuick()[i]->phi();
+		reco::TrackRef itrk ;
+		reco::PFCandidatePtr  part = pfjet->getPFConstituent(i);
+		double pt=part->pt();
+		double eta=part->eta();
+		double phi=part->phi();
+		if (part.isNonnull())
+		  itrk = (*part).trackRef();
+		if (pt > pTMax) 
+		  pTMax = pt;
+		if (itrk.isNonnull() && pt > pTMaxChg) 
+		  pTMaxChg = pt;
+		if (!itrk.isNonnull() && pt > pTMaxNeutral) 
+		  pTMaxNeutral = pt;
+		if (!itrk.isNonnull() && pt > 1.0) 
+		  nNeutral_ptCut++;
+		
+		bool trkForAxis = false;
+		bool trkForMult = false;
+		
+		//-----matching with vertex tracks-------
+		if (!itrk.isNonnull()) { 
+		  trkForMult = true;
+		  trkForAxis = true;
+		}
+		else {
+		  if (pt > 1.0)
+		    nChg_ptCut++;
+		  float dZmin = 999;
+		  int index_min = 999;
+		  reco::VertexCollection::const_iterator vtxClose;
+		  for(unsigned ivtx = 0;ivtx < recVtxs->size();ivtx++) {
+		    float dZ_cut = fabs(itrk->dz((*recVtxs)[ivtx].position()));
+		    float sumpT = 0;
+		    for(reco::Vertex::trackRef_iterator itk = (*recVtxs)[ivtx].tracks_begin();itk!=(*recVtxs)[ivtx].tracks_end(); ++itk) {
+		      sumpT = sumpT + ((*itk)->pt())*((*itk)->pt());
+		    }
+		    if (dZ_cut < dZmin) {
+		      dZmin = dZ_cut;
+		      index_min = ivtx;
+		        //  std::cout<<"dz=="<<dZ_cut<<std::endl;
+		    }
+		  }//Loop over vertices 
+		  if (index_min == 0) {
+		    float dz = itrk->dz((*recVtxs)[0].position());
+		    float d0 = itrk->dxy((*recVtxs)[0].position());
+		    float vtx_xError = (*recVtxs)[0].xError();
+		    float vtx_yError = (*recVtxs)[0].yError();
+		    float vtx_zError = (*recVtxs)[0].zError();
+		    float d0_sigma=sqrt(pow(itrk->d0Error(),2) + pow(vtx_xError,2) + pow(vtx_yError,2));
+		    float dz_sigma=sqrt(pow(itrk->dzError(),2) + pow(vtx_zError,2));
+		    if (itrk->quality(reco::TrackBase::qualityByName("highPurity")) && fabs(dz/dz_sigma) < 5.) {
+		      trkForAxis = true;
+		      if (fabs(d0/d0_sigma) < 5.)
+		        trkForMult = true;
+		    }//
+		  }
+		  if (trkForMult)
+		    nChg_QC++;
+		  if (itrk.isNonnull() && trkForMult && pt > 1.0)
+		    nChg_ptCut_QC++;
+		  if (pt > pTMaxChg_QC && trkForAxis) 
+		    pTMaxChg_QC = pt;
+		}// for charged particles only
+
+
+            jetPart_forMult.push_back(trkForMult);
+            jetPart_forAxis.push_back(trkForAxis);
+
 		double dphi = 2*atan(tan((phi-Phi0)/2));      
 		double deta = eta-Eta0;
 		SumW+=pt;
@@ -777,6 +932,16 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 		SumDphi+=pt*pt*dphi;
 		SumDphi2+=pt*pt*dphi*dphi;
 		SumDetaDphi+=pt*pt*deta*dphi;
+		if (trkForAxis) {
+		  SumW_QC+=pt;
+		  SumW2_QC+=pt*pt;
+		  SumDeta_QC+=pt*pt*deta;
+		  SumDeta2_QC+=pt*pt*deta*deta;
+		  SumDphi_QC+=pt*pt*dphi;
+		  SumDphi2_QC+=pt*pt*dphi*dphi;
+		  SumDetaDphi_QC+=pt*pt*deta*dphi;
+		}
+
 		}
 	float ave_deta = SumDeta/SumW2;
 	float ave_dphi = SumDphi/SumW2;
@@ -796,12 +961,28 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
         tana = 0.5*(b-a+delta)/c;
       }	
 
+	float ave_deta_QC = SumDeta_QC/SumW2_QC;
+	float ave_dphi_QC = SumDphi_QC/SumW2_QC;
+	float  ave_deta2_QC = SumDeta2_QC/SumW2_QC;
+	float  ave_dphi2_QC = SumDphi2_QC/SumW2_QC;
+      float a_QC = ave_deta2_QC-ave_deta_QC*ave_deta_QC;
+      float b_QC = ave_dphi2_QC-ave_dphi_QC*ave_dphi_QC;
+      float c_QC = -(SumDetaDphi_QC/SumW2_QC-ave_deta_QC*ave_dphi_QC);
+      float delta_QC = sqrt(fabs((a_QC-b_QC)*(a_QC-b_QC)+4*c_QC*c_QC));
+      if (a_QC+b_QC+delta_QC > 0) {
+        axis1_QC = sqrt(0.5*(a_QC+b_QC+delta_QC));
+      }
+      if (a_QC+b_QC-delta_QC > 0) {  
+        axis2_QC = sqrt(0.5*(a_QC+b_QC-delta_QC));
+      }
+
       ptD =sqrt( SumW2/ (SumW*SumW));
 
       if(pfjet->nConstituents()>0)r_ch=pfjet->getJetConstituentsQuick()[0]->pt()/SumW;
 	//-------calculate pull------
     	float ddetaR_sum(0.0), ddphiR_sum(0.0),ddetaR_sum_QC(0.0), ddphiR_sum_QC(0.0);
       float sum_ddR = 0.;
+      float sum_ddR_QC = 0.;
     	for(int i=0; i<pfjet->nConstituents(); ++i) {
 			double pt=pfjet->getJetConstituentsQuick()[i]->pt();
 			double eta=pfjet->getJetConstituentsQuick()[i]->eta();
@@ -810,12 +991,21 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
 			double deta = eta-Eta0;
   		    float weight = pt*pt;
   		    float ddeta, ddphi,ddR;
+  		    float ddeta_QC, ddphi_QC,ddR_QC;
   		    ddeta = deta - ave_deta ;//jetPart_deta[i] - ave_deta ; 
   		    ddphi = 2*atan(tan(( dphi - ave_dphi)/2.)) ;
   		    ddR = sqrt(ddeta*ddeta + ddphi*ddphi);
 		    sum_ddR += ddR *ddR* weight;
   		    ddetaR_sum += ddR*ddeta*weight;
   		    ddphiR_sum += ddR*ddphi*weight;
+                if (jetPart_forAxis[i]) {
+  		      ddeta = deta - ave_deta ;//jetPart_deta[i] - ave_deta ; 
+  		      ddphi = 2*atan(tan(( dphi - ave_dphi)/2.)) ;
+  		      ddR = sqrt(ddeta*ddeta + ddphi*ddphi);
+		      sum_ddR += ddR *ddR* weight;
+  		      ddetaR_sum += ddR*ddeta*weight;
+  		      ddphiR_sum += ddR*ddphi*weight;
+                }
   		  }//second loop over constituents  
   		  if (SumW2 > 0) {
   		    float ddetaR_ave = ddetaR_sum/SumW2;
@@ -823,7 +1013,14 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
   		    pull = sqrt(ddetaR_ave*ddetaR_ave+ddphiR_ave*ddphiR_ave);
   		  }
 
+  		  if (SumW2_QC > 0) {
+  		    float ddetaR_ave_QC = ddetaR_sum_QC/SumW2_QC;
+  		    float ddphiR_ave_QC = ddphiR_sum_QC/SumW2_QC;
+  		    pull_QC = sqrt(ddetaR_ave_QC*ddetaR_ave_QC+ddphiR_ave_QC*ddphiR_ave_QC);
+  		  }
+
   rmsCand = sqrt( sum_ddR / SumW2);
+  rmsCand_QC = sqrt( sum_ddR_QC / SumW2_QC);
   } //close compute brackets
 
   
@@ -836,6 +1033,19 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, float R, float ptr
   vars.pull=  pull;
   vars.r_ch=  r_ch;
   vars.tana = tana;
+
+  vars.ptD_QC = ptD_QC;
+  vars.rmsCand_QC = rmsCand_QC;
+  vars.axis1_QC= axis1_QC;
+  vars.axis2_QC= axis2_QC;
+  vars.pull_QC=  pull_QC;
+  vars.r_ch_QC=  r_ch_QC;
+  vars.tana_QC = tana_QC;
+
+  vars.nChg_ptCut = nChg_ptCut;
+  vars.nChg_QC = nChg_QC;
+  vars.nChg_ptCut_QC = nChg_ptCut_QC;
+  vars.nNeutral_ptCut = nNeutral_ptCut;
 
   return vars;
 
