@@ -1,31 +1,34 @@
 --- Recipe to build and run the H->WW / RAZOR 52X  ---
 
 setenv SCRAM_ARCH slc5_amd64_gcc462
-cmsrel CMSSW_5_2_3
-cd CMSSW_5_2_3/src
+cmsrel CMSSW_5_2_6
+cd CMSSW_5_2_6/src
 cmsenv
 
 cvs co -r V22-5_2_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r edm-30March2012 HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V06-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
+cvs co -r V00-5_2_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
 cvs co -r V01-5_2_X -d PhysicsTools/EcalAnomalousEventFilter UserCode/emanuele/PhysicsTools/EcalAnomalousEventFilter
 cvs co -r V110523_BE -d Sandbox UserCode/csander/Sandbox
-cvs co -r V19MAY2011_v3 JetMETAnalysis/ecalDeadCellTools
 cvs co -r edm-30March2012 -d WWAnalysis/DataFormats UserCode/Mangano/WWAnalysis/DataFormats
 cvs co -r edm-30March2012 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r edm-30March2012 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
 cvs co -r V00-00-10 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTools
-cvs co -r V00-00-11 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
+cvs co -r V00-00-22 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 addpkg ElectroWeakAnalysis/Utilities
+cvs co -r V19MAY2011_v3 JetMETAnalysis/ecalDeadCellTools
 cvs co -r V03-01-00 JetMETCorrections/Objects
 addpkg JetMETCorrections/Modules
 cvs up -r 1.4 JetMETCorrections/Modules/plugins/JetCorrectorOnTheFly.cc
 cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 cvs co -r V04-06-03 JetMETCorrections/Type1MET
 cvs co -r V03-03-11 DataFormats/METReco
+cvs co -r BV00-03-20_HBHEfor52X CommonTools/RecoAlgos
+cvs co -r V00-00-08      RecoMET/METAnalyzers
+cvs co -r V00-00-08      RecoMET/METFilters
 addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V00-00-09 -d CMGTools/External UserCode/CMG/CMGTools/External
 
