@@ -20,6 +20,10 @@ from RecoJets.Configuration.RecoJets_cff   import *
 from JetMETCorrections.Configuration.JetCorrectionServicesAllAlgos_cff import *
 from JetMETCorrections.Configuration.JetCorrectionProducersAllAlgos_cff import *
 
+##-------------------- Turn-on the FastJet density calculation -----------------------
+from RecoJets.JetProducers.kt4PFJets_cfi import *
+kt6PFJets = kt4PFJets.clone( rParam = 0.6, doRhoFastjet = cms.bool(True), doAreaFastjet = cms.bool(True) )
+
 ##-------------------- Turn-on the FastJet jet area calculation for your favorite algorithm -----------------------
 ak5PFJets.doAreaFastjet = True
 ak5CaloJets.doAreaFastjet = True
@@ -48,7 +52,7 @@ ak5PFNoPUJetsL1FastL2L3 = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFNoPUJets', corr
 ak5PFNoPUJetsL1FastL2L3Residual = ak5PFJetsL1FastL2L3.clone( src = 'ak5PFNoPUJets', correctors = ['ak5PFNoPUL1FastL2L3Residual'] )
 
 CaloJetSequenceData = cms.Sequence( ak5CaloJets)   # not run for the moment
-PFJetAK5SequenceData = cms.Sequence( ak5PFJets )
+PFJetAK5SequenceData = cms.Sequence( ak5PFJets * kt6PFJets )
 PFNoPUJetAK5SequenceData = cms.Sequence( FastjetForPFNoPU )
 
 ourJetSequenceData = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5SequenceData)
@@ -56,7 +60,7 @@ ourJetSequenceDataReduced = cms.Sequence( PFJetAK5SequenceData * PFNoPUJetAK5Seq
 
 # MC sequeces use only L2L3 corrections
 CaloJetSequenceMC = cms.Sequence( ak5CaloJets )  # not run for the moment
-PFJetAK5SequenceMC = cms.Sequence( ak5PFJets )
+PFJetAK5SequenceMC = cms.Sequence( ak5PFJets * kt6PFJets )
 PFNoPUJetAK5SequenceMC = cms.Sequence( FastjetForPFNoPU )
 ourJetSequenceMC = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC)
 ourJetSequenceMCReduced = cms.Sequence( PFJetAK5SequenceMC * PFNoPUJetAK5SequenceMC * CaloJetSequenceMC )

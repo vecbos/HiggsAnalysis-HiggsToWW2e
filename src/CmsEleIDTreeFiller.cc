@@ -285,15 +285,17 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
                                          false);
   privateData_->mvaidtrig->push_back(mvaidtrig);
 
-  double mvaidisotrig = myMVATrigIdIsoCombined->IDIsoCombinedMvaValue(*ele,
-                                                                      primaryVertex->front(),
-                                                                      thebuilder,
-                                                                      lazyTools,
-                                                                      *pfcandidates_,
-                                                                      *rho_,
-                                                                      ElectronEffectiveArea::kEleEAData2012,
-                                                                      false);
-  privateData_->mvaidisotrig->push_back(mvaidisotrig);
+  // training incompatible with 4.2.X
+  //   double mvaidisotrig = myMVATrigIdIsoCombined->IDIsoCombinedMvaValue(*ele,
+  //                                                                       primaryVertex->front(),
+  //                                                                       thebuilder,
+  //                                                                       lazyTools,
+  //                                                                       *pfcandidates_,
+  //                                                                       *rho_,
+  //                                                                       ElectronEffectiveArea::kEleEAData2012,
+  //                                                                       false);
+  //  privateData_->mvaidisotrig->push_back(mvaidisotrig);
+  privateData_->mvaidisotrig->push_back(-999.);
 
   // --- isolations ---
 

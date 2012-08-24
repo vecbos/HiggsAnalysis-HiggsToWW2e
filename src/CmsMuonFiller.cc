@@ -41,8 +41,6 @@ using namespace edm;
 using namespace reco;
 using namespace muon;
 
-//#define CMSSW_4_2_X
-
 //		----------------------------------------
 // 		-- Public Function Member Definitions --
 //		----------------------------------------
@@ -369,11 +367,7 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
       ( TMLastStationOptimizedLowPtLoose << 1 ) | TMLastStationOptimizedLowPtTight;
 
     privateData_->muonId->push_back(packed_sel);
-#ifdef CMSSW_4_2_X
-    privateData_->pfmuonId->push_back(0);
-#else
-    privateData_->pfmuonId->push_back(muon->isPFMuon());
-#endif
+    privateData_->pfmuonId->push_back(0); // only available in CMSSW > 5.2.X
     privateData_->type->push_back(muon->type());
     privateData_->numberOfMatches->push_back(muon->numberOfMatches());
 
@@ -448,9 +442,11 @@ void CmsMuonFiller::writeMuonInfo(const Candidate *cand, const edm::Event& iEven
     privateData_->pfCandNeutralDirIso04->push_back( muonsPfCandNHad04DirIsoVal[muonRef] );
     privateData_->pfCandPhotonDirIso04->push_back( muonsPfCandPhoton04DirIsoVal[muonRef] );
 
-    // deltabeta corrected isolation
-    privateData_->pfIsolationSumPUPtR03->push_back(muonRef->pfIsolationR03().sumPUPt );
-    privateData_->pfIsolationSumPUPtR04->push_back(muonRef->pfIsolationR04().sumPUPt );
+    // deltabeta corrected isolation (available only in CMSSW > 5.2.X)
+    // privateData_->pfIsolationSumPUPtR03->push_back(muonRef->pfIsolationR03().sumPUPt );
+    // privateData_->pfIsolationSumPUPtR04->push_back(muonRef->pfIsolationR04().sumPUPt );
+    privateData_->pfIsolationSumPUPtR03->push_back(-999.);
+    privateData_->pfIsolationSumPUPtR04->push_back(-999.);
 
     // track kinks
     privateData_->kink->push_back(muonRef->combinedQuality().trkKink) ;

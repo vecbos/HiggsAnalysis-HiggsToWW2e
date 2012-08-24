@@ -286,7 +286,8 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     
     // isolations
     privateData_->hOverE->push_back(photonRef->hadronicOverEm());
-    privateData_->hTowOverE->push_back(photonRef->hadTowOverEm());
+    // privateData_->hTowOverE->push_back(photonRef->hadTowOverEm()); // available in CMSSW > 5.2.X
+    privateData_->hTowOverE->push_back(-999.);
     privateData_->dr03TkSumPt->push_back(photonRef->trkSumPtSolidConeDR03());
     privateData_->dr03HollowTkSumPt->push_back(photonRef->trkSumPtHollowConeDR03());
     privateData_->dr03EcalRecHitSumEt->push_back(photonRef->ecalRecHitSumEtConeDR03());

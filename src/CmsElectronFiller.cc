@@ -444,7 +444,7 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     int isEcalEnergyCorrected = ( electronRef->isEcalEnergyCorrected() ) ? 1 : 0;
     packed_corr = isEcalEnergyCorrected;
     privateData_->energyCorrections->push_back( packed_corr );
-    privateData_->correctedEcalEnergy->push_back( electronRef->correctedEcalEnergy() );
+    privateData_->correctedEcalEnergy->push_back( electronRef->ecalEnergy() );
 
   } else {
     privateData_->fiducialFlags->push_back(-1);
