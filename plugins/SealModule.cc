@@ -26,7 +26,7 @@ typedef ObjectSelector< LeptonTrackFilter,
 			> leptonTrackFilter ;
 
 typedef ObjectSelector< LeptonCandidateFilter, 
-			reco::CandidateCollection
+			reco::PFCandidateCollection
 			> leptonCandidateFilter ;
 
 typedef CollectionCombiner< reco::SuperClusterCollection > SuperClusterCombiner;
