@@ -17,7 +17,7 @@
 #include "DataFormats/METReco/interface/BeamHaloSummary.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsMetFiller.h"
-#include "DataFormats/METReco/interface/AnomalousECALVariables.h"
+#include "DataFormats/AnomalousEcalDataFormats/interface/AnomalousECALVariables.h"
 
 #include <TTree.h>
 
@@ -120,21 +120,6 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << ECALTPFilter; }
       bool ECALTPFilterFlag = *ECALTPFilter;
 
-      edm::Handle< bool > HBHENoiseFilterResult;
-      try { iEvent.getByLabel(edm::InputTag("HBHENoiseFilterResultProducer","HBHENoiseFilterResult"), HBHENoiseFilterResult); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << HBHENoiseFilterResult; }
-      bool HBHENoiseFilterResultFlag = *HBHENoiseFilterResult;
-
-      edm::Handle< bool > hcalLaserEventFilter;
-      try { iEvent.getByLabel("hcalLaserEventFilter", hcalLaserEventFilter); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << hcalLaserEventFilter; }
-      bool hcalLaserEventFilterFlag = *hcalLaserEventFilter;
-
-      edm::Handle< bool > eeBadScFilter;
-      try { iEvent.getByLabel("eeBadScFilter", eeBadScFilter); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << eeBadScFilter; }
-      bool eeBadScFilterFlag = *eeBadScFilter;
-
       edm::Handle< int > ECALDeadDRFilter;
       try { iEvent.getByLabel("simpleDRFlagProducer","deadCellStatus", ECALDeadDRFilter); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get int: " << ECALDeadDRFilter; }
@@ -153,7 +138,7 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
       bool CSCHaloFilterFlag = ! beamHaloH->CSCTightHaloId();
 
       edm::Handle< bool > trackerFailureFilter;
-      try { iEvent.getByLabel("trackingFailureFilter", trackerFailureFilter); }
+      try { iEvent.getByLabel("trackingFailureFlagProducer", trackerFailureFilter); }
       catch ( cms::Exception& ex ) { edm::LogWarning("CmsMetFiller") << "Can't get bool: " << trackerFailureFilter; }
       bool trackerFailureFilterFlag = *trackerFailureFilter;    
 
@@ -169,10 +154,7 @@ void CmsMetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
       bool isNotDeadEcalCluster = !(anomalousECALvars.isDeadEcalCluster());
       
-      *(privateData_->filterBits) = 
-        (eeBadScFilterFlag << 8) | (hcalLaserEventFilterFlag << 7) | (HBHENoiseFilterResultFlag << 6) | 
-        (isNotDeadEcalCluster << 5) | (trackerFailureFilterFlag << 4) | (CSCHaloFilterFlag << 3) | 
-        ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
+      *(privateData_->filterBits) = (isNotDeadEcalCluster << 5) | (trackerFailureFilterFlag << 4) | (CSCHaloFilterFlag << 3) | ( drDead << 2 ) | ( drBoundary << 1 ) | ECALTPFilterFlag;
     }
 
     *(privateData_->ncand) = collection->size();
