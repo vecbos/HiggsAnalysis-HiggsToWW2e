@@ -1098,6 +1098,7 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
   vars.pTMaxNeutral = pTMaxNeutral;
   vars.pTMaxChg_QC = pTMaxChg_QC;
 
+  delete input_particles;
   return vars;
 
 }
