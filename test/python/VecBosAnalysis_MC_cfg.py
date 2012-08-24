@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 is42X = False
+is52X = False
 runOnAOD = 1
 
 process = cms.Process("VecBosAnalysis")
@@ -9,11 +10,14 @@ process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
-if(is42X):
-    process.GlobalTag.globaltag = 'START42_V14B::All'
-else:
-    process.GlobalTag.globaltag = 'START52_V9::All'
 process.es_prefer_GlobalTag = cms.ESPrefer('PoolDBESSource','GlobalTag')
+
+if(is42X):
+    process.GlobalTag.globaltag = 'START42_V17::All'
+elif(is52X):
+    process.GlobalTag.globaltag = 'START52_V11C::All'
+else:
+    process.GlobalTag.globaltag = 'START53_V10::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -119,10 +123,17 @@ process.options = cms.untracked.PSet(
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
+if(is42X):
+    inputfile = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/DYeeSummer11.root')
+elif(is52X):
+    inputfile = cms.untracked.vstring('file:/cmsrm/pc21_2/emanuele/data/AOD_WWSummer12.root')
+else:
+    inputfile = cms.untracked.vstring('/store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_S10_START53_V7A-v1/0000/FEFF0D8E-91D2-E111-9BEA-001E673976ED.root')
+
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc21_2/emanuele/data/AOD_WWSummer12.root')
+                            fileNames = inputfile
                             )
 
 process.prejets = cms.Sequence( process.leptonLinkedTracks 

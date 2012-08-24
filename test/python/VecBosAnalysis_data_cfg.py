@@ -1,6 +1,7 @@
 import FWCore.ParameterSet.Config as cms
 
 is42X = False
+is52X = False
 runOnAOD = 1
 
 process = cms.Process("VecBosAnalysis")
@@ -12,8 +13,10 @@ process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(is42X):
     process.GlobalTag.globaltag = 'GR_R_42_V25::All'
+elif(is52X):
+    process.GlobalTag.globaltag = 'GR_R_52_V9D::All'
 else:
-    process.GlobalTag.globaltag = 'GR_R_52_V7C::All'
+    process.GlobalTag.globaltag = 'GR_P_V41_AN1::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -102,13 +105,18 @@ process.options = cms.untracked.PSet(
 
 process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 
+if(is42X):
+    inputfile = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root')
+elif(is52X):
+    inputfile = cms.untracked.vstring('/store/data/Run2012A/DoubleElectron/AOD/PromptReco-v1/000/191/700/00327508-AF8B-E111-8151-BCAEC53296F4.root')
+else:
+    inputfile = cms.untracked.vstring('/store/data/Run2012C/DoubleElectron/AOD/PromptReco-v2/000/201/278/F8F44E0A-ACED-E111-8621-E0CB4E553651.root')
+
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
 #                            skipEvents = cms.untracked.uint32(6764),
-                            fileNames = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root') if is42X else cms.untracked.vstring('/store/data/Run2012A/DoubleElectron/AOD/PromptReco-v1/000/191/700/00327508-AF8B-E111-8151-BCAEC53296F4.root')
-#                            fileNames = cms.untracked.vstring('/store/data/Run2012A/Photon/AOD/PromptReco-v1/000/191/830/6C397AE1-CA8C-E111-9CA2-003048F1C424.root')
-#                            fileNames = cms.untracked.vstring('file:./pickevents.root')
+                            fileNames = inputfile
                             )
 
 process.prejets = cms.Sequence( process.leptonLinkedTracks
