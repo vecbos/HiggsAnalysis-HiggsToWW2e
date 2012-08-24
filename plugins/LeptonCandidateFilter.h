@@ -2,7 +2,8 @@
 #define LeptonCandidateFilter_h
 
 #include "DataFormats/Common/interface/Handle.h"
-#include "DataFormats/Candidate/interface/Candidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidate.h"
+#include "DataFormats/ParticleFlowCandidate/interface/PFCandidateFwd.h"
 
 #include "FWCore/Framework/interface/Event.h"
 #include "FWCore/Framework/interface/EventSetup.h"
@@ -16,9 +17,9 @@ class LeptonCandidateFilter{
 
  public:
 
-  typedef const reco::Candidate * track ;
-  typedef reco::CandidateCollection collection ;
-  typedef reco::CandidateRefVector container;
+  typedef const reco::PFCandidate * track ;
+  typedef reco::PFCandidateCollection collection ;
+  typedef reco::PFCandidateRefVector container;
   typedef container::const_iterator const_iterator ;
   
   //! ctor
@@ -42,7 +43,7 @@ class LeptonCandidateFilter{
   container m_selected ;
 
   //! the configurable inputs
-  edm::InputTag m_ElectronLabel, m_MuonLabel;
+  edm::InputTag m_ElectronLabel, m_MuonLabel, m_PhotonLabel;
 
 };  
 
