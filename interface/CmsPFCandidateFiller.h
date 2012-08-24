@@ -33,8 +33,7 @@
 struct CmsPFCandidateFillerData : public CmsCandidateFillerData {
   // All the vectors that will store the stuff
   // going into the tree.
-  vector<int> *particleId, *vtxtype;
-  vector<int> *superClusterRef, *trackRef, *gsfTrackRef;
+  vector<int> *particleId;
 
 public:
   void initialise();

@@ -60,9 +60,6 @@ CmsPFCandidateFiller::~CmsPFCandidateFiller() {
 
   // delete here the vector ptr's
   delete privateData_->particleId;
-  delete privateData_->trackRef;
-  delete privateData_->gsfTrackRef;
-  delete privateData_->superClusterRef;
   delete privateData_;
 }
 
@@ -119,18 +116,6 @@ void CmsPFCandidateFiller::writeCollectionToTree(edm::InputTag collectionTag,
       const reco::PFCandidate *pfcand = dynamic_cast< const reco::PFCandidate * > ( &(*cand) );
       privateData_->particleId->push_back(pfcand->particleId());
 
-      int ctfTrackLink=-1;
-      for(int itrk=0; itrk<(int)h_tracks->size(); itrk++) {
-        reco::TrackRef iTrackRef = h_tracks->at(itrk);
-        if(pfcand->trackRef().key() == iTrackRef.key()) {
-          ctfTrackLink = itrk;
-          break;
-        }
-      }
-
-      privateData_->trackRef->push_back(ctfTrackLink);
-      privateData_->gsfTrackRef->push_back(pfcand->gsfTrackRef().key());
-      privateData_->superClusterRef->push_back(pfcand->superClusterRef().key());
     }
   }
   else {
@@ -164,9 +149,6 @@ void CmsPFCandidateFiller::treePFInfo(const std::string colPrefix, const std::st
 
   std::string nCandString = colPrefix+(*trkIndexName_)+colSuffix;
   cmstree->column((colPrefix+"particleId"+colSuffix).c_str(), *privateData_->particleId, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"trackRef"+colSuffix).c_str(), *privateData_->trackRef, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"gsfTrackRef"+colSuffix).c_str(), *privateData_->gsfTrackRef, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"superClusterRef"+colSuffix).c_str(), *privateData_->superClusterRef, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -179,9 +161,6 @@ void CmsPFCandidateFillerData::initialise() {
 
   initialiseCandidate();
   particleId = new vector<int>;
-  trackRef = new vector<int>;
-  gsfTrackRef = new vector<int>;
-  superClusterRef = new vector<int>;
 
 }
 
@@ -189,8 +168,5 @@ void CmsPFCandidateFillerData::clearTrkVectors() {
 
   clearTrkVectorsCandidate();
   particleId->clear();
-  trackRef->clear();
-  gsfTrackRef->clear();
-  superClusterRef->clear();
 
 }
