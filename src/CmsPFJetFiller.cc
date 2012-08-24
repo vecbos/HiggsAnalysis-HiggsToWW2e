@@ -129,7 +129,6 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->axis1;
   delete privateData_->axis2;
   delete privateData_->pull;
-  delete privateData_->r_ch;
   delete privateData_->tana;
 
   delete privateData_->ptD_QC;
@@ -137,13 +136,22 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->axis1_QC;
   delete privateData_->axis2_QC;
   delete privateData_->pull_QC;
-  delete privateData_->r_ch_QC;
   delete privateData_->tana_QC;
 
   delete privateData_->nChg_ptCut;
   delete privateData_->nChg_QC;
   delete privateData_->nChg_ptCut_QC;
   delete privateData_->nNeutral_ptCut;
+
+  delete privateData_->Rchg;
+  delete privateData_->Rneutral;
+  delete privateData_->R;
+  delete privateData_->Rchg_QC;
+
+  delete privateData_->pTMax;
+  delete privateData_->pTMaxChg;
+  delete privateData_->pTMaxNeutral;
+  delete privateData_->pTMaxChg_QC;
 
   // additional variables for PU studies
   delete privateData_->jetIdMvaSimple;
@@ -284,7 +292,6 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->axis1->push_back( qgvars.axis1 );
         privateData_->axis2->push_back( qgvars.axis2 );
         privateData_->pull->push_back( qgvars.pull );
-        privateData_->r_ch->push_back( qgvars.r_ch );
         privateData_->tana->push_back( qgvars.tana );
 
         privateData_->ptD_QC->push_back( qgvars.ptD_QC );
@@ -292,13 +299,22 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->axis1_QC->push_back( qgvars.axis1_QC );
         privateData_->axis2_QC->push_back( qgvars.axis2_QC );
         privateData_->pull_QC->push_back( qgvars.pull_QC );
-        privateData_->r_ch_QC->push_back( qgvars.r_ch_QC );
         privateData_->tana_QC->push_back( qgvars.tana_QC );
 
         privateData_->nChg_ptCut->push_back( qgvars.nChg_ptCut );
         privateData_->nChg_QC->push_back( qgvars.nChg_QC );
         privateData_->nChg_ptCut_QC->push_back( qgvars.nChg_ptCut_QC );
         privateData_->nNeutral_ptCut->push_back( qgvars.nNeutral_ptCut );
+
+        privateData_->Rchg->push_back( qgvars.Rchg );
+        privateData_->Rneutral->push_back( qgvars.Rneutral );
+        privateData_->R->push_back( qgvars.R );
+        privateData_->Rchg_QC->push_back( qgvars.Rchg_QC );
+
+        privateData_->pTMax->push_back( qgvars.pTMax );
+        privateData_->pTMaxChg->push_back( qgvars.pTMaxChg );
+        privateData_->pTMaxNeutral->push_back( qgvars.pTMaxNeutral );
+        privateData_->pTMaxChg_QC->push_back( qgvars.pTMaxChg_QC );
 
 
 	float sumPt_cands,sumPt2_cands,rms_cands,sumTrkPtBetaStar,sumTrkPt,betastar_;
@@ -592,7 +608,6 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"axis1"+colSuffix).c_str(), *privateData_->axis1, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"axis2"+colSuffix).c_str(), *privateData_->axis2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pull"+colSuffix).c_str(), *privateData_->pull, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"r_ch"+colSuffix).c_str(), *privateData_->r_ch, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"tana"+colSuffix).c_str(), *privateData_->tana, nCandString.c_str(), 0, "Reco");
 
   cmstree->column((colPrefix+"rmsCand_QC"+colSuffix).c_str(), *privateData_->rmsCand_QC, nCandString.c_str(), 0, "Reco");
@@ -600,13 +615,22 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"axis1_QC"+colSuffix).c_str(), *privateData_->axis1_QC, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"axis2_QC"+colSuffix).c_str(), *privateData_->axis2_QC, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pull_QC"+colSuffix).c_str(), *privateData_->pull_QC, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"r_ch_QC"+colSuffix).c_str(), *privateData_->r_ch_QC, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"tana_QC"+colSuffix).c_str(), *privateData_->tana_QC, nCandString.c_str(), 0, "Reco");
 
   cmstree->column((colPrefix+"nChg_ptCut"+colSuffix).c_str(), *privateData_->nChg_ptCut, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nChg_QC"+colSuffix).c_str(), *privateData_->nChg_QC, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nChg_ptCut_QC"+colSuffix).c_str(), *privateData_->nChg_ptCut_QC, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"nNeutral_ptCut"+colSuffix).c_str(), *privateData_->nNeutral_ptCut, nCandString.c_str(), 0, "Reco");
+
+  cmstree->column((colPrefix+"Rchg"+colSuffix).c_str(), *privateData_->Rchg, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"Rneutral"+colSuffix).c_str(), *privateData_->Rneutral, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"R"+colSuffix).c_str(), *privateData_->R, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"Rchg_QC"+colSuffix).c_str(), *privateData_->Rchg_QC, nCandString.c_str(), 0, "Reco");
+
+  cmstree->column((colPrefix+"pTMax"+colSuffix).c_str(), *privateData_->pTMax, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pTMaxChg"+colSuffix).c_str(), *privateData_->pTMaxChg, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pTMaxNeutral"+colSuffix).c_str(), *privateData_->pTMaxNeutral, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"pTMaxChg_QC"+colSuffix).c_str(), *privateData_->pTMaxChg_QC, nCandString.c_str(), 0, "Reco");
 }
 
 
@@ -670,7 +694,6 @@ void CmsPFJetFillerData::initialise() {
   axis1 = new vector<float>;
   axis2 = new vector<float>;
   pull = new vector<float>;
-  r_ch = new vector<float>;
   tana = new vector<float>;
 
   ptD_QC = new vector<float>;
@@ -678,13 +701,22 @@ void CmsPFJetFillerData::initialise() {
   axis1_QC = new vector<float>;
   axis2_QC = new vector<float>;
   pull_QC = new vector<float>;
-  r_ch_QC = new vector<float>;
   tana_QC = new vector<float>;
 
   nChg_ptCut = new vector<int>;
   nChg_QC = new vector<int>;
   nChg_ptCut_QC = new vector<int>;
   nNeutral_ptCut = new vector<int>;
+
+  Rchg = new vector<float>;
+  Rneutral = new vector<float>;
+  R = new vector<float>;
+  Rchg_QC = new vector<float>;
+
+  pTMax = new vector<float>;
+  pTMaxChg = new vector<float>;
+  pTMaxNeutral = new vector<float>;
+  pTMaxChg_QC = new vector<float>;
 
   betastar = new vector<float>;
   jetIdMvaSimple = new vector<float>;
@@ -760,7 +792,6 @@ void CmsPFJetFillerData::clearTrkVectors() {
   axis1->clear();
   axis2->clear();
   pull->clear();
-  r_ch->clear();
   tana->clear();
 
   ptD_QC->clear();
@@ -768,13 +799,22 @@ void CmsPFJetFillerData::clearTrkVectors() {
   axis1_QC->clear();
   axis2_QC->clear();
   pull_QC->clear();
-  r_ch_QC->clear();
   tana_QC->clear();
 
   nChg_ptCut->clear();
   nChg_QC->clear();
   nChg_ptCut_QC->clear();
   nNeutral_ptCut->clear();
+
+  Rchg->clear();
+  Rneutral->clear();
+  R->clear();
+  Rchg_QC->clear();
+
+  pTMax->clear();
+  pTMaxChg->clear();
+  pTMaxNeutral->clear();
+  pTMaxChg_QC->clear();
 
   betastar -> clear();
   jetIdMvaSimple -> clear();
@@ -818,17 +858,16 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
   float axis1=    -999.;
   float axis2=    -999.;
   float pull=     -999.;
-  float r_ch=     -999.;
   float tana =    -999.;
   float rmsCand_QC=  -999.;
   float ptD_QC=      -999.;
   float axis1_QC=    -999.;
   float axis2_QC=    -999.;
   float pull_QC=     -999.;
-  float r_ch_QC=     -999.;
   float tana_QC =    -999.;
   float pTMax(0.0),pTMaxChg(0.0),pTMaxNeutral(0.0),pTMaxChg_QC(0.0);
   int nChg_QC(0),nChg_ptCut(0),nChg_ptCut_QC(0),nNeutral_ptCut(0);
+  float Rchg(0),Rneutral(0),R(0),Rchg_QC(0);
 	//compute the variables
   {
 	float SumW=0;
@@ -978,7 +1017,6 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
 
       ptD =sqrt( SumW2/ (SumW*SumW));
 
-      if(pfjet->nConstituents()>0)r_ch=pfjet->getJetConstituentsQuick()[0]->pt()/SumW;
 	//-------calculate pull------
     	float ddetaR_sum(0.0), ddphiR_sum(0.0),ddetaR_sum_QC(0.0), ddphiR_sum_QC(0.0);
       float sum_ddR = 0.;
@@ -991,20 +1029,19 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
 			double deta = eta-Eta0;
   		    float weight = pt*pt;
   		    float ddeta, ddphi,ddR;
-  		    float ddeta_QC, ddphi_QC,ddR_QC;
   		    ddeta = deta - ave_deta ;//jetPart_deta[i] - ave_deta ; 
   		    ddphi = 2*atan(tan(( dphi - ave_dphi)/2.)) ;
   		    ddR = sqrt(ddeta*ddeta + ddphi*ddphi);
 		    sum_ddR += ddR *ddR* weight;
   		    ddetaR_sum += ddR*ddeta*weight;
   		    ddphiR_sum += ddR*ddphi*weight;
-                if (jetPart_forAxis[i]) {
-  		      ddeta = deta - ave_deta ;//jetPart_deta[i] - ave_deta ; 
-  		      ddphi = 2*atan(tan(( dphi - ave_dphi)/2.)) ;
-  		      ddR = sqrt(ddeta*ddeta + ddphi*ddphi);
-		      sum_ddR += ddR *ddR* weight;
-  		      ddetaR_sum += ddR*ddeta*weight;
-  		      ddphiR_sum += ddR*ddphi*weight;
+                if (jetPart_forAxis[i]) { // this should be ave_deta_QC
+  		      float ddeta_QC = deta - ave_deta_QC ;//jetPart_deta[i] - ave_deta ; 
+  		      float ddphi_QC = 2*atan(tan(( dphi - ave_dphi_QC)/2.)) ;
+  		      float ddR_QC = sqrt(ddeta_QC*ddeta_QC + ddphi_QC*ddphi_QC);
+		      sum_ddR_QC += ddR_QC *ddR_QC* weight;
+  		      ddetaR_sum_QC += ddR_QC*ddeta_QC*weight;
+  		      ddphiR_sum_QC += ddR_QC*ddphi_QC*weight;
                 }
   		  }//second loop over constituents  
   		  if (SumW2 > 0) {
@@ -1021,6 +1058,12 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
 
   rmsCand = sqrt( sum_ddR / SumW2);
   rmsCand_QC = sqrt( sum_ddR_QC / SumW2_QC);
+
+  Rchg = pTMaxChg/SumW;
+  Rneutral = pTMaxNeutral/SumW;
+  R = pTMax/SumW;
+  Rchg_QC = pTMaxChg_QC/SumW_QC;
+
   } //close compute brackets
 
   
@@ -1031,7 +1074,6 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
   vars.axis1= axis1;
   vars.axis2= axis2;
   vars.pull=  pull;
-  vars.r_ch=  r_ch;
   vars.tana = tana;
 
   vars.ptD_QC = ptD_QC;
@@ -1039,13 +1081,22 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
   vars.axis1_QC= axis1_QC;
   vars.axis2_QC= axis2_QC;
   vars.pull_QC=  pull_QC;
-  vars.r_ch_QC=  r_ch_QC;
   vars.tana_QC = tana_QC;
+
+  vars.Rchg = Rchg;
+  vars.Rneutral = Rneutral;
+  vars.R = R;
+  vars.Rchg_QC = Rchg_QC;
 
   vars.nChg_ptCut = nChg_ptCut;
   vars.nChg_QC = nChg_QC;
   vars.nChg_ptCut_QC = nChg_ptCut_QC;
   vars.nNeutral_ptCut = nNeutral_ptCut;
+
+  vars.pTMax = pTMax;
+  vars.pTMaxChg = pTMaxChg;
+  vars.pTMaxNeutral = pTMaxNeutral;
+  vars.pTMaxChg_QC = pTMaxChg_QC;
 
   return vars;
 
