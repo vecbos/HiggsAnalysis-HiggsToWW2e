@@ -9,9 +9,10 @@ reducedPFCands = cms.EDProducer("HWWReducedCandidatesProducer",
 
 # produces the reduced collection, subset of the above, of all the candidates in a cone 0.1 from reco leptons (to be removed offline from the chMET)
 reducedPFCandsToSave = cms.EDFilter("leptonCandidateFilter",
-                                    src = cms.InputTag("reducedPFCands"),
+                                    src = cms.InputTag("particleFlow"),
                                     ElectronLabel = cms.InputTag("gsfElectrons"),
-                                    MuonLabel = cms.InputTag("muons")
+                                    MuonLabel = cms.InputTag("muons"),
+                                    PhotonLabel = cms.InputTag("photons")
                                     )
 
 ourChPFMet = cms.EDProducer("ChargedPFMetProducer",
