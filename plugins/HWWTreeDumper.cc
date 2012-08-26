@@ -946,13 +946,11 @@ void HWWTreeDumper::beginJob() {
   myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat5.weights.xml").fullPath());
   myManualCatWeigthsTrigIdIsoCombined.push_back(edm::FileInPath("HiggsAnalysis/HiggsToWW2e/data/Electrons_BDTG_TrigV1_Cat6.weights.xml").fullPath());
 
-  // training incompatible with ROOT 5.27 of 4.2.X (done with 5.32/00 of 5.2.X)
-  // fEleIdMVATrigIdIsoCombined = new EGammaMvaEleEstimator();
-  // fEleIdMVATrigIdIsoCombined->initialize("BDT",
-  //                                        EGammaMvaEleEstimator::kTrigIDIsoCombined,
-  //                                        manualCat,
-  //                                        myManualCatWeigthsTrigIdIsoCombined);
-  fEleIdMVATrigIdIsoCombined = 0;
+  fEleIdMVATrigIdIsoCombined = new EGammaMvaEleEstimator();
+  fEleIdMVATrigIdIsoCombined->initialize("BDT",
+                                         EGammaMvaEleEstimator::kTrigIDIsoCombined,
+                                         manualCat,
+                                         myManualCatWeigthsTrigIdIsoCombined);
 
   // muon isolation
   fMuonIsoMVA = new MuonMVAEstimator();
