@@ -108,9 +108,8 @@ cvs co -r V00-5_3_X-BP42X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/Hi
 cvs co -r V06-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
+cvs co -r V01-5_2_X -d PhysicsTools/EcalAnomalousEventFilter UserCode/emanuele/PhysicsTools/EcalAnomalousEventFilter
 cvs co -r V00-04-01 CondFormats/EgammaObjects
-cvs co -r V110523_BE -d DataFormats/AnomalousEcalDataFormats UserCode/csander/DataFormats/AnomalousEcalDataFormats
-cvs co -r V110523_BE -d PhysicsTools/EcalAnomalousEventFilter UserCode/csander/PhysicsTools/EcalAnomalousEventFilter
 cvs co -r V110523_BE -d Sandbox UserCode/csander/Sandbox
 cvs co -r V19MAY2011_v3 JetMETAnalysis/ecalDeadCellTools
 cvs co -r V02-04-17 RecoJets/Configuration
@@ -134,6 +133,9 @@ addpkg JetMETCorrections/Modules
 cvs up -r 1.4 JetMETCorrections/Modules/plugins/JetCorrectorOnTheFly.cc
 cvs up -r 1.6 JetMETCorrections/Modules/interface/JetCorrectionProducer.h
 cvs co -r V04-06-03 JetMETCorrections/Type1MET
+addpkg CommonTools/RecoAlgos
+cvs up -r BV00-03-20_HBHEfor52X CommonTools/RecoAlgos/plugins/HBHENoiseFilterResultProducer.cc
+cvs up -r BV00-03-20_HBHEfor52X CommonTools/RecoAlgos/python/HBHENoiseFilterResultProducer_cfi.py 
 cvs co -r lhx_12JAN2012_v1 DataFormats/METReco
 cvs co -r V00-00-08   RecoMET/METAnalyzers
 cvs co -r VB00-00-03  RecoMET/METFilters
