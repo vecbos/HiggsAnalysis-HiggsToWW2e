@@ -170,6 +170,7 @@ void CmsElectronFiller::saveFatEcal(bool what) { saveFatEcal_=what;}
 
 void CmsElectronFiller::saveEleID(bool what) { saveEleID_=what;}
 
+void CmsElectronFiller::savePFlowIsolations(bool what) { savePFlowIsolation_=what;}
 
 
 void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
@@ -215,9 +216,11 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     const EcalRecHitCollection *EERecHits = EcalEndcapRecHits.product();
 
     // for track link
-    try { iEvent.getByLabel(generalTracks_, h_tracks); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
-
+    if(generalTracks_.label().size()!=0) {
+      try { iEvent.getByLabel(generalTracks_, h_tracks); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get general track collection: " << generalTracks_; }
+    }
+    
     // for ECAL supercluster link
     try { iEvent.getByLabel(EcalSuperClusters_, h_superclusters); }
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get merged ECAL supercluster collection: " << EcalSuperClusters_; }
@@ -229,8 +232,10 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     // for conversions with full vertex fit
     iEvent.getByLabel("offlineBeamSpot", bsHandle);
 
-    try { iEvent.getByLabel(conversionsProducer_, hConversions); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get conversions collection " << conversionsProducer_; }
+    if(conversionsProducer_.label().size()!=0) {
+      try { iEvent.getByLabel(conversionsProducer_, hConversions); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsElectronFiller") << "Can't get conversions collection " << conversionsProducer_; }
+    }
 
     for(int index = 0; index < (int)collection->size(); index++) {
 
@@ -286,6 +291,7 @@ void CmsElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
     eIDFiller.setVertexCollection(m_vxtCollectionTag);
     eIDFiller.setEleIdMVAs(myMVATrig,myMVATrigIdIsoCombined,myMVANonTrig);
     eIDFiller.setPFCandidateCollection(m_pfcandCollectionTag);
+    eIDFiller.savePFlowIsolations(savePFlowIsolation_);
     eIDFiller.writeCollectionToTree(collectionTag,iEvent,iSetup,columnPrefix,columnSuffix,false);
   }
   
@@ -349,8 +355,10 @@ void CmsElectronFiller::writeTrkInfo(const GsfElectronRef electronRef,
       privateData_->convTrackIndex->push_back(-1);
     }
 
-    bool matchesConv = ConversionTools::hasMatchedConversion(*electronRef,hConversions,bsHandle->position());
-    privateData_->hasMatchedConversion->push_back(matchesConv);
+    if(conversionsProducer_.label().size()!=0) {
+      bool matchesConv = ConversionTools::hasMatchedConversion(*electronRef,hConversions,bsHandle->position());
+      privateData_->hasMatchedConversion->push_back(matchesConv);
+    } else privateData_->hasMatchedConversion->push_back(-999);
 
   } else {
     privateData_->gsfTrackIndex->push_back( -1 );

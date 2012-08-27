@@ -48,6 +48,7 @@ public:
   virtual ~CmsRunInfoFiller();
 
   void dumpL1Trigger(bool what) { dumpL1_ = what; }
+  void dumpLogErrorFlags(bool what) { dumpLogErrorFlags_ = what; }
   void writeRunInfoToTree(const edm::Event&, const edm::EventSetup&, 
                           bool dumpData=false);
 
@@ -60,6 +61,7 @@ protected:
   CmsTree *cmstree;
   bool isMC_;
   bool dumpL1_;
+  bool dumpLogErrorFlags_;
 
 };
 

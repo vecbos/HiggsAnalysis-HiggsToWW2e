@@ -8,7 +8,8 @@ mergedSuperClusters = cms.EDProducer("SuperClusterCombiner",
 electronAndPhotonSuperClusters = cms.EDProducer("ElectronAndPhotonSuperClusterProducer",
                                                 ElectronLabel = cms.InputTag("gsfElectrons"),
                                                 PhotonLabel = cms.InputTag("photons"),
-                                                SuperClusterLabel = cms.InputTag("mergedSuperClusters")
+                                                SuperClusterLabel = cms.InputTag("mergedSuperClusters"),
+                                                includePhotonSuperClusters = cms.bool(True)
                                                 )
 
 electronAndPhotonSuperClustersSequence = cms.Sequence( mergedSuperClusters

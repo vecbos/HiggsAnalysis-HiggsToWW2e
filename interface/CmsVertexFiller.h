@@ -71,6 +71,8 @@ public:
 
   //! set the charged met collection associated to the PVs
   void setChargedMet( edm::InputTag ChargedMets ) { ChargedMets_ = ChargedMets; }
+  //! set the track collection (if not present in the event (ALCARECO) don't try to loop over tracks associated to the vertex)
+  void setGeneralTracksCollection( edm::InputTag tracksCollection ) { tracksCollection_ = tracksCollection; }
 
 private:
   void treeVertexInfo(const std::string &colPrefix,
@@ -79,6 +81,7 @@ private:
   CmsVertexFillerData *privateData_;
   //    CmsVertexTracksFillerData *privateDatat_;
   edm::InputTag ChargedMets_;
+  edm::InputTag tracksCollection_;
   std::string *trkIndexName_;
   CmsTree *cmstree;
 

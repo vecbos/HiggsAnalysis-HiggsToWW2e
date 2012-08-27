@@ -184,9 +184,10 @@ void CmsSuperClusterFiller::writeCollectionToTree(edm::InputTag collectionTag,
       
       *(privateData_->nSC) = collection->size();
   
-      try { iEvent.getByLabel(Calotowers_, calotowers_); }
-      catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary calotowers collection" << Calotowers_; }
-
+      if(Calotowers_.label().size()!=0) {
+        try { iEvent.getByLabel(Calotowers_, calotowers_); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsSuperClusterFiller") << "Can't get primary calotowers collection" << Calotowers_; }
+      }
       // for cluster shape variables
       Handle< EcalRecHitCollection > EcalBarrelRecHits;
       try { iEvent.getByLabel(EcalBarrelRecHits_, EcalBarrelRecHits); }
@@ -356,19 +357,23 @@ void CmsSuperClusterFiller::writeSCInfo(const SuperCluster *cand,
         privateData_->seedX->push_back(id.ix());
         privateData_->seedY->push_back(id.iy());        
       }
+
       // calculate H/E
-      float hOverEConeSize = 0.15;
-      float hOverEPtMin = 0.;
-      EgammaTowerIsolation *towerIso1 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,1,calotowers_.product()) ;
-      EgammaTowerIsolation *towerIso2 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,2,calotowers_.product()) ;
-      
-      float TowerHcalESum1 = towerIso1->getTowerESum(cand);
-      float TowerHcalESum2 = towerIso2->getTowerESum(cand);
-      float hcalESum = TowerHcalESum1 + TowerHcalESum2;
-      
-      privateData_->hOverE->push_back(hcalESum/cand->energy());
-      delete towerIso1;
-      delete towerIso2;
+      float hcalESum = 0.;
+      if(Calotowers_.label().size()!=0) { 
+        float hOverEConeSize = 0.15;
+        float hOverEPtMin = 0.;
+        EgammaTowerIsolation *towerIso1 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,1,calotowers_.product()) ;
+        EgammaTowerIsolation *towerIso2 = new EgammaTowerIsolation(hOverEConeSize,0.,hOverEPtMin,2,calotowers_.product()) ;
+        
+        float TowerHcalESum1 = towerIso1->getTowerESum(cand);
+        float TowerHcalESum2 = towerIso2->getTowerESum(cand);
+        hcalESum = TowerHcalESum1 + TowerHcalESum2;
+        
+        privateData_->hOverE->push_back(hcalESum/cand->energy());
+        delete towerIso1;
+        delete towerIso2;
+      } else privateData_->hOverE->push_back(-999.);
 
       // === Preshower cluster shapes === //
       // ES geometry

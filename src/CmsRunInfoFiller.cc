@@ -184,7 +184,7 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
 
 
   // log errors (tracker failures)
-  if(!isMC_) {
+  if(!isMC_ && dumpLogErrorFlags_) {
     edm::Handle< bool > tooManySeedsH;
     iEvent.getByLabel(edm::InputTag("tooManySeeds:TrackerLogError"), tooManySeedsH);
     bool tooManySeeds = *tooManySeedsH;

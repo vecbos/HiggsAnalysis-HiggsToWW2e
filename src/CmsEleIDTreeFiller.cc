@@ -41,6 +41,7 @@ CmsEleIDTreeFiller::CmsEleIDTreeFiller(CmsTree *cmsTree, int maxTracks, bool noO
   trkIndexName_ = new std::string("n");
   
   standalone_ = true;
+  savePFlowIsolation_ = true;
 
   privateData_->initialise();
 
@@ -149,38 +150,43 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[0] );
 
     eIsoFromPFCandsValueMap_ = new isoContainer(25);
-    iEvent.getByLabel( "electronCombinedPFIsoMapProducer", (*eIsoFromPFCandsValueMap_)[0] ); 
-    iEvent.getByLabel( "electronPFIsoChHad01", (*eIsoFromPFCandsValueMap_)[1] );
-    iEvent.getByLabel( "electronPFIsoNHad01", (*eIsoFromPFCandsValueMap_)[2] );
-    iEvent.getByLabel( "electronPFIsoPhoton01", (*eIsoFromPFCandsValueMap_)[3] );
-    iEvent.getByLabel( "electronPFIsoChHad02", (*eIsoFromPFCandsValueMap_)[4] );
-    iEvent.getByLabel( "electronPFIsoNHad02", (*eIsoFromPFCandsValueMap_)[5] );
-    iEvent.getByLabel( "electronPFIsoPhoton02", (*eIsoFromPFCandsValueMap_)[6] );
-    iEvent.getByLabel( "electronPFIsoChHad03", (*eIsoFromPFCandsValueMap_)[7] );
-    iEvent.getByLabel( "electronPFIsoNHad03", (*eIsoFromPFCandsValueMap_)[8] );
-    iEvent.getByLabel( "electronPFIsoPhoton03", (*eIsoFromPFCandsValueMap_)[9] );
-    iEvent.getByLabel( "electronPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[10] );
-    iEvent.getByLabel( "electronPFIsoNHad04", (*eIsoFromPFCandsValueMap_)[11] );
-    iEvent.getByLabel( "electronPFIsoPhoton04", (*eIsoFromPFCandsValueMap_)[12] );
-    iEvent.getByLabel( "electronPFIsoChHad05", (*eIsoFromPFCandsValueMap_)[13] );
-    iEvent.getByLabel( "electronPFIsoNHad05", (*eIsoFromPFCandsValueMap_)[14] );
-    iEvent.getByLabel( "electronPFIsoPhoton05", (*eIsoFromPFCandsValueMap_)[15] );
-    iEvent.getByLabel( "electronPFIsoChHad06", (*eIsoFromPFCandsValueMap_)[16] );
-    iEvent.getByLabel( "electronPFIsoNHad06", (*eIsoFromPFCandsValueMap_)[17] );
-    iEvent.getByLabel( "electronPFIsoPhoton06", (*eIsoFromPFCandsValueMap_)[18] );
-    iEvent.getByLabel( "electronPFIsoChHad07", (*eIsoFromPFCandsValueMap_)[19] );
-    iEvent.getByLabel( "electronPFIsoNHad07", (*eIsoFromPFCandsValueMap_)[20] );
-    iEvent.getByLabel( "electronPFIsoPhoton07", (*eIsoFromPFCandsValueMap_)[21] );
-    iEvent.getByLabel( "electronDirPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[22] );
-    iEvent.getByLabel( "electronDirPFIsoNHad04", (*eIsoFromPFCandsValueMap_)[23] );
-    iEvent.getByLabel( "electronDirPFIsoPhoton04", (*eIsoFromPFCandsValueMap_)[24] );
+    if(savePFlowIsolation_) {
+      iEvent.getByLabel( "electronCombinedPFIsoMapProducer", (*eIsoFromPFCandsValueMap_)[0] ); 
+      iEvent.getByLabel( "electronPFIsoChHad01", (*eIsoFromPFCandsValueMap_)[1] );
+      iEvent.getByLabel( "electronPFIsoNHad01", (*eIsoFromPFCandsValueMap_)[2] );
+      iEvent.getByLabel( "electronPFIsoPhoton01", (*eIsoFromPFCandsValueMap_)[3] );
+      iEvent.getByLabel( "electronPFIsoChHad02", (*eIsoFromPFCandsValueMap_)[4] );
+      iEvent.getByLabel( "electronPFIsoNHad02", (*eIsoFromPFCandsValueMap_)[5] );
+      iEvent.getByLabel( "electronPFIsoPhoton02", (*eIsoFromPFCandsValueMap_)[6] );
+      iEvent.getByLabel( "electronPFIsoChHad03", (*eIsoFromPFCandsValueMap_)[7] );
+      iEvent.getByLabel( "electronPFIsoNHad03", (*eIsoFromPFCandsValueMap_)[8] );
+      iEvent.getByLabel( "electronPFIsoPhoton03", (*eIsoFromPFCandsValueMap_)[9] );
+      iEvent.getByLabel( "electronPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[10] );
+      iEvent.getByLabel( "electronPFIsoNHad04", (*eIsoFromPFCandsValueMap_)[11] );
+      iEvent.getByLabel( "electronPFIsoPhoton04", (*eIsoFromPFCandsValueMap_)[12] );
+      iEvent.getByLabel( "electronPFIsoChHad05", (*eIsoFromPFCandsValueMap_)[13] );
+      iEvent.getByLabel( "electronPFIsoNHad05", (*eIsoFromPFCandsValueMap_)[14] );
+      iEvent.getByLabel( "electronPFIsoPhoton05", (*eIsoFromPFCandsValueMap_)[15] );
+      iEvent.getByLabel( "electronPFIsoChHad06", (*eIsoFromPFCandsValueMap_)[16] );
+      iEvent.getByLabel( "electronPFIsoNHad06", (*eIsoFromPFCandsValueMap_)[17] );
+      iEvent.getByLabel( "electronPFIsoPhoton06", (*eIsoFromPFCandsValueMap_)[18] );
+      iEvent.getByLabel( "electronPFIsoChHad07", (*eIsoFromPFCandsValueMap_)[19] );
+      iEvent.getByLabel( "electronPFIsoNHad07", (*eIsoFromPFCandsValueMap_)[20] );
+      iEvent.getByLabel( "electronPFIsoPhoton07", (*eIsoFromPFCandsValueMap_)[21] );
+      iEvent.getByLabel( "electronDirPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[22] );
+      iEvent.getByLabel( "electronDirPFIsoNHad04", (*eIsoFromPFCandsValueMap_)[23] );
+      iEvent.getByLabel( "electronDirPFIsoPhoton04", (*eIsoFromPFCandsValueMap_)[24] );
+    }
 
     // Read the tracks and calotowers collections for isolation
-    try { iEvent.getByLabel(tracksProducer_, m_tracks); }
-    catch (  cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracks product" << tracksProducer_; }
-    
-    try { iEvent.getByLabel(calotowersProducer_, m_calotowers); }
-    catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get calotowers product" << calotowersProducer_; }
+    if(tracksProducer_.label().size()!=0) {
+      try { iEvent.getByLabel(tracksProducer_, m_tracks); }
+      catch (  cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get tracks product" << tracksProducer_; }
+    }
+    if(calotowersProducer_.label().size()!=0) {
+      try { iEvent.getByLabel(calotowersProducer_, m_calotowers); }
+      catch ( cms::Exception& ex ) { edm::LogWarning("CmsEleIDTreeFiller") << "Can't get calotowers product" << calotowersProducer_; }
+    }
 
     // vertices and transient track builder needed for ele ID MVA
     try { iEvent.getByLabel(m_vxtCollectionTag, primaryVertex); }
@@ -190,20 +196,22 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
     catch ( cms::Exception& ex ) { edm::LogWarning("CmsTrackFiller") << "Can't get TransientTrackBuilder from Event Setup."; }
 
     // the full pf candidates to make the combined ID+ISO MVA
-    try { iEvent.getByLabel(m_pfcandCollectionTag, pfcandidates_); }
-    catch(cms::Exception& ex ) {edm::LogWarning("CmsVertexFiller") << "Can't get candidate collection: " << m_pfcandCollectionTag; }
-    
+    if(savePFlowIsolation_) {
+      try { iEvent.getByLabel(m_pfcandCollectionTag, pfcandidates_); }
+      catch(cms::Exception& ex ) {edm::LogWarning("CmsVertexFiller") << "Can't get candidate collection: " << m_pfcandCollectionTag; }
+    }
     iEvent.getByLabel(edm::InputTag("kt6PFJets","rho"),rho_);
 
     // HCAL isolation in the full cone (to be used w/o H/E)
     float egHcalIsoConeSizeOutSmall=0.3, egHcalIsoConeSizeOutLarge=0.4;
     float egHcalIsoConeSizeIn=0.0, egHcalIsoPtMin=0.0;
     int egHcalDepth1=1, egHcalDepth2=2;
-    hadDepth1Isolation03_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutSmall,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth1,m_calotowers.product()) ;
-    hadDepth2Isolation03_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutSmall,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth2,m_calotowers.product()) ;
-    hadDepth1Isolation04_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutLarge,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth1,m_calotowers.product()) ;
-    hadDepth2Isolation04_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutLarge,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth2,m_calotowers.product()) ;
-
+    if(calotowersProducer_.label().size()!=0) {
+      hadDepth1Isolation03_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutSmall,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth1,m_calotowers.product()) ;
+      hadDepth2Isolation03_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutSmall,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth2,m_calotowers.product()) ;
+      hadDepth1Isolation04_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutLarge,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth1,m_calotowers.product()) ;
+      hadDepth2Isolation04_ = new EgammaTowerIsolation(egHcalIsoConeSizeOutLarge,egHcalIsoConeSizeIn,egHcalIsoPtMin,egHcalDepth2,m_calotowers.product()) ;
+    }
     for(int index = 0; index < (int)collection->size(); index++) {
 	  
       const GsfElectronRef electronRef = collection->refAt(index).castTo<GsfElectronRef>();
@@ -228,10 +236,12 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
   treeEleInfo(columnPrefix,columnSuffix);
   if(dumpData) cmstree->dumpData();
   
-  delete hadDepth1Isolation03_;
-  delete hadDepth2Isolation03_;
-  delete hadDepth1Isolation04_;
-  delete hadDepth2Isolation04_;
+  if(calotowersProducer_.label().size()!=0) {
+    delete hadDepth1Isolation03_;
+    delete hadDepth2Isolation03_;
+    delete hadDepth1Isolation04_;
+    delete hadDepth2Isolation04_;
+  }
   delete trkIndexName_;
 }
 
@@ -271,29 +281,37 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   const TransientTrackBuilder thebuilder = *(trackBuilder_.product());
 
   const reco::GsfElectron *ele = &(*electronRef);
-  double mvaidnontrig = myMVANonTrig->mvaValue(*ele,
-                                               primaryVertex->front(),
+  
+  if(tracksProducer_.label().size()!=0) {
+    double mvaidnontrig = myMVANonTrig->mvaValue(*ele,
+                                                 primaryVertex->front(),
                                                thebuilder,
-                                               lazyTools,
-                                               false);
-  privateData_->mvaidnontrig->push_back(mvaidnontrig);
+                                                 lazyTools,
+                                                 false);
+    privateData_->mvaidnontrig->push_back(mvaidnontrig);
+    
+    double mvaidtrig = myMVATrig->mvaValue(*ele,
+                                           primaryVertex->front(),
+                                           thebuilder,
+                                           lazyTools,
+                                           false);
+    privateData_->mvaidtrig->push_back(mvaidtrig);
+  } else {
+    privateData_->mvaidnontrig->push_back(-999.);
+    privateData_->mvaidtrig->push_back(-999.);
+  }
 
-  double mvaidtrig = myMVATrig->mvaValue(*ele,
-                                         primaryVertex->front(),
-                                         thebuilder,
-                                         lazyTools,
-                                         false);
-  privateData_->mvaidtrig->push_back(mvaidtrig);
-
-  double mvaidisotrig = myMVATrigIdIsoCombined->IDIsoCombinedMvaValue(*ele,
-                                                                      primaryVertex->front(),
-                                                                      thebuilder,
-                                                                      lazyTools,
-                                                                      *pfcandidates_,
-                                                                      *rho_,
-                                                                      ElectronEffectiveArea::kEleEAData2012,
-                                                                      false);
-  privateData_->mvaidisotrig->push_back(mvaidisotrig);
+  if(savePFlowIsolation_) {
+    double mvaidisotrig = myMVATrigIdIsoCombined->IDIsoCombinedMvaValue(*ele,
+                                                                        primaryVertex->front(),
+                                                                        thebuilder,
+                                                                        lazyTools,
+                                                                        *pfcandidates_,
+                                                                        *rho_,
+                                                                        ElectronEffectiveArea::kEleEAData2012,
+                                                                        false);
+    privateData_->mvaidisotrig->push_back(mvaidisotrig);
+  } else privateData_->mvaidisotrig->push_back(-999.);
 
   // --- isolations ---
 
@@ -319,65 +337,68 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
   float scBasedEcalSum04 = scBasedIsolation.getSum(iEvent,iSetup,&(*sc));
   privateData_->scBasedEcalSum04->push_back(scBasedEcalSum04);
 
-  float hcalDepth1TowerSumEt03 = hadDepth1Isolation03_->getTowerEtSum(&(*electronRef));
-  float hcalDepth2TowerSumEt03 = hadDepth2Isolation03_->getTowerEtSum(&(*electronRef));
-  float hcalDepth1TowerSumEt04 = hadDepth1Isolation04_->getTowerEtSum(&(*electronRef));
-  float hcalDepth2TowerSumEt04 = hadDepth2Isolation04_->getTowerEtSum(&(*electronRef));
+  if(calotowersProducer_.label().size()!=0) {
+    float hcalDepth1TowerSumEt03 = hadDepth1Isolation03_->getTowerEtSum(&(*electronRef));
+    float hcalDepth2TowerSumEt03 = hadDepth2Isolation03_->getTowerEtSum(&(*electronRef));
+    float hcalDepth1TowerSumEt04 = hadDepth1Isolation04_->getTowerEtSum(&(*electronRef));
+    float hcalDepth2TowerSumEt04 = hadDepth2Isolation04_->getTowerEtSum(&(*electronRef));
+    privateData_->dr03HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt03+hcalDepth2TowerSumEt03);
+    privateData_->dr04HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt04+hcalDepth2TowerSumEt04);
+  }
 
-  privateData_->dr03HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt03+hcalDepth2TowerSumEt03);
-  privateData_->dr04HcalTowerSumEtFullCone->push_back(hcalDepth1TowerSumEt04+hcalDepth2TowerSumEt04);
+  if(savePFlowIsolation_) {
+    const isoFromPFCandsMap & electronsPfCombinedIsoVal = *( (*eIsoFromPFCandsValueMap_)[0] );
+    const isoFromPFCandsMap & electronsPfCandChHad01IsoVal = *( (*eIsoFromPFCandsValueMap_)[1] );
+    const isoFromPFCandsMap & electronsPfCandNHad01IsoVal = *( (*eIsoFromPFCandsValueMap_)[2] );
+    const isoFromPFCandsMap & electronsPfCandPhoton01IsoVal = *( (*eIsoFromPFCandsValueMap_)[3] );
+    const isoFromPFCandsMap & electronsPfCandChHad02IsoVal = *( (*eIsoFromPFCandsValueMap_)[4] );
+    const isoFromPFCandsMap & electronsPfCandNHad02IsoVal = *( (*eIsoFromPFCandsValueMap_)[5] );
+    const isoFromPFCandsMap & electronsPfCandPhoton02IsoVal = *( (*eIsoFromPFCandsValueMap_)[6] );
+    const isoFromPFCandsMap & electronsPfCandChHad03IsoVal = *( (*eIsoFromPFCandsValueMap_)[7] );
+    const isoFromPFCandsMap & electronsPfCandNHad03IsoVal = *( (*eIsoFromPFCandsValueMap_)[8] );
+    const isoFromPFCandsMap & electronsPfCandPhoton03IsoVal = *( (*eIsoFromPFCandsValueMap_)[9] );
+    const isoFromPFCandsMap & electronsPfCandChHad04IsoVal = *( (*eIsoFromPFCandsValueMap_)[10] );
+    const isoFromPFCandsMap & electronsPfCandNHad04IsoVal = *( (*eIsoFromPFCandsValueMap_)[11] );
+    const isoFromPFCandsMap & electronsPfCandPhoton04IsoVal = *( (*eIsoFromPFCandsValueMap_)[12] );
+    const isoFromPFCandsMap & electronsPfCandChHad05IsoVal = *( (*eIsoFromPFCandsValueMap_)[13] );
+    const isoFromPFCandsMap & electronsPfCandNHad05IsoVal = *( (*eIsoFromPFCandsValueMap_)[14] );
+    const isoFromPFCandsMap & electronsPfCandPhoton05IsoVal = *( (*eIsoFromPFCandsValueMap_)[15] );
+    const isoFromPFCandsMap & electronsPfCandChHad06IsoVal = *( (*eIsoFromPFCandsValueMap_)[16] );
+    const isoFromPFCandsMap & electronsPfCandNHad06IsoVal = *( (*eIsoFromPFCandsValueMap_)[17] );
+    const isoFromPFCandsMap & electronsPfCandPhoton06IsoVal = *( (*eIsoFromPFCandsValueMap_)[18] );
+    const isoFromPFCandsMap & electronsPfCandChHad07IsoVal = *( (*eIsoFromPFCandsValueMap_)[19] );
+    const isoFromPFCandsMap & electronsPfCandNHad07IsoVal = *( (*eIsoFromPFCandsValueMap_)[20] );
+    const isoFromPFCandsMap & electronsPfCandPhoton07IsoVal = *( (*eIsoFromPFCandsValueMap_)[21] );
+    const isoFromPFCandsMap & electronsPfCandChHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[22] );
+    const isoFromPFCandsMap & electronsPfCandNHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[23] );
+    const isoFromPFCandsMap & electronsPfCandPhoton04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[24] );
 
-  const isoFromPFCandsMap & electronsPfCombinedIsoVal = *( (*eIsoFromPFCandsValueMap_)[0] );
-  const isoFromPFCandsMap & electronsPfCandChHad01IsoVal = *( (*eIsoFromPFCandsValueMap_)[1] );
-  const isoFromPFCandsMap & electronsPfCandNHad01IsoVal = *( (*eIsoFromPFCandsValueMap_)[2] );
-  const isoFromPFCandsMap & electronsPfCandPhoton01IsoVal = *( (*eIsoFromPFCandsValueMap_)[3] );
-  const isoFromPFCandsMap & electronsPfCandChHad02IsoVal = *( (*eIsoFromPFCandsValueMap_)[4] );
-  const isoFromPFCandsMap & electronsPfCandNHad02IsoVal = *( (*eIsoFromPFCandsValueMap_)[5] );
-  const isoFromPFCandsMap & electronsPfCandPhoton02IsoVal = *( (*eIsoFromPFCandsValueMap_)[6] );
-  const isoFromPFCandsMap & electronsPfCandChHad03IsoVal = *( (*eIsoFromPFCandsValueMap_)[7] );
-  const isoFromPFCandsMap & electronsPfCandNHad03IsoVal = *( (*eIsoFromPFCandsValueMap_)[8] );
-  const isoFromPFCandsMap & electronsPfCandPhoton03IsoVal = *( (*eIsoFromPFCandsValueMap_)[9] );
-  const isoFromPFCandsMap & electronsPfCandChHad04IsoVal = *( (*eIsoFromPFCandsValueMap_)[10] );
-  const isoFromPFCandsMap & electronsPfCandNHad04IsoVal = *( (*eIsoFromPFCandsValueMap_)[11] );
-  const isoFromPFCandsMap & electronsPfCandPhoton04IsoVal = *( (*eIsoFromPFCandsValueMap_)[12] );
-  const isoFromPFCandsMap & electronsPfCandChHad05IsoVal = *( (*eIsoFromPFCandsValueMap_)[13] );
-  const isoFromPFCandsMap & electronsPfCandNHad05IsoVal = *( (*eIsoFromPFCandsValueMap_)[14] );
-  const isoFromPFCandsMap & electronsPfCandPhoton05IsoVal = *( (*eIsoFromPFCandsValueMap_)[15] );
-  const isoFromPFCandsMap & electronsPfCandChHad06IsoVal = *( (*eIsoFromPFCandsValueMap_)[16] );
-  const isoFromPFCandsMap & electronsPfCandNHad06IsoVal = *( (*eIsoFromPFCandsValueMap_)[17] );
-  const isoFromPFCandsMap & electronsPfCandPhoton06IsoVal = *( (*eIsoFromPFCandsValueMap_)[18] );
-  const isoFromPFCandsMap & electronsPfCandChHad07IsoVal = *( (*eIsoFromPFCandsValueMap_)[19] );
-  const isoFromPFCandsMap & electronsPfCandNHad07IsoVal = *( (*eIsoFromPFCandsValueMap_)[20] );
-  const isoFromPFCandsMap & electronsPfCandPhoton07IsoVal = *( (*eIsoFromPFCandsValueMap_)[21] );
-  const isoFromPFCandsMap & electronsPfCandChHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[22] );
-  const isoFromPFCandsMap & electronsPfCandNHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[23] );
-  const isoFromPFCandsMap & electronsPfCandPhoton04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[24] );
-
-  privateData_->pfCombinedIso->push_back( electronsPfCombinedIsoVal[electronRef] );
-  privateData_->pfCandChargedIso01->push_back( electronsPfCandChHad01IsoVal[electronRef] );
-  privateData_->pfCandNeutralIso01->push_back( electronsPfCandNHad01IsoVal[electronRef] );
-  privateData_->pfCandPhotonIso01->push_back( electronsPfCandPhoton01IsoVal[electronRef] );
-  privateData_->pfCandChargedIso02->push_back( electronsPfCandChHad02IsoVal[electronRef] );
-  privateData_->pfCandNeutralIso02->push_back( electronsPfCandNHad02IsoVal[electronRef] );
-  privateData_->pfCandPhotonIso02->push_back( electronsPfCandPhoton02IsoVal[electronRef] );
-  privateData_->pfCandChargedIso03->push_back( electronsPfCandChHad03IsoVal[electronRef] );
-  privateData_->pfCandNeutralIso03->push_back( electronsPfCandNHad03IsoVal[electronRef] );
-  privateData_->pfCandPhotonIso03->push_back( electronsPfCandPhoton03IsoVal[electronRef] );
-  privateData_->pfCandChargedIso04->push_back( electronsPfCandChHad04IsoVal[electronRef] );
-  privateData_->pfCandNeutralIso04->push_back( electronsPfCandNHad04IsoVal[electronRef] );
-  privateData_->pfCandPhotonIso04->push_back( electronsPfCandPhoton04IsoVal[electronRef] );
-  privateData_->pfCandChargedIso05->push_back( electronsPfCandChHad05IsoVal[electronRef] );
-  privateData_->pfCandNeutralIso05->push_back( electronsPfCandNHad05IsoVal[electronRef] );
-  privateData_->pfCandPhotonIso05->push_back( electronsPfCandPhoton05IsoVal[electronRef] );
-  privateData_->pfCandChargedIso06->push_back( electronsPfCandChHad06IsoVal[electronRef] );
-  privateData_->pfCandNeutralIso06->push_back( electronsPfCandNHad06IsoVal[electronRef] );
-  privateData_->pfCandPhotonIso06->push_back( electronsPfCandPhoton06IsoVal[electronRef] );
-  privateData_->pfCandChargedIso07->push_back( electronsPfCandChHad07IsoVal[electronRef] );
-  privateData_->pfCandNeutralIso07->push_back( electronsPfCandNHad07IsoVal[electronRef] );
-  privateData_->pfCandPhotonIso07->push_back( electronsPfCandPhoton07IsoVal[electronRef] );
-  privateData_->pfCandChargedDirIso04->push_back( electronsPfCandChHad04DirIsoVal[electronRef] );
-  privateData_->pfCandNeutralDirIso04->push_back( electronsPfCandNHad04DirIsoVal[electronRef] );
-  privateData_->pfCandPhotonDirIso04->push_back( electronsPfCandPhoton04DirIsoVal[electronRef] );
+    privateData_->pfCombinedIso->push_back( electronsPfCombinedIsoVal[electronRef] );
+    privateData_->pfCandChargedIso01->push_back( electronsPfCandChHad01IsoVal[electronRef] );
+    privateData_->pfCandNeutralIso01->push_back( electronsPfCandNHad01IsoVal[electronRef] );
+    privateData_->pfCandPhotonIso01->push_back( electronsPfCandPhoton01IsoVal[electronRef] );
+    privateData_->pfCandChargedIso02->push_back( electronsPfCandChHad02IsoVal[electronRef] );
+    privateData_->pfCandNeutralIso02->push_back( electronsPfCandNHad02IsoVal[electronRef] );
+    privateData_->pfCandPhotonIso02->push_back( electronsPfCandPhoton02IsoVal[electronRef] );
+    privateData_->pfCandChargedIso03->push_back( electronsPfCandChHad03IsoVal[electronRef] );
+    privateData_->pfCandNeutralIso03->push_back( electronsPfCandNHad03IsoVal[electronRef] );
+    privateData_->pfCandPhotonIso03->push_back( electronsPfCandPhoton03IsoVal[electronRef] );
+    privateData_->pfCandChargedIso04->push_back( electronsPfCandChHad04IsoVal[electronRef] );
+    privateData_->pfCandNeutralIso04->push_back( electronsPfCandNHad04IsoVal[electronRef] );
+    privateData_->pfCandPhotonIso04->push_back( electronsPfCandPhoton04IsoVal[electronRef] );
+    privateData_->pfCandChargedIso05->push_back( electronsPfCandChHad05IsoVal[electronRef] );
+    privateData_->pfCandNeutralIso05->push_back( electronsPfCandNHad05IsoVal[electronRef] );
+    privateData_->pfCandPhotonIso05->push_back( electronsPfCandPhoton05IsoVal[electronRef] );
+    privateData_->pfCandChargedIso06->push_back( electronsPfCandChHad06IsoVal[electronRef] );
+    privateData_->pfCandNeutralIso06->push_back( electronsPfCandNHad06IsoVal[electronRef] );
+    privateData_->pfCandPhotonIso06->push_back( electronsPfCandPhoton06IsoVal[electronRef] );
+    privateData_->pfCandChargedIso07->push_back( electronsPfCandChHad07IsoVal[electronRef] );
+    privateData_->pfCandNeutralIso07->push_back( electronsPfCandNHad07IsoVal[electronRef] );
+    privateData_->pfCandPhotonIso07->push_back( electronsPfCandPhoton07IsoVal[electronRef] );
+    privateData_->pfCandChargedDirIso04->push_back( electronsPfCandChHad04DirIsoVal[electronRef] );
+    privateData_->pfCandNeutralDirIso04->push_back( electronsPfCandNHad04DirIsoVal[electronRef] );
+    privateData_->pfCandPhotonDirIso04->push_back( electronsPfCandPhoton04DirIsoVal[electronRef] );
+  }
 
 }
 
@@ -409,39 +430,42 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"dr04HcalTowerSumEt"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEt, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scBasedEcalSum03"+colSuffix).c_str(), *privateData_->scBasedEcalSum03, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"scBasedEcalSum04"+colSuffix).c_str(), *privateData_->scBasedEcalSum04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"dr03HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr03HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"dr04HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
+  if(calotowersProducer_.label().size()!=0) {
+    cmstree->column((colPrefix+"dr03HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr03HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"dr04HcalTowerSumEtFullCone"+colSuffix).c_str(), *privateData_->dr04HcalTowerSumEtFullCone, nCandString.c_str(), 0, "Reco");
+  }
   cmstree->column((colPrefix+"eleIdLikelihood"+colSuffix).c_str(), *privateData_->eleLik, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"pflowMVA"+colSuffix).c_str(), *privateData_->pflowMVA, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"mvaidnontrig"+colSuffix).c_str(), *privateData_->mvaidnontrig, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"mvaidtrig"+colSuffix).c_str(), *privateData_->mvaidtrig, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"mvaidisotrig"+colSuffix).c_str(), *privateData_->mvaidisotrig, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedIso01"+colSuffix).c_str(),  *privateData_->pfCandChargedIso01, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso01"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso01, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso01"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso01, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedIso02"+colSuffix).c_str(),  *privateData_->pfCandChargedIso02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso02"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso02"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso02, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedIso03"+colSuffix).c_str(),  *privateData_->pfCandChargedIso03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso03"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso03"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso03, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedIso04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedIso05"+colSuffix).c_str(),  *privateData_->pfCandChargedIso05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso05"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso05"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso05, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedIso06"+colSuffix).c_str(),  *privateData_->pfCandChargedIso06, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso06"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso06, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso06"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso06, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedIso07"+colSuffix).c_str(),  *privateData_->pfCandChargedIso07, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralIso07"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso07, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonIso07"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso07, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandChargedDirIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedDirIso04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandNeutralDirIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralDirIso04, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"pfCandPhotonDirIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonDirIso04, nCandString.c_str(), 0, "Reco");
-  
+  if(savePFlowIsolation_) {
+    cmstree->column((colPrefix+"mvaidisotrig"+colSuffix).c_str(), *privateData_->mvaidisotrig, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCombinedIso"+colSuffix).c_str(),  *privateData_->pfCombinedIso, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedIso01"+colSuffix).c_str(),  *privateData_->pfCandChargedIso01, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralIso01"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso01, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonIso01"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso01, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedIso02"+colSuffix).c_str(),  *privateData_->pfCandChargedIso02, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralIso02"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso02, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonIso02"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso02, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedIso03"+colSuffix).c_str(),  *privateData_->pfCandChargedIso03, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralIso03"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso03, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonIso03"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso03, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedIso04, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso04, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso04, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedIso05"+colSuffix).c_str(),  *privateData_->pfCandChargedIso05, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralIso05"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso05, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonIso05"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso05, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedIso06"+colSuffix).c_str(),  *privateData_->pfCandChargedIso06, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralIso06"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso06, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonIso06"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso06, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedIso07"+colSuffix).c_str(),  *privateData_->pfCandChargedIso07, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralIso07"+colSuffix).c_str(),  *privateData_->pfCandNeutralIso07, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonIso07"+colSuffix).c_str(),  *privateData_->pfCandPhotonIso07, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedDirIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedDirIso04, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandNeutralDirIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralDirIso04, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandPhotonDirIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonDirIso04, nCandString.c_str(), 0, "Reco");
+  }
 }
 
 

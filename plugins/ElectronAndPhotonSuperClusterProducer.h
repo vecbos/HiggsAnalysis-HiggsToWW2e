@@ -40,6 +40,7 @@ class ElectronAndPhotonSuperClusterProducer : public edm::EDProducer{
   edm::InputTag m_ElectronLabel;
   edm::InputTag m_PhotonLabel;
   edm::InputTag m_SuperClusterLabel;
+  bool m_includePhotonSuperClusters;
 
 };  
 

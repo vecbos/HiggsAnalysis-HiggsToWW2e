@@ -21,6 +21,7 @@ ElectronAndPhotonSuperClusterProducer::ElectronAndPhotonSuperClusterProducer (co
   m_ElectronLabel = conf.getParameter<edm::InputTag>("ElectronLabel");
   m_PhotonLabel = conf.getParameter<edm::InputTag>("PhotonLabel");
   m_SuperClusterLabel = conf.getParameter<edm::InputTag>("SuperClusterLabel");
+  m_includePhotonSuperClusters = conf.getParameter<bool>("includePhotonSuperClusters");
   produces<SuperClusterCollection>();
 }
 
@@ -46,11 +47,13 @@ ElectronAndPhotonSuperClusterProducer::produce (edm::Event& iEvent,  const edm::
 
   // get the PhotonCollection
   edm::Handle<PhotonCollection> photons;
-  try { iEvent.getByLabel(m_PhotonLabel, photons); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("ElectronAndPhotonSuperClusterProducer") << "Can't get photon Collection: " << m_PhotonLabel; }
+  if(m_includePhotonSuperClusters) {
+    try { iEvent.getByLabel(m_PhotonLabel, photons); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("ElectronAndPhotonSuperClusterProducer") << "Can't get photon Collection: " << m_PhotonLabel; }
+  }
 
   edm::LogInfo("ElectronAndPhotonSuperClusterProducer") << "ElectronAndPhotonSuperClusterProducer starting, original collection size = " 
-                                             << electrons->size();
+                                                        << electrons->size();
 
   reco::SuperClusterCollection::const_iterator it = superclusters->begin();
   for(unsigned int isclu = 0; isclu < superclusters->size(); isclu++) {
@@ -73,16 +76,18 @@ ElectronAndPhotonSuperClusterProducer::produce (edm::Event& iEvent,  const edm::
       }
     }
 
-    // look if it is linked to a photon
-    for(unsigned int ipho = 0; ipho < photons->size(); ipho++) {
-      const reco::PhotonRef photonRef(photons,ipho);
-      if ( !(photonRef.isNull()) ) {
-        reco::SuperClusterRef phoSc = photonRef->superCluster();
-        if ( phoSc.isNonnull() ) { 
-          // match by energy and position, since the input is a merged EB+EE collection where the ref is lost
-          if( phoSc->energy()==scRef->energy() && phoSc->position()==scRef->position() && !linked) {
-            selected->push_back(*it);
-            break;
+    if(m_includePhotonSuperClusters) {
+      // look if it is linked to a photon
+      for(unsigned int ipho = 0; ipho < photons->size(); ipho++) {
+        const reco::PhotonRef photonRef(photons,ipho);
+        if ( !(photonRef.isNull()) ) {
+          reco::SuperClusterRef phoSc = photonRef->superCluster();
+          if ( phoSc.isNonnull() ) { 
+            // match by energy and position, since the input is a merged EB+EE collection where the ref is lost
+            if( phoSc->energy()==scRef->energy() && phoSc->position()==scRef->position() && !linked) {
+              selected->push_back(*it);
+              break;
+            }
           }
         }
       }

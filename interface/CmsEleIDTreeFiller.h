@@ -109,6 +109,8 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   void setPFCandidateCollection(edm::InputTag collectionTag) { m_pfcandCollectionTag = collectionTag; }
   //! set the eleID MVA algos
   void setEleIdMVAs(EGammaMvaEleEstimator* algotrig, EGammaMvaEleEstimator* algotrigidiso, EGammaMvaEleEstimator* algonontrig) { myMVATrig = algotrig; myMVATrigIdIsoCombined = algotrigidiso; myMVANonTrig = algonontrig; }
+  //! dump pflow isolation related variables
+  void savePFlowIsolations(bool what) { savePFlowIsolation_ = what; }
 
   //! set to false if the column with the block size is set by another object
   void setStandalone(bool );
@@ -138,6 +140,8 @@ class CmsEleIDTreeFiller : public CmsCandidateFiller {
   edm::InputTag calotowersProducer_;
   edm::InputTag m_vxtCollectionTag;
   edm::InputTag m_pfcandCollectionTag;
+
+  bool savePFlowIsolation_;
 
   CmsTree *cmstree;
   CmsEleIDTreeFillerData *privateData_;

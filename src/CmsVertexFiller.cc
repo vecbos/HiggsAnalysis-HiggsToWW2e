@@ -103,23 +103,26 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
   catch(cms::Exception& ex ) {edm::LogWarning("CmsVertexFiller") << "Can't get candidate collection: " << vtxcollectionTag; }
 
   edm::Handle< edm::ValueMap<reco::PFMET> > chargedMets;
-  try { iEvent.getByLabel(ChargedMets_, chargedMets); }
-  catch ( cms::Exception& ex ) { edm::LogWarning("CmsVertexFiller") << "Can't get charged PFMET candidate collection: " << ChargedMets_; }
-
+  if(ChargedMets_.label().size()!=0) {
+    try { iEvent.getByLabel(ChargedMets_, chargedMets); }
+    catch ( cms::Exception& ex ) { edm::LogWarning("CmsVertexFiller") << "Can't get charged PFMET candidate collection: " << ChargedMets_; }
+  }
   if(primaryVertex->size() > 0) {
     int ivtx=0;
     for(VertexCollection::const_iterator v = primaryVertex->begin();
 	v != primaryVertex->end(); ++v){
       float SumPt = 0.0;
-      if((*v).tracksSize() > 0){
-	std::vector<TrackBaseRef >::const_iterator t;
-	for( t = (*v).tracks_begin(); t != (*v).tracks_end(); t++){
-	  if((**t).charge() < -1 || (**t).charge() > 1){
-	    //illegal charge
-	  } else {
-	    SumPt += (**t).pt();
-	  }
-	}
+      if(tracksCollection_.label().size()!=0) {
+        if((*v).tracksSize() > 0){
+          std::vector<TrackBaseRef >::const_iterator t;
+          for( t = (*v).tracks_begin(); t != (*v).tracks_end(); t++){
+            if((**t).charge() < -1 || (**t).charge() > 1){
+              //illegal charge
+            } else {
+              SumPt += (**t).pt();
+            }
+          }
+        }
 
         reco::VertexRef vertexRef(primaryVertex, ivtx);
         
@@ -134,7 +137,7 @@ CmsVertexFiller::writeCollectionToTree (edm::InputTag vtxcollectionTag,
 	privateData_->ndof->push_back((*v).ndof());
 	privateData_->chi2->push_back((*v).chi2());
 	privateData_->normChi2->push_back((*v).normalizedChi2());
-        if(vertexRef.isNonnull()) {
+        if(vertexRef.isNonnull() && ChargedMets_.label().size()!=0) {
           privateData_->pxChMet->push_back(((*chargedMets)[vertexRef]).px());
           privateData_->pyChMet->push_back(((*chargedMets)[vertexRef]).py());
           privateData_->pzChMet->push_back(((*chargedMets)[vertexRef]).pz());

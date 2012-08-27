@@ -80,6 +80,8 @@ class CmsElectronFiller : public CmsCandidateFiller {
   void saveFatEcal(bool );
   //! dump electron ID variables
   void saveEleID(bool );
+  //! dump pflow isolation related variables
+  void savePFlowIsolations(bool );
 
   //! write the electron related informations for the given collection
   void writeCollectionToTree(edm::InputTag collectionTag,
@@ -129,6 +131,7 @@ class CmsElectronFiller : public CmsCandidateFiller {
   bool saveFatTrk_;
   bool saveFatEcal_;
   bool saveEleID_;
+  bool savePFlowIsolation_;
 
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
