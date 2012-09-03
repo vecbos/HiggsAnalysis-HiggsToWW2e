@@ -363,7 +363,8 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
 	  float dxy = fabs(cand->trackRef()->dxy(vtx->position()));
 	  if(fabs(dxy) > dxyMax_c) continue;
 
-	  float dR = phoDirFromVtx.DeltaR(candPos);
+          float dR = 0.0;
+          if(phoDirFromVtx.Pt()>0 && candPos.Pt()>0) dR = phoDirFromVtx.DeltaR(candPos);
 	  if(dR < dRVeto_c) continue;
 	  for(int i=0;i<nCones;i++){
 	    if(dR > 0.1*(i+1)) continue; // fill cones in increasing 0.1 radius
