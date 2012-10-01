@@ -1014,12 +1014,8 @@ QGLikelihoodVars computeQGLikelihoodVars( const PFJet* pfjet, Handle<reco::Verte
       if (a_QC+b_QC-delta_QC > 0) {  
         axis2_QC = sqrt(0.5*(a_QC+b_QC-delta_QC));
       }
-      if (c_QC != 0) {
-        tana_QC = 0.5*(b_QC-a_QC+delta_QC)/c_QC;
-      }	
 
       ptD =sqrt( SumW2/ (SumW*SumW));
-      ptD_QC =sqrt( SumW2_QC/ (SumW_QC*SumW_QC));
 
 	//-------calculate pull------
     	float ddetaR_sum(0.0), ddphiR_sum(0.0),ddetaR_sum_QC(0.0), ddphiR_sum_QC(0.0);
