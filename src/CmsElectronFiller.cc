@@ -135,6 +135,7 @@ CmsElectronFiller::~CmsElectronFiller() {
   delete privateData_->energyCorrections;
   delete privateData_->scPixCharge;
   delete privateData_->correctedEcalEnergy;
+  delete privateData_->trackMomentumError;
 
   delete privateData_->superClusterIndex;
   delete privateData_->PFsuperClusterIndex;
@@ -445,6 +446,7 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     packed_corr = isEcalEnergyCorrected;
     privateData_->energyCorrections->push_back( packed_corr );
     privateData_->correctedEcalEnergy->push_back( electronRef->ecalEnergy() );
+    privateData_->trackMomentumError->push_back( electronRef->trackMomentumError() );
 
   } else {
     privateData_->fiducialFlags->push_back(-1);
@@ -452,6 +454,8 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     privateData_->superClusterIndex->push_back( -1 );
     privateData_->PFsuperClusterIndex->push_back( -1 );
     privateData_->energyCorrections->push_back( -1 );
+    privateData_->correctedEcalEnergy->push_back( -1 );
+    privateData_->trackMomentumError->push_back( -1 );
   }
 
 }
@@ -463,6 +467,7 @@ void CmsElectronFiller::treeEcalInfo(const std::string &colPrefix, const std::st
   cmstree->column((colPrefix+"recoFlags"+colSuffix).c_str(), *privateData_->recoFlags, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"energyCorrections"+colSuffix).c_str(), *privateData_->energyCorrections, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"correctedEcalEnergy"+colSuffix).c_str(), *privateData_->correctedEcalEnergy, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"trackMomentumError"+colSuffix).c_str(), *privateData_->trackMomentumError, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"superClusterIndex"+colSuffix).c_str(), *privateData_->superClusterIndex, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"PFsuperClusterIndex"+colSuffix).c_str(), *privateData_->PFsuperClusterIndex, nCandString.c_str(), 0, "Reco");
 
@@ -479,6 +484,7 @@ void CmsElectronFillerData::initialise() {
   recoFlags = new vector<int>;
   energyCorrections = new vector<int>;
   correctedEcalEnergy = new vector<float>;
+  trackMomentumError = new vector<float>;
 
   superClusterIndex = new vector<int>;
   PFsuperClusterIndex = new vector<int>;
@@ -502,6 +508,7 @@ void CmsElectronFillerData::clearTrkVectors() {
   recoFlags->clear();
   energyCorrections->clear();
   correctedEcalEnergy->clear();
+  trackMomentumError->clear();
 
   superClusterIndex->clear();
   PFsuperClusterIndex->clear();
