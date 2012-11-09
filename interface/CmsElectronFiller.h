@@ -40,7 +40,7 @@ struct CmsElectronFillerData : public CmsCandidateFillerData {
   vector<int> *fiducialFlags, *recoFlags, *scPixCharge;
 
   vector<int> *superClusterIndex, *PFsuperClusterIndex;
-  vector<float> *correctedEcalEnergy;
+  vector<float> *correctedEcalEnergy, *correctedEcalEnergyError, *trackMomentumError;
   vector<int> *energyCorrections;
 
   vector<float> *convDist, *convDcot, *convRadius;
