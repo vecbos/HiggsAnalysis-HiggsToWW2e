@@ -3,10 +3,10 @@ cmsrel CMSSW_5_3_3_patch3
 cd CMSSW_5_3_3_patch3/src
 cmsenv
 
-cvs co -r V03-5_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V04-5_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r edm-30March2012 HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V06-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
-cvs co -r V00-5_2_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
+cvs co -r V00-5_3_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
 cvs co -r V01-5_2_X -d PhysicsTools/EcalAnomalousEventFilter UserCode/emanuele/PhysicsTools/EcalAnomalousEventFilter
 cvs co -r V110523_BE -d Sandbox UserCode/csander/Sandbox
@@ -26,7 +26,11 @@ cvs co -r V04-06-03 JetMETCorrections/Type1MET
 cvs co -r V03-03-11 DataFormats/METReco
 cvs co -r V00-03-23  CommonTools/RecoAlgos
 cvs co -r V00-00-08  RecoMET/METAnalyzers
-cvs co -r V00-00-08  RecoMET/METFilters
+cvs co -r V00-00-13  RecoMET/METFilters
+cvs co -r V00-00-08  DataFormats/TrackerCommon
+cvs co -r V00-11-17  DPGAnalysis/SiStripTools
+cvs co -r V01-00-11-01  DPGAnalysis/Skims
+cvs co -r V01-09-05  RecoLocalTracker/SubCollectionProducers
 addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V00-00-09 -d CMGTools/External UserCode/CMG/CMGTools/External
 
