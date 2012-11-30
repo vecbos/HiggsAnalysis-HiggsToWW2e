@@ -186,14 +186,27 @@ void CmsRunInfoFiller::writeRunInfoToTree(const edm::Event& iEvent, const edm::E
   // log errors (tracker failures)
   if(!isMC_ && dumpLogErrorFlags_) {
     edm::Handle< bool > tooManySeedsH;
-    iEvent.getByLabel(edm::InputTag("tooManySeeds:TrackerLogError"), tooManySeedsH);
-    bool tooManySeeds = *tooManySeedsH;
+    iEvent.getByLabel(edm::InputTag("tooManySeeds"), tooManySeedsH);
+    bool tooManySeeds = !(*tooManySeedsH);
     
     edm::Handle< bool > tooManyClustersH;
-    iEvent.getByLabel(edm::InputTag("tooManyClusters:TrackerLogError"), tooManyClustersH);
-    bool tooManyClusters = *tooManyClustersH;
+    iEvent.getByLabel(edm::InputTag("tooManyClusters"), tooManyClustersH);
+    bool tooManyClusters = !(*tooManyClustersH);
     
-    int trackerFailures = ( tooManySeeds << 1 ) | tooManyClusters;
+    edm::Handle< bool > tooManyTripletsPairsH;
+    iEvent.getByLabel(edm::InputTag("tooManyTripletsPairs"), tooManyTripletsPairsH);
+    bool tooManyTripletsPairs = !(*tooManyTripletsPairsH);
+
+    edm::Handle< bool > tooManyTripletsPairsMainIterationsH;
+    iEvent.getByLabel(edm::InputTag("tooManyTripletsPairsMainIterations"), tooManyTripletsPairsMainIterationsH);
+    bool tooManyTripletsPairsMainIterations = !(*tooManyTripletsPairsMainIterationsH);
+
+    edm::Handle< bool > tooManySeedsMainIterationsH;
+    iEvent.getByLabel(edm::InputTag("tooManySeedsMainIterations"), tooManySeedsMainIterationsH);
+    bool tooManySeedsMainIterations = !(*tooManySeedsMainIterationsH);
+
+    int trackerFailures = (tooManySeedsMainIterations << 4) | (tooManyTripletsPairsMainIterations << 3) | 
+      (tooManyTripletsPairs << 2) | ( tooManySeeds << 1 ) | tooManyClusters;
     
     cmstree->column("tooManyTrackerFailures", trackerFailures, 0, "LogError");
   }
