@@ -263,7 +263,6 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     // link to the supercluster. We have to match manually because in the merged collection
     // the reference is broken.
     if ( sclusRef.isNonnull() ) {
-
       int scInd=-1;
       for(unsigned int isclu=0; isclu!=hSuperClusters->size(); ++isclu) {
         const reco::SuperClusterRef thisScRef(hSuperClusters,isclu);
@@ -287,7 +286,8 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     
     // isolations
     privateData_->hOverE->push_back(photonRef->hadronicOverEm());
-    privateData_->hTowOverE->push_back(photonRef->hadTowOverEm());
+    // privateData_->hTowOverE->push_back(photonRef->hadTowOverEm()); // available in CMSSW > 5.2.X
+    privateData_->hTowOverE->push_back(-999.);
     privateData_->dr03TkSumPt->push_back(photonRef->trkSumPtSolidConeDR03());
     privateData_->dr03HollowTkSumPt->push_back(photonRef->trkSumPtHollowConeDR03());
     privateData_->dr03EcalRecHitSumEt->push_back(photonRef->ecalRecHitSumEtConeDR03());
@@ -315,7 +315,6 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
     // charged hadron isolation is computed w.r.t. each vertex
       
     TVector3 phoPos(photonRef->superCluster()->x(),photonRef->superCluster()->y(),photonRef->superCluster()->z());
-
     //vetoes
     //photon
     const float dRVetoBarrel_p = 0.;
@@ -336,7 +335,6 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
       etaStrip_p = etaStripBarrel_p;
       dRVeto_c = dRVetoBarrel_c;
     }
-
     const int nCones=6;
     float neutralIsos[nCones], photonIsos[nCones]; 
     for(int i=0;i<nCones;i++){
@@ -356,7 +354,6 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
 	if( fabs(cand->energy() - photonRef->energy()) < 1e-6 
 	    && fabs(cand->eta() - photonRef->eta())    < 1e-6
 	    && fabs(cand->phi() - photonRef->phi())    < 1e-6) continue; // this candidate is the photon!
-
 	TVector3 candPos;
 	candPos.SetPtEtaPhi(cand->pt(), cand->eta(), cand->phi());
 
@@ -366,7 +363,7 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
 	  float dxy = fabs(cand->trackRef()->dxy(vtx->position()));
 	  if(fabs(dxy) > dxyMax_c) continue;
 
-	  float dR = 0.0;
+          float dR = 0.0;
           if(phoDirFromVtx.Pt()>0 && candPos.Pt()>0) dR = phoDirFromVtx.DeltaR(candPos);
 	  if(dR < dRVeto_c) continue;
 	  for(int i=0;i<nCones;i++){
@@ -404,7 +401,6 @@ void CmsPhotonFiller::writeEcalInfo(const PhotonRef photonRef,
 	    photonIsos[i]+=cand->pt();
 	  }
 	}
-
       } // end pfCand loop
       privateData_->dr01chPFIso->push_back(chargedIsos[0]);
       privateData_->dr02chPFIso->push_back(chargedIsos[1]);

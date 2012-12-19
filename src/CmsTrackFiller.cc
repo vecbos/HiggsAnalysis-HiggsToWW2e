@@ -320,7 +320,7 @@ void CmsTrackFiller::writeTrkInfo(edm::RefToBase<reco::Track> trkRef, const edm:
   reco::Vertex closestVertex;
 
   if(trkRef.isNonnull()) {
-
+    
     if ( saveVtxTrk_ ) { 
       
       int iVtx = -1;

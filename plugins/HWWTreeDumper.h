@@ -103,7 +103,7 @@ private:
   //! dump Super/Basic Clusters block
   bool dumpSCs_, dumpBCs_;
   //! dump tracks
-  bool dumpTracks_, dumpLinkedTracks_, dumpGsfTracks_, dumpMuonTracks_;
+  bool dumpTracks_, dumpGsfTracks_, dumpMuonTracks_;
   //! dump the primary vertices of the event
   bool dumpVertices_;
   //! bool dump the block of the V0 candidates (as K0s)
@@ -115,8 +115,6 @@ private:
   //! dump hcal noise flags
   bool dumpHcalNoiseFlags_;
   bool aodHcalNoiseFlags_;
-  //! dump the logerror analysis
-  bool dumpLogErrorFlags_;
   //! dump the run info informations
   bool dumpRunInfo_;
   //! PDF collections
@@ -124,8 +122,6 @@ private:
   std::string namePdf1_, namePdf2_, namePdf3_;
   //! save the dE/dx of the tracks (requires the right module to be run)
   bool saveTrackDeDx_;
-  //! save the vertex of the track and the impact parameters (require the full general track collection in the event)
-  bool saveTrackImpactParameters_;
   //! save the calotowers
   bool dumpCaloTowers_;
   //! MVAs

@@ -80,7 +80,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   saveRPC_        = iConfig.getUntrackedParameter<bool>("saveRPC", false);
   saveFatTrk_     = iConfig.getUntrackedParameter<bool>("saveFatTrk", false);
   saveTrackDeDx_  = iConfig.getUntrackedParameter<bool>("saveTrackDeDx", false);
-  saveTrackImpactParameters_ = iConfig.getUntrackedParameter<bool>("saveTrackImpactParameters",true);
   saveFatEcal_    = iConfig.getUntrackedParameter<bool>("saveFatEcal", false);
   saveFatHcal_    = iConfig.getUntrackedParameter<bool>("saveFatHcal", false);
   saveFatDT_      = iConfig.getUntrackedParameter<bool>("saveFatDT", false);
@@ -129,7 +128,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpPFlowElectrons_ = iConfig.getUntrackedParameter<bool>("dumpPFlowElectrons", false);
   dumpSCs_            = iConfig.getUntrackedParameter<bool>("dumpSCs", false);
   dumpBCs_            = iConfig.getUntrackedParameter<bool>("dumpBCs", false);
-  dumpLinkedTracks_   = iConfig.getUntrackedParameter<bool>("dumpLinkedTracks", false);
   dumpTracks_         = iConfig.getUntrackedParameter<bool>("dumpTracks", false);
   dumpGsfTracks_      = iConfig.getUntrackedParameter<bool>("dumpGsfTracks", false);
   dumpMuonTracks_     = iConfig.getUntrackedParameter<bool>("dumpMuonTracks", false);
@@ -145,7 +143,6 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpVertices_       = iConfig.getUntrackedParameter<bool>("dumpVertices", false);
   dumpK0s_            = iConfig.getUntrackedParameter<bool>("dumpK0s", false);
   dumpCaloTowers_     = iConfig.getUntrackedParameter<bool>("dumpCaloTowers", false);
-  dumpLogErrorFlags_  = iConfig.getUntrackedParameter<bool>("dumpLogErrorFlags", false); 
   dumpHcalNoiseFlags_ = iConfig.getUntrackedParameter<bool>("dumpHcalNoiseFlags", false);
   aodHcalNoiseFlags_  = iConfig.getUntrackedParameter<bool>("AODHcalNoiseFlags", true);
 
@@ -316,7 +313,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   if(dumpRunInfo_) {
     CmsRunInfoFiller runFiller( tree_, dumpMCTruth_ );
     runFiller.dumpL1Trigger(dumpTriggerResults_);
-    runFiller.dumpLogErrorFlags(dumpLogErrorFlags_);
     runFiller.writeRunInfoToTree(iEvent,iSetup,false);
   }
 
@@ -391,13 +387,11 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFill.saveFatTrk(saveFatTrk_);
     treeFill.saveFatEcal(saveFatEcal_);
     treeFill.setGeneralTracks(trackCollection_);
-    // if set to false, it will not save any PF isolation-related variable (ALCARECO has not pflowcands)
-    treeFill.savePFlowIsolations(dumpParticleFlowObjects_);
     treeFill.setEcalSuperClusters(ecalSCCollection_);
     treeFill.setEcalBarrelRecHits(ecalBarrelRecHits_);
     treeFill.setEcalEndcapRecHits(ecalEndcapRecHits_);
     // for custom isolation
-    treeFill.setTracksProducer(generalTrackCollection_);
+    treeFill.setTracksProducer(trackCollection_);
     treeFill.setCalotowersProducer(calotowersForIsolationProducer_);
     // for custom MVA id
     treeFill.setVertexCollection(vertexCollection_);
@@ -476,27 +470,27 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 	
       treeFill.writeCollectionToTree(ecalSCCollection_, iEvent, iSetup, prefix, suffix, false);
       
-      if(dumpParticleFlowObjects_) {
-        CmsSuperClusterFiller treeFillPF(tree_, 1000);
-        suffix = "PFSC";
-        treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
-        treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
-        treeFillPF.setESRecHits(esRecHits_);
-        treeFillPF.setCalotowers(calotowersForIsolationProducer_);
-        treeFillPF.setPositionCalc(posCalculator_);
-        treeFillPF.setEnergyCorrectionFunction(energyCorrectionF);
-        treeFillPF.writeCollectionToTree(ecalElePFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
-        
-        CmsSuperClusterFiller treeFillPhoPF(tree_, 1000);
-        suffix = "PhoPFSC";
-        treeFillPhoPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
-        treeFillPhoPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
-        treeFillPhoPF.setESRecHits(esRecHits_);
-        treeFillPhoPF.setCalotowers(calotowersForIsolationProducer_);
-        treeFillPhoPF.setPositionCalc(posCalculator_);
-        treeFillPhoPF.setEnergyCorrectionFunction(energyCorrectionF);
-        treeFillPhoPF.writeCollectionToTree(ecalPhoPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
-      }
+
+      CmsSuperClusterFiller treeFillPF(tree_, 1000);
+      suffix = "PFSC";
+      treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPF.setESRecHits(esRecHits_);
+      treeFillPF.setCalotowers(calotowersForIsolationProducer_);
+      treeFillPF.setPositionCalc(posCalculator_);
+      treeFillPF.setEnergyCorrectionFunction(energyCorrectionF);
+      treeFillPF.writeCollectionToTree(ecalElePFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
+
+      CmsSuperClusterFiller treeFillPhoPF(tree_, 1000);
+      suffix = "PhoPFSC";
+      treeFillPhoPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPhoPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPhoPF.setESRecHits(esRecHits_);
+      treeFillPhoPF.setCalotowers(calotowersForIsolationProducer_);
+      treeFillPhoPF.setPositionCalc(posCalculator_);
+      treeFillPhoPF.setEnergyCorrectionFunction(energyCorrectionF);
+      treeFillPhoPF.writeCollectionToTree(ecalPhoPFClusterCollection_, iEvent, iSetup, prefix, suffix, false);
+
   }
 
   // fill BC block
@@ -510,23 +504,22 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
       treeFill.setEcalSuperClusters(ecalSCCollection_);
       treeFill.writeCollectionToTree(ecalBCCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
 
-      if(dumpParticleFlowObjects_) {
-        CmsBasicClusterFiller treeFillPF(tree_, 350);
-        prefix="";
-        barrelSuffix="PFBC";
-        treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
-        treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
-        treeFillPF.setEcalSuperClusters(ecalElePFClusterCollection_);
-        treeFillPF.writeCollectionToTree(ecalElePFClusterCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
-        
-        CmsBasicClusterFiller treeFillPhoPF(tree_, 350);
-        prefix="";
-        barrelSuffix="PhoPFBC";
-        treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
-        treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
-        treeFillPF.setEcalSuperClusters(ecalPhoPFClusterCollection_);
-        treeFillPF.writeCollectionToTree(ecalPhoPFClusterCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
-      }
+      CmsBasicClusterFiller treeFillPF(tree_, 350);
+      prefix="";
+      barrelSuffix="PFBC";
+      treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPF.setEcalSuperClusters(ecalElePFClusterCollection_);
+      treeFillPF.writeCollectionToTree(ecalElePFClusterCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
+
+      CmsBasicClusterFiller treeFillPhoPF(tree_, 350);
+      prefix="";
+      barrelSuffix="PhoPFBC";
+      treeFillPF.setEcalBarrelRecHits(ecalBarrelRecHits_);
+      treeFillPF.setEcalEndcapRecHits(ecalEndcapRecHits_);
+      treeFillPF.setEcalSuperClusters(ecalPhoPFClusterCollection_);
+      treeFillPF.writeCollectionToTree(ecalPhoPFClusterCollection_, iEvent, iSetup, prefix, barrelSuffix, false);
+
   }
 
   // fill general track block
@@ -539,7 +532,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFiller.saveDeDx(saveTrackDeDx_);
 
-    treeFiller.saveVtxTrk(saveTrackImpactParameters_);
+    treeFiller.saveVtxTrk(true);
 
     std::string prefix("");
     std::string suffix("GeneralTrack");
@@ -548,18 +541,16 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
   }
 
-  // fill the leptonLinkedTracks
-  if(dumpLinkedTracks_) {
-    CmsTrackFiller leptonLLTreeFiller(tree_, vertexCollection_, true);
-    leptonLLTreeFiller.saveFatTrk(saveFatTrk_);
-    leptonLLTreeFiller.isGsf(false);
-    leptonLLTreeFiller.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
-    leptonLLTreeFiller.saveDeDx(saveTrackDeDx_);
-    leptonLLTreeFiller.saveVtxTrk(saveTrackImpactParameters_);
-    std::string prefix("");
-    std::string suffix("Track");
-    leptonLLTreeFiller.writeCollectionToTree(trackCollection_, iEvent, iSetup, prefix, suffix, false);
-  }
+  // always fill the leptonLinkedTracks
+  CmsTrackFiller leptonLLTreeFiller(tree_, vertexCollection_, true);
+  leptonLLTreeFiller.saveFatTrk(saveFatTrk_);
+  leptonLLTreeFiller.isGsf(false);
+  leptonLLTreeFiller.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
+  leptonLLTreeFiller.saveDeDx(saveTrackDeDx_);
+  leptonLLTreeFiller.saveVtxTrk(true);
+  std::string prefix("");
+  std::string suffix("Track");
+  leptonLLTreeFiller.writeCollectionToTree(trackCollection_, iEvent, iSetup, prefix, suffix, false);
 
   if(dumpGsfTracks_) {
 
@@ -568,7 +559,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFiller.setRefittedTracksForDeDxProducer(gsfTrackCollection_);
     treeFiller.isGsf(true);
     treeFiller.saveDeDx(false);
-    treeFiller.saveVtxTrk(saveTrackImpactParameters_);
+    treeFiller.saveVtxTrk(true);
 
 
     std::string prefix("");
@@ -586,7 +577,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     treeFillerGlobalMuonTrack.setRefittedTracksForDeDxProducer(refittedForDeDxTrackCollection_);
     treeFillerGlobalMuonTrack.saveDeDx(false);
     treeFillerGlobalMuonTrack.isGsf(false);
-    treeFillerGlobalMuonTrack.saveVtxTrk(saveTrackImpactParameters_);
+    treeFillerGlobalMuonTrack.saveVtxTrk(true);
 
     std::string prefix("");
     std::string suffix1("GlobalMuonTrack");
@@ -609,7 +600,6 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   if(dumpVertices_){
     CmsVertexFiller treeFillerVertices(tree_, true);
     treeFillerVertices.setChargedMet(chargedMetCollection_);
-    treeFillerVertices.setGeneralTracksCollection(generalTrackCollection_);
     std::string prefix("");
     std::string suffix("PV");
     treeFillerVertices.writeCollectionToTree(vertexCollection_, iEvent, iSetup, prefix, suffix);
@@ -806,6 +796,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
   }
 
 
+
   // fill JET block
   if(dumpJets_) {
 
@@ -960,7 +951,6 @@ void HWWTreeDumper::beginJob() {
                                          EGammaMvaEleEstimator::kTrigIDIsoCombined,
                                          manualCat,
                                          myManualCatWeigthsTrigIdIsoCombined);
-
 
   // muon isolation
   fMuonIsoMVA = new MuonMVAEstimator();
