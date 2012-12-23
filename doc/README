@@ -108,7 +108,7 @@ HiggsAnalysis/HiggsToWW2e/test/crab
 cmsrel CMSSW_4_2_8_patch7
 cd CMSSW_4_2_8_patch7/src
 cmsenv
-cvs co -r V00-5_3_X-BP42X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V05-5_3_X-BP42X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r V00-5_3_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V02-4_4_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
 cvs co -r mistag_425_v1 RecoBTag/ImpactParameter
@@ -143,6 +143,9 @@ cvs up -r BV00-03-20_HBHEfor52X CommonTools/RecoAlgos/python/HBHENoiseFilterResu
 cvs co -r lhx_12JAN2012_v1 DataFormats/METReco
 cvs co -r V00-00-08   RecoMET/METAnalyzers
 cvs co -r VB00-00-03  RecoMET/METFilters
+addpkg DPGAnalysis/Skims
+addpkg DPGAnalysis/SiStripTools
+cvs co -r 1.2 DPGAnalysis/Skims/src/LogErrorEventFilter.cc
 addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V00-00-09 -d CMGTools/External UserCode/CMG/CMGTools/External
 
