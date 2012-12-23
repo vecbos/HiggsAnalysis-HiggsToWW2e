@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-is42X = False
+is42X = True
 is52X = False
 runOnAOD = 1
 

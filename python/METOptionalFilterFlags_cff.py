@@ -24,14 +24,10 @@ hcalLaserEventFilter.vetoByHBHEOccupancy= True
 from RecoMET.METFilters.eeBadScFilter_cfi import *
 eeBadScFilter.taggingMode = True
 
-from RecoMET.METFilters.ecalLaserCorrFilter_cfi import *
-ecalLaserCorrFilter.taggingMode = True
-
 metOptionalFilterSequence = cms.Sequence( EcalDeadCellEventFlagProducer
                                           * HBHENoiseFilterResultProducer
                                           * hcalLaserEventFilter
                                           * eeBadScFilter
                                           * simpleDRFlagProducer
                                           * trackingFailureFilter
-                                          * EcalAnomalousEventFilter
-                                          * ecalLaserCorrFilter)
+                                          * EcalAnomalousEventFilter)

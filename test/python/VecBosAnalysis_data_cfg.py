@@ -1,6 +1,6 @@
 import FWCore.ParameterSet.Config as cms
 
-is42X = False
+is42X = True
 is52X = False
 runOnAOD = 1
 
@@ -8,7 +8,8 @@ process = cms.Process("VecBosAnalysis")
 
 process.load("Configuration.StandardSequences.MagneticField_AutoFromDBCurrent_cff")
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
-process.load("Configuration.StandardSequences.Reconstruction_Data_cff")
+if(is42X): process.load("Configuration.StandardSequences.Reconstruction_cff")
+else:      process.load("Configuration.StandardSequences.Reconstruction_Data_cff")
 process.load("Configuration.StandardSequences.FrontierConditions_GlobalTag_cff")
 
 if(is42X):

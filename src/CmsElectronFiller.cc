@@ -454,8 +454,8 @@ void CmsElectronFiller::writeEcalInfo(const GsfElectronRef electronRef,
     int isEcalEnergyCorrected = ( electronRef->isEcalEnergyCorrected() ) ? 1 : 0;
     packed_corr = isEcalEnergyCorrected;
     privateData_->energyCorrections->push_back( packed_corr );
-    privateData_->correctedEcalEnergy->push_back( electronRef->correctedEcalEnergy() );
-    privateData_->correctedEcalEnergyError->push_back( electronRef->correctedEcalEnergyError() );
+    privateData_->correctedEcalEnergy->push_back( electronRef->ecalEnergy() );
+    privateData_->correctedEcalEnergyError->push_back( electronRef->ecalEnergyError() );
     privateData_->trackMomentumError->push_back( electronRef->trackMomentumError() );
 
   } else {
