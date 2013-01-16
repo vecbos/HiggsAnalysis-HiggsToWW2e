@@ -33,8 +33,9 @@ import RecoMET.METFilters.eeBadScFilter_cfi
 eeBadScFilterSkim = RecoMET.METFilters.eeBadScFilter_cfi.eeBadScFilter.clone()
 eeBadScFilterSkim.taggingMode = False
 
-from RecoMET.METFilters.ecalLaserCorrFilter_cfi import *
-ecalLaserCorrFilter.taggingMode = False
+import RecoMET.METFilters.ecalLaserCorrFilter_cfi
+ecalLaserCorrFilterSkim = RecoMET.METFilters.ecalLaserCorrFilter_cfi.ecalLaserCorrFilter.clone()
+ecalLaserCorrFilterSkim.taggingMode = False
 
 import MyAnalysis.METFlags.logErrorAnalysisProducer_cff
 tooManySeedsFilterSkim = MyAnalysis.METFlags.logErrorAnalysisProducer_cff.tooManySeeds.clone()
@@ -51,7 +52,7 @@ metOptionalFiltersSkim = cms.Sequence( EcalDeadCellEventFilterSkim
                                        #* simpleDRFilterSkim  # this is super-efficient!
                                        * trackingFailureFilterSkim
                                        * EcalAnomalousEventFilterSkim
-                                       * ecalLaserCorrFilter
+                                       * ecalLaserCorrFilterSkim
                                        * tooManySeedsFilterSkim
                                        * tooManyClustersFilterSkim
                                        * tooManyTripletsPairsFilterSkim
