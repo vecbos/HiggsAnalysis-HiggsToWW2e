@@ -16,7 +16,7 @@ if(is42X):
 elif(is52X):
     process.GlobalTag.globaltag = 'GR_R_52_V9D::All'
 else:
-    process.GlobalTag.globaltag = 'GR_P_V41_AN1::All'
+    process.GlobalTag.globaltag = 'FT_53_V6_AN2::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -104,14 +104,14 @@ process.options = cms.untracked.PSet(
       fileMode =  cms.untracked.string('NOMERGE')
       )
 
-process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
+process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(-1) )
 
 if(is42X):
     inputfile = cms.untracked.vstring('file:/cmsrm/pc24_2/emanuele/data/reRecoMay10File.root')
 elif(is52X):
     inputfile = cms.untracked.vstring('/store/data/Run2012A/DoubleElectron/AOD/PromptReco-v1/000/191/700/00327508-AF8B-E111-8151-BCAEC53296F4.root')
 else:
-    inputfile = cms.untracked.vstring('/store/data/Run2012C/DoubleElectron/AOD/PromptReco-v2/000/201/278/F8F44E0A-ACED-E111-8621-E0CB4E553651.root')
+    inputfile = cms.untracked.vstring('file:pickevents_Javier.root')
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
@@ -184,7 +184,7 @@ process.p6 = cms.Path ( process.goodPrimaryVertices
                        * process.postjets
                        )
 process.p7 = cms.Path ( process.goodPrimaryVertices
-                        * ~process.ecalLaserCorrFilter
+                        * ~process.ecalLaserCorrFilterSkim
                         * process.prejets
                         * process.jets
                         * process.postjets
