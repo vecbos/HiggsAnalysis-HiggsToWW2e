@@ -139,6 +139,16 @@ CmsPFTauFiller::~CmsPFTauFiller()
   delete privateData_->thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr;
   delete privateData_->thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr;
   delete privateData_->thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr;
+  delete privateData_->thehpsTauDiscrAgainstMuonLoose2;
+  delete privateData_->thehpsTauDiscrAgainstMuonMedium2;
+  delete privateData_->thehpsTauDiscrAgainstMuonTight2;
+  delete privateData_->thehpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits;
+  delete privateData_->thehpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits;
+  delete privateData_->thehpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits;
+  delete privateData_->thehpsTauDiscrAgainstElectronLooseMVA3;
+  delete privateData_->thehpsTauDiscrAgainstElectronMediumMVA3;
+  delete privateData_->thehpsTauDiscrAgainstElectronTightMVA3;
+  delete privateData_->thehpsTauDiscrAgainstElectronVTightMVA3;
 
   // from the Discriminator for HPS TaNC
   delete privateData_->thehpsTancTausDiscrByLeadingTrackFinding;
@@ -374,6 +384,16 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 					   edm::InputTag hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag,
 					   edm::InputTag hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag,
 					   edm::InputTag hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag,
+					   edm::InputTag hpsTauDiscrAgainstMuonLoose2Tag,
+					   edm::InputTag hpsTauDiscrAgainstMuonMedium2Tag,
+					   edm::InputTag hpsTauDiscrAgainstMuonTight2Tag,
+					   edm::InputTag hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsTag,
+					   edm::InputTag hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsTag,
+					   edm::InputTag hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsTag,
+					   edm::InputTag hpsTauDiscrAgainstElectronLooseMVA3Tag,
+					   edm::InputTag hpsTauDiscrAgainstElectronMediumMVA3Tag,
+					   edm::InputTag hpsTauDiscrAgainstElectronTightMVA3Tag,
+					   edm::InputTag hpsTauDiscrAgainstElectronVTightMVA3Tag,
 					   bool dumpData) {
 
   edm::Handle<reco::PFTauCollection> collectionHandle;
@@ -479,6 +499,56 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 	catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag; }
 	const reco::PFTauDiscriminator *hpsTauDiscrByTightCombinedIsolationDBSumPtCorr = hpsTauDiscrByTightCombinedIsolationDBSumPtCorrHandle.product();
 
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrAgainstMuonLoose2Handle;
+        try { iEvent.getByLabel(hpsTauDiscrAgainstMuonLoose2Tag, hpsTauDiscrAgainstMuonLoose2Handle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrAgainstMuonLoose2Tag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrAgainstMuonLoose2 = hpsTauDiscrAgainstMuonLoose2Handle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrAgainstMuonMedium2Handle;
+        try { iEvent.getByLabel(hpsTauDiscrAgainstMuonMedium2Tag, hpsTauDiscrAgainstMuonMedium2Handle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrAgainstMuonMedium2Tag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrAgainstMuonMedium2 = hpsTauDiscrAgainstMuonMedium2Handle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrAgainstMuonTight2Handle;
+        try { iEvent.getByLabel(hpsTauDiscrAgainstMuonTight2Tag, hpsTauDiscrAgainstMuonTight2Handle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrAgainstMuonTight2Tag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrAgainstMuonTight2 = hpsTauDiscrAgainstMuonTight2Handle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsHandle;
+        try { iEvent.getByLabel(hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsTag, hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsHandle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsTag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits = hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsHandle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsHandle;
+        try { iEvent.getByLabel(hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsTag, hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsHandle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsTag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits = hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsHandle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsHandle;
+        try { iEvent.getByLabel(hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsTag, hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsHandle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsTag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits = hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsHandle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrAgainstElectronLooseMVA3Handle;
+        try { iEvent.getByLabel(hpsTauDiscrAgainstElectronLooseMVA3Tag, hpsTauDiscrAgainstElectronLooseMVA3Handle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrAgainstElectronLooseMVA3Tag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronLooseMVA3 = hpsTauDiscrAgainstElectronLooseMVA3Handle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrAgainstElectronMediumMVA3Handle;
+        try { iEvent.getByLabel(hpsTauDiscrAgainstElectronMediumMVA3Tag, hpsTauDiscrAgainstElectronMediumMVA3Handle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrAgainstElectronMediumMVA3Tag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronMediumMVA3 = hpsTauDiscrAgainstElectronMediumMVA3Handle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrAgainstElectronTightMVA3Handle;
+        try { iEvent.getByLabel(hpsTauDiscrAgainstElectronTightMVA3Tag, hpsTauDiscrAgainstElectronTightMVA3Handle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrAgainstElectronTightMVA3Tag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronTightMVA3 = hpsTauDiscrAgainstElectronTightMVA3Handle.product();
+
+	edm::Handle<reco::PFTauDiscriminator> hpsTauDiscrAgainstElectronVTightMVA3Handle;
+        try { iEvent.getByLabel(hpsTauDiscrAgainstElectronVTightMVA3Tag, hpsTauDiscrAgainstElectronVTightMVA3Handle); }
+        catch ( cms::Exception& ex ) { edm::LogWarning("CmsPFTauFiller") << "Can't get PFTau discriminator: " << hpsTauDiscrAgainstElectronVTightMVA3Tag; }
+        const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronVTightMVA3 = hpsTauDiscrAgainstElectronVTightMVA3Handle.product();
+
 	writePFTauDiscInfo(collectionHandle, iTauJet,
 			   hpsTauDiscrByLooseElectronRejection,
 			   hpsTauDiscrByMediumElectronRejection,
@@ -493,7 +563,17 @@ void CmsPFTauFiller::writeCollectionToTree(edm::InputTag collectionTag,
 			   hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorr,
 			   hpsTauDiscrByLooseCombinedIsolationDBSumPtCorr,
 			   hpsTauDiscrByMediumCombinedIsolationDBSumPtCorr,
-			   hpsTauDiscrByTightCombinedIsolationDBSumPtCorr
+			   hpsTauDiscrByTightCombinedIsolationDBSumPtCorr,
+			   hpsTauDiscrAgainstMuonLoose2,
+			   hpsTauDiscrAgainstMuonMedium2,
+			   hpsTauDiscrAgainstMuonTight2,
+			   hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits,
+			   hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits,
+			   hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits,
+			   hpsTauDiscrAgainstElectronLooseMVA3,
+			   hpsTauDiscrAgainstElectronMediumMVA3,
+			   hpsTauDiscrAgainstElectronTightMVA3,
+			   hpsTauDiscrAgainstElectronVTightMVA3
 			   );
       }
 
@@ -809,7 +889,17 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
 					const reco::PFTauDiscriminator *hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorr,
 					const reco::PFTauDiscriminator *hpsTauDiscrByLooseCombinedIsolationDBSumPtCorr,
 					const reco::PFTauDiscriminator *hpsTauDiscrByMediumCombinedIsolationDBSumPtCorr,
-					const reco::PFTauDiscriminator *hpsTauDiscrByTightCombinedIsolationDBSumPtCorr
+					const reco::PFTauDiscriminator *hpsTauDiscrByTightCombinedIsolationDBSumPtCorr,
+					const reco::PFTauDiscriminator *hpsTauDiscrAgainstMuonLoose2,
+					const reco::PFTauDiscriminator *hpsTauDiscrAgainstMuonMedium2,
+					const reco::PFTauDiscriminator *hpsTauDiscrAgainstMuonTight2,
+					const reco::PFTauDiscriminator *hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits,
+					const reco::PFTauDiscriminator *hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits,
+					const reco::PFTauDiscriminator *hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits,
+					const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronLooseMVA3,
+					const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronMediumMVA3,
+					const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronTightMVA3,
+					const reco::PFTauDiscriminator *hpsTauDiscrAgainstElectronVTightMVA3
 					)
 {
   if ( theTauJetIndex != -1 ) {
@@ -828,6 +918,18 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
     privateData_->thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr->push_back((*hpsTauDiscrByLooseCombinedIsolationDBSumPtCorr)[theTauJetRef]);
     privateData_->thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr->push_back((*hpsTauDiscrByMediumCombinedIsolationDBSumPtCorr)[theTauJetRef]);
     privateData_->thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr->push_back((*hpsTauDiscrByTightCombinedIsolationDBSumPtCorr)[theTauJetRef]);
+
+    privateData_->thehpsTauDiscrAgainstMuonLoose2->push_back((*hpsTauDiscrAgainstMuonLoose2)[theTauJetRef]);
+    privateData_->thehpsTauDiscrAgainstMuonMedium2->push_back((*hpsTauDiscrAgainstMuonMedium2)[theTauJetRef]);
+    privateData_->thehpsTauDiscrAgainstMuonTight2->push_back((*hpsTauDiscrAgainstMuonTight2)[theTauJetRef]);
+    privateData_->thehpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits->push_back((*hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits)[theTauJetRef]);
+    privateData_->thehpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits->push_back((*hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits)[theTauJetRef]);
+    privateData_->thehpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits->push_back((*hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits)[theTauJetRef]);
+    privateData_->thehpsTauDiscrAgainstElectronLooseMVA3->push_back((*hpsTauDiscrAgainstElectronLooseMVA3)[theTauJetRef]);
+    privateData_->thehpsTauDiscrAgainstElectronMediumMVA3->push_back((*hpsTauDiscrAgainstElectronMediumMVA3)[theTauJetRef]);
+    privateData_->thehpsTauDiscrAgainstElectronTightMVA3->push_back((*hpsTauDiscrAgainstElectronTightMVA3)[theTauJetRef]);
+    privateData_->thehpsTauDiscrAgainstElectronVTightMVA3->push_back((*hpsTauDiscrAgainstElectronVTightMVA3)[theTauJetRef]);
+
   } else {
     privateData_->thehpsTauDiscrByLooseElectronRejection->push_back(-1);
     privateData_->thehpsTauDiscrByMediumElectronRejection->push_back(-1);
@@ -843,6 +945,16 @@ void CmsPFTauFiller::writePFTauDiscInfo(edm::Handle<reco::PFTauCollection> tauCo
     privateData_->thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr->push_back(-1);
     privateData_->thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr->push_back(-1);
     privateData_->thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr->push_back(-1);
+    privateData_->thehpsTauDiscrAgainstMuonLoose2->push_back(-1);
+    privateData_->thehpsTauDiscrAgainstMuonMedium2->push_back(-1);
+    privateData_->thehpsTauDiscrAgainstMuonTight2->push_back(-1);
+    privateData_->thehpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits->push_back(-1);
+    privateData_->thehpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits->push_back(-1);
+    privateData_->thehpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits->push_back(-1);
+    privateData_->thehpsTauDiscrAgainstElectronLooseMVA3->push_back(-1);
+    privateData_->thehpsTauDiscrAgainstElectronMediumMVA3->push_back(-1);
+    privateData_->thehpsTauDiscrAgainstElectronTightMVA3->push_back(-1);
+    privateData_->thehpsTauDiscrAgainstElectronVTightMVA3->push_back(-1);
   }
 }
 
@@ -984,6 +1096,16 @@ void CmsPFTauFiller::treehpsPFTauDiscInfo(const std::string &colPrefix, const st
   cmstree->column((colPrefix+"thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr"+colSuffix).c_str(), *privateData_->thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr"+colSuffix).c_str(), *privateData_->thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr"+colSuffix).c_str(), *privateData_->thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrAgainstMuonLoose2"+colSuffix).c_str(), *privateData_->thehpsTauDiscrAgainstMuonLoose2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrAgainstMuonMedium2"+colSuffix).c_str(), *privateData_->thehpsTauDiscrAgainstMuonMedium2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrAgainstMuonTight2"+colSuffix).c_str(), *privateData_->thehpsTauDiscrAgainstMuonTight2, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits"+colSuffix).c_str(), *privateData_->thehpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits"+colSuffix).c_str(), *privateData_->thehpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits"+colSuffix).c_str(), *privateData_->thehpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrAgainstElectronLooseMVA3"+colSuffix).c_str(), *privateData_->thehpsTauDiscrAgainstElectronLooseMVA3, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrAgainstElectronMediumMVA3"+colSuffix).c_str(), *privateData_->thehpsTauDiscrAgainstElectronMediumMVA3, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrAgainstElectronTightMVA3"+colSuffix).c_str(), *privateData_->thehpsTauDiscrAgainstElectronTightMVA3, nCandString.c_str(), 0, "Reco");
+  cmstree->column((colPrefix+"thehpsTauDiscrAgainstElectronVTightMVA3"+colSuffix).c_str(), *privateData_->thehpsTauDiscrAgainstElectronVTightMVA3, nCandString.c_str(), 0, "Reco");
 }
 
 void CmsPFTauFiller::treehpsTancTausDiscInfo(const std::string &colPrefix, const std::string &colSuffix)
@@ -1070,6 +1192,16 @@ void CmsPFTauFillerData::initialise()
   thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr = new vector<float>;
   thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr = new vector<float>;
   thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr = new vector<float>;
+  thehpsTauDiscrAgainstMuonLoose2 = new vector<float>;
+  thehpsTauDiscrAgainstMuonMedium2 = new vector<float>;
+  thehpsTauDiscrAgainstMuonTight2 = new vector<float>;
+  thehpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits = new vector<float>;
+  thehpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits = new vector<float>;
+  thehpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits = new vector<float>;
+  thehpsTauDiscrAgainstElectronLooseMVA3 = new vector<float>;
+  thehpsTauDiscrAgainstElectronMediumMVA3 = new vector<float>;
+  thehpsTauDiscrAgainstElectronTightMVA3 = new vector<float>;
+  thehpsTauDiscrAgainstElectronVTightMVA3 = new vector<float>;
 
   thehpsTancTausDiscrByLeadingTrackFinding = new vector<float>;
   thehpsTancTausDiscrByLeadingTrackPtCut = new vector<float>;
@@ -1139,6 +1271,16 @@ void CmsPFTauFillerData::clear()
   thehpsTauDiscrByLooseCombinedIsolationDBSumPtCorr->clear();
   thehpsTauDiscrByMediumCombinedIsolationDBSumPtCorr->clear();
   thehpsTauDiscrByTightCombinedIsolationDBSumPtCorr->clear();
+  thehpsTauDiscrAgainstMuonLoose2->clear();
+  thehpsTauDiscrAgainstMuonMedium2->clear();
+  thehpsTauDiscrAgainstMuonTight2->clear();
+  thehpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3Hits->clear();
+  thehpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3Hits->clear();
+  thehpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3Hits->clear();
+  thehpsTauDiscrAgainstElectronLooseMVA3->clear();
+  thehpsTauDiscrAgainstElectronMediumMVA3->clear();
+  thehpsTauDiscrAgainstElectronTightMVA3->clear();
+  thehpsTauDiscrAgainstElectronVTightMVA3->clear();
 
   thehpsTancTausDiscrByLeadingTrackFinding->clear();
   thehpsTancTausDiscrByLeadingTrackPtCut->clear();

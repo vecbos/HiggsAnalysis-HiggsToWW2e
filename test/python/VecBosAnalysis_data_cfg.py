@@ -119,11 +119,16 @@ process.source = cms.Source("PoolSource",
                             fileNames = inputfile
                             )
 
-process.prejets = cms.Sequence( process.leptonLinkedTracks
+#rerun the HPS Tau sequence
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
+
+process.prejets = cms.Sequence( process.recoTauClassicHPSSequence
+                                * process.leptonLinkedTracks
                                 * process.electronAndPhotonSuperClustersSequence
                                 * process.chargedMetProducer
                                 * process.metOptionalFilterSequence
-                                * process.pfIsolationAllSequence )
+                                * process.pfIsolationAllSequence
+                                )
 
 if(process.treeDumper.dumpBCs==True):
     process.prejets *= process.seedBasicClustersSequence
@@ -133,7 +138,6 @@ process.jets = cms.Sequence( process.ourJetSequenceDataReduced
                              * process.newPFPUcorrJetBtaggingSequence
                              * process.newPFNoPUJetBtaggingSequence
                              * process.metSequence )
-
 process.postjets = cms.Sequence( process.eIdSequence
                                  * process.FastjetForIsolation
                                  * process.logErrorAnalysis

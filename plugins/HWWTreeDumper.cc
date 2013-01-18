@@ -262,6 +262,16 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag");
   hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag");
   hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag");
+  hpsTauDiscrAgainstMuonLoose2Tag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrAgainstMuonLoose2Tag");
+  hpsTauDiscrAgainstMuonMedium2Tag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrAgainstMuonMedium2Tag");
+  hpsTauDiscrAgainstMuonTight2Tag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrAgainstMuonTight2Tag");
+  hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsTag");
+  hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsTag");
+  hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsTag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsTag");
+  hpsTauDiscrAgainstElectronLooseMVA3Tag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrAgainstElectronLooseMVA3Tag");
+  hpsTauDiscrAgainstElectronMediumMVA3Tag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrAgainstElectronMediumMVA3Tag");
+  hpsTauDiscrAgainstElectronTightMVA3Tag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrAgainstElectronTightMVA3Tag");
+  hpsTauDiscrAgainstElectronVTightMVA3Tag_ = iConfig.getParameter<edm::InputTag>("hpsTauDiscrAgainstElectronVTightMVA3Tag");
   // HPS Tanc Tau Discriminators
   hpsTancTausDiscrByLeadingTrackFindingTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLeadingTrackFindingTag");
   hpsTancTausDiscrByLeadingTrackPtCutTag_ = iConfig.getParameter<edm::InputTag>("hpsTancTausDiscrByLeadingTrackPtCutTag");
@@ -688,6 +698,16 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
                                      hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag_,
                                      hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag_,
                                      hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag_,                                     
+				     hpsTauDiscrAgainstMuonLoose2Tag_,
+				     hpsTauDiscrAgainstMuonMedium2Tag_,
+				     hpsTauDiscrAgainstMuonTight2Tag_,
+				     hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsTag_,
+				     hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsTag_,
+				     hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsTag_,
+				     hpsTauDiscrAgainstElectronLooseMVA3Tag_,
+				     hpsTauDiscrAgainstElectronMediumMVA3Tag_,
+				     hpsTauDiscrAgainstElectronTightMVA3Tag_,
+				     hpsTauDiscrAgainstElectronVTightMVA3Tag_,
                                      false);
     }
 

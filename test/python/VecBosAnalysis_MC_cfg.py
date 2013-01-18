@@ -136,7 +136,8 @@ process.source = cms.Source("PoolSource",
                             fileNames = inputfile
                             )
 
-process.prejets = cms.Sequence( process.leptonLinkedTracks 
+process.prejets = cms.Sequence( process.recoTauClassicHPSSequence
+                                * process.leptonLinkedTracks 
                                 * process.electronAndPhotonSuperClustersSequence
                                 * process.chargedMetProducer
                                 * process.pfIsolationAllSequence )

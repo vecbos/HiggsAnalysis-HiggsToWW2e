@@ -33,6 +33,8 @@ cvs co -r V01-00-11-01  DPGAnalysis/Skims
 cvs co -r V01-09-05  RecoLocalTracker/SubCollectionProducers
 addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V00-00-09 -d CMGTools/External UserCode/CMG/CMGTools/External
+addpkg RecoTauTag/Configuration V01-04-10
+addpkg CondFormats/EgammaObjects V00-04-00
 
 scram setup lhapdffull
 touch $CMSSW_BASE/src/ElectroWeakAnalysis/Utilities/CMS.BuildFile.xml

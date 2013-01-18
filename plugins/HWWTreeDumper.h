@@ -204,7 +204,11 @@ private:
     hpsTauDiscrByVLooseIsolationTag_, hpsTauDiscrByLooseIsolationTag_,
     hpsTauDiscrByMediumIsolationTag_, hpsTauDiscrByTightIsolationTag_,
     hpsTauDiscrByVLooseCombinedIsolationDBSumPtCorrTag_, hpsTauDiscrByLooseCombinedIsolationDBSumPtCorrTag_,
-    hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag_, hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag_;
+    hpsTauDiscrByMediumCombinedIsolationDBSumPtCorrTag_, hpsTauDiscrByTightCombinedIsolationDBSumPtCorrTag_,
+    hpsTauDiscrAgainstMuonLoose2Tag_, hpsTauDiscrAgainstMuonMedium2Tag_, hpsTauDiscrAgainstMuonTight2Tag_,
+    hpsTauDiscrByLooseCombinedIsolationDeltaBetaCorr3HitsTag_, hpsTauDiscrByMediumCombinedIsolationDeltaBetaCorr3HitsTag_,
+    hpsTauDiscrByTightCombinedIsolationDeltaBetaCorr3HitsTag_, hpsTauDiscrAgainstElectronLooseMVA3Tag_,
+    hpsTauDiscrAgainstElectronMediumMVA3Tag_, hpsTauDiscrAgainstElectronTightMVA3Tag_, hpsTauDiscrAgainstElectronVTightMVA3Tag_;
   //! HPS Tanc Tau Discriminators
   edm::InputTag hpsTancTausDiscrByLeadingTrackFindingTag_, hpsTancTausDiscrByLeadingTrackPtCutTag_, hpsTancTausDiscrByLeadingPionPtCutTag_,
     hpsTancTausDiscrByTancTag_, hpsTancTausDiscrByTancRawTag_,
