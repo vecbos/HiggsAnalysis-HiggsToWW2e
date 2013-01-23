@@ -80,8 +80,8 @@ process.treeDumper.JetCorrectionService = 'ak5CaloL1FastL2L3'
 process.treeDumper.dumpTriggerResults = True
 process.treeDumper.dumpHLTObjects = True
 process.treeDumper.dumpGenInfo = True
-process.treeDumper.dumpLHE = False
-process.treeDumper.dumpPdfWeight = False
+process.treeDumper.dumpLHE = True
+process.treeDumper.dumpPdfWeight = True
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = False
 process.treeDumper.dumpElectrons = True
@@ -142,8 +142,11 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             fileNames = inputfile
                             )
+#rerun the HPS Tau sequence
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
 
-process.prejets = cms.Sequence( process.leptonLinkedTracks 
+process.prejets = cms.Sequence( process.recoTauClassicHPSSequence
+                                * process.leptonLinkedTracks 
                                 * process.electronAndPhotonSuperClustersSequence
                                 * process.chargedMetProducer
                                 * process.pfIsolationAllSequence )

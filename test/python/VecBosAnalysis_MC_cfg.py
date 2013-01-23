@@ -135,6 +135,8 @@ process.source = cms.Source("PoolSource",
                             duplicateCheckMode = cms.untracked.string('noDuplicateCheck'),
                             fileNames = inputfile
                             )
+#rerun the HPS Tau sequence
+process.load("RecoTauTag.Configuration.RecoPFTauTag_cff")
 
 process.prejets = cms.Sequence( process.recoTauClassicHPSSequence
                                 * process.leptonLinkedTracks 
