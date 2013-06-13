@@ -167,6 +167,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   hpspfTauCollection_      = iConfig.getParameter<edm::InputTag>("hpspfTauCollection");
   hpsTancTausCollection_   = iConfig.getParameter<edm::InputTag>("hpsTancTausCollection");
   PFCandidateCollection_   = iConfig.getParameter<edm::InputTag>("PFCandidateCollection");
+  PFPUCandidateCollection_  = iConfig.getParameter<edm::InputTag>("PFPUCandidateCollection");
   PFNoPUCandidateCollection_  = iConfig.getParameter<edm::InputTag>("PFNoPUCandidateCollection");
   ecalSCCollection_        = iConfig.getParameter<edm::InputTag>("ecalSCCollection");
   ecalElePFClusterCollection_ = iConfig.getParameter<edm::InputTag>("ecalElePFClusterCollection");
@@ -748,7 +749,10 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     std::string suffix("PFCand");
     treeFill.saveCand(saveCand_);
     treeFill.setGeneralTracks(trackCollection_);
-    treeFill.writeCollectionToTree(PFCandidateCollection_, iEvent, iSetup, prefix, suffix, false);
+    // for isolation
+    treeFill.setMinPtPFCand(10.);
+    treeFill.dumpChargeOnly(true);
+    treeFill.writeCollectionToTree(PFNoPUCandidateCollection_, PFPUCandidateCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 
   // PF candidates. Only the ones in a cone 0.5 from leptons to correct ChMET. In Candidate format to save space

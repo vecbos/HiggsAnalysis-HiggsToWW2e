@@ -34,6 +34,10 @@ struct CmsPFCandidateFillerData : public CmsCandidateFillerData {
   // All the vectors that will store the stuff
   // going into the tree.
   vector<int> *particleId;
+  vector<double> *pfCandChargedIso03;
+  vector<double> *pfCandNeutralIso03;
+  vector<double> *pfCandPhotonIso03;
+  vector<double> *pfIsolationSumPUPtR03;
 
 public:
   void initialise();
@@ -55,8 +59,11 @@ class CmsPFCandidateFiller : public CmsCandidateFiller {
   //! set the general tracks (reduced collection)
   void setGeneralTracks( edm::InputTag generalTracks) { generalTracks_ = generalTracks; }
 
+  void setMinPtPFCand(double value);
+  void dumpChargeOnly(bool value); 
+
   //! write the basic candidate informations for the collection "collection"
-  virtual void writeCollectionToTree(edm::InputTag collection,
+  virtual void writeCollectionToTree(edm::InputTag collectionTagNoPU, edm::InputTag collectionTagPU,
 				     const edm::Event&, const edm::EventSetup&,
 				     const std::string &columnPrefix, const std::string &columnSuffix,
 				     bool dumpData=false);
@@ -77,6 +84,9 @@ class CmsPFCandidateFiller : public CmsCandidateFiller {
   bool hitLimitsMeansNoOutput_;
   int maxTracks_;
   int maxMCTracks_;
+
+  double minPtPFCand_;
+  bool chargeOnly_;
 
   edm::InputTag generalTracks_;
   edm::Handle< reco::TrackRefVector > h_tracks;

@@ -6,6 +6,9 @@ runOnAOD = 1
 
 process = cms.Process("VecBosAnalysis")
 
+# for PF candidates isolation
+process.load("CommonTools.ParticleFlow.pfPileUp_cfi")
+
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
@@ -94,7 +97,10 @@ process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
 #process.treeDumper.dumpParticleFlowObjects = False
 process.treeDumper.dumpParticleFlowObjects = True
-process.treeDumper.dumpPFCandidates = False
+# for indirect lepton veto
+process.treeDumper.dumpPFCandidates = True
+process.treeDumper.PFPUCandidateCollection = "pfPileUp"
+#
 process.treeDumper.dumpTree = True
 if (runOnAOD == 1) :
     process.treeDumper.saveFatTrk = False
@@ -155,6 +161,7 @@ process.jets = cms.Sequence( process.ourJetSequenceMCReduced
 
 process.postjets = cms.Sequence( process.eIdSequence
                                  * process.FastjetForIsolation
+                                 * process.pfPileUp
                                  * process.treeDumper )
 
 # In order to use the good primary vertices everywhere (It would be nicer to set the proper inputTags in the first place)

@@ -6,6 +6,9 @@ runOnAOD = 1
 
 process = cms.Process("VecBosAnalysis")
 
+# for PF candidates isolation
+process.load("CommonTools.ParticleFlow.pfPileUp_cfi")
+
 process.load("Configuration.StandardSequences.MagneticField_38T_cff")
 process.load("Configuration.StandardSequences.GeometryRecoDB_cff")
 process.load("Configuration.StandardSequences.Reconstruction_cff")
@@ -94,7 +97,10 @@ process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpGenJets = True
 #process.treeDumper.dumpParticleFlowObjects = False
 process.treeDumper.dumpParticleFlowObjects = True
-process.treeDumper.dumpPFCandidates = False
+# for indirect lepton veto
+process.treeDumper.dumpPFCandidates = True
+process.treeDumper.PFPUCandidateCollection = "pfPileUp"
+#        
 process.treeDumper.dumpTree = True
 if (runOnAOD == 1) :
     process.treeDumper.saveFatTrk = False
@@ -134,8 +140,7 @@ process.maxEvents = cms.untracked.PSet( input = cms.untracked.int32(100) )
 #    inputfile = cms.untracked.vstring('file:/cmsrm/pc21_2/emanuele/data/AOD_WWSummer12.root')
 #else:
 #    inputfile = cms.untracked.vstring('/store/mc/Summer12_DR53X/DYJetsToLL_M-50_TuneZ2Star_8TeV-madgraph-tarball/AODSIM/PU_S10_START53_V7A-v1/0000/FEFF0D8E-91D2-E111-9BEA-001E673976ED.root')
-inputfile = cms.untracked.vstring('/store/mc/Summer12/SMS-T2tt_FineBin_Mstop-225to1200_mLSP-0to1000_8TeV-Pythia6Z/AODSIM/S\
-TART52_V9_FSIM-v1/00003/FC2E3270-D7E0-E111-B1E2-848F69FD4565.root')
+inputfile = cms.untracked.vstring('/store/mc/Summer12/SMS-T2tt_FineBin_Mstop-225to1200_mLSP-0to1000_8TeV-Pythia6Z/AODSIM/START52_V9_FSIM-v1/00003/FC2E3270-D7E0-E111-B1E2-848F69FD4565.root')
 
 process.source = cms.Source("PoolSource",
                             noEventSort = cms.untracked.bool(True),
@@ -162,6 +167,7 @@ process.jets = cms.Sequence( process.ourJetSequenceMCReduced
 
 process.postjets = cms.Sequence( process.eIdSequence
                                  * process.FastjetForIsolation
+                                 * process.pfPileUp
                                  * process.treeDumper )
 
 # In order to use the good primary vertices everywhere (It would be nicer to set the proper inputTags in the first place)

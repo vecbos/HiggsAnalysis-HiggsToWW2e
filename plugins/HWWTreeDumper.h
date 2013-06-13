@@ -164,7 +164,7 @@ private:
   //! taus
   edm::InputTag pfTauCollection_, hpspfTauCollection_, hpsTancTausCollection_;
   //! PF candidates
-  edm::InputTag PFCandidateCollection_, PFNoPUCandidateCollection_;
+  edm::InputTag PFCandidateCollection_, PFNoPUCandidateCollection_, PFPUCandidateCollection_;
   //! supercluster collections in input
   edm::InputTag ecalSCCollection_; // merged ECAL Superclusters
   edm::InputTag ecalElePFClusterCollection_, ecalPhoPFClusterCollection_;
