@@ -107,6 +107,8 @@ CmsEleIDTreeFiller::~CmsEleIDTreeFiller() {
   delete privateData_->pfCandChargedDirIso04;
   delete privateData_->pfCandNeutralDirIso04;
   delete privateData_->pfCandPhotonDirIso04;
+  delete privateData_->pfCandChargedPUIso03;
+  delete privateData_->pfCandChargedPUIso04;
 
   delete privateData_;
 }
@@ -149,7 +151,7 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
     iEvent.getByLabel( "egammaIDLikelihood", (*eleIdResults_)[0] );
 
-    eIsoFromPFCandsValueMap_ = new isoContainer(25);
+    eIsoFromPFCandsValueMap_ = new isoContainer(27);
     if(savePFlowIsolation_) {
       iEvent.getByLabel( "electronCombinedPFIsoMapProducer", (*eIsoFromPFCandsValueMap_)[0] ); 
       iEvent.getByLabel( "electronPFIsoChHad01", (*eIsoFromPFCandsValueMap_)[1] );
@@ -176,6 +178,8 @@ void CmsEleIDTreeFiller::writeCollectionToTree(edm::InputTag collectionTag,
       iEvent.getByLabel( "electronDirPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[22] );
       iEvent.getByLabel( "electronDirPFIsoNHad04", (*eIsoFromPFCandsValueMap_)[23] );
       iEvent.getByLabel( "electronDirPFIsoPhoton04", (*eIsoFromPFCandsValueMap_)[24] );
+      iEvent.getByLabel( "electronPUPFIsoChHad03", (*eIsoFromPFCandsValueMap_)[25] );
+      iEvent.getByLabel( "electronPUPFIsoChHad04", (*eIsoFromPFCandsValueMap_)[26] );
     }
 
     // Read the tracks and calotowers collections for isolation
@@ -372,6 +376,8 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
     const isoFromPFCandsMap & electronsPfCandChHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[22] );
     const isoFromPFCandsMap & electronsPfCandNHad04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[23] );
     const isoFromPFCandsMap & electronsPfCandPhoton04DirIsoVal = *( (*eIsoFromPFCandsValueMap_)[24] );
+    const isoFromPFCandsMap & electronsPfCandChHad03PUIsoVal = *( (*eIsoFromPFCandsValueMap_)[25] );
+    const isoFromPFCandsMap & electronsPfCandChHad04PUIsoVal = *( (*eIsoFromPFCandsValueMap_)[26] );
 
     privateData_->pfCombinedIso->push_back( electronsPfCombinedIsoVal[electronRef] );
     privateData_->pfCandChargedIso01->push_back( electronsPfCandChHad01IsoVal[electronRef] );
@@ -398,6 +404,8 @@ void CmsEleIDTreeFiller::writeEleInfo(const GsfElectronRef electronRef,
     privateData_->pfCandChargedDirIso04->push_back( electronsPfCandChHad04DirIsoVal[electronRef] );
     privateData_->pfCandNeutralDirIso04->push_back( electronsPfCandNHad04DirIsoVal[electronRef] );
     privateData_->pfCandPhotonDirIso04->push_back( electronsPfCandPhoton04DirIsoVal[electronRef] );
+    privateData_->pfCandChargedPUIso03->push_back( electronsPfCandChHad03PUIsoVal[electronRef] );
+    privateData_->pfCandChargedPUIso04->push_back( electronsPfCandChHad04PUIsoVal[electronRef] );
   }
 
 }
@@ -465,6 +473,8 @@ void CmsEleIDTreeFiller::treeEleInfo(const std::string &colPrefix, const std::st
     cmstree->column((colPrefix+"pfCandChargedDirIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedDirIso04, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pfCandNeutralDirIso04"+colSuffix).c_str(),  *privateData_->pfCandNeutralDirIso04, nCandString.c_str(), 0, "Reco");
     cmstree->column((colPrefix+"pfCandPhotonDirIso04"+colSuffix).c_str(),  *privateData_->pfCandPhotonDirIso04, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedPUIso03"+colSuffix).c_str(),  *privateData_->pfCandChargedPUIso03, nCandString.c_str(), 0, "Reco");
+    cmstree->column((colPrefix+"pfCandChargedPUIso04"+colSuffix).c_str(),  *privateData_->pfCandChargedPUIso04, nCandString.c_str(), 0, "Reco");
   }
 }
 
@@ -528,6 +538,8 @@ void CmsEleIDTreeFillerData::initialise() {
   pfCandChargedDirIso04    = new vector<float>;
   pfCandNeutralDirIso04    = new vector<float>;
   pfCandPhotonDirIso04     = new vector<float>;
+  pfCandChargedPUIso03     = new vector<float>;
+  pfCandChargedPUIso04     = new vector<float>;
 }
 
 void CmsEleIDTreeFillerData::clearTrkVectors() {
@@ -587,6 +599,8 @@ void CmsEleIDTreeFillerData::clearTrkVectors() {
   pfCandChargedDirIso04 ->clear();
   pfCandNeutralDirIso04 ->clear();
   pfCandPhotonDirIso04  ->clear();
+  pfCandChargedPUIso03  ->clear();
+  pfCandChargedPUIso04  ->clear();
 }
 
 int CmsEleIDTreeFiller::stdEleIdClassify(const GsfElectron* electron) {

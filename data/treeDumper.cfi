@@ -3,6 +3,7 @@
 module treeDumper = HWWTreeDumper {
     InputTag TriggerResultsTag = TriggerResults::HLT    
     InputTag electronCollection = ambiguityResolvedElectrons
+    InputTag calibElectronCollection = calibratedElectrons
     InputTag muonCollection     = isolatedMuons
     InputTag hybridSCCollection = correctedHybridSuperClusters
     InputTag islandSCCollection = correctedEndcapSuperClustersWithPreshower

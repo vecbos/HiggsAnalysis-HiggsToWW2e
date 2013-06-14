@@ -19,7 +19,7 @@ if(is42X):
 elif(is52X):
     process.GlobalTag.globaltag = 'GR_R_52_V9D::All'
 else:
-    process.GlobalTag.globaltag = 'GR_P_V41_AN1::All'
+    process.GlobalTag.globaltag = 'FT_53_V21_AN4::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -48,6 +48,11 @@ process.load("HiggsAnalysis.HiggsToWW2e.leptonLinkedTracks_cfi")
 
 # --- electron sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
+
+# --- electron regression and corrections ---
+process.load("HiggsAnalysis.HiggsToWW2e.calibratedElectronsSequence_cff")
+process.calibratedElectrons.isMC = cms.bool(False)                       
+process.calibratedElectrons.inputDataset = cms.string("22Jan2013ReReco")
 
 # --- pf isolation sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.leptonPFIsoSequence_cff")
@@ -80,6 +85,7 @@ process.treeDumper.dumpConversions = True
 process.treeDumper.dumpVertices = True
 process.treeDumper.dumpCaloTowers = False
 process.treeDumper.dumpParticleFlowObjects = True
+process.treeDumper.dumpCalibratedElectrons = True
 # for indirect lepton veto
 process.treeDumper.dumpPFCandidates = True
 process.treeDumper.PFPUCandidateCollection = "pfPileUp"
@@ -144,8 +150,17 @@ process.jets = cms.Sequence( process.ourJetSequenceDataReduced
                              * process.newPFPUcorrJetBtaggingSequence
                              * process.newPFNoPUJetBtaggingSequence
                              * process.metSequence )
+
+process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                                                   calibratedElectrons = cms.PSet(
+    initialSeed = cms.untracked.uint32(1),
+    engineName = cms.untracked.string('TRandom3')
+    )
+                                                   )
+
 process.postjets = cms.Sequence( process.eIdSequence
                                  * process.FastjetForIsolation
+                                 * process.eCalibSequence
                                  * process.logErrorAnalysis
                                  * process.pfPileUp
                                  * process.treeDumper )

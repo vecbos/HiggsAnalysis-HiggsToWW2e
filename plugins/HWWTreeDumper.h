@@ -27,7 +27,7 @@
 
 #include "RecoEcal/EgammaCoreTools/interface/PositionCalc.h"
 #include "Muon/MuonAnalysisTools/interface/MuonMVAEstimator.h"
-#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
+#include "EgammaAnalysis/ElectronTools/interface/EGammaMvaEleEstimator.h"
 #include "CMGTools/External/interface/PileupJetIdAlgo.h"
 #include "CMGTools/External/interface/PileupJetIdentifier.h"
 
@@ -82,6 +82,8 @@ private:
   bool saveJetBTag_;
   //! dump the electron block
   bool dumpElectrons_;
+  //! dump the calibrated electron block
+  bool dumpCalibratedElectrons_;
   //! dump the photon block
   bool dumpPhotons_;
   //! dump the conversion block
@@ -141,7 +143,7 @@ private:
   std::string energyRegressionPhotonFile_;
 
   //! candidate collections in input
-  edm::InputTag electronCollection_, muonCollection_,pflowElectronCollection_;
+  edm::InputTag electronCollection_, calibElectronCollection_, muonCollection_,pflowElectronCollection_;
   edm::InputTag photonCollection_;
   edm::InputTag jetCollection1_, genJetCollection_, jetCollection2_;
   edm::InputTag PFpuCorrJetCollection1_, PFpuCorrJetCollection2_, PFpuCorrJetCollection3_;

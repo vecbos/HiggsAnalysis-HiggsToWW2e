@@ -51,7 +51,7 @@
 <use   name="HiggsAnalysis/HiggsToGammaGamma"/>
 <use   name="CMGTools/External"/>
 <use   name="Muon/MuonAnalysisTools"/>
-<use   name="EGamma/EGammaAnalysisTools"/>
+<use   name="EgammaAnalysis/ElectronTools"/>
 <use   name="JetMETCorrections/Objects"/>
 <export>
   <lib   name="1"/>

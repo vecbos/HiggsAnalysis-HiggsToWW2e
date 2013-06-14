@@ -35,7 +35,7 @@
 #include "RecoEgamma/EgammaIsolationAlgos/interface/EgammaTowerIsolation.h"
 #include "TrackingTools/TransientTrack/interface/TransientTrackBuilder.h"
 #include "TrackingTools/Records/interface/TransientTrackRecord.h"
-#include "EGamma/EGammaAnalysisTools/interface/EGammaMvaEleEstimator.h"
+#include "EgammaAnalysis/ElectronTools/interface/EGammaMvaEleEstimator.h"
 
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsTree.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsCandidateFiller.h"
@@ -63,7 +63,8 @@ struct CmsEleIDTreeFillerData : public CmsCandidateFillerData {
     *pfCandChargedIso05, *pfCandNeutralIso05, *pfCandPhotonIso05,
     *pfCandChargedIso06, *pfCandNeutralIso06, *pfCandPhotonIso06,
     *pfCandChargedIso07, *pfCandNeutralIso07, *pfCandPhotonIso07,
-    *pfCandChargedDirIso04, *pfCandNeutralDirIso04, *pfCandPhotonDirIso04;
+    *pfCandChargedDirIso04, *pfCandNeutralDirIso04, *pfCandPhotonDirIso04,
+    *pfCandChargedPUIso03, *pfCandChargedPUIso04;
 
   vector<float> *eleLik, *pflowMVA, *mvaidtrig, *mvaidisotrig, *mvaidnontrig;
 

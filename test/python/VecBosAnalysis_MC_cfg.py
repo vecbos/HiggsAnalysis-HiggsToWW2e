@@ -20,7 +20,7 @@ if(is42X):
 elif(is52X):
     process.GlobalTag.globaltag = 'START52_V11C::All'
 else:
-    process.GlobalTag.globaltag = 'START53_V10::All'
+    process.GlobalTag.globaltag = 'START53_V23::All'
 
 # --- jet met sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.metProducerSequence_cff")
@@ -50,6 +50,9 @@ process.load("HiggsAnalysis.HiggsToWW2e.leptonLinkedTracks_cfi")
 
 # --- electron sequences ---
 process.load("HiggsAnalysis.HiggsToWW2e.electronIdSequence_cff")
+
+# --- electron regression and corrections ---
+process.load("HiggsAnalysis.HiggsToWW2e.calibratedElectronsSequence_cff")
 
 # --- pf isolation sequence ---
 process.load("HiggsAnalysis.HiggsToWW2e.leptonPFIsoSequence_cff")
@@ -88,6 +91,7 @@ process.treeDumper.dumpPdfWeight = False
 process.treeDumper.dumpSignalKfactor = False
 process.treeDumper.dumpTracks = False
 process.treeDumper.dumpElectrons = True
+process.treeDumper.dumpCalibratedElectrons = True
 process.treeDumper.dumpGsfTracks = True
 process.treeDumper.dumpSCs = True
 process.treeDumper.dumpBCs = True
@@ -159,8 +163,16 @@ process.jets = cms.Sequence( process.ourJetSequenceMCReduced
                              * process.newPFNoPUJetBtaggingSequence
                              * process.metSequence )
 
+process.RandomNumberGeneratorService = cms.Service("RandomNumberGeneratorService",
+                                                   calibratedElectrons = cms.PSet(
+    initialSeed = cms.untracked.uint32(1),
+    engineName = cms.untracked.string('TRandom3')
+    )
+                                                   )
+
 process.postjets = cms.Sequence( process.eIdSequence
                                  * process.FastjetForIsolation
+                                 * process.eCalibSequence
                                  * process.pfPileUp
                                  * process.treeDumper )
 

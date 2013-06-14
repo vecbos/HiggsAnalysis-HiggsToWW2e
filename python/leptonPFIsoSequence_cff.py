@@ -14,6 +14,8 @@ from MyAnalysis.IsolationTools.electronPFIsolations_cff import *
 from MyAnalysis.IsolationTools.muonPFIsolations_cff import *
 from MyAnalysis.IsolationTools.electronDirectionalPFIsolations_cff import *
 from MyAnalysis.IsolationTools.muonDirectionalPFIsolations_cff import *
+from MyAnalysis.IsolationTools.electronPFPUIsolations_cff import *
+from MyAnalysis.IsolationTools.muonPFPUIsolations_cff import *
 
 from CommonTools.ParticleFlow.pfNoPileUp_cff import *
 pfPileUp.PFCandidates = "particleFlow"
@@ -34,5 +36,8 @@ pfIsolationSingleType = cms.Sequence( electronPFIsoChHad01 * electronPFIsoNHad01
 # just one cone size
 pfDirectionalIsolationSingleType = cms.Sequence( electronDirPFIsoChHad04 * electronDirPFIsoNHad04 * electronDirPFIsoPhoton04 * muonDirPFIsoChHad04 * muonDirPFIsoNHad04 * muonDirPFIsoPhoton04 )
 
-pfIsolationAllSequence = cms.Sequence( pfPUSequence * pfIsolationCombined * pfIsolationSingleType * pfDirectionalIsolationSingleType )
+# just for charged, only 2 cones
+pfPUIsolationSingleType = cms.Sequence( electronPUPFIsoChHad03 * electronPUPFIsoChHad04 * muonPUPFIsoChHad03 * muonPUPFIsoChHad04 )
+
+pfIsolationAllSequence = cms.Sequence( pfPUSequence * pfIsolationCombined * pfIsolationSingleType * pfDirectionalIsolationSingleType * pfPUIsolationSingleType )
 

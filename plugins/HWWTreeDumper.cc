@@ -40,6 +40,7 @@
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPhotonFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsConversionFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsElectronFiller.h"
+#include "HiggsAnalysis/HiggsToWW2e/interface/CmsCalibElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsPFlowElectronFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsSuperClusterFiller.h"
 #include "HiggsAnalysis/HiggsToWW2e/interface/CmsBasicClusterFiller.h"
@@ -124,6 +125,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpGenInfo_        = iConfig.getUntrackedParameter<bool>("dumpGenInfo", false);
   dumpLHE_            = iConfig.getUntrackedParameter<bool>("dumpLHE", false);
   dumpElectrons_      = iConfig.getUntrackedParameter<bool>("dumpElectrons", false);
+  dumpCalibratedElectrons_ = iConfig.getUntrackedParameter<bool>("dumpCalibratedElectrons", false);
   dumpPhotons_        = iConfig.getUntrackedParameter<bool>("dumpPhotons", false);
   dumpConversions_    = iConfig.getUntrackedParameter<bool>("dumpConversions", false);
   dumpPFlowElectrons_ = iConfig.getUntrackedParameter<bool>("dumpPFlowElectrons", false);
@@ -160,6 +162,7 @@ HWWTreeDumper::HWWTreeDumper(const edm::ParameterSet& iConfig)
   dumpPdfWeight_ = iConfig.getUntrackedParameter<bool>("dumpPdfWeight",false);
 
   electronCollection_      = iConfig.getParameter<edm::InputTag>("electronCollection");
+  calibElectronCollection_ = iConfig.getParameter<edm::InputTag>("calibElectronCollection");
   pflowElectronCollection_ = iConfig.getParameter<edm::InputTag>("pflowElectronCollection");
   photonCollection_        = iConfig.getParameter<edm::InputTag>("photonCollection");
   muonCollection_          = iConfig.getParameter<edm::InputTag>("muonCollection");
@@ -420,6 +423,14 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
 
     treeFill.writeCollectionToTree(electronCollection_, iEvent, iSetup, prefix, suffix, false);
 
+  }
+
+  // fill minimal electrons block after energy corrections
+  if(dumpCalibratedElectrons_) {
+    CmsCalibElectronFiller treeFill(tree_, true);
+    std::string prefix("");
+    std::string suffix("CalibEle");
+    treeFill.writeCollectionToTree(calibElectronCollection_, iEvent, iSetup, prefix, suffix);
   }
 
   if(dumpPFlowElectrons_) {

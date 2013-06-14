@@ -124,6 +124,7 @@ process.treeDumper.dumpParticleFlowObjects = False
 process.treeDumper.dumpPFCandidates = False
 
 process.treeDumper.dumpElectrons = cms.untracked.bool(True)
+process.treeDumper.dumpCalibratedElectrons = cms.untracked.bool(False)
 process.treeDumper.dumpPFlowElectrons = cms.untracked.bool(True)
 process.treeDumper.dumpPFpreId = cms.untracked.bool(False)
 process.treeDumper.dumpPhotons = cms.untracked.bool(True)
