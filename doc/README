@@ -1,9 +1,9 @@
 --- Recipe to build and run the H->WW / RAZOR 53X  ---
-cmsrel CMSSW_5_3_3_patch3
-cd CMSSW_5_3_3_patch3/src
+cmsrel CMSSW_5_3_9
+cd CMSSW_5_3_9/src
 cmsenv
 
-cvs co -r V07-5_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
+cvs co -r V08-5_3_X -d HiggsAnalysis/HiggsToWW2e UserCode/HiggsAnalysis/HiggsToWW2e
 cvs co -r edm-30March2012 HiggsAnalysis/HiggsToWW2Leptons
 cvs co -r V06-4_2_X -d MyAnalysis/IsolationTools UserCode/emanuele/MyAnalysis/IsolationTools
 cvs co -r V01-5_3_X -d MyAnalysis/METFlags UserCode/emanuele/MyAnalysis/METFlags
@@ -15,7 +15,6 @@ cvs co -r edm-30March2012 -d WWAnalysis/Tools UserCode/Mangano/WWAnalysis/Tools
 cvs co -r edm-30March2012 -d WWAnalysis/Filters UserCode/Mangano/WWAnalysis/Filters
 cvs co -r pm20111022a -d HiggsAnalysis/HiggsToGammaGamma UserCode/meridian/EnergyCorrections_HggAnalysis/
 cvs co -r V00-00-10 -d Muon/MuonAnalysisTools UserCode/sixie/Muon/MuonAnalysisTools
-cvs co -r V00-00-22 -d EGamma/EGammaAnalysisTools UserCode/EGamma/EGammaAnalysisTools
 addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V19MAY2011_v3 JetMETAnalysis/ecalDeadCellTools
 cvs co -r V03-01-00 JetMETCorrections/Objects
@@ -35,6 +34,14 @@ addpkg ElectroWeakAnalysis/Utilities
 cvs co -r V00-00-09 -d CMGTools/External UserCode/CMG/CMGTools/External
 addpkg RecoTauTag/Configuration V01-04-10
 addpkg CondFormats/EgammaObjects V00-04-00
+addpkg DataFormats/PatCandidates V06-05-06-10
+addpkg RecoEgamma/EgammaTools V09-00-01
+addpkg RecoTauTag/RecoTau V01-04-23
+addpkg EgammaAnalysis/ElectronTools V00-00-08
+cd EgammaAnalysis/ElectronTools/data
+cat download.url | xargs wget
+
+cd ../../../
 
 scram setup lhapdffull
 touch $CMSSW_BASE/src/ElectroWeakAnalysis/Utilities/CMS.BuildFile.xml
