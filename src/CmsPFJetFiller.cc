@@ -154,20 +154,19 @@ CmsPFJetFiller::~CmsPFJetFiller() {
   delete privateData_->pTMaxChg_QC;
 
   // additional variables for PU studies
-  delete privateData_->jetIdMvaSimple;
   delete privateData_->jetIdMvaFull;
-  delete privateData_->jetIdMvaPhilV1;
-  delete privateData_->nChargedIdMva;
-  delete privateData_->nNeutralsIdMva;
-  delete privateData_->dZIdMva;
+  // delete privateData_->jetIdMvaCut;
+  // delete privateData_->nChargedIdMva;
+  // delete privateData_->nNeutralsIdMva;
+  // delete privateData_->dZIdMva;
   delete privateData_->dR2MeanIdMva;
   delete privateData_->dRMeanIdMva;
-  delete privateData_->frac01IdMva;
-  delete privateData_->frac02IdMva;
-  delete privateData_->frac03IdMva;
-  delete privateData_->frac04IdMva;
-  delete privateData_->frac05IdMva;
-  delete privateData_->betaIdMva;
+  // delete privateData_->frac01IdMva;
+  // delete privateData_->frac02IdMva;
+  // delete privateData_->frac03IdMva;
+  // delete privateData_->frac04IdMva;
+  // delete privateData_->frac05IdMva;
+  // delete privateData_->betaIdMva;
   delete privateData_->betastarIdMva;
   delete privateData_->betastarclassicIdMva;
   delete privateData_->betastar;
@@ -418,22 +417,21 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         privateData_->neutralEmEnergy->push_back( -1. );
 
 	// for PU studies
-	privateData_->betastar->push_back(-999.);            // chiara
-	privateData_->rmsCandsHand->push_back(-999.);        // chiara
- 	privateData_->jetIdMvaSimple->push_back(-1.);
+	privateData_->betastar->push_back(-999.);       
+	privateData_->rmsCandsHand->push_back(-999.);   
  	privateData_->jetIdMvaFull->push_back(-1.);
- 	privateData_->jetIdMvaPhilV1->push_back(-1.);
- 	privateData_->nChargedIdMva->push_back(-1.);
- 	privateData_->nNeutralsIdMva->push_back(-1.);
- 	privateData_->dZIdMva->push_back(-1.);
+ 	// privateData_->jetIdMvaCut->push_back(-1.);
+ 	// privateData_->nChargedIdMva->push_back(-1.);
+ 	// privateData_->nNeutralsIdMva->push_back(-1.);
+ 	// privateData_->dZIdMva->push_back(-1.);
  	privateData_->dR2MeanIdMva->push_back(-1.);
  	privateData_->dRMeanIdMva->push_back(-1.);
- 	privateData_->frac01IdMva->push_back(-1.);
- 	privateData_->frac02IdMva->push_back(-1.);
- 	privateData_->frac03IdMva->push_back(-1.);
- 	privateData_->frac04IdMva->push_back(-1.);
- 	privateData_->frac05IdMva->push_back(-1.);
- 	privateData_->betaIdMva->push_back(-1.);
+ 	// privateData_->frac01IdMva->push_back(-1.);
+ 	// privateData_->frac02IdMva->push_back(-1.);
+ 	// privateData_->frac03IdMva->push_back(-1.);
+ 	// privateData_->frac04IdMva->push_back(-1.);
+ 	// privateData_->frac05IdMva->push_back(-1.);
+ 	// privateData_->betaIdMva->push_back(-1.);
  	privateData_->betastarIdMva->push_back(-1.);
  	privateData_->betastarclassicIdMva->push_back(-1.);
       }
@@ -486,16 +484,16 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
 
       PileupJetIdentifier jetIdentifer_vars = _jetId_algos[0]->computeIdVariables(&correctedJet, scale, &bestPrimaryVertex_, *(primaryVertexColl.product()));
       privateData_->dRMeanIdMva->push_back( jetIdentifer_vars.dRMean() );
-      privateData_->frac01IdMva->push_back( jetIdentifer_vars.frac01() );
-      privateData_->frac02IdMva->push_back( jetIdentifer_vars.frac02() );
-      privateData_->frac03IdMva->push_back( jetIdentifer_vars.frac03() );
-      privateData_->frac04IdMva->push_back( jetIdentifer_vars.frac04() );
-      privateData_->frac05IdMva->push_back( jetIdentifer_vars.frac05() );
-      privateData_->nNeutralsIdMva->push_back( jetIdentifer_vars.nNeutrals() );
-      privateData_->betaIdMva->push_back( jetIdentifer_vars.beta() );
+      //privateData_->frac01IdMva->push_back( jetIdentifer_vars.frac01() );
+      //privateData_->frac02IdMva->push_back( jetIdentifer_vars.frac02() );
+      //privateData_->frac03IdMva->push_back( jetIdentifer_vars.frac03() );
+      //privateData_->frac04IdMva->push_back( jetIdentifer_vars.frac04() );
+      //privateData_->frac05IdMva->push_back( jetIdentifer_vars.frac05() );
+      //privateData_->nNeutralsIdMva->push_back( jetIdentifer_vars.nNeutrals() );
+      //privateData_->betaIdMva->push_back( jetIdentifer_vars.beta() );
       privateData_->betastarIdMva->push_back( jetIdentifer_vars.betaStar() );
-      privateData_->dZIdMva->push_back( jetIdentifer_vars.dZ() );
-      privateData_->nChargedIdMva->push_back( jetIdentifer_vars.nCharged() );
+      //privateData_->dZIdMva->push_back( jetIdentifer_vars.dZ() );
+      //privateData_->nChargedIdMva->push_back( jetIdentifer_vars.nCharged() );
       privateData_->dR2MeanIdMva->push_back( jetIdentifer_vars.dR2Mean() );
       privateData_->betastarclassicIdMva->push_back( jetIdentifer_vars.betaStarClassic() );
 
@@ -504,9 +502,8 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
         ialgo->set(jetIdentifer_vars);
         PileupJetIdentifier id = ialgo->computeMva();
         // mva values
-        if (imva==0) privateData_->jetIdMvaSimple->push_back( id.mva() );
-        if (imva==1) privateData_->jetIdMvaFull->push_back( id.mva() );
-        if (imva==2) privateData_->jetIdMvaPhilV1->push_back( id.mva() );
+        if (imva==0) privateData_->jetIdMvaFull->push_back( id.mva() );
+        // if (imva==1) privateData_->jetIdMvaCut->push_back( id.mva() );
       }
 
       index++;
@@ -525,7 +522,7 @@ void CmsPFJetFiller::writeCollectionToTree(edm::InputTag collectionTag,
   
   if(saveCand_) treeCandInfo(columnPrefix,columnSuffix);
   treeJetInfo(columnPrefix,columnSuffix);
-  
+
   if(dumpData) cmstree->dumpData();
   
 }
@@ -572,20 +569,19 @@ void CmsPFJetFiller::treeJetInfo(const std::string &colPrefix, const std::string
   cmstree->column((colPrefix+"weightedDz2"+colSuffix).c_str(), *privateData_->weightedDz2, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"betastar"+colSuffix).c_str(), *privateData_->betastar, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"rmsCandsHand"+colSuffix).c_str(), *privateData_->rmsCandsHand, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"jetIdMvaSimple"+colSuffix).c_str(), *privateData_->jetIdMvaSimple, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"jetIdMvaFull"+colSuffix).c_str(), *privateData_->jetIdMvaFull, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"jetIdMvaPhilV1"+colSuffix).c_str(), *privateData_->jetIdMvaPhilV1, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"nChargedIdMva"+colSuffix).c_str(), *privateData_->nChargedIdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"nNeutralsIdMva"+colSuffix).c_str(), *privateData_->nNeutralsIdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"dZIdMva"+colSuffix).c_str(), *privateData_->dZIdMva, nCandString.c_str(), 0, "Reco");
+  // cmstree->column((colPrefix+"jetIdMvaCut"+colSuffix).c_str(), *privateData_->jetIdMvaCut, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"nChargedIdMva"+colSuffix).c_str(), *privateData_->nChargedIdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"nNeutralsIdMva"+colSuffix).c_str(), *privateData_->nNeutralsIdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"dZIdMva"+colSuffix).c_str(), *privateData_->dZIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dR2MeanIdMva"+colSuffix).c_str(), *privateData_->dR2MeanIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"dRMeanIdMva"+colSuffix).c_str(), *privateData_->dRMeanIdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"frac01IdMva"+colSuffix).c_str(), *privateData_->frac01IdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"frac02IdMva"+colSuffix).c_str(), *privateData_->frac02IdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"frac03IdMva"+colSuffix).c_str(), *privateData_->frac03IdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"frac04IdMva"+colSuffix).c_str(), *privateData_->frac04IdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"frac05IdMva"+colSuffix).c_str(), *privateData_->frac05IdMva, nCandString.c_str(), 0, "Reco");
-  cmstree->column((colPrefix+"betaIdMva"+colSuffix).c_str(), *privateData_->betaIdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"frac01IdMva"+colSuffix).c_str(), *privateData_->frac01IdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"frac02IdMva"+colSuffix).c_str(), *privateData_->frac02IdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"frac03IdMva"+colSuffix).c_str(), *privateData_->frac03IdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"frac04IdMva"+colSuffix).c_str(), *privateData_->frac04IdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"frac05IdMva"+colSuffix).c_str(), *privateData_->frac05IdMva, nCandString.c_str(), 0, "Reco");
+  //cmstree->column((colPrefix+"betaIdMva"+colSuffix).c_str(), *privateData_->betaIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"betastarIdMva"+colSuffix).c_str(), *privateData_->betastarIdMva, nCandString.c_str(), 0, "Reco");
   cmstree->column((colPrefix+"betastarclassicIdMva"+colSuffix).c_str(), *privateData_->betastarclassicIdMva, nCandString.c_str(), 0, "Reco");
 
@@ -719,20 +715,19 @@ void CmsPFJetFillerData::initialise() {
   pTMaxChg_QC = new vector<float>;
 
   betastar = new vector<float>;
-  jetIdMvaSimple = new vector<float>;
   jetIdMvaFull = new vector<float>;
-  jetIdMvaPhilV1 = new vector<float>;
-  nChargedIdMva = new vector<float>;
-  nNeutralsIdMva = new vector<float>;
-  dZIdMva = new vector<float>;
+  //jetIdMvaCut = new vector<float>;
+  //nChargedIdMva = new vector<float>;
+  //nNeutralsIdMva = new vector<float>;
+  //dZIdMva = new vector<float>;
   dR2MeanIdMva = new vector<float>;
   dRMeanIdMva = new vector<float>;
-  frac01IdMva = new vector<float>;
-  frac02IdMva = new vector<float>;
-  frac03IdMva = new vector<float>;
-  frac04IdMva = new vector<float>;
-  frac05IdMva = new vector<float>;
-  betaIdMva = new vector<float>;
+  //frac01IdMva = new vector<float>;
+  //frac02IdMva = new vector<float>;
+  //frac03IdMva = new vector<float>;
+  //frac04IdMva = new vector<float>;
+  //frac05IdMva = new vector<float>;
+  //betaIdMva = new vector<float>;
   betastarIdMva = new vector<float>;
   betastarclassicIdMva = new vector<float>;
   rmsCandsHand = new vector<float>;
@@ -817,20 +812,19 @@ void CmsPFJetFillerData::clearTrkVectors() {
   pTMaxChg_QC->clear();
 
   betastar -> clear();
-  jetIdMvaSimple -> clear();
   jetIdMvaFull -> clear();
-  jetIdMvaPhilV1 -> clear();
-  nChargedIdMva -> clear();
-  nNeutralsIdMva -> clear();
-  dZIdMva -> clear();
+  //jetIdMvaCut -> clear();
+  //nChargedIdMva -> clear();
+  //nNeutralsIdMva -> clear();
+  //dZIdMva -> clear();
   dR2MeanIdMva -> clear();
   dRMeanIdMva -> clear();
-  frac01IdMva -> clear();
-  frac02IdMva -> clear();
-  frac03IdMva -> clear();
-  frac04IdMva -> clear();
-  frac05IdMva -> clear();
-  betaIdMva -> clear(); 
+  //frac01IdMva -> clear();
+  //frac02IdMva -> clear();
+  //frac03IdMva -> clear();
+  //frac04IdMva -> clear();
+  //frac05IdMva -> clear();
+  //betaIdMva -> clear(); 
   betastarIdMva -> clear();
   betastarclassicIdMva -> clear();
   rmsCandsHand -> clear();

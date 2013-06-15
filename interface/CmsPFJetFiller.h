@@ -102,13 +102,13 @@ struct CmsPFJetFillerData {
   std::vector<float> *weightedDz1, *weightedDz2;
 
   std::vector<float> *betastar, *rmsCandsHand;
-  std::vector<float> *jetIdMvaSimple, *jetIdMvaFull, *jetIdMvaPhilV1;
-  std::vector<float> *nChargedIdMva, *nNeutralsIdMva;
-  std::vector<float> *dZIdMva;
+  std::vector<float> *jetIdMvaFull;  //, *jetIdMvaCut;
+  //std::vector<float> *nChargedIdMva, *nNeutralsIdMva;
+  //std::vector<float> *dZIdMva;
   std::vector<float> *dR2MeanIdMva, *dRMeanIdMva;
-  std::vector<float> *frac01IdMva, *frac02IdMva, *frac03IdMva, *frac04IdMva, *frac05IdMva; 
-  std::vector<float> *betaIdMva, *betastarIdMva;
-  std::vector<float> *betastarclassicIdMva;
+  //std::vector<float> *frac01IdMva, *frac02IdMva, *frac03IdMva, *frac04IdMva, *frac05IdMva; 
+  //std::vector<float> *betaIdMva;
+  std::vector<float> *betastarIdMva, *betastarclassicIdMva; 
 
   // for backward compatibility with existing trees
   std::vector<float> *chargedEmEnergy, *neutralEmEnergy;
