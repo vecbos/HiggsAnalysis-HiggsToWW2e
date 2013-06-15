@@ -129,7 +129,7 @@ void CmsCalibElectronFiller::writeCollectionToTree(edm::InputTag collectionTag,
   treeCandInfo(columnPrefix,columnSuffix);
   treeExtraEleInfo(columnPrefix,columnSuffix);
 
-  cmstree->dumpData();
+  if(dumpData) cmstree->dumpData();
 
   delete trkIndexName_;
 }

@@ -430,7 +430,7 @@ void HWWTreeDumper::analyze(const edm::Event& iEvent, const edm::EventSetup& iSe
     CmsCalibElectronFiller treeFill(tree_, true);
     std::string prefix("");
     std::string suffix("CalibEle");
-    treeFill.writeCollectionToTree(calibElectronCollection_, iEvent, iSetup, prefix, suffix);
+    treeFill.writeCollectionToTree(calibElectronCollection_, iEvent, iSetup, prefix, suffix, false);
   }
 
   if(dumpPFlowElectrons_) {
